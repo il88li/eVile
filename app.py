@@ -82,9 +82,17 @@ def ensure_users_table(cur):
         credits INTEGER DEFAULT 10,
         last_active TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )''')
-    logger.info("✅ Ensured users table")
+    
+    # إضافة عمود الهدية اليومية
+    cur.execute("""
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name='users' AND column_name='last_daily_gift'
+    """)
+    if not cur.fetchone():
+        cur.execute("ALTER TABLE users ADD COLUMN last_daily_gift DATE")
+        logger.info("✅ Added column 'last_daily_gift' to users table")
 
-# --- إضافة دالة لحذف العمود القديم وحل مشكلة الخطأ ---
 def drop_old_telegram_id_column(cur):
     cur.execute("""
         SELECT column_name 
@@ -116,7 +124,7 @@ def init_db():
             ensure_notification_columns(cur)
             ensure_ads_table(cur)
             ensure_users_table(cur)
-            drop_old_telegram_id_column(cur) # إضافة استدعاء دالة الحذف هنا
+            drop_old_telegram_id_column(cur)
             
             logger.info("Database initialized/updated successfully")
             print("✅ Database tables ensured successfully.")
@@ -156,7 +164,7 @@ def index():
             latest_ad = cur.fetchone()
             
             if user_id:
-                cur.execute('SELECT username, credits FROM users WHERE id=%s', (user_id,))
+                cur.execute('SELECT username, credits, last_daily_gift FROM users WHERE id=%s', (user_id,))
                 user_data = cur.fetchone()
     except Exception as e:
         logger.error(f"Index error: {e}")
@@ -230,7 +238,7 @@ def user_info():
         return jsonify(None)
     try:
         with get_db() as cur:
-            cur.execute("SELECT username, credits FROM users WHERE id=%s", (user_id,))
+            cur.execute("SELECT username, credits, last_daily_gift FROM users WHERE id=%s", (user_id,))
             user = cur.fetchone()
         return jsonify(user)
     except Exception as e:
@@ -261,6 +269,75 @@ def update_user():
         return jsonify({'success': True, 'message': 'تم تحديث البيانات'})
     except Exception as e:
         logger.error(f"Update user error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/claim_daily_gift', methods=['POST'])
+def claim_daily_gift():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'success': False, 'message': 'غير مسجل'}), 401
+        
+    try:
+        with get_db() as cur:
+            # التحقق مما إذا كان قد حصل على الهدية اليوم
+            cur.execute("SELECT last_daily_gift FROM users WHERE id=%s", (user_id,))
+            user = cur.fetchone()
+            today = datetime.now().date()
+            
+            if user and user['last_daily_gift'] == today:
+                return jsonify({'success': False, 'message': 'لقد حصلت على هديتك اليومية بالفعل!'}), 400
+            
+            # إضافة 3 نقاط وتحديث التاريخ
+            cur.execute("UPDATE users SET credits = credits + 3, last_daily_gift = %s WHERE id=%s", (today, user_id))
+            cur.execute("SELECT credits FROM users WHERE id=%s", (user_id,))
+            updated = cur.fetchone()
+            
+            return jsonify({'success': True, 'message': 'تم الحصول على 3 نقاط!', 'credits': updated['credits']})
+    except Exception as e:
+        logger.error(f"Claim daily gift error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/transfer_credits', methods=['POST'])
+def transfer_credits():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'success': False, 'message': 'غير مسجل'}), 401
+        
+    data = request.json
+    target_username = data.get('username')
+    amount = data.get('amount', 0)
+    
+    if not target_username or amount <= 0:
+        return jsonify({'success': False, 'message': 'بيانات غير صحيحة'}), 400
+        
+    try:
+        with get_db() as cur:
+            # التحقق من وجود المستخدم الحالي ورصيده
+            cur.execute("SELECT credits FROM users WHERE id=%s", (user_id,))
+            sender = cur.fetchone()
+            if not sender or sender['credits'] < amount:
+                return jsonify({'success': False, 'message': 'رصيدك غير كافٍ'}), 400
+                
+            # التحقق من وجود المستخدم المستلم
+            cur.execute("SELECT id FROM users WHERE username=%s", (target_username,))
+            receiver = cur.fetchone()
+            if not receiver:
+                return jsonify({'success': False, 'message': 'اسم المستخدم غير موجود'}), 404
+                
+            if receiver['id'] == user_id:
+                return jsonify({'success': False, 'message': 'لا يمكنك تحويل النقاط لنفسك'}), 400
+                
+            # إجراء عملية التحويل
+            cur.execute("UPDATE users SET credits = credits - %s WHERE id=%s", (amount, user_id))
+            cur.execute("UPDATE users SET credits = credits + %s WHERE id=%s", (amount, receiver['id']))
+            
+            # جلب الرصيد الجديد للمرسل
+            cur.execute("SELECT credits FROM users WHERE id=%s", (user_id,))
+            updated = cur.fetchone()
+            
+            return jsonify({'success': True, 'message': f'تم تحويل {amount} نقاط إلى {target_username} بنجاح', 'credits': updated['credits']})
+    except Exception as e:
+        logger.error(f"Transfer credits error: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/api/deduct_credit', methods=['POST'])
