@@ -58,19 +58,11 @@
             border: 1px solid rgba(255, 255, 255, 0.9);
             gap: 8px;
         }
-        
-        .header-left, .header-right {
-            display: flex; align-items: center; gap: 6px;
-        }
-        .header-center {
-            position: absolute; left: 50%; transform: translateX(-50%);
-            font-size: 18px; font-weight: 900; color: #1F2937; letter-spacing: 2px; white-space: nowrap;
-        }
-        
+        .header-left, .header-right { display: flex; align-items: center; gap: 6px; }
+        .header-center { position: absolute; left: 50%; transform: translateX(-50%); font-size: 18px; font-weight: 900; color: #1F2937; letter-spacing: 2px; white-space: nowrap; }
         .header-btn {
             width: 34px; height: 34px; border-radius: 12px;
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.9);
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s; color: #6B7280; text-decoration: none;
         }
@@ -79,7 +71,6 @@
         .header-btn.special { background: rgba(123, 97, 255, 0.08); color: #7B61FF; border-color: rgba(123,97,255,0.1); }
         .header-btn.telegram { color: #0088cc; }
         .header-btn.instagram { color: #e4405f; }
-        
         .active-users-dot {
             display: flex; align-items: center; gap: 4px;
             font-size: 11px; color: #6B7280; font-weight: 600;
@@ -89,7 +80,7 @@
         }
         .active-users-dot i { font-size: 13px; color: #7B61FF; }
 
-        /* بطاقة الإدخال والمخرجات */
+        /* البطاقة العلوية */
         .input-card { 
             width: 100%; max-width: 600px;
             background: rgba(255, 255, 255, 0.65);
@@ -98,18 +89,15 @@
             border-radius: 24px;
             padding: 24px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
-            flex-shrink: 0;
-            display: flex; flex-direction: column; gap: 16px;
+            flex-shrink: 0; display: flex; flex-direction: column; gap: 16px;
         }
         .input-header { display: flex; justify-content: space-between; align-items: center; }
         .input-label { font-size: 16px; font-weight: 700; color: #1F2937; display: flex; align-items: center; gap: 6px; }
         .input-label i { color: #7B61FF; }
         .credits-badge { background: rgba(123, 97, 255, 0.08); padding: 4px 14px; border-radius: 30px; font-size: 13px; color: #7B61FF; font-weight: 600; border: 1px solid rgba(123,97,255,0.1); cursor: pointer; transition: 0.2s; }
         .credits-badge:active { transform: scale(0.95); }
-        
         .textarea-wrapper { 
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(0,0,0,0.03); 
+            background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(0,0,0,0.03); 
             border-radius: 16px; padding: 0 18px; height: 52px; min-height: 52px; max-height: 52px; 
             display: flex; align-items: center;
         }
@@ -118,7 +106,6 @@
             height: 100%; resize: none; overflow-y: auto; text-align: right; padding: 0; line-height: 1.5; display: flex; align-items: center; 
         }
         .message-input::placeholder { color: #9CA3AF; }
-        
         .main-btn { width: 80%; max-width: 300px; height: 44px; margin: 0 auto; display: block; background: #7B61FF; border: none; border-radius: 30px; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.2s; box-shadow: 0 6px 20px rgba(123, 97, 255, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
         .main-btn:active { transform: scale(0.96); }
         .main-btn.stop-btn { background: #ef4444; box-shadow: none; }
@@ -126,140 +113,122 @@
         .prompt-result-wrapper { 
             padding: 16px 20px; display: flex; flex-direction: column; 
             min-height: 100px; max-height: 120px; overflow-y: auto;
-            border-radius: 16px; background: rgba(255, 255, 255, 0.35);
-            border: 1px solid rgba(0,0,0,0.03);
+            border-radius: 16px; background: rgba(255, 255, 255, 0.35); border: 1px solid rgba(0,0,0,0.03);
         }
         .prompt-result-text { font-size: 14px; color: #1F2937; line-height: 1.6; width: 100%; background: transparent; border: none; resize: none; outline: none; font-family: 'Tajawal', sans-serif; height: 100%; text-align: center; }
         .prompt-result-text::placeholder { color: #9CA3AF; }
-        
-        .copy-wrapper {
-            display: flex; justify-content: flex-start; margin-top: -8px; padding-left: 4px;
-        }
-        .copy-btn { 
-            background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(123,97,255,0.1); 
-            border-radius: 30px; padding: 6px 14px; font-size: 12px; color: #6B7280; cursor: pointer; 
-            display: flex; align-items: center; gap: 4px; transition: 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-        }
-        .copy-btn:active { transform: scale(0.9); }
-        .copy-btn.success { background: rgba(34, 197, 94, 0.1); color: #16a34a; border-color: rgba(34, 197, 94, 0.2); }
 
-        /* بطاقة الأنماط */
+        /* بطاقة الأنماط (إعادة تصميم كاملة لتطابق الصورة) */
         .patterns-card { 
-            width: 100%; max-width: 500px; 
+            width: 100%; max-width: 600px; 
             background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.85);
             border-radius: 24px;
-            padding: 20px 18px 24px 18px;
-            flex-shrink: 0; display: flex; flex-direction: column; gap: 12px;
+            padding: 20px 20px 24px 20px;
+            flex-shrink: 0; display: flex; flex-direction: column; gap: 16px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
         }
         .patterns-header { display: flex; justify-content: space-between; align-items: center; }
         .patterns-card-title { font-size: 16px; font-weight: 700; color: #1F2937; display: flex; align-items: center; gap: 8px; }
         .patterns-card-title i { color: #7B61FF; font-size: 20px; }
-        
-        /* شريط النص التعليمي المطلوب */
+
+        /* شريط التوجيه */
         .patterns-guidance-strip {
             display: flex; justify-content: space-between; align-items: center;
             background: rgba(180, 83, 9, 0.06);
             border: 1px solid rgba(180, 83, 9, 0.12);
             border-radius: 30px;
-            padding: 2px 12px;
-            height: 28px;
-            margin-bottom: -14px; /* يتداخل الجزء السفلي مع شريط الأزرار */
-            position: relative;
-            z-index: 2;
+            padding: 4px 14px;
         }
         .patterns-instruction {
-            font-size: 11px; color: #B45309; /* اللون الذهبي/البرتقالي */
-            font-weight: 500;
-            display: flex; align-items: center; gap: 4px;
+            font-size: 12px; color: #B45309; font-weight: 500; display: flex; align-items: center; gap: 4px;
         }
-        .patterns-instruction i { font-size: 12px; }
-        .scroll-arrows {
-            display: flex; gap: 4px;
-        }
+        .scroll-arrows { display: flex; gap: 6px; }
         .scroll-btn {
-            width: 22px; height: 22px; border-radius: 50%;
-            background: rgba(180, 83, 9, 0.08);
-            border: 1px solid rgba(180, 83, 9, 0.15);
-            color: #B45309;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s;
-            opacity: 0.5; pointer-events: none; /* معطل افتراضيًا */
+            width: 24px; height: 24px; border-radius: 50%;
+            background: rgba(180, 83, 9, 0.08); border: 1px solid rgba(180, 83, 9, 0.15);
+            color: #B45309; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; opacity: 0.5; pointer-events: none;
         }
         .scroll-btn.visible { opacity: 1; pointer-events: auto; }
         .scroll-btn:active { transform: scale(0.9); }
-        .scroll-btn i { font-size: 12px; }
+        .scroll-btn i { font-size: 14px; }
 
-        .selected-pattern-container {
-            display: flex; align-items: center; justify-content: center;
-            width: 100%; min-height: 120px;
-            background: rgba(255, 255, 255, 0.3); padding: 12px;
-            border-radius: 16px; border: 1px solid rgba(0,0,0,0.03);
+        /* شبكة عرض الأنماط (2x2) */
+        .patterns-grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            width: 100%;
         }
-        .selected-pattern-img { max-width: 100%; max-height: 160px; border-radius: 12px; object-fit: contain; }
-
-        .patterns-container-wrapper {
+        .pattern-grid-item {
             position: relative;
-            display: flex; align-items: center; justify-content: flex-start;
-            width: 100%; margin: 0 auto;
-            background: #192f5d;
-            padding: 10px 12px 16px 12px;
             border-radius: 16px;
-            overflow-x: auto; scrollbar-width: none;
-            white-space: nowrap;
-            scroll-behavior: smooth;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            background: #ffffff;
+            aspect-ratio: 1 / 1;
+            display: flex; align-items: center; justify-content: center;
         }
-        .patterns-container-wrapper::-webkit-scrollbar { display: none; }
-        .patterns-container { display: flex; gap: 12px; flex-wrap: nowrap; position: relative; z-index: 1; }
-        
-        .pattern-item {
-            flex-shrink: 0; padding: 8px 18px; border-radius: 30px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(6px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;
-            font-size: 13px; font-weight: 600; color: #e2e8f0; position: relative;
+        .pattern-grid-item img {
+            width: 100%; height: 100%; object-fit: contain; padding: 10px;
         }
-        .pattern-item.active {
-            background: rgba(255, 255, 255, 0.2);
-            color: #ffffff;
-            border-color: rgba(255, 255, 255, 0.3);
+        .pattern-grid-item.active {
+            border-color: #7B61FF;
+            box-shadow: 0 0 0 2px rgba(123, 97, 255, 0.2);
         }
-        .pattern-item:active { transform: scale(0.95); }
+        .pattern-grid-item:active { transform: scale(0.95); }
 
-        #active-indicator {
-            position: absolute;
-            bottom: 0px;
-            left: 0;
-            height: 3px;
-            background: #60a5fa;
-            border-radius: 4px 4px 0 0;
-            transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
-            width: 0px;
-            box-shadow: 0 0 10px rgba(96, 165, 250, 0.4);
-            z-index: 0;
+        /* الشريط السفلي (أزرار الفئات + زر النسخ) */
+        .patterns-action-strip {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 30px; padding: 4px 6px;
+            gap: 10px;
+            flex-wrap: wrap;
+            border: 1px solid rgba(0,0,0,0.03);
         }
+        .category-tabs-wrapper {
+            display: flex; gap: 6px; flex-wrap: wrap;
+        }
+        .category-tab-btn {
+            padding: 6px 16px; border-radius: 30px; background: transparent;
+            border: 1px solid transparent; font-size: 12px; font-weight: 600;
+            color: #6B7280; cursor: pointer; transition: all 0.2s;
+        }
+        .category-tab-btn.active {
+            background: #192f5d; color: #ffffff;
+        }
+        .pattern-copy-wrapper {
+            display: flex; align-items: center; justify-content: flex-end; flex: 1;
+        }
+        .copy-btn { 
+            background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(123,97,255,0.1); 
+            border-radius: 30px; padding: 6px 14px; font-size: 12px; color: #6B7280; cursor: pointer; 
+            display: flex; align-items: center; gap: 4px; transition: 0.2s;
+        }
+        .copy-btn:active { transform: scale(0.9); }
+        .copy-btn.success { background: rgba(34, 197, 94, 0.1); color: #16a34a; border-color: rgba(34, 197, 94, 0.2); }
 
         @media (max-width: 600px) {
             .input-card, .patterns-card { padding: 20px 16px; max-width: 100%; border-radius: 20px; }
-            .patterns-card { padding: 18px 14px 20px 14px; }
             .prompt-result-wrapper { min-height: 80px; max-height: 80px; padding: 12px; }
-            .selected-pattern-container { min-height: 100px; }
             .main-btn { width: 90%; height: 40px; font-size: 14px; }
-            .pattern-item { font-size: 12px; padding: 6px 14px; }
-            .patterns-container-wrapper { padding: 8px 10px 14px 10px; }
-            .patterns-instruction { font-size: 10px; }
-            .patterns-guidance-strip { height: 24px; padding: 0 8px; margin-bottom: -12px; }
+            .patterns-grid-container { gap: 8px; }
+            .pattern-grid-item img { padding: 6px; }
+            .patterns-action-strip { flex-direction: column; align-items: stretch; gap: 8px; padding: 8px; }
+            .pattern-copy-wrapper { justify-content: center; margin-top: 4px; }
+            .patterns-guidance-strip { padding: 4px 10px; }
+            .patterns-instruction { font-size: 11px; }
             .scroll-btn { width: 20px; height: 20px; }
-            .scroll-btn i { font-size: 11px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- التحقق من حالة الموقع -->
     {% if site_status == 'off' %}
         <!-- شاشة التوقف -->
         <div class="offline-container">
@@ -294,7 +263,7 @@
         </header>
 
         <div class="main-container">
-            <!-- بطاقة الإدخال -->
+            <!-- البطاقة العلوية -->
             <div class="input-card">
                 <div class="input-header">
                     <span class="input-label">
@@ -312,15 +281,11 @@
                 </button>
 
                 <div class="prompt-result-wrapper">
-                    <textarea class="prompt-result-text" id="promptResultText" readonly placeholder="سيظهر هنا البرومبت المولد بعد الضغط على انشاء"></textarea>
-                </div>
-                
-                <div class="copy-wrapper">
-                    <button class="copy-btn" onclick="copyGeneratedPrompt()"><i class="bi bi-files"></i> نسخ النص</button>
+                    <textarea class="prompt-result-text" id="promptResultText" readonly placeholder="سيظهر هنا المحتوى المُنشأ بعد الضغط على إنشاء"></textarea>
                 </div>
             </div>
 
-            <!-- بطاقة الأنماط المحدثة مع شريط النص التعليمي -->
+            <!-- البطاقة السفلية (تصميم الشبكة الجديد) -->
             <div class="patterns-card">
                 <div class="patterns-header">
                     <span class="patterns-card-title">
@@ -328,25 +293,27 @@
                     </span>
                 </div>
                 
-                <!-- شريط النص المتداخل -->
                 <div class="patterns-guidance-strip">
                     <span class="patterns-instruction"><i class="bi bi-info-circle"></i> اختر أحد الأنماط من الأزرار أدناه</span>
                     <div class="scroll-arrows">
-                        <button class="scroll-btn" id="scrollLeftBtn" onclick="scrollPatterns(-150)"><i class="bi bi-chevron-right"></i></button>
-                        <button class="scroll-btn" id="scrollRightBtn" onclick="scrollPatterns(150)"><i class="bi bi-chevron-left"></i></button>
+                        <button class="scroll-btn" id="scrollLeftBtn" onclick="scrollPatterns(-100)"><i class="bi bi-chevron-right"></i></button>
+                        <button class="scroll-btn" id="scrollRightBtn" onclick="scrollPatterns(100)"><i class="bi bi-chevron-left"></i></button>
                     </div>
                 </div>
                 
-                <div class="selected-pattern-container" id="selectedPatternContainer">
-                    <img src="" alt="صورة النمط" class="selected-pattern-img" id="selectedPatternImg" style="display: none;">
-                    <span style="color:#9CA3AF; font-size: 14px;" id="noPatternMsg">اختر نمطاً لعرض صورته هنا</span>
+                <div class="patterns-grid-container" id="patternsGrid">
+                    <!-- سيتم توليد الأنماط هنا عبر JS -->
                 </div>
 
-                <div class="patterns-container-wrapper" id="patternsWrapper">
-                    <div class="patterns-container" id="patternsContainer">
-                        <!-- سيتم توليد الأنماط هنا عبر JS -->
+                <div class="patterns-action-strip">
+                    <div class="category-tabs-wrapper">
+                        <button class="category-tab-btn active">شعارات</button>
+                        <button class="category-tab-btn">بوسترات</button>
+                        <button class="category-tab-btn">نماذج</button>
                     </div>
-                    <div id="active-indicator"></div>
+                    <div class="pattern-copy-wrapper">
+                        <button class="copy-btn" onclick="copyGeneratedPrompt()"><i class="bi bi-files"></i> نسخ النص</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -483,7 +450,7 @@
                 if (!userId) { window.location.href = '/sign'; return; }
                 if (!userData || !userData.username) { window.location.href = '/sign'; return; }
 
-                renderPatterns();
+                renderPatternsGrid();
                 updateCreditsBadge(userData.credits);
                 updateDailyGiftState();
                 updateSettingsDisplay();
@@ -533,76 +500,55 @@
                 setTimeout(() => { toast.remove(); }, duration);
             }
 
-            function renderPatterns() {
-                const container = document.getElementById('patternsContainer');
-                const filtered = patterns; 
-                
-                if (!filtered || filtered.length === 0) {
-                    container.innerHTML = '<div style="color:#e2e8f0; font-size:13px; padding:6px;">لا توجد أنماط</div>';
+            /* --- دوال الأنماط الجديدة --- */
+            function renderPatternsGrid() {
+                const container = document.getElementById('patternsGrid');
+                if (!patterns || patterns.length === 0) {
+                    container.innerHTML = '<div style="text-align:center; color:#9CA3AF; padding: 20px; grid-column: 1 / -1;">لا توجد أنماط</div>';
                     return;
                 }
-                container.innerHTML = filtered.map(p => `
-                    <div class="pattern-item ${p.id === currentPatternId ? 'active' : ''}" data-id="${p.id}" onclick="selectPattern(${p.id})">
-                        <span>${p.name}</span>
+                
+                container.innerHTML = patterns.map(p => `
+                    <div class="pattern-grid-item ${p.id === currentPatternId ? 'active' : ''}" onclick="selectPatternGrid(${p.id})">
+                        <img src="${p.image_url}" alt="${p.name}" title="${p.name}">
                     </div>
                 `).join('');
-                
-                if (!currentPatternId || !filtered.some(p => p.id === currentPatternId)) {
-                    selectPattern(filtered[0].id);
-                } else {
-                    updateIndicator(currentPatternId);
+
+                if (!currentPatternId || !patterns.some(p => p.id === currentPatternId)) {
+                    selectPatternGrid(patterns[0].id);
                 }
-                
                 updateScrollButtons();
             }
 
-            function updateIndicator(patternId) {
-                const activeBtn = document.querySelector(`.pattern-item[data-id="${patternId}"]`);
-                const indicator = document.getElementById('active-indicator');
-                if (activeBtn && indicator) {
-                    const btnRect = activeBtn.getBoundingClientRect();
-                    const wrapperRect = document.querySelector('.patterns-container-wrapper').getBoundingClientRect();
-                    
-                    const leftPos = btnRect.left - wrapperRect.left;
-                    indicator.style.width = `${btnRect.width}px`;
-                    indicator.style.left = `${leftPos}px`;
-                }
-            }
-
-            // دالة اختيار النمط (يتم تحديث الصورة هنا)
-            function selectPattern(patternId) {
+            function selectPatternGrid(patternId) {
                 currentPatternId = patternId;
+                renderPatternsGrid();
+                // تحديث البيانات عند التحديد
                 const p = patterns.find(p => p.id === patternId);
                 if (p) {
-                    const img = document.getElementById('selectedPatternImg');
-                    // تحديث مصدر الصورة وإظهارها
-                    img.src = p.image_url;
-                    img.style.display = 'block';
-                    document.getElementById('noPatternMsg').style.display = 'none';
+                    // يمكن حفظ بيانات النمط هنا للاستخدام المستقبلي إذا لزم الأمر
                 }
-                renderPatterns();
-                setTimeout(() => updateIndicator(patternId), 50);
             }
 
+            /* --- دوال التمرير --- */
             function updateScrollButtons() {
-                const wrapper = document.getElementById('patternsWrapper');
+                const wrapper = document.getElementById('patternsGrid');
                 const leftBtn = document.getElementById('scrollLeftBtn');
                 const rightBtn = document.getElementById('scrollRightBtn');
                 
                 if (!wrapper || !leftBtn || !rightBtn) return;
 
+                // الشبكة لا تحتاج لتمرير في العادة، لكننا نحافظ على الأسهم للنص التعليمي
+                // لجعل الأسهم تعمل، سنقوم بتمرير الشبكة إذا فاضت
                 const isOverflowing = wrapper.scrollWidth > wrapper.clientWidth;
                 
                 if (isOverflowing) {
                     leftBtn.classList.add('visible');
                     rightBtn.classList.add('visible');
-                    
                     const isAtStart = wrapper.scrollLeft <= 0;
                     const isAtEnd = wrapper.scrollLeft >= (wrapper.scrollWidth - wrapper.clientWidth - 5);
-
                     leftBtn.style.opacity = isAtStart ? '0.5' : '1';
                     leftBtn.style.pointerEvents = isAtStart ? 'none' : 'auto';
-                    
                     rightBtn.style.opacity = isAtEnd ? '0.5' : '1';
                     rightBtn.style.pointerEvents = isAtEnd ? 'none' : 'auto';
                 } else {
@@ -612,19 +558,12 @@
             }
 
             function scrollPatterns(amount) {
-                const wrapper = document.getElementById('patternsWrapper');
+                const wrapper = document.getElementById('patternsGrid');
                 if (!wrapper) return;
                 wrapper.scrollLeft += amount;
             }
 
-            document.addEventListener('DOMContentLoaded', () => {
-                const wrapper = document.getElementById('patternsWrapper');
-                if (wrapper) {
-                    wrapper.addEventListener('scroll', updateScrollButtons);
-                    window.addEventListener('resize', updateScrollButtons);
-                }
-            });
-
+            /* --- الإرسال والنسخ --- */
             function updateSendButton(isStreamingActive) {
                 const btn = document.getElementById('mainSendBtn');
                 if (!btn) return;
@@ -737,6 +676,7 @@
                 }
             }
 
+            /* --- الإعدادات والإشعارات --- */
             function openSettingsSheet() {
                 document.getElementById('settingsUsername').value = userData.username || '';
                 document.getElementById('settingsPassword').value = '';
@@ -877,10 +817,6 @@
 
             document.addEventListener('DOMContentLoaded', () => {
                 initScreen();
-                window.addEventListener('resize', () => {
-                    if (currentPatternId) updateIndicator(currentPatternId);
-                    updateScrollButtons();
-                });
                 document.getElementById('mainInput').addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); } 
                 });
