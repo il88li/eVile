@@ -10,7 +10,8 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: 'Tajawal', sans-serif;
-            background: linear-gradient(160deg, #ffffff 0%, #e4d8ff 100%);
+            /* خلفية ناعمة فاتحة */
+            background: linear-gradient(160deg, #ffffff 0%, #e6dcff 100%);
             color: #1f153f;
             overflow: hidden;
             touch-action: manipulation;
@@ -24,7 +25,7 @@
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             text-align: center; padding: 20px;
-            background: linear-gradient(160deg, #ffffff 0%, #e4d8ff 100%);
+            background: linear-gradient(160deg, #ffffff 0%, #e6dcff 100%);
             color: #1f153f;
         }
         .offline-icon { font-size: 64px; color: #6535e0; margin-bottom: 20px; animation: pulse 2s infinite; }
@@ -39,34 +40,33 @@
         .offline-socials a:active { transform: scale(0.9); }
 
         /* --- واجهة التوليد (ON) --- */
-        /* تم ضبط الحجم ليكون شاشة واحدة بالكامل */
         .main-container { 
             width: 100%; height: 100vh; height: 100dvh; 
             display: flex; flex-direction: column; 
             align-items: center; 
-            padding: 70px 16px 80px 16px;
+            padding: 70px 16px 90px 16px;
             position: relative;
-            gap: 10px; /* تقليل الفراغات */
+            gap: 12px;
         }
         
+        /* الثيم الزجاجي المعزز */
         .glass-card, .floating-header, .input-card, .patterns-card, .bottom-sheet, .social-bar {
-            background: rgba(255, 255, 255, 0.45);
+            background: rgba(255, 255, 255, 0.55);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(101, 53, 224, 0.15);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 24px rgba(101, 53, 224, 0.05);
             border-radius: 24px;
         }
         
         .floating-header {
             position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100;
-            display: flex; align-items: center; justify-content: space-between; padding: 6px 12px;
+            display: flex; align-items: center; justify-content: space-between; padding: 6px 14px;
         }
         .header-logo { font-size: 16px; font-weight: 800; color: #1f153f; letter-spacing: 2px; position: absolute; left: 50%; transform: translateX(-50%); }
         .header-icon {
-            width: 34px; height: 34px; border-radius: 12px;
-            background: rgba(255, 255, 255, 0.6);
-            border: 1px solid rgba(101, 53, 224, 0.1);
+            width: 34px; height: 34px; border-radius: 10px;
+            background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.8);
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s; 
         }
@@ -75,102 +75,110 @@
         .active-users-dot {
             display: flex; align-items: center; gap: 4px;
             font-size: 11px; color: #4f367a; font-weight: 600;
-            background: rgba(255,255,255,0.5);
-            padding: 4px 10px; border-radius: 30px;
-            border: 1px solid rgba(101,53,224,0.1);
+            background: rgba(255,255,255,0.4); padding: 4px 12px; border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
         .active-users-dot i { font-size: 14px; }
 
-        /* بطاقة الإدخال */
-        .input-card { padding: 14px; width: 100%; max-width: 500px; flex-shrink: 0; }
-        .input-label { font-size: 13px; font-weight: 700; color: #1f153f; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .credits-badge { background: rgba(255, 255, 255, 0.5); padding: 4px 12px; border-radius: 20px; font-size: 11px; color: #4f367a; font-weight: 600; border: 1px solid rgba(101,53,224,0.1); cursor: pointer; }
+        /* بطاقة الإدخال (مدمجة مع المخرجات) */
+        .input-card { padding: 16px; width: 100%; max-width: 500px; flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
+        .input-label { font-size: 13px; font-weight: 700; color: #1f153f; display: flex; justify-content: space-between; align-items: center; }
+        .credits-badge { background: rgba(255, 255, 255, 0.5); padding: 4px 12px; border-radius: 20px; font-size: 11px; color: #4f367a; font-weight: 600; border: 1px solid rgba(255,255,255,0.8); cursor: pointer; }
         
-        /* حقل الكتابة الجديد - حجم ثابت وتمرير داخلي */
         .textarea-wrapper { 
-            background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(101,53,224,0.1); 
-            border-radius: 16px; padding: 8px 14px; margin-bottom: 12px; 
-            height: 44px; min-height: 44px; max-height: 44px; /* حجم ثابت لا يتغير */
+            background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255,255,255,0.6); 
+            border-radius: 12px; padding: 8px 14px; height: 44px; min-height: 44px; max-height: 44px; 
             display: flex; align-items: center;
         }
         .message-input { 
             width: 100%; background: transparent; border: none; font-family: 'Tajawal', sans-serif; font-size: 13px; outline: none; color: #1f153f; 
-            height: 100%; resize: none; overflow-y: auto; /* تمرير داخلي للأسطر المتعددة */
-            text-align: right; padding: 0; line-height: 1.4; display: flex; align-items: center; 
+            height: 100%; resize: none; overflow-y: auto; text-align: right; padding: 0; line-height: 1.4; display: flex; align-items: center; 
         }
         .message-input::-webkit-scrollbar { width: 4px; }
         .message-input::-webkit-scrollbar-thumb { background: #d1c4e9; border-radius: 4px; }
         .message-input::placeholder { color: #7b5b9e; }
         
-        .main-btn { width: 80%; max-width: 300px; height: 38px; margin: 0 auto; display: block; background: #6535e0; border: none; border-radius: 30px; color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(101, 53, 224, 0.3); display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .main-btn { width: 60%; max-width: 200px; height: 36px; margin: 0 auto; display: block; background: #6535e0; border: none; border-radius: 30px; color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(101, 53, 224, 0.3); display: flex; align-items: center; justify-content: center; gap: 6px; }
         .main-btn:active { transform: scale(0.96); }
         .main-btn.stop-btn { background: #ff4d4d; box-shadow: none; }
 
-        /* حقل عرض المخرجات */
+        /* حقل عرض المخرجات (داخل البطاقة) */
         .prompt-result-wrapper { 
-            margin-top: 10px; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; 
-            min-height: 55px; max-height: 55px; overflow-y: auto; flex-shrink: 0;
+            padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; 
+            min-height: 55px; max-height: 55px; overflow-y: auto;
+            border-radius: 12px; border: 1px solid rgba(255,255,255,0.6);
+            background: rgba(255, 255, 255, 0.3);
         }
         .prompt-result-text { font-size: 12px; color: #1f153f; line-height: 1.5; width: 100%; background: transparent; border: none; resize: none; outline: none; font-family: 'Tajawal', sans-serif; height: 100%; text-align: center; }
         .prompt-result-text::placeholder { color: #7b5b9e; }
         .prompt-result-actions { display: flex; justify-content: flex-end; gap: 8px; }
-        .copy-btn { background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(101,53,224,0.1); border-radius: 30px; padding: 4px 12px; font-size: 11px; color: #4f367a; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .copy-btn { background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255,255,255,0.8); border-radius: 30px; padding: 4px 12px; font-size: 11px; color: #4f367a; cursor: pointer; display: flex; align-items: center; gap: 4px; }
         .copy-btn:active { transform: scale(0.9); }
         .copy-btn.success { background: rgba(46, 204, 113, 0.15); color: #27ae60; border-color: rgba(46, 204, 113, 0.3); }
-        .result-note { font-size: 10px; color: #2d1b4e; text-align: center; margin-top: 2px; line-height: 1.4; background: rgba(101, 53, 224, 0.08); padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(101,53,224,0.15); }
+        .result-note { font-size: 10px; color: #4f367a; text-align: center; margin-top: 4px; line-height: 1.4; }
 
         /* بطاقة الأنماط */
-        .patterns-card { padding: 10px 14px; width: 100%; max-width: 500px; flex-shrink: 0; flex-grow: 0;}
-        .patterns-card-title { font-size: 13px; font-weight: 700; color: #1f153f; margin-bottom: 6px; display: block; text-align: center; }
+        .patterns-card { padding: 16px; width: 100%; max-width: 500px; flex-shrink: 0; flex-grow: 0; display: flex; flex-direction: column; gap: 12px; }
+        .patterns-card-title { font-size: 13px; font-weight: 700; color: #1f153f; display: block; text-align: center; }
 
-        /* صورة واسم النمط المختار */
+        /* حاوية الصورة الكاملة للنمط */
         .selected-pattern-container {
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            margin-bottom: 6px; background: rgba(255,255,255,0.2); padding: 4px 10px;
-            border-radius: 16px; border: 1px dashed rgba(101,53,224,0.1); height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; min-height: 80px;
+            background: rgba(255,255,255,0.3); padding: 10px;
+            border-radius: 12px; border: 1px dashed rgba(101,53,224,0.15);
         }
-        .selected-pattern-img { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
-        .selected-pattern-name { font-size: 12px; font-weight: 600; color: #1f153f; }
+        .selected-pattern-img {
+            max-width: 100%; max-height: 140px;
+            border-radius: 8px; object-fit: contain;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
 
-        /* شريط الأنماط (يظهر الصورة والاسم) */
-        .patterns-container { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding: 4px 0; width: 100%; }
-        .patterns-container::-webkit-scrollbar { display: none; }
+        /* شريط أزرار الأنماط (اسم فقط، صغير مستطيل زجاجي) */
+        .patterns-container-wrapper {
+            display: flex; align-items: center; justify-content: center;
+            width: fit-content; max-width: 100%; margin: 0 auto;
+            background: rgba(255, 255, 255, 0.4); padding: 6px;
+            border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.6);
+            overflow-x: auto; scrollbar-width: none;
+        }
+        .patterns-container-wrapper::-webkit-scrollbar { display: none; }
+        .patterns-container { display: flex; gap: 6px; flex-wrap: nowrap; }
+        
         .pattern-item {
-            flex-shrink: 0; width: 60px; height: 68px; padding: 4px;
-            border-radius: 12px; border: 1px solid rgba(101,53,224,0.1);
-            cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-            background: rgba(255, 255, 255, 0.3);
+            flex-shrink: 0; padding: 6px 14px; border-radius: 6px;
+            background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 600; color: #4f367a;
         }
-        .pattern-item img { width: 32px; height: 32px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
-        .pattern-item span { font-size: 9px; line-height: 1.1; text-align: center; color: #4f367a; }
-        .pattern-item.active { border-color: #6535e0; box-shadow: 0 0 0 2px #6535e0; background: rgba(255,255,255,0.6); }
+        .pattern-item.active { background: #6535e0; border-color: #6535e0; color: #fff; box-shadow: 0 2px 8px rgba(101, 53, 224, 0.2); }
 
-        /* الشريط السفلي (الفئات مع الأسماء) */
+        /* الشريط السفلي (الفئات - مستطيل زجاجي بأحجام محتوى) */
         .bottom-nav {
             position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 99;
-            display: flex; gap: 4px; padding: 6px 10px;
+            display: flex; gap: 4px; padding: 6px 8px;
             background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 40px; width: fit-content; max-width: 90%;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            width: fit-content; max-width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
             overflow-x: auto; scrollbar-width: none;
         }
         .bottom-nav::-webkit-scrollbar { display: none; }
         .bottom-nav-btn {
-            flex-shrink: 0; height: 32px; padding: 0 12px; border-radius: 30px;
-            background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(101,53,224,0.1);
+            flex-shrink: 0; height: 32px; padding: 0 12px; border-radius: 6px;
+            background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
             color: rgba(79, 54, 122, 0.6); display: flex; align-items: center; gap: 4px;
-            cursor: pointer; transition: all 0.2s; font-size: 12px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; font-size: 11px; font-weight: 600;
         }
         .bottom-nav-btn.active { background: #6535e0; border-color: #6535e0; color: #fff; }
         .bottom-nav-btn i { font-size: 14px; }
 
         @media (max-width: 450px) {
-            .input-card { padding: 10px; }
-            .main-btn { height: 34px; font-size: 12px; }
+            .input-card { padding: 12px; }
+            .main-btn { height: 32px; font-size: 12px; width: 70%; }
             .prompt-result-wrapper { min-height: 45px; max-height: 45px; padding: 8px; }
-            .pattern-item { width: 48px; height: 56px; }
-            .pattern-item img { width: 26px; height: 26px; }
+            .pattern-item { font-size: 10px; padding: 4px 10px; }
             .bottom-nav-btn { font-size: 10px; height: 28px; padding: 0 8px; }
         }
     </style>
@@ -207,7 +215,7 @@
         </header>
 
         <div class="main-container">
-            <!-- بطاقة الإدخال والمخرجات -->
+            <!-- بطاقة الإدخال والمخرجات (مدمجة) -->
             <div class="input-card glass-card">
                 <label class="input-label">
                     <span><i class="bi bi-pencil" style="margin-left:6px;"></i> اصنع محتواك الان</span>
@@ -222,6 +230,7 @@
                     <i class="bi bi-stars"></i> توليد
                 </button>
 
+                <!-- حقل عرض المخرجات داخل البطاقة -->
                 <div class="prompt-result-wrapper">
                     <textarea class="prompt-result-text" id="promptResultText" readonly placeholder="سيظهر هنا النص المولد بعد الضغط على توليد..."></textarea>
                     <div class="prompt-result-actions">
@@ -233,23 +242,24 @@
                 </div>
             </div>
 
-            <!-- بطاقة الأنماط (عرض الصورة والاسم) -->
+            <!-- بطاقة الأنماط (صورة كبيرة + شريط أزرار اسم فقط) -->
             <div class="patterns-card glass-card">
                 <span class="patterns-card-title"><i class="bi bi-grid"></i> اختر نمطاً</span>
                 
                 <div class="selected-pattern-container" id="selectedPatternContainer">
                     <img src="" alt="صورة النمط" class="selected-pattern-img" id="selectedPatternImg" style="display: none;">
-                    <span class="selected-pattern-name" id="selectedPatternName" style="display: none;">اسم النمط</span>
-                    <span style="color:#7b5b9e; font-size: 11px;" id="noPatternMsg">اختر نمطاً</span>
+                    <span style="color:#7b5b9e; font-size: 12px;" id="noPatternMsg">اختر نمطاً</span>
                 </div>
 
-                <div class="patterns-container" id="patternsContainer">
-                    <!-- سيتم توليد الأنماط هنا عبر JS -->
+                <div class="patterns-container-wrapper">
+                    <div class="patterns-container" id="patternsContainer">
+                        <!-- سيتم توليد الأنماط هنا عبر JS -->
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- الشريط السفلي (الفئات مع الأسماء) -->
+        <!-- الشريط السفلي (الفئات) -->
         <div class="bottom-nav" id="bottomNav">
             <!-- سيتم توليد الفئات هنا عبر JS -->
         </div>
@@ -441,7 +451,7 @@
                 setTimeout(() => { toast.remove(); }, duration);
             }
 
-            // --- الشريط السفلي (الفئات مع الأسماء) ---
+            // --- الشريط السفلي (الفئات) ---
             function renderCategories() {
                 const container = document.getElementById('bottomNav');
                 if (!categories || categories.length === 0) {
@@ -462,11 +472,10 @@
                 renderPatterns(catId);
                 currentPatternId = null;
                 document.getElementById('selectedPatternImg').style.display = 'none';
-                document.getElementById('selectedPatternName').style.display = 'none';
                 document.getElementById('noPatternMsg').style.display = 'block';
             }
 
-            // --- شريط الأنماط (الصور والأسماء) ---
+            // --- شريط الأنماط (اسم فقط) ---
             function renderPatterns(catId) {
                 const container = document.getElementById('patternsContainer');
                 const filtered = patterns.filter(p => p.category_id === catId);
@@ -477,7 +486,6 @@
                 }
                 container.innerHTML = filtered.map(p => `
                     <div class="pattern-item ${p.id === currentPatternId ? 'active' : ''}" data-id="${p.id}" onclick="selectPattern(${p.id})">
-                        <img src="${p.image_url}" alt="${p.name}">
                         <span>${p.name}</span>
                     </div>
                 `).join('');
@@ -492,11 +500,8 @@
                 const p = patterns.find(p => p.id === patternId);
                 if (p) {
                     const img = document.getElementById('selectedPatternImg');
-                    const name = document.getElementById('selectedPatternName');
                     img.src = p.image_url;
                     img.style.display = 'block';
-                    name.textContent = p.name;
-                    name.style.display = 'block';
                     document.getElementById('noPatternMsg').style.display = 'none';
                 }
                 renderPatterns(currentCategoryId);
