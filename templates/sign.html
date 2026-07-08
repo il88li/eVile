@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>انضم إلينا - EVILE</title>
+    <title>انضم إلينا - UFOQ</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Tajawal', sans-serif;
-            background: linear-gradient(160deg, #ffffff 0%, #e4d8ff 100%);
-            color: #1f153f;
-            height: 100vh; height: 100dvh;
+            background: linear-gradient(160deg, #ffffff 0%, #f5f3ff 100%);
+            color: #1F2937;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden; /* منع التمرير تماماً */
+            position: relative;
         }
+
         .sign-wrapper {
             width: 100%; max-width: 400px; 
             height: 100vh; height: 100dvh;
@@ -27,62 +28,58 @@
             padding: 20px;
         }
         
-        /* الشعار */
         .logo-area { text-align: center; margin-bottom: 12px; }
         .logo-icon {
             width: 48px; height: 48px; border-radius: 16px;
-            background: #6535e0; color: white;
+            background: #7B61FF; color: white;
             display: flex; align-items: center; justify-content: center;
             margin: 0 auto 8px auto;
-            box-shadow: 0 8px 20px rgba(101, 53, 224, 0.2);
+            box-shadow: 0 8px 20px rgba(123, 97, 255, 0.2);
         }
         .logo-icon i { font-size: 24px; }
-        .logo-title { font-size: 22px; font-weight: 800; color: #1f153f; letter-spacing: 1px; }
+        .logo-title { font-size: 22px; font-weight: 800; color: #1F2937; letter-spacing: 1px; }
         
-        /* الميزات (مصغرة جداً) */
         .features-grid {
             display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
             width: 100%; margin-bottom: 16px;
         }
         .feature-item {
             background: rgba(255, 255, 255, 0.6);
-            border: 1px solid rgba(101, 53, 224, 0.08);
+            border: 1px solid rgba(123, 97, 255, 0.08);
             border-radius: 12px; padding: 10px 8px;
             text-align: center; transition: 0.2s;
         }
-        .feature-item i { font-size: 20px; color: #6535e0; display: block; margin-bottom: 2px; }
-        .feature-item span { font-size: 10px; font-weight: 600; color: #3b2b66; }
+        .feature-item i { font-size: 20px; color: #7B61FF; display: block; margin-bottom: 2px; }
+        .feature-item span { font-size: 10px; font-weight: 600; color: #6B7280; }
 
-        /* بطاقة النموذج */
         .sign-card {
             background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
             border-radius: 20px;
             padding: 20px 20px; width: 100%;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 10px 40px rgba(123, 97, 255, 0.03);
         }
-        .form-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; text-align: center; color: #1f153f; }
+        .form-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; text-align: center; color: #1F2937; }
         .input-group { margin-bottom: 12px; }
-        .input-group label { display: block; font-size: 11px; font-weight: 700; color: #3b2b66; margin-bottom: 4px; }
+        .input-group label { display: block; font-size: 11px; font-weight: 700; color: #6B7280; margin-bottom: 4px; }
         .input-group input {
-            width: 100%; padding: 10px 14px; background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(101, 53, 224, 0.1); border-radius: 12px; 
-            font-family: 'Tajawal', sans-serif; font-size: 14px; color: #1f153f; outline: none; transition: 0.2s;
+            width: 100%; padding: 10px 14px; background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(123, 97, 255, 0.1); border-radius: 12px; 
+            font-family: 'Tajawal', sans-serif; font-size: 14px; color: #1F2937; outline: none; transition: 0.2s;
         }
-        .input-group input:focus { border-color: #6535e0; background: #ffffff; }
+        .input-group input:focus { border-color: #7B61FF; background: #ffffff; }
         .btn-primary {
             width: 100%; padding: 12px; margin-top: 6px;
-            background: #6535e0; border: none; border-radius: 12px;
+            background: #7B61FF; border: none; border-radius: 12px;
             color: #fff; font-weight: 700; font-size: 15px;
-            cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(101, 53, 224, 0.3);
+            cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.3);
         }
         .btn-primary:active { transform: scale(0.96); }
-        .sign-error { color: #dc3545; font-size: 12px; margin-top: 8px; display: none; text-align: center; }
-        .auth-switch { text-align: center; margin-top: 12px; font-size: 12px; color: #5a4591; }
-        .auth-switch a { color: #6535e0; font-weight: 700; text-decoration: none; }
+        .sign-error { color: #ef4444; font-size: 12px; margin-top: 8px; display: none; text-align: center; }
+        .auth-switch { text-align: center; margin-top: 12px; font-size: 12px; color: #6B7280; }
+        .auth-switch a { color: #7B61FF; font-weight: 700; text-decoration: none; }
 
-        /* إخفاء التمرير للموبايل */
         @media (max-width: 480px) {
             .sign-wrapper { max-width: 100%; padding: 16px; }
             .feature-item span { font-size: 9px; }
@@ -92,30 +89,27 @@
 <body>
 
     <div class="sign-wrapper">
-        <!-- الشعار -->
         <div class="logo-area">
             <div class="logo-icon"><i class="bi bi-magic"></i></div>
-            <div class="logo-title">EVILE</div>
+            <div class="logo-title">UFOQ</div>
         </div>
 
-        <!-- الميزات المصغرة -->
         <div class="features-grid">
             <div class="feature-item"><i class="bi bi-lightning-charge-fill"></i><span>توليد نصوص</span></div>
-            <div class="feature-item"><i class="bi bi-robot"></i><span>شخصيات ذكية</span></div>
-            <div class="feature-item"><i class="bi bi-pencil-square"></i><span>تصاميم شعارات</span></div>
+            <div class="feature-item"><i class="bi bi-robot"></i><span>فئات ذكية</span></div>
+            <div class="feature-item"><i class="bi bi-pencil-square"></i><span>أنماط متعددة</span></div>
             <div class="feature-item"><i class="bi bi-gem"></i><span>10 نقاط مجانية</span></div>
         </div>
 
-        <!-- النموذج -->
         <div class="sign-card">
             <div class="form-title">انضم لتبدأ الإبداع</div>
             <form id="signForm" onsubmit="handleSignup(event)">
                 <div class="input-group">
-                    <label><i class="bi bi-person"></i> اسم المستخدم</label>
+                    <label><i class="bi bi-person" style="color: #7B61FF;"></i> اسم المستخدم</label>
                     <input type="text" id="username" placeholder="أدخل اسماً فريداً" required>
                 </div>
                 <div class="input-group">
-                    <label><i class="bi bi-lock"></i> كلمة المرور</label>
+                    <label><i class="bi bi-lock" style="color: #7B61FF;"></i> كلمة المرور</label>
                     <input type="password" id="password" placeholder="******" required>
                 </div>
                 <button type="submit" class="btn-primary">ابدأ مجاناً <i class="bi bi-arrow-left"></i></button>
@@ -127,11 +121,11 @@
             
             <form id="loginForm" onsubmit="handleLogin(event)" style="display:none;">
                 <div class="input-group">
-                    <label><i class="bi bi-person"></i> اسم المستخدم</label>
+                    <label><i class="bi bi-person" style="color: #7B61FF;"></i> اسم المستخدم</label>
                     <input type="text" id="loginUsername" placeholder="اسم المستخدم" required>
                 </div>
                 <div class="input-group">
-                    <label><i class="bi bi-lock"></i> كلمة المرور</label>
+                    <label><i class="bi bi-lock" style="color: #7B61FF;"></i> كلمة المرور</label>
                     <input type="password" id="loginPassword" placeholder="******" required>
                 </div>
                 <button type="submit" class="btn-primary">دخول <i class="bi bi-box-arrow-in-left"></i></button>
