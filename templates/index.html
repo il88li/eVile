@@ -151,13 +151,37 @@
             border: 1px solid rgba(255, 255, 255, 0.85);
             border-radius: 24px;
             padding: 20px 18px 24px 18px;
-            flex-shrink: 0; display: flex; flex-direction: column; gap: 14px;
+            flex-shrink: 0; display: flex; flex-direction: column; gap: 10px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
         }
         .patterns-header { display: flex; justify-content: space-between; align-items: center; }
         .patterns-card-title { font-size: 16px; font-weight: 700; color: #1F2937; display: flex; align-items: center; gap: 8px; }
         .patterns-card-title i { color: #7B61FF; font-size: 20px; }
         
+        .patterns-guidance {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 4px;
+        }
+        .patterns-instruction {
+            font-size: 12px; color: #B45309; /* اللون الثالث (ذهبي/برتقالي داكن) */
+            font-weight: 500;
+        }
+        .scroll-arrows {
+            display: flex; gap: 6px;
+        }
+        .scroll-btn {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: rgba(180, 83, 9, 0.08); /* لون ثالث شفاف */
+            border: 1px solid rgba(180, 83, 9, 0.15);
+            color: #B45309;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s;
+            opacity: 0.5; pointer-events: none; /* افتراضيًا معطل */
+        }
+        .scroll-btn.visible { opacity: 1; pointer-events: auto; }
+        .scroll-btn:active { transform: scale(0.9); }
+        .scroll-btn i { font-size: 14px; }
+
         .selected-pattern-container {
             display: flex; align-items: center; justify-content: center;
             width: 100%; min-height: 120px;
@@ -175,6 +199,7 @@
             border-radius: 16px;
             overflow-x: auto; scrollbar-width: none;
             white-space: nowrap;
+            scroll-behavior: smooth;
         }
         .patterns-container-wrapper::-webkit-scrollbar { display: none; }
         .patterns-container { display: flex; gap: 12px; flex-wrap: nowrap; position: relative; z-index: 1; }
@@ -215,6 +240,8 @@
             .main-btn { width: 90%; height: 40px; font-size: 14px; }
             .pattern-item { font-size: 12px; padding: 6px 14px; }
             .patterns-container-wrapper { padding: 8px 10px 14px 10px; }
+            .patterns-instruction { font-size: 11px; }
+            .scroll-btn { width: 24px; height: 24px; }
         }
     </style>
 </head>
@@ -281,20 +308,28 @@
                 </div>
             </div>
 
-            <!-- بطاقة الأنماط -->
+            <!-- بطاقة الأنماط المحدثة -->
             <div class="patterns-card">
                 <div class="patterns-header">
                     <span class="patterns-card-title">
-                        <i class="bi bi-palette"></i> اختر نمط يناسبك
+                        <i class="bi bi-palette"></i> اختر نمطاً
                     </span>
+                </div>
+                
+                <div class="patterns-guidance">
+                    <span class="patterns-instruction"><i class="bi bi-info-circle" style="margin-left: 4px;"></i> اختر أحد الأنماط من الأزرار أدناه</span>
+                    <div class="scroll-arrows">
+                        <button class="scroll-btn" id="scrollLeftBtn" onclick="scrollPatterns(-150)"><i class="bi bi-chevron-right"></i></button>
+                        <button class="scroll-btn" id="scrollRightBtn" onclick="scrollPatterns(150)"><i class="bi bi-chevron-left"></i></button>
+                    </div>
                 </div>
                 
                 <div class="selected-pattern-container" id="selectedPatternContainer">
                     <img src="" alt="صورة النمط" class="selected-pattern-img" id="selectedPatternImg" style="display: none;">
-                    <span style="color:#9CA3AF; font-size: 14px;" id="noPatternMsg">اختر نمطاً</span>
+                    <span style="color:#9CA3AF; font-size: 14px;" id="noPatternMsg">اختر نمطاً لعرض صورته هنا</span>
                 </div>
 
-                <div class="patterns-container-wrapper">
+                <div class="patterns-container-wrapper" id="patternsWrapper">
                     <div class="patterns-container" id="patternsContainer">
                         <!-- سيتم توليد الأنماط هنا عبر JS -->
                     </div>
@@ -485,8 +520,6 @@
                 setTimeout(() => { toast.remove(); }, duration);
             }
 
-            // تم حذف دوال الفئات بالكامل
-
             function renderPatterns() {
                 const container = document.getElementById('patternsContainer');
                 const filtered = patterns; 
@@ -506,6 +539,9 @@
                 } else {
                     updateIndicator(currentPatternId);
                 }
+                
+                // تحديث حالة أزرار الأسهم
+                updateScrollButtons();
             }
 
             function updateIndicator(patternId) {
@@ -533,6 +569,54 @@
                 renderPatterns();
                 setTimeout(() => updateIndicator(patternId), 50);
             }
+
+            // --- دوال أزرار التمرير للأنماط ---
+            function updateScrollButtons() {
+                const wrapper = document.getElementById('patternsWrapper');
+                const leftBtn = document.getElementById('scrollLeftBtn');
+                const rightBtn = document.getElementById('scrollRightBtn');
+                
+                if (!wrapper || !leftBtn || !rightBtn) return;
+
+                // التحقق مما إذا كان المحتوى يتجاوز العرض
+                const isOverflowing = wrapper.scrollWidth > wrapper.clientWidth;
+                
+                if (isOverflowing) {
+                    leftBtn.classList.add('visible');
+                    rightBtn.classList.add('visible');
+                    
+                    // في الـ RTL، نعكس المنطق قليلاً
+                    const isAtStart = wrapper.scrollLeft <= 0;
+                    const isAtEnd = wrapper.scrollLeft >= (wrapper.scrollWidth - wrapper.clientWidth - 5); // 5px tolerance
+
+                    leftBtn.style.opacity = isAtStart ? '0.5' : '1';
+                    leftBtn.style.pointerEvents = isAtStart ? 'none' : 'auto';
+                    
+                    rightBtn.style.opacity = isAtEnd ? '0.5' : '1';
+                    rightBtn.style.pointerEvents = isAtEnd ? 'none' : 'auto';
+                } else {
+                    // إخفاء الأسهم إذا لم تكن هناك حاجة للتمرير
+                    leftBtn.classList.remove('visible');
+                    rightBtn.classList.remove('visible');
+                }
+            }
+
+            function scrollPatterns(amount) {
+                const wrapper = document.getElementById('patternsWrapper');
+                if (!wrapper) return;
+                wrapper.scrollLeft += amount;
+            }
+
+            // مستمع التمرير لتحديث الأسهم أثناء التمرير بالماوس/اللمس
+            document.addEventListener('DOMContentLoaded', () => {
+                const wrapper = document.getElementById('patternsWrapper');
+                if (wrapper) {
+                    wrapper.addEventListener('scroll', updateScrollButtons);
+                    // إعادة الحساب عند تغيير حجم الشاشة
+                    window.addEventListener('resize', updateScrollButtons);
+                }
+            });
+            // ----------------------------------------------------
 
             function updateSendButton(isStreamingActive) {
                 const btn = document.getElementById('mainSendBtn');
@@ -788,6 +872,7 @@
                 initScreen();
                 window.addEventListener('resize', () => {
                     if (currentPatternId) updateIndicator(currentPatternId);
+                    updateScrollButtons(); // تحديث الأسهم عند تغيير الحجم
                 });
                 document.getElementById('mainInput').addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); } 
