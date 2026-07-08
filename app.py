@@ -83,7 +83,6 @@ def ensure_users_table(cur):
         last_active TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )''')
     
-    # إضافة عمود الهدية اليومية
     cur.execute("""
         SELECT column_name 
         FROM information_schema.columns 
@@ -91,7 +90,6 @@ def ensure_users_table(cur):
     """)
     if not cur.fetchone():
         cur.execute("ALTER TABLE users ADD COLUMN last_daily_gift DATE")
-        logger.info("✅ Added column 'last_daily_gift' to users table")
 
 def drop_old_telegram_id_column(cur):
     cur.execute("""
@@ -101,7 +99,19 @@ def drop_old_telegram_id_column(cur):
     """)
     if cur.fetchone():
         cur.execute("ALTER TABLE users DROP COLUMN telegram_id")
-        logger.info("✅ Dropped obsolete column 'telegram_id' from users table")
+
+# --- إضافة جدول إعدادات الموقع ---
+def ensure_site_settings_table(cur):
+    cur.execute('''CREATE TABLE IF NOT EXISTS site_settings (
+        id SERIAL PRIMARY KEY,
+        status TEXT DEFAULT 'on',
+        offline_message TEXT DEFAULT 'الموقع تحت الصيانة حالياً، نعتذر عن الإزعاج.'
+    )''')
+    # التأكد من وجود صف واحد على الأقل
+    cur.execute("SELECT COUNT(*) FROM site_settings")
+    if cur.fetchone()['count'] == 0:
+        cur.execute("INSERT INTO site_settings (status, offline_message) VALUES ('on', 'الموقع تحت الصيانة حالياً، نعتذر عن الإزعاج.')")
+    logger.info("✅ Ensured site_settings table")
 
 def init_db():
     try:
@@ -125,6 +135,7 @@ def init_db():
             ensure_ads_table(cur)
             ensure_users_table(cur)
             drop_old_telegram_id_column(cur)
+            ensure_site_settings_table(cur)
             
             logger.info("Database initialized/updated successfully")
             print("✅ Database tables ensured successfully.")
@@ -151,6 +162,20 @@ def admin_required(f):
 
 @app.route('/')
 def index():
+    # جلب إعدادات الموقع
+    try:
+        with get_db() as cur:
+            cur.execute("SELECT status, offline_message FROM site_settings LIMIT 1")
+            site_settings = cur.fetchone()
+    except Exception as e:
+        logger.error(f"Site settings fetch error: {e}")
+        site_settings = {'status': 'on', 'offline_message': 'الموقع تحت الصيانة.'}
+
+    # إذا كان الموقع متوقفاً، نعرض صفحة الإيقاف
+    if site_settings and site_settings['status'] == 'off':
+        return render_template('index.html', site_status='off', offline_message=site_settings['offline_message'])
+
+    # المنطق الطبيعي للموقع
     user_id = session.get('user_id')
     if user_id: update_user_activity(user_id)
     user_data = None
@@ -178,7 +203,8 @@ def index():
                          user_id=user_id,
                          latest_notification=latest_notification,
                          latest_ad=latest_ad,
-                         user_data=user_data)
+                         user_data=user_data,
+                         site_status='on')
 
 @app.route('/sign')
 def sign():
@@ -279,7 +305,6 @@ def claim_daily_gift():
         
     try:
         with get_db() as cur:
-            # التحقق مما إذا كان قد حصل على الهدية اليوم
             cur.execute("SELECT last_daily_gift FROM users WHERE id=%s", (user_id,))
             user = cur.fetchone()
             today = datetime.now().date()
@@ -287,7 +312,6 @@ def claim_daily_gift():
             if user and user['last_daily_gift'] == today:
                 return jsonify({'success': False, 'message': 'لقد حصلت على هديتك اليومية بالفعل!'}), 400
             
-            # إضافة 3 نقاط وتحديث التاريخ
             cur.execute("UPDATE users SET credits = credits + 3, last_daily_gift = %s WHERE id=%s", (today, user_id))
             cur.execute("SELECT credits FROM users WHERE id=%s", (user_id,))
             updated = cur.fetchone()
@@ -312,13 +336,11 @@ def transfer_credits():
         
     try:
         with get_db() as cur:
-            # التحقق من وجود المستخدم الحالي ورصيده
             cur.execute("SELECT credits FROM users WHERE id=%s", (user_id,))
             sender = cur.fetchone()
             if not sender or sender['credits'] < amount:
                 return jsonify({'success': False, 'message': 'رصيدك غير كافٍ'}), 400
                 
-            # التحقق من وجود المستخدم المستلم
             cur.execute("SELECT id FROM users WHERE username=%s", (target_username,))
             receiver = cur.fetchone()
             if not receiver:
@@ -327,11 +349,9 @@ def transfer_credits():
             if receiver['id'] == user_id:
                 return jsonify({'success': False, 'message': 'لا يمكنك تحويل النقاط لنفسك'}), 400
                 
-            # إجراء عملية التحويل
             cur.execute("UPDATE users SET credits = credits - %s WHERE id=%s", (amount, user_id))
             cur.execute("UPDATE users SET credits = credits + %s WHERE id=%s", (amount, receiver['id']))
             
-            # جلب الرصيد الجديد للمرسل
             cur.execute("SELECT credits FROM users WHERE id=%s", (user_id,))
             updated = cur.fetchone()
             
@@ -403,10 +423,12 @@ def admin_panel():
                 cur.execute('SELECT COUNT(*) FROM users')
                 row = cur.fetchone()
                 users_count = row['count'] if row else 0
+                cur.execute('SELECT * FROM site_settings LIMIT 1')
+                site_settings = cur.fetchone()
         except Exception as e:
             logger.error(f"Admin panel data error: {e}")
-            characters, notifications, ads, users_count = [], [], [], 0
-        return render_template('admin.html', characters=characters, notifications=notifications, ads=ads, users_count=users_count)
+            characters, notifications, ads, users_count, site_settings = [], [], [], 0, {'status': 'on', 'offline_message': ''}
+        return render_template('admin.html', characters=characters, notifications=notifications, ads=ads, users_count=users_count, site_settings=site_settings)
     
     return render_template('admin.html')
 
@@ -522,6 +544,21 @@ def delete_ad(ad_id):
     except Exception as e:
         flash(str(e), 'error')
     return redirect(url_for('admin_panel'))
+
+@app.route('/api/admin/update_site_settings', methods=['POST'])
+@admin_required
+def update_site_settings():
+    data = request.json
+    status = data.get('status', 'on')
+    offline_message = data.get('offline_message', '')
+    
+    try:
+        with get_db() as cur:
+            cur.execute("UPDATE site_settings SET status=%s, offline_message=%s WHERE id=1", (status, offline_message))
+        return jsonify({'success': True, 'message': 'تم تحديث إعدادات الموقع بنجاح'})
+    except Exception as e:
+        logger.error(f"Update site settings error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/api/admin/update_credits', methods=['POST'])
 @admin_required
