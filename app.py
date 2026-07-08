@@ -186,7 +186,6 @@ def index():
     if user_id: update_user_activity(user_id)
     
     user_data = None
-    categories = []
     patterns = []
     
     try:
@@ -435,7 +434,6 @@ def admin_panel():
                 cur.execute('SELECT * FROM site_settings LIMIT 1')
                 site_settings = cur.fetchone()
                 
-                # جلب أول فئة لاستخدامها كمعرف افتراضي عند إضافة الأنماط (لأنه تم حذف واجهة الفئات)
                 cur.execute('SELECT id FROM categories LIMIT 1')
                 default_category = cur.fetchone()
                 default_category_id = default_category['id'] if default_category else 1
@@ -451,7 +449,6 @@ def logout():
     session.clear()
     return redirect(url_for('admin_panel'))
 
-# --- مسارات إدارة الأنماط ---
 @app.route('/admin/pattern/add', methods=['POST'])
 @admin_required
 def add_pattern():
@@ -461,11 +458,10 @@ def add_pattern():
     
     if name and image_url and prompt:
         try:
-            # جلب أول فئة متاحة لربط النمط بها
             with get_db() as cur:
                 cur.execute("SELECT id FROM categories LIMIT 1")
                 category = cur.fetchone()
-                category_id = category['id'] if category else 1 # افتراضي 1 إذا لم توجد فئات
+                category_id = category['id'] if category else 1
                 
                 cur.execute("INSERT INTO patterns (category_id, name, image_url, prompt) VALUES (%s, %s, %s, %s)",
                             (category_id, name, image_url, prompt))
@@ -502,7 +498,6 @@ def delete_pattern(pat_id):
         flash(str(e), 'error')
     return redirect(url_for('admin_panel'))
 
-# --- مسارات الإعلانات ---
 @app.route('/admin/notification/add', methods=['POST'])
 @admin_required
 def add_notification():
@@ -599,22 +594,6 @@ def update_credits():
     except Exception as e:
         logger.error(f"Update credits error: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
-
-@app.route('/api/characters')
-def api_characters():
-    now = time.time()
-    if _characters_cache['data'] and (now - _characters_cache['timestamp']) < CACHE_TTL:
-        return jsonify(_characters_cache['data'])
-    try:
-        with get_db() as cur:
-            cur.execute('SELECT * FROM characters ORDER BY id')
-            data = cur.fetchall()
-        _characters_cache['data'] = data
-        _characters_cache['timestamp'] = now
-        return jsonify(data)
-    except Exception as e:
-        logger.error(f"API characters error: {e}")
-        return jsonify([])
 
 @app.route('/api/notifications')
 def api_notifications():
