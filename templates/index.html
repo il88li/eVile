@@ -10,7 +10,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: 'Tajawal', sans-serif;
-            /* تم تعتيم الخلفية قليلاً لتبرز الزجاج */
             background: linear-gradient(160deg, #f2f4f8 0%, #e1dbf5 100%);
             color: #1F2937;
             overflow: hidden;
@@ -44,7 +43,7 @@
             width: 100%; height: 100vh; height: 100dvh; 
             display: flex; flex-direction: column; 
             align-items: center; 
-            padding: 80px 16px 100px 16px;
+            padding: 80px 16px 30px 16px;
             position: relative;
             gap: 16px;
         }
@@ -52,31 +51,45 @@
         /* الهيدر العلوي */
         .floating-header {
             position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100;
-            display: flex; align-items: center; justify-content: space-between; padding: 8px 16px;
+            display: flex; align-items: center; justify-content: space-between; padding: 6px 12px;
             max-width: 700px; margin: 0 auto; border-radius: 24px;
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.9);
+            gap: 8px;
         }
-        .header-logo { font-size: 20px; font-weight: 900; color: #1F2937; letter-spacing: 2px; position: absolute; left: 50%; transform: translateX(-50%); }
-        .header-icon {
-            width: 38px; height: 38px; border-radius: 12px;
-            background: rgba(123, 97, 255, 0.1);
-            border: 1px solid rgba(123, 97, 255, 0.1);
+        
+        .header-left, .header-right {
+            display: flex; align-items: center; gap: 6px;
+        }
+        .header-center {
+            position: absolute; left: 50%; transform: translateX(-50%);
+            font-size: 18px; font-weight: 900; color: #1F2937; letter-spacing: 2px; white-space: nowrap;
+        }
+        
+        .header-btn {
+            width: 34px; height: 34px; border-radius: 12px;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.9);
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s; color: #7B61FF;
+            cursor: pointer; transition: all 0.2s; color: #6B7280; text-decoration: none;
         }
-        .header-icon:active { transform: scale(0.9); }
-        .header-icon i { font-size: 20px; }
+        .header-btn:active { transform: scale(0.9); }
+        .header-btn i { font-size: 16px; }
+        .header-btn.special { background: rgba(123, 97, 255, 0.08); color: #7B61FF; border-color: rgba(123,97,255,0.1); }
+        .header-btn.telegram { color: #0088cc; }
+        .header-btn.instagram { color: #e4405f; }
+        
         .active-users-dot {
             display: flex; align-items: center; gap: 4px;
-            font-size: 12px; color: #6B7280; font-weight: 600;
-            background: rgba(255,255,255,0.6); padding: 4px 14px; border-radius: 30px;
+            font-size: 11px; color: #6B7280; font-weight: 600;
+            background: rgba(255,255,255,0.6); padding: 4px 10px; border-radius: 30px;
             border: 1px solid rgba(255, 255, 255, 0.9);
+            white-space: nowrap;
         }
-        .active-users-dot i { font-size: 14px; color: #7B61FF; }
+        .active-users-dot i { font-size: 13px; color: #7B61FF; }
 
-        /* البطاقة العلوية */
+        /* بطاقة الإدخال والمخرجات */
         .input-card { 
             width: 100%; max-width: 600px;
             background: rgba(255, 255, 255, 0.65);
@@ -110,7 +123,6 @@
         .main-btn:active { transform: scale(0.96); }
         .main-btn.stop-btn { background: #ef4444; box-shadow: none; }
 
-        /* حقل عرض المخرجات */
         .prompt-result-wrapper { 
             padding: 16px 20px; display: flex; flex-direction: column; 
             min-height: 100px; max-height: 120px; overflow-y: auto;
@@ -120,7 +132,6 @@
         .prompt-result-text { font-size: 14px; color: #1F2937; line-height: 1.6; width: 100%; background: transparent; border: none; resize: none; outline: none; font-family: 'Tajawal', sans-serif; height: 100%; text-align: center; }
         .prompt-result-text::placeholder { color: #9CA3AF; }
         
-        /* زر النسخ (أصبح خارج الحقل) */
         .copy-wrapper {
             display: flex; justify-content: flex-start; margin-top: -8px; padding-left: 4px;
         }
@@ -132,9 +143,9 @@
         .copy-btn:active { transform: scale(0.9); }
         .copy-btn.success { background: rgba(34, 197, 94, 0.1); color: #16a34a; border-color: rgba(34, 197, 94, 0.2); }
 
-        /* --- بطاقة الأنماط (تصغير العرض لتفادي التداخل) --- */
+        /* بطاقة الأنماط */
         .patterns-card { 
-            width: 100%; max-width: 500px; /* تم تصغير العرض */
+            width: 100%; max-width: 500px; 
             background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.85);
@@ -155,7 +166,6 @@
         }
         .selected-pattern-img { max-width: 100%; max-height: 160px; border-radius: 12px; object-fit: contain; }
 
-        /* شريط الأنماط */
         .patterns-container-wrapper {
             position: relative;
             display: flex; align-items: center; justify-content: flex-start;
@@ -184,7 +194,6 @@
         }
         .pattern-item:active { transform: scale(0.95); }
 
-        /* مؤشر التمرير المخصص */
         #active-indicator {
             position: absolute;
             bottom: 0px;
@@ -198,35 +207,12 @@
             z-index: 0;
         }
 
-        /* الشريط السفلي */
-        .social-bar {
-            position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 99;
-            display: flex; gap: 12px; padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            border-radius: 40px; width: fit-content; max-width: 90%;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-        }
-        .social-btn {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(0,0,0,0.03);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s; color: #6B7280; text-decoration: none;
-        }
-        .social-btn:active { transform: scale(0.9); }
-        .social-btn i { font-size: 18px; }
-        .social-btn.settings { color: #7B61FF; background: rgba(123,97,255,0.08); }
-        .social-btn.telegram { color: #0088cc; }
-        .social-btn.instagram { color: #e4405f; }
-
         @media (max-width: 600px) {
-            .input-card { padding: 20px 16px; max-width: 100%; border-radius: 20px; }
-            .patterns-card { padding: 18px 14px 20px 14px; max-width: 100%; border-radius: 20px; }
+            .input-card, .patterns-card { padding: 20px 16px; max-width: 100%; border-radius: 20px; }
+            .patterns-card { padding: 18px 14px 20px 14px; }
             .prompt-result-wrapper { min-height: 80px; max-height: 80px; padding: 12px; }
             .selected-pattern-container { min-height: 100px; }
             .main-btn { width: 90%; height: 40px; font-size: 14px; }
-            .social-btn { width: 36px; height: 36px; }
             .pattern-item { font-size: 12px; padding: 6px 14px; }
             .patterns-container-wrapper { padding: 8px 10px 14px 10px; }
         }
@@ -251,20 +237,25 @@
         </div>
     {% else %}
         
-        <!-- الهيدر العلوي العائم -->
+        <!-- الهيدر العلوي -->
         <header class="floating-header">
-            <div class="active-users-dot">
-                <i class="bi bi-person-friends" style="font-size: 12px;"></i>
-                <span id="activeCount">0</span>
+            <div class="header-left">
+                <div class="header-btn special" onclick="openSettingsSheet()"><i class="bi bi-gear"></i></div>
+                <div class="header-btn" onclick="openNotificationsSheet()"><i class="bi bi-bell"></i></div>
             </div>
-            <div class="header-logo">UFOQ</div>
-            <div class="header-icon" onclick="openSettingsSheet()">
-                <i class="bi bi-gear-wide-connected"></i>
+            <div class="header-center">UFOQ</div>
+            <div class="header-right">
+                <a href="https://www.instagram.com/bla6c7" target="_blank" class="header-btn instagram"><i class="bi bi-instagram"></i></a>
+                <a href="https://t.me/Evile_Prompts" target="_blank" class="header-btn telegram"><i class="bi bi-telegram"></i></a>
+                <div class="active-users-dot">
+                    <i class="bi bi-person-friends"></i>
+                    <span id="activeCount">0</span>
+                </div>
             </div>
         </header>
 
         <div class="main-container">
-            <!-- بطاقة الإدخال والمخرجات -->
+            <!-- بطاقة الإدخال -->
             <div class="input-card">
                 <div class="input-header">
                     <span class="input-label">
@@ -281,12 +272,10 @@
                     <i class="bi bi-stars"></i> إنشاء
                 </button>
 
-                <!-- حقل المخرجات -->
                 <div class="prompt-result-wrapper">
                     <textarea class="prompt-result-text" id="promptResultText" readonly placeholder="سيظهر هنا البرومبت المولد بعد الضغط على انشاء"></textarea>
                 </div>
                 
-                <!-- زر نسخ النص (خارج المخرجات) -->
                 <div class="copy-wrapper">
                     <button class="copy-btn" onclick="copyGeneratedPrompt()"><i class="bi bi-files"></i> نسخ النص</button>
                 </div>
@@ -312,14 +301,6 @@
                     <div id="active-indicator"></div>
                 </div>
             </div>
-        </div>
-
-        <!-- الشريط السفلي -->
-        <div class="social-bar">
-            <div class="social-btn settings" onclick="openSettingsSheet()"><i class="bi bi-gear"></i></div>
-            <div class="social-btn" onclick="openNotificationsSheet()"><i class="bi bi-bell"></i></div>
-            <a href="https://www.instagram.com/bla6c7" target="_blank" class="social-btn instagram"><i class="bi bi-instagram"></i></a>
-            <a href="https://t.me/Evile_Prompts" target="_blank" class="social-btn telegram"><i class="bi bi-telegram"></i></a>
         </div>
 
         <!-- نافذة الإعدادات الجانبية -->
@@ -439,14 +420,12 @@
         </style>
 
         <script>
-            const categories = {{ categories|tojson }};
             const patterns = {{ patterns|tojson }};
             let userId = {{ user_id|tojson }};
             const latestNotification = {{ latest_notification|tojson }};
             const latestAd = {{ latest_ad|tojson }};
             let userData = {{ user_data|tojson }};
 
-            let currentCategoryId = categories.length > 0 ? categories[0].id : null;
             let currentPatternId = null;
             let isProcessing = false;
             let isStreaming = false;
@@ -456,7 +435,7 @@
                 if (!userId) { window.location.href = '/sign'; return; }
                 if (!userData || !userData.username) { window.location.href = '/sign'; return; }
 
-                renderPatterns(currentCategoryId);
+                renderPatterns();
                 updateCreditsBadge(userData.credits);
                 updateDailyGiftState();
                 updateSettingsDisplay();
@@ -506,7 +485,9 @@
                 setTimeout(() => { toast.remove(); }, duration);
             }
 
-            function renderPatterns(catId) {
+            // تم حذف دوال الفئات بالكامل
+
+            function renderPatterns() {
                 const container = document.getElementById('patternsContainer');
                 const filtered = patterns; 
                 
@@ -549,7 +530,7 @@
                     img.style.display = 'block';
                     document.getElementById('noPatternMsg').style.display = 'none';
                 }
-                renderPatterns(null);
+                renderPatterns();
                 setTimeout(() => updateIndicator(patternId), 50);
             }
 
