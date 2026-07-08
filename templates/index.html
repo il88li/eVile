@@ -29,7 +29,7 @@
             z-index: 1;
         }
         
-        .glass-card, .floating-header, .input-card, .style-card, .bottom-sheet, .ad-modal-box, .prompt-result-wrapper, .social-bar {
+        .glass-card, .floating-header, .input-card, .style-card, .bottom-sheet, .ad-modal-box, .prompt-result-wrapper, .social-bar, .credits-modal-box {
             background: rgba(255, 255, 255, 0.45);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -83,10 +83,18 @@
         }
         .input-label { font-size: 14px; font-weight: 700; color: #1f153f; margin-bottom: 12px; display: block; text-align: center; }
         .input-label .credits-badge { 
-            float: left; background: rgba(255, 255, 255, 0.5); padding: 4px 12px; 
-            border-radius: 20px; font-size: 12px; color: #4f367a; font-weight: 600;
+            float: left; 
+            background: rgba(255, 255, 255, 0.5); 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-size: 12px; 
+            color: #4f367a; 
+            font-weight: 600;
             border: 1px solid rgba(101, 53, 224, 0.1);
+            cursor: pointer; /* تم إضافة المؤشر */
+            transition: background 0.2s;
         }
+        .input-label .credits-badge:active { background: rgba(255, 255, 255, 0.8); }
         
         .textarea-wrapper {
             position: relative;
@@ -155,22 +163,18 @@
         .copy-btn:active { transform: scale(0.9); }
         .copy-btn.success { background: rgba(46, 204, 113, 0.15); color: #27ae60; border-color: rgba(46, 204, 113, 0.3); }
 
-        /* تحسين الملاحظة: لون خلفية مختلف لجعلها بارزة */
         .result-note {
             font-size: 11px;
             color: #2d1b4e;
             text-align: center;
             margin-top: 4px;
             line-height: 1.4;
-            background: rgba(101, 53, 224, 0.08); /* لون بنفسجي فاتح جداً لتمييزها */
+            background: rgba(101, 53, 224, 0.08);
             padding: 6px 12px;
             border-radius: 12px;
             border: 1px solid rgba(101, 53, 224, 0.15);
         }
-        .result-note i {
-            margin-left: 4px;
-            color: #6535e0;
-        }
+        .result-note i { margin-left: 4px; color: #6535e0; }
 
         /* بطاقة الأنماط */
         .style-card {
@@ -179,10 +183,8 @@
         }
         .style-title { font-size: 15px; font-weight: 700; color: #1f153f; margin-bottom: 12px; display: block; text-align: center; }
 
-        /* تحسين مرونة الشريط لأي عدد من الأزرار */
         .styles-container {
-            display: flex;
-            gap: 10px;
+            display: flex; gap: 10px;
             overflow-x: auto;
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
@@ -263,19 +265,59 @@
         </div>
     </div>
 
-    <!-- نافذة نفاذ النقاط -->
+    <!-- نافذة النقاط (الجديدة) -->
     <div class="credits-modal-overlay" id="creditsModal">
-        <div class="credits-modal-box">
-            <i class="bi bi-exclamation-triangle-fill credits-icon"></i>
-            <h2 class="credits-title">بلغت حدك المسموح</h2>
-            <p class="credits-text">
+        <div class="credits-modal-box" style="max-width: 480px; padding: 25px; display: flex; flex-direction: column; gap: 20px;">
+            
+            <!-- البطاقة الأولى: الهدية اليومية -->
+            <div style="background: rgba(255,255,255,0.6); border-radius: 20px; padding: 20px; border: 1px solid rgba(101,53,224,0.1); text-align: center;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="font-weight: 700; font-size: 16px; color: #1f153f;">
+                        <i class="bi bi-gift-fill" style="color: #6535e0; margin-left: 6px;"></i> هدية يومية
+                    </div>
+                    <span style="font-size: 12px; color: #4f367a;">+ 3 نقاط</span>
+                </div>
+                <button id="dailyGiftBtn" onclick="claimDailyGift()" style="width: 100%; padding: 10px; border: none; border-radius: 30px; background: #6535e0; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s;">
+                    <i class="bi bi-stars"></i> الحصول
+                </button>
+                <div id="dailyGiftStatus" style="margin-top: 8px; font-size: 12px; color: #4f367a; display: none;">تم استلام الهدية اليوم!</div>
+            </div>
+
+            <!-- البطاقة الثانية: تحويل النقاط -->
+            <div style="background: rgba(255,255,255,0.6); border-radius: 20px; padding: 20px; border: 1px solid rgba(101,53,224,0.1);">
+                <div style="font-weight: 700; font-size: 16px; color: #1f153f; margin-bottom: 12px; text-align: center;">
+                    <i class="bi bi-arrow-left-right" style="color: #6535e0; margin-left: 6px;"></i> تحويل النقاط
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <input type="text" id="transferTarget" placeholder="اسم المستخدم" style="padding: 10px 14px; border: 1px solid rgba(101,53,224,0.1); border-radius: 12px; background: rgba(255,255,255,0.8); font-family: inherit; outline: none; width: 100%;">
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" id="transferAmount" placeholder="عدد النقاط" min="1" value="1" style="padding: 10px 14px; border: 1px solid rgba(101,53,224,0.1); border-radius: 12px; background: rgba(255,255,255,0.8); font-family: inherit; outline: none; width: 50%;">
+                        <button onclick="transferCredits()" style="flex: 1; padding: 10px; border: none; border-radius: 30px; background: #6535e0; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s;">
+                            <i class="bi bi-send"></i> إرسال
+                        </button>
+                    </div>
+                </div>
+                <div id="transferStatus" style="margin-top: 10px; font-size: 12px; text-align: center; display: none;"></div>
+            </div>
+            
+            <button onclick="closeCreditsModal()" style="background: transparent; border: none; color: #4f367a; font-size: 13px; cursor: pointer; padding: 5px;"><i class="bi bi-x-lg"></i> إغلاق</button>
+
+        </div>
+    </div>
+
+    <!-- نافذة نفاذ النقاط (القديمة) -->
+    <div class="credits-modal-overlay" id="noCreditsModal">
+        <div class="credits-modal-box" style="max-width: 380px;">
+            <i class="bi bi-exclamation-triangle-fill" style="font-size: 50px; color: #ff4d4d; margin-bottom: 15px; display: block;"></i>
+            <h2 style="font-size: 22px; font-weight: 800; color: #1f153f; margin-bottom: 10px;">بلغت حدك المسموح</h2>
+            <p style="font-size: 14px; color: #4f367a; line-height: 1.6; margin-bottom: 25px;">
                 لقد استنفذت جميع نقاطك المجانية. للحصول على المزيد من التوليدات ومواصلة الإبداع، يرجى التواصل معنا عبر إحدى القنوات التالية.
             </p>
-            <div class="credits-btns">
-                <a href="https://wa.me/967730577358" target="_blank" class="btn-whatsapp"><i class="bi bi-whatsapp"></i> واتساب</a>
-                <a href="https://t.me/OlIiIl7" target="_blank" class="btn-telegram-credits"><i class="bi bi-telegram"></i> تلجرام</a>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                <a href="https://wa.me/967730577358" target="_blank" style="display: block; width: 100%; padding: 12px; border-radius: 14px; color: #fff; font-weight: 700; text-decoration: none; background: #25d366; text-align: center;">واتساب</a>
+                <a href="https://t.me/OlIiIl7" target="_blank" style="display: block; width: 100%; padding: 12px; border-radius: 14px; color: #fff; font-weight: 700; text-decoration: none; background: #0088cc; text-align: center;">تلجرام</a>
             </div>
-            <button class="credits-close" onclick="closeCreditsModal()">إغلاق</button>
+            <button onclick="closeNoCreditsModal()" style="background: transparent; border: 1px solid rgba(101,53,224,0.1); color: #4f367a; padding: 8px 16px; border-radius: 30px; font-weight: 600; cursor: pointer; width: 100%;">إغلاق</button>
         </div>
     </div>
 
@@ -295,7 +337,8 @@
         <div class="input-card glass-card">
             <label class="input-label">
                 <i class="bi bi-pencil" style="margin-left:6px;"></i> اصنع محتواك الان
-                <span class="credits-badge" id="creditsBadge"><i class="bi bi-stars"></i> 10 نقاط</span>
+                <!-- تم إضافة onclick للنقاط -->
+                <span class="credits-badge" id="creditsBadge" onclick="openCreditsModal()"><i class="bi bi-stars"></i> 10 نقاط</span>
             </label>
             
             <div class="textarea-wrapper">
@@ -317,7 +360,7 @@
             </div>
         </div>
 
-        <!-- بطاقة الأنماط (الشريط يتسع لأي عدد من الأزرار) -->
+        <!-- بطاقة الأنماط -->
         <div class="style-card glass-card">
             <span class="style-title"><i class="bi bi-palette"></i> اختر نمط يناسبك</span>
             <div class="styles-container" id="stylesContainer"></div>
@@ -430,19 +473,16 @@
         .ad-skip-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .ad-skip-btn:not(:disabled):hover { background: rgba(255,255,255,0.2); }
 
-        .credits-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(4px); z-index: 10000; display: none; justify-content: center; align-items: center; }
+        .credits-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(4px); z-index: 10000; display: none; justify-content: center; align-items: center; }
         .credits-modal-overlay.active { display: flex; }
-        .credits-modal-box { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(101, 53, 224, 0.1); border-radius: 24px; padding: 30px; max-width: 380px; width: 90%; text-align: center; }
-        .credits-icon { font-size: 50px; color: #ff4d4d; margin-bottom: 15px; }
-        .credits-title { font-size: 22px; font-weight: 800; color: #1f153f; margin-bottom: 10px; }
-        .credits-text { font-size: 14px; color: #4f367a; line-height: 1.6; margin-bottom: 25px; }
-        .credits-btns { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
-        .btn-whatsapp, .btn-telegram-credits { display: block; width: 100%; padding: 12px; border-radius: 14px; color: #fff; font-weight: 700; text-decoration: none; transition: all 0.2s; }
-        .btn-whatsapp { background: #25d366; }
-        .btn-whatsapp:active { transform: scale(0.96); }
-        .btn-telegram-credits { background: #0088cc; }
-        .btn-telegram-credits:active { transform: scale(0.96); }
-        .credits-close { background: transparent; border: 1px solid rgba(101,53,224,0.1); color: #4f367a; padding: 8px 16px; border-radius: 30px; font-weight: 600; cursor: pointer; }
+        .credits-modal-box { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(101, 53, 224, 0.1); border-radius: 24px; padding: 30px; max-width: 380px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02); }
+        .credits-modal-box .credits-icon { font-size: 50px; color: #ff4d4d; margin-bottom: 15px; display: block; }
+        .credits-modal-box .credits-title { font-size: 22px; font-weight: 800; color: #1f153f; margin-bottom: 10px; }
+        .credits-modal-box .credits-text { font-size: 14px; color: #4f367a; line-height: 1.6; margin-bottom: 25px; }
+        .credits-modal-box .credits-btns { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        .credits-modal-box .credits-btns a { display: block; width: 100%; padding: 12px; border-radius: 14px; color: #fff; font-weight: 700; text-decoration: none; transition: all 0.2s; }
+        .credits-modal-box .credits-btns a:active { transform: scale(0.96); }
+        .credits-modal-box .credits-close { background: transparent; border: 1px solid rgba(101,53,224,0.1); color: #4f367a; padding: 8px 16px; border-radius: 30px; font-weight: 600; cursor: pointer; }
     </style>
 
     <script>
@@ -470,7 +510,10 @@
             renderStyleButtons();
             updateWelcomeDisplay();
             updateCreditsBadge(userData.credits);
-            
+
+            // تحديث حالة الهدية اليومية عند فتح النافذة
+            updateDailyGiftState();
+
             if (latestNotification && latestNotification.show_in_chat) {
                 showToastNotification(latestNotification.title + ': ' + latestNotification.text, 10000);
             }
@@ -481,6 +524,30 @@
 
         function updateCreditsBadge(credits) {
             document.getElementById('creditsBadge').innerHTML = `<i class="bi bi-stars"></i> ${credits} نقاط`;
+        }
+
+        function updateDailyGiftState() {
+            const btn = document.getElementById('dailyGiftBtn');
+            const statusMsg = document.getElementById('dailyGiftStatus');
+            if (!userData) return;
+
+            // التحقق من تاريخ الهدية
+            const lastGift = userData.last_daily_gift;
+            const today = new Date().toISOString().split('T')[0];
+
+            if (lastGift === today) {
+                btn.style.background = '#aaa';
+                btn.style.cursor = 'default';
+                btn.innerHTML = '<i class="bi bi-check-circle"></i> تم الاستلام';
+                btn.disabled = true;
+                statusMsg.style.display = 'block';
+            } else {
+                btn.style.background = '#6535e0';
+                btn.style.cursor = 'pointer';
+                btn.innerHTML = '<i class="bi bi-stars"></i> الحصول';
+                btn.disabled = false;
+                statusMsg.style.display = 'none';
+            }
         }
 
         function showToastNotification(message, duration = 10000) {
@@ -504,10 +571,7 @@
                 'minimalist': 'bi-circle',
                 'modern': 'bi-pentagon'
             };
-            
-            // عرض جميع الشخصيات دون تقطيع
-            const displayChars = characters;
-            container.innerHTML = displayChars.map(char => `
+            container.innerHTML = characters.map(char => `
                 <div class="style-btn ${char.callback_key === currentCharacter ? 'active' : ''}" data-key="${char.callback_key}">
                     <i class="bi ${styleIcons[char.callback_key] || 'bi-robot'}"></i>
                     <span>${escapeHtml(char.name)}</span>
@@ -588,9 +652,97 @@
             } catch (err) { console.error('Failed to load notifications', err); }
         }
 
-        function openCreditsModal() { document.getElementById('creditsModal').classList.add('active'); }
-        function closeCreditsModal() { document.getElementById('creditsModal').classList.remove('active'); }
+        // --- دوال النافذة المنبثقة للنقاط (Credits Modal) ---
+        function openCreditsModal() {
+            // تحديث الحالة عند الفتح
+            updateDailyGiftState();
+            document.getElementById('creditsModal').classList.add('active');
+        }
+        function closeCreditsModal() {
+            document.getElementById('creditsModal').classList.remove('active');
+        }
 
+        async function claimDailyGift() {
+            const btn = document.getElementById('dailyGiftBtn');
+            if (btn.disabled) return; // الحماية من الضغط المتكرر
+            
+            btn.disabled = true;
+            btn.innerHTML = 'جاري التحميل...';
+            
+            try {
+                const res = await fetch('/api/claim_daily_gift', { method: 'POST' });
+                const data = await res.json();
+                
+                if (data.success) {
+                    showToastNotification('🎉 ' + data.message);
+                    // تحديث الرصيد
+                    userData.credits = data.credits;
+                    updateCreditsBadge(data.credits);
+                    // تحديث حالة الهدية
+                    userData.last_daily_gift = new Date().toISOString().split('T')[0];
+                    updateDailyGiftState();
+                } else {
+                    showToastNotification(data.message);
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-stars"></i> الحصول';
+                }
+            } catch (err) {
+                showToastNotification('خطأ في الاتصال بالخادم');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-stars"></i> الحصول';
+            }
+        }
+
+        async function transferCredits() {
+            const usernameInput = document.getElementById('transferTarget');
+            const amountInput = document.getElementById('transferAmount');
+            const statusMsg = document.getElementById('transferStatus');
+            
+            const target = usernameInput.value.trim();
+            const amount = parseInt(amountInput.value);
+
+            if (!target || amount <= 0) {
+                statusMsg.style.display = 'block';
+                statusMsg.style.color = '#ff4d4d';
+                statusMsg.textContent = 'يرجى ملء البيانات بشكل صحيح';
+                return;
+            }
+
+            statusMsg.style.display = 'block';
+            statusMsg.style.color = '#4f367a';
+            statusMsg.textContent = 'جاري التحويل...';
+
+            try {
+                const res = await fetch('/api/transfer_credits', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username: target, amount: amount})
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    statusMsg.style.color = '#27ae60';
+                    statusMsg.textContent = data.message;
+                    userData.credits = data.credits;
+                    updateCreditsBadge(data.credits);
+                    usernameInput.value = '';
+                    amountInput.value = '1';
+                    setTimeout(() => { statusMsg.style.display = 'none'; }, 3000);
+                } else {
+                    statusMsg.style.color = '#ff4d4d';
+                    statusMsg.textContent = data.message;
+                }
+            } catch (err) {
+                statusMsg.style.color = '#ff4d4d';
+                statusMsg.textContent = 'خطأ في الاتصال بالخادم';
+            }
+        }
+
+        // --- دوال النافذة المنبثقة لنفاذ النقاط (No Credits Modal) ---
+        function openNoCreditsModal() { document.getElementById('noCreditsModal').classList.add('active'); }
+        function closeNoCreditsModal() { document.getElementById('noCreditsModal').classList.remove('active'); }
+
+        // --- دوال الإرسال الأساسية ---
         function updateSendButton(isStreamingActive) {
             const btn = document.getElementById('mainSendBtn');
             if (!btn) return;
@@ -664,7 +816,7 @@
                 });
                 
                 if (response.status === 402) {
-                    openCreditsModal();
+                    openNoCreditsModal();
                     throw new Error('no_credits');
                 }
                 
