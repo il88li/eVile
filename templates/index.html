@@ -18,6 +18,41 @@
             position: relative;
         }
 
+        /* --- شاشة التوقف (OFF) --- */
+        .offline-container {
+            width: 100%; height: 100vh; height: 100dvh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center; padding: 20px;
+            background: linear-gradient(160deg, #ffffff 0%, #e4d8ff 100%);
+            color: #1f153f;
+        }
+        .offline-icon {
+            font-size: 64px; color: #6535e0;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+        .offline-title { font-size: 28px; font-weight: 800; margin-bottom: 10px; }
+        .offline-message { font-size: 16px; color: #4f367a; max-width: 400px; line-height: 1.6; margin-bottom: 30px; }
+        .offline-socials {
+            display: flex; gap: 15px; font-size: 28px;
+        }
+        .offline-socials a {
+            color: #4f367a; transition: all 0.2s;
+            background: rgba(255,255,255,0.6);
+            width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(101,53,224,0.1);
+            text-decoration: none;
+        }
+        .offline-socials a:active { transform: scale(0.9); }
+        .offline-socials a:hover { background: #ffffff; }
+
+        /* --- واجهة التوليد (ON) --- */
         .main-container { 
             width: 100%; height: 100vh; height: 100dvh; 
             display: flex; flex-direction: column; 
@@ -91,7 +126,7 @@
             color: #4f367a; 
             font-weight: 600;
             border: 1px solid rgba(101, 53, 224, 0.1);
-            cursor: pointer; /* تم إضافة المؤشر */
+            cursor: pointer;
             transition: background 0.2s;
         }
         .input-label .credits-badge:active { background: rgba(255, 255, 255, 0.8); }
@@ -252,688 +287,686 @@
 </head>
 <body>
 
-    <!-- نافذة الإعلانات -->
-    <div class="ad-modal-overlay" id="adModal">
-        <div class="ad-modal-box">
-            <div id="adContent">
-                <h2 class="ad-modal-title" id="adTitle">عرض خاص</h2>
-                <p class="ad-modal-text" id="adText">تفاصيل العرض هنا...</p>
-                <a href="#" id="adButton" class="ad-modal-btn" target="_blank">اضغط للمزيد</a>
-                <br>
-                <button class="ad-skip-btn" id="adSkipBtn" disabled>تخط بعد 5 ثواني</button>
+    <!-- التحقق من حالة الموقع -->
+    {% if site_status == 'off' %}
+        <!-- شاشة التوقف -->
+        <div class="offline-container">
+            <div class="offline-icon"><i class="bi bi-tools"></i></div>
+            <h1 class="offline-title">الموقع متوقف مؤقتاً</h1>
+            <p class="offline-message">{{ offline_message }}</p>
+            <div class="offline-socials">
+                <a href="https://t.me/Evile_Prompts" target="_blank"><i class="bi bi-telegram"></i></a>
+                <a href="https://www.instagram.com/bla6c7" target="_blank"><i class="bi bi-instagram"></i></a>
+                <a href="https://wa.me/967730577358" target="_blank"><i class="bi bi-whatsapp"></i></a>
             </div>
         </div>
-    </div>
-
-    <!-- نافذة النقاط (الجديدة) -->
-    <div class="credits-modal-overlay" id="creditsModal">
-        <div class="credits-modal-box" style="max-width: 480px; padding: 25px; display: flex; flex-direction: column; gap: 20px;">
-            
-            <!-- البطاقة الأولى: الهدية اليومية -->
-            <div style="background: rgba(255,255,255,0.6); border-radius: 20px; padding: 20px; border: 1px solid rgba(101,53,224,0.1); text-align: center;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <div style="font-weight: 700; font-size: 16px; color: #1f153f;">
-                        <i class="bi bi-gift-fill" style="color: #6535e0; margin-left: 6px;"></i> هدية يومية
-                    </div>
-                    <span style="font-size: 12px; color: #4f367a;">+ 3 نقاط</span>
-                </div>
-                <button id="dailyGiftBtn" onclick="claimDailyGift()" style="width: 100%; padding: 10px; border: none; border-radius: 30px; background: #6535e0; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s;">
-                    <i class="bi bi-stars"></i> الحصول
-                </button>
-                <div id="dailyGiftStatus" style="margin-top: 8px; font-size: 12px; color: #4f367a; display: none;">تم استلام الهدية اليوم!</div>
-            </div>
-
-            <!-- البطاقة الثانية: تحويل النقاط -->
-            <div style="background: rgba(255,255,255,0.6); border-radius: 20px; padding: 20px; border: 1px solid rgba(101,53,224,0.1);">
-                <div style="font-weight: 700; font-size: 16px; color: #1f153f; margin-bottom: 12px; text-align: center;">
-                    <i class="bi bi-arrow-left-right" style="color: #6535e0; margin-left: 6px;"></i> تحويل النقاط
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <input type="text" id="transferTarget" placeholder="اسم المستخدم" style="padding: 10px 14px; border: 1px solid rgba(101,53,224,0.1); border-radius: 12px; background: rgba(255,255,255,0.8); font-family: inherit; outline: none; width: 100%;">
-                    <div style="display: flex; gap: 10px;">
-                        <input type="number" id="transferAmount" placeholder="عدد النقاط" min="1" value="1" style="padding: 10px 14px; border: 1px solid rgba(101,53,224,0.1); border-radius: 12px; background: rgba(255,255,255,0.8); font-family: inherit; outline: none; width: 50%;">
-                        <button onclick="transferCredits()" style="flex: 1; padding: 10px; border: none; border-radius: 30px; background: #6535e0; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s;">
-                            <i class="bi bi-send"></i> إرسال
-                        </button>
-                    </div>
-                </div>
-                <div id="transferStatus" style="margin-top: 10px; font-size: 12px; text-align: center; display: none;"></div>
-            </div>
-            
-            <button onclick="closeCreditsModal()" style="background: transparent; border: none; color: #4f367a; font-size: 13px; cursor: pointer; padding: 5px;"><i class="bi bi-x-lg"></i> إغلاق</button>
-
-        </div>
-    </div>
-
-    <!-- نافذة نفاذ النقاط (القديمة) -->
-    <div class="credits-modal-overlay" id="noCreditsModal">
-        <div class="credits-modal-box" style="max-width: 380px;">
-            <i class="bi bi-exclamation-triangle-fill" style="font-size: 50px; color: #ff4d4d; margin-bottom: 15px; display: block;"></i>
-            <h2 style="font-size: 22px; font-weight: 800; color: #1f153f; margin-bottom: 10px;">بلغت حدك المسموح</h2>
-            <p style="font-size: 14px; color: #4f367a; line-height: 1.6; margin-bottom: 25px;">
-                لقد استنفذت جميع نقاطك المجانية. للحصول على المزيد من التوليدات ومواصلة الإبداع، يرجى التواصل معنا عبر إحدى القنوات التالية.
-            </p>
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
-                <a href="https://wa.me/967730577358" target="_blank" style="display: block; width: 100%; padding: 12px; border-radius: 14px; color: #fff; font-weight: 700; text-decoration: none; background: #25d366; text-align: center;">واتساب</a>
-                <a href="https://t.me/OlIiIl7" target="_blank" style="display: block; width: 100%; padding: 12px; border-radius: 14px; color: #fff; font-weight: 700; text-decoration: none; background: #0088cc; text-align: center;">تلجرام</a>
-            </div>
-            <button onclick="closeNoCreditsModal()" style="background: transparent; border: 1px solid rgba(101,53,224,0.1); color: #4f367a; padding: 8px 16px; border-radius: 30px; font-weight: 600; cursor: pointer; width: 100%;">إغلاق</button>
-        </div>
-    </div>
-
-    <div class="main-container">
-        <!-- منطقة العنوان -->
-        <div class="hero-section">
-            <h1 class="hero-title" id="welcomeTitle">لوجو ميكر</h1>
-            <p class="hero-subtitle" id="welcomeSubtitle">صمم شعارك بسهولة واحترافية<br>بأسلوب يعبر عن هويتك</p>
-            <div class="hero-features-bar">
-                <span><i class="bi bi-lightning-charge-fill"></i> نتائج فورية</span>
-                <span><i class="bi bi-pencil-square"></i> تصاميم احترافية</span>
-                <span><i class="bi bi-emoji-smile"></i> سهل الاستخدام</span>
-            </div>
-        </div>
-
-        <!-- بطاقة الإدخال الرئيسية -->
-        <div class="input-card glass-card">
-            <label class="input-label">
-                <i class="bi bi-pencil" style="margin-left:6px;"></i> اصنع محتواك الان
-                <!-- تم إضافة onclick للنقاط -->
-                <span class="credits-badge" id="creditsBadge" onclick="openCreditsModal()"><i class="bi bi-stars"></i> 10 نقاط</span>
-            </label>
-            
-            <div class="textarea-wrapper">
-                <textarea class="message-input" id="mainInput" placeholder="اكتب ماتريد لـ لوجو ميكر..." rows="1"></textarea>
-            </div>
-
-            <button class="main-btn" id="mainSendBtn" onclick="handleSendWelcome()">
-                <i class="bi bi-stars"></i> إنشاء
-            </button>
-
-            <div class="prompt-result-wrapper">
-                <textarea class="prompt-result-text" id="promptResultText" readonly placeholder="سيظهر هنا البرومبت المولد بعد الضغط على انشاء"></textarea>
-                <div class="prompt-result-actions">
-                    <button class="copy-btn" onclick="copyGeneratedPrompt()"><i class="bi bi-files"></i> نسخ النص</button>
-                </div>
-                <div class="result-note">
-                    <i class="bi bi-info-circle"></i> يرجى مراجعة المخرجات قبل استخدامها للتأكد من دقتها.
-                </div>
-            </div>
-        </div>
-
-        <!-- بطاقة الأنماط -->
-        <div class="style-card glass-card">
-            <span class="style-title"><i class="bi bi-palette"></i> اختر نمط يناسبك</span>
-            <div class="styles-container" id="stylesContainer"></div>
-        </div>
-    </div>
-
-    <!-- الشريط السفلي -->
-    <div class="social-bar">
-        <a href="https://t.me/Evile_Prompts" target="_blank" class="social-btn telegram"><i class="bi bi-telegram"></i></a>
-        <a href="https://www.instagram.com/bla6c7" target="_blank" class="social-btn instagram"><i class="bi bi-instagram"></i></a>
-        <div class="social-btn bell" onclick="openNotificationsSheet()">
-            <i class="bi bi-bell"></i>
-            <span class="notif-badge" id="notifBadge" style="display: none;">0</span>
-        </div>
-        <div class="social-btn gear" onclick="openSettingsSheet()">
-            <i class="bi bi-gear"></i>
-        </div>
-    </div>
-
-    <!-- نافذة الشخصيات -->
-    <div class="bottom-sheet-overlay" id="charactersSheet" onclick="closeSheetOnBackdrop(event, 'charactersSheet')">
-        <div class="bottom-sheet" onclick="event.stopPropagation()">
-            <div class="sheet-header">
-                <div class="sheet-title"><i class="bi bi-people"></i> الشخصيات المتاحة</div>
-                <button class="sheet-close" onclick="closeSheet('charactersSheet')"><i class="bi bi-x-lg"></i></button>
-            </div>
-            <div class="sheet-instruction">اختر الشخصية المناسبة لتوليد الشعار</div>
-            <div id="charactersList" class="characters-list"></div>
-        </div>
-    </div>
-
-    <!-- نافذة الإشعارات -->
-    <div class="bottom-sheet-overlay" id="notificationsSheet" onclick="closeSheetOnBackdrop(event, 'notificationsSheet')">
-        <div class="bottom-sheet" onclick="event.stopPropagation()">
-            <div class="sheet-header">
-                <div class="sheet-title"><i class="bi bi-bell"></i> الإشعارات</div>
-                <button class="sheet-close" onclick="closeSheet('notificationsSheet')"><i class="bi bi-x-lg"></i></button>
-            </div>
-            <div id="notificationsList" class="notifications-list"></div>
-        </div>
-    </div>
-
-    <!-- نافذة الإعدادات -->
-    <div class="bottom-sheet-overlay" id="settingsSheet" onclick="closeSheetOnBackdrop(event, 'settingsSheet')">
-        <div class="bottom-sheet" onclick="event.stopPropagation()">
-            <div class="sheet-header">
-                <div class="sheet-title"><i class="bi bi-gear-wide-connected"></i> إعدادات الحساب</div>
-                <button class="sheet-close" onclick="closeSheet('settingsSheet')"><i class="bi bi-x-lg"></i></button>
-            </div>
-            <div id="settingsContent">
-                <div class="settings-group">
-                    <label>اسم المستخدم الحالي</label>
-                    <div class="settings-row">
-                        <input type="text" id="settingsUsername" value="" readonly>
-                        <button class="btn-copy" onclick="copyField('settingsUsername')"><i class="bi bi-files"></i></button>
-                    </div>
-                </div>
-                <div class="settings-group">
-                    <label>كلمة المرور الحالية</label>
-                    <div class="settings-row">
-                        <input type="text" id="settingsPassword" value="" readonly>
-                        <button class="btn-copy" onclick="copyField('settingsPassword')"><i class="bi bi-files"></i></button>
-                    </div>
-                </div>
-                <div style="font-size: 12px; color: #4f367a; text-align: center; margin: 15px 0 5px 0; border-top: 1px solid rgba(101,53,224,0.1); padding-top: 12px;">
-                    يمكنك نسخ بياناتك، أو التواصل مع الإدارة لتغييرها.
-                </div>
-                <button class="btn-save-settings" onclick="updateSettings()"><i class="bi bi-check-lg"></i> تحديث بياناتي</button>
-            </div>
-        </div>
-    </div>
-
-    <style>
-        .bottom-sheet-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: flex-end; justify-content: center; }
-        .bottom-sheet-overlay.active { display: flex; }
-        .bottom-sheet { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(101, 53, 224, 0.1); border-radius: 25px 25px 0 0; padding: 20px; animation: slideUp 0.4s ease; overflow-y: auto; display: flex; flex-direction: column; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .sheet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(101,53,224,0.1); }
-        .sheet-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; color: #1f153f; }
-        .sheet-close { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.6); border: 1px solid rgba(101,53,224,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; color: #2d1b4e; }
-        .sheet-instruction { font-size: 12px; text-align: center; margin-bottom: 16px; color: #4f367a; }
-        .characters-list, .notifications-list { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; max-height: 50vh; }
-        .char-list-item, .notif-item { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 16px; width: 100%; background: rgba(255,255,255,0.4); border: 1px solid rgba(101,53,224,0.1); cursor: pointer; transition: all 0.2s; }
-        .char-list-item:active { transform: scale(0.98); }
-        .char-list-item.active { background: rgba(101, 53, 224, 0.1); border-color: #6535e0; }
-        .char-list-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #2d1b4e; }
-        .char-list-info { flex: 1; text-align: right; }
-        .char-list-name { font-size: 14px; font-weight: 700; color: #1f153f; }
-        .char-list-desc { font-size: 11px; color: #4f367a; }
-        .char-list-check { width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; }
-        .char-list-item.active .char-list-check { opacity: 1; background: #6535e0; color: #fff; }
+    {% else %}
+        <!-- واجهة التوليد الطبيعية -->
         
-        .settings-group { margin-bottom: 16px; }
-        .settings-group label { font-size: 13px; font-weight: 700; color: #4f367a; display: block; margin-bottom: 6px; }
-        .settings-row { display: flex; gap: 10px; }
-        .settings-row input { flex: 1; padding: 10px 12px; background: rgba(255,255,255,0.5); border: 1px solid rgba(101,53,224,0.1); border-radius: 12px; font-family: 'Tajawal', sans-serif; color: #1f153f; outline: none; }
-        .settings-row input:focus { border-color: #6535e0; }
-        .btn-copy { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.4); border: none; color: #2d1b4e; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .btn-copy:active { transform: scale(0.9); }
-        .btn-save-settings { width: 100%; padding: 12px; background: #6535e0; border: none; border-radius: 14px; color: #fff; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 15px rgba(101, 53, 224, 0.2); }
-
-        .ad-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(4px); z-index: 9999; display: none; justify-content: center; align-items: center; }
-        .ad-modal-overlay.active { display: flex; }
-        .ad-modal-box { padding: 30px; max-width: 400px; width: 90%; text-align: center; position: relative; color: #1f153f; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02); }
-        .ad-modal-title { font-size: 22px; font-weight: 700; color: #1f153f; margin-bottom: 12px; }
-        .ad-modal-text { font-size: 14px; color: #4f367a; margin-bottom: 20px; line-height: 1.5; }
-        .ad-modal-btn { display: inline-block; padding: 12px 24px; margin-bottom: 15px; background: #6535e0; border: none; color: #fff; border-radius: 30px; font-weight: bold; font-size: 15px; text-decoration: none; transition: all 0.2s; cursor: pointer; box-shadow: 0 4px 15px rgba(101, 53, 224, 0.2); }
-        .ad-modal-btn:hover { transform: scale(1.02); }
-        .ad-skip-btn { display: inline-block; padding: 8px 16px; margin-top: 5px; background: transparent; color: #4f367a; border: 1px solid rgba(101,53,224,0.1); border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.2s; }
-        .ad-skip-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .ad-skip-btn:not(:disabled):hover { background: rgba(255,255,255,0.2); }
-
-        .credits-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(4px); z-index: 10000; display: none; justify-content: center; align-items: center; }
-        .credits-modal-overlay.active { display: flex; }
-        .credits-modal-box { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(101, 53, 224, 0.1); border-radius: 24px; padding: 30px; max-width: 380px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02); }
-        .credits-modal-box .credits-icon { font-size: 50px; color: #ff4d4d; margin-bottom: 15px; display: block; }
-        .credits-modal-box .credits-title { font-size: 22px; font-weight: 800; color: #1f153f; margin-bottom: 10px; }
-        .credits-modal-box .credits-text { font-size: 14px; color: #4f367a; line-height: 1.6; margin-bottom: 25px; }
-        .credits-modal-box .credits-btns { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
-        .credits-modal-box .credits-btns a { display: block; width: 100%; padding: 12px; border-radius: 14px; color: #fff; font-weight: 700; text-decoration: none; transition: all 0.2s; }
-        .credits-modal-box .credits-btns a:active { transform: scale(0.96); }
-        .credits-modal-box .credits-close { background: transparent; border: 1px solid rgba(101,53,224,0.1); color: #4f367a; padding: 8px 16px; border-radius: 30px; font-weight: 600; cursor: pointer; }
-    </style>
-
-    <script>
-        const characters = {{ characters|tojson }};
-        let userId = {{ user_id|tojson }};
-        const latestNotification = {{ latest_notification|tojson }};
-        const latestAd = {{ latest_ad|tojson }};
-        let userData = {{ user_data|tojson }};
-        
-        let currentCharacter = null; 
-        let isProcessing = false;
-        let isStreaming = false;
-        let abortController = null;
-
-        function initScreen() {
-            if (!userId) { 
-                window.location.href = '/sign'; 
-                return; 
-            }
-            if (!userData || !userData.username) { 
-                window.location.href = '/sign'; 
-                return; 
-            }
-
-            renderStyleButtons();
-            updateWelcomeDisplay();
-            updateCreditsBadge(userData.credits);
-
-            // تحديث حالة الهدية اليومية عند فتح النافذة
-            updateDailyGiftState();
-
-            if (latestNotification && latestNotification.show_in_chat) {
-                showToastNotification(latestNotification.title + ': ' + latestNotification.text, 10000);
-            }
-            if (latestAd) {
-                setTimeout(() => { showAdModal(latestAd); }, 1000);
-            }
-        }
-
-        function updateCreditsBadge(credits) {
-            document.getElementById('creditsBadge').innerHTML = `<i class="bi bi-stars"></i> ${credits} نقاط`;
-        }
-
-        function updateDailyGiftState() {
-            const btn = document.getElementById('dailyGiftBtn');
-            const statusMsg = document.getElementById('dailyGiftStatus');
-            if (!userData) return;
-
-            // التحقق من تاريخ الهدية
-            const lastGift = userData.last_daily_gift;
-            const today = new Date().toISOString().split('T')[0];
-
-            if (lastGift === today) {
-                btn.style.background = '#aaa';
-                btn.style.cursor = 'default';
-                btn.innerHTML = '<i class="bi bi-check-circle"></i> تم الاستلام';
-                btn.disabled = true;
-                statusMsg.style.display = 'block';
-            } else {
-                btn.style.background = '#6535e0';
-                btn.style.cursor = 'pointer';
-                btn.innerHTML = '<i class="bi bi-stars"></i> الحصول';
-                btn.disabled = false;
-                statusMsg.style.display = 'none';
-            }
-        }
-
-        function showToastNotification(message, duration = 10000) {
-            const toast = document.createElement('div');
-            toast.className = 'toast-notification';
-            toast.innerText = message;
-            document.body.appendChild(toast);
-            setTimeout(() => { toast.remove(); }, duration);
-        }
-
-        function renderStyleButtons() {
-            const container = document.getElementById('stylesContainer');
-            if (!characters || characters.length === 0) {
-                container.innerHTML = '<div class="style-btn" style="cursor:default;">لا توجد شخصيات</div>';
-                return;
-            }
-            const styleIcons = {
-                'logo_maker': 'bi-brush',
-                'creative': 'bi-lightbulb',
-                'luxury': 'bi-gem',
-                'minimalist': 'bi-circle',
-                'modern': 'bi-pentagon'
-            };
-            container.innerHTML = characters.map(char => `
-                <div class="style-btn ${char.callback_key === currentCharacter ? 'active' : ''}" data-key="${char.callback_key}">
-                    <i class="bi ${styleIcons[char.callback_key] || 'bi-robot'}"></i>
-                    <span>${escapeHtml(char.name)}</span>
+        <!-- نافذة الإعلانات -->
+        <div class="ad-modal-overlay" id="adModal">
+            <div class="ad-modal-box">
+                <div id="adContent">
+                    <h2 class="ad-modal-title" id="adTitle">عرض خاص</h2>
+                    <p class="ad-modal-text" id="adText">تفاصيل العرض هنا...</p>
+                    <a href="#" id="adButton" class="ad-modal-btn" target="_blank">اضغط للمزيد</a>
+                    <br>
+                    <button class="ad-skip-btn" id="adSkipBtn" disabled>تخط بعد 5 ثواني</button>
                 </div>
-            `).join('');
-            
-            document.querySelectorAll('.style-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const key = btn.getAttribute('data-key');
-                    if (key) selectCharacter(key);
-                });
-            });
-        }
+            </div>
+        </div>
 
-        function updateWelcomeDisplay() {
-            const char = characters.find(c => c.callback_key === currentCharacter);
-            const title = document.getElementById('welcomeTitle');
-            const subtitle = document.getElementById('welcomeSubtitle');
-            const input = document.getElementById('mainInput');
-            
-            if (char) {
-                title.textContent = char.name;
-                subtitle.innerHTML = char.description.replace(/\n/g, '<br>');
-                input.placeholder = `اكتب ماتريد لـ ${char.name}...`;
-            } else {
-                title.textContent = "اختر نمطاً";
-                subtitle.innerHTML = "يرجى اختيار شخصية من الأزرار أدناه للبدء.";
-                input.placeholder = "اختر نمطاً أولاً...";
-            }
-        }
-
-        function selectCharacter(key) {
-            currentCharacter = key;
-            renderStyleButtons();
-            updateWelcomeDisplay();
-            renderCharactersSheet();
-            closeSheet('charactersSheet');
-        }
-
-        function renderCharactersSheet() {
-            const list = document.getElementById('charactersList');
-            if (!characters || characters.length === 0) {
-                list.innerHTML = '<div class="char-list-item" style="justify-content:center; color:#4f367a;">لا توجد شخصيات بعد</div>';
-                return;
-            }
-            list.innerHTML = characters.map(char => `
-                <div class="char-list-item ${char.callback_key === currentCharacter ? 'active' : ''}" onclick="selectCharacter('${char.callback_key}')">
-                    <div class="char-list-icon"><i class="bi bi-robot"></i></div>
-                    <div class="char-list-info">
-                        <div class="char-list-name">${escapeHtml(char.name)}</div>
-                        <div class="char-list-desc">${escapeHtml(char.description)}</div>
+        <!-- نافذة النقاط -->
+        <div class="credits-modal-overlay" id="creditsModal">
+            <div class="credits-modal-box" style="max-width: 480px; padding: 25px; display: flex; flex-direction: column; gap: 20px;">
+                <div style="background: rgba(255,255,255,0.6); border-radius: 20px; padding: 20px; border: 1px solid rgba(101,53,224,0.1); text-align: center;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div style="font-weight: 700; font-size: 16px; color: #1f153f;">
+                            <i class="bi bi-gift-fill" style="color: #6535e0; margin-left: 6px;"></i> هدية يومية
+                        </div>
+                        <span style="font-size: 12px; color: #4f367a;">+ 3 نقاط</span>
                     </div>
-                    <div class="char-list-check"><i class="bi bi-check-lg"></i></div>
+                    <button id="dailyGiftBtn" onclick="claimDailyGift()" style="width: 100%; padding: 10px; border: none; border-radius: 30px; background: #6535e0; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s;">
+                        <i class="bi bi-stars"></i> الحصول
+                    </button>
+                    <div id="dailyGiftStatus" style="margin-top: 8px; font-size: 12px; color: #4f367a; display: none;">تم استلام الهدية اليوم!</div>
                 </div>
-            `).join('');
-        }
 
-        async function renderNotificationsSheet() {
-            try {
-                const res = await fetch('/api/notifications');
-                const notifications = await res.json();
-                const list = document.getElementById('notificationsList');
-                const badge = document.getElementById('notifBadge');
-                if (notifications.length === 0) {
-                    list.innerHTML = '<div class="notif-item" style="justify-content: center; text-align: center; color:#4f367a;">لا توجد إشعارات</div>';
-                    badge.style.display = 'none'; return;
-                }
-                badge.textContent = notifications.length; badge.style.display = 'flex';
-                list.innerHTML = notifications.map(notif => `
-                    <div class="notif-item">
-                        <div class="notif-icon"><i class="bi bi-bell"></i></div>
-                        <div class="notif-content">
-                            <div class="notif-title">${escapeHtml(notif.title)}</div>
-                            <div class="notif-text" style="font-size:11px; color:#4f367a;">${escapeHtml(notif.text)}</div>
+                <div style="background: rgba(255,255,255,0.6); border-radius: 20px; padding: 20px; border: 1px solid rgba(101,53,224,0.1);">
+                    <div style="font-weight: 700; font-size: 16px; color: #1f153f; margin-bottom: 12px; text-align: center;">
+                        <i class="bi bi-arrow-left-right" style="color: #6535e0; margin-left: 6px;"></i> تحويل النقاط
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <input type="text" id="transferTarget" placeholder="اسم المستخدم" style="padding: 10px 14px; border: 1px solid rgba(101,53,224,0.1); border-radius: 12px; background: rgba(255,255,255,0.8); font-family: inherit; outline: none; width: 100%;">
+                        <div style="display: flex; gap: 10px;">
+                            <input type="number" id="transferAmount" placeholder="عدد النقاط" min="1" value="1" style="padding: 10px 14px; border: 1px solid rgba(101,53,224,0.1); border-radius: 12px; background: rgba(255,255,255,0.8); font-family: inherit; outline: none; width: 50%;">
+                            <button onclick="transferCredits()" style="flex: 1; padding: 10px; border: none; border-radius: 30px; background: #6535e0; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s;">
+                                <i class="bi bi-send"></i> إرسال
+                            </button>
                         </div>
                     </div>
-                `).join('');
-            } catch (err) { console.error('Failed to load notifications', err); }
-        }
+                    <div id="transferStatus" style="margin-top: 10px; font-size: 12px; text-align: center; display: none;"></div>
+                </div>
+                <button onclick="closeCreditsModal()" style="background: transparent; border: none; color: #4f367a; font-size: 13px; cursor: pointer; padding: 5px;"><i class="bi bi-x-lg"></i> إغلاق</button>
+            </div>
+        </div>
 
-        // --- دوال النافذة المنبثقة للنقاط (Credits Modal) ---
-        function openCreditsModal() {
-            // تحديث الحالة عند الفتح
-            updateDailyGiftState();
-            document.getElementById('creditsModal').classList.add('active');
-        }
-        function closeCreditsModal() {
-            document.getElementById('creditsModal').classList.remove('active');
-        }
+        <!-- نافذة نفاذ النقاط -->
+        <div class="credits-modal-overlay" id="noCreditsModal">
+            <div class="credits-modal-box" style="max-width: 380px;">
+                <i class="bi bi-exclamation-triangle-fill" style="font-size: 50px; color: #ff4d4d; margin-bottom: 15px; display: block;"></i>
+                <h2 style="font-size: 22px; font-weight: 800; color: #1f153f; margin-bottom: 10px;">بلغت حدك المسموح</h2>
+                <p style="font-size: 14px; color: #4f367a; line-height: 1.6; margin-bottom: 25px;">
+                    لقد استنفذت جميع نقاطك المجانية. للحصول على المزيد من التوليدات ومواصلة الإبداع، يرجى التواصل معنا عبر إحدى القنوات التالية.
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                    <a href="https://wa.me/967730577358" target="_blank" style="display: block; width: 100%; padding: 12px; border-radius: 14px; color: #fff; font-weight: 700; text-decoration: none; background: #25d366; text-align: center;">واتساب</a>
+                    <a href="https://t.me/OlIiIl7" target="_blank" style="display: block; width: 100%; padding: 12px; border-radius: 14px; color: #fff; font-weight: 700; text-decoration: none; background: #0088cc; text-align: center;">تلجرام</a>
+                </div>
+                <button onclick="closeNoCreditsModal()" style="background: transparent; border: 1px solid rgba(101,53,224,0.1); color: #4f367a; padding: 8px 16px; border-radius: 30px; font-weight: 600; cursor: pointer; width: 100%;">إغلاق</button>
+            </div>
+        </div>
 
-        async function claimDailyGift() {
-            const btn = document.getElementById('dailyGiftBtn');
-            if (btn.disabled) return; // الحماية من الضغط المتكرر
-            
-            btn.disabled = true;
-            btn.innerHTML = 'جاري التحميل...';
-            
-            try {
-                const res = await fetch('/api/claim_daily_gift', { method: 'POST' });
-                const data = await res.json();
+        <div class="main-container">
+            <div class="hero-section">
+                <h1 class="hero-title" id="welcomeTitle">لوجو ميكر</h1>
+                <p class="hero-subtitle" id="welcomeSubtitle">صمم شعارك بسهولة واحترافية<br>بأسلوب يعبر عن هويتك</p>
+                <div class="hero-features-bar">
+                    <span><i class="bi bi-lightning-charge-fill"></i> نتائج فورية</span>
+                    <span><i class="bi bi-pencil-square"></i> تصاميم احترافية</span>
+                    <span><i class="bi bi-emoji-smile"></i> سهل الاستخدام</span>
+                </div>
+            </div>
+
+            <div class="input-card glass-card">
+                <label class="input-label">
+                    <i class="bi bi-pencil" style="margin-left:6px;"></i> اصنع محتواك الان
+                    <span class="credits-badge" id="creditsBadge" onclick="openCreditsModal()"><i class="bi bi-stars"></i> 10 نقاط</span>
+                </label>
                 
-                if (data.success) {
-                    showToastNotification('🎉 ' + data.message);
-                    // تحديث الرصيد
-                    userData.credits = data.credits;
-                    updateCreditsBadge(data.credits);
-                    // تحديث حالة الهدية
-                    userData.last_daily_gift = new Date().toISOString().split('T')[0];
-                    updateDailyGiftState();
+                <div class="textarea-wrapper">
+                    <textarea class="message-input" id="mainInput" placeholder="اكتب ماتريد لـ لوجو ميكر..." rows="1"></textarea>
+                </div>
+
+                <button class="main-btn" id="mainSendBtn" onclick="handleSendWelcome()">
+                    <i class="bi bi-stars"></i> إنشاء
+                </button>
+
+                <div class="prompt-result-wrapper">
+                    <textarea class="prompt-result-text" id="promptResultText" readonly placeholder="سيظهر هنا البرومبت المولد بعد الضغط على انشاء"></textarea>
+                    <div class="prompt-result-actions">
+                        <button class="copy-btn" onclick="copyGeneratedPrompt()"><i class="bi bi-files"></i> نسخ النص</button>
+                    </div>
+                    <div class="result-note">
+                        <i class="bi bi-info-circle"></i> يرجى مراجعة المخرجات قبل استخدامها للتأكد من دقتها.
+                    </div>
+                </div>
+            </div>
+
+            <div class="style-card glass-card">
+                <span class="style-title"><i class="bi bi-palette"></i> اختر نمط يناسبك</span>
+                <div class="styles-container" id="stylesContainer"></div>
+            </div>
+        </div>
+
+        <div class="social-bar">
+            <a href="https://t.me/Evile_Prompts" target="_blank" class="social-btn telegram"><i class="bi bi-telegram"></i></a>
+            <a href="https://www.instagram.com/bla6c7" target="_blank" class="social-btn instagram"><i class="bi bi-instagram"></i></a>
+            <div class="social-btn bell" onclick="openNotificationsSheet()">
+                <i class="bi bi-bell"></i>
+                <span class="notif-badge" id="notifBadge" style="display: none;">0</span>
+            </div>
+            <div class="social-btn gear" onclick="openSettingsSheet()">
+                <i class="bi bi-gear"></i>
+            </div>
+        </div>
+
+        <!-- نافذة الشخصيات -->
+        <div class="bottom-sheet-overlay" id="charactersSheet" onclick="closeSheetOnBackdrop(event, 'charactersSheet')">
+            <div class="bottom-sheet" onclick="event.stopPropagation()">
+                <div class="sheet-header">
+                    <div class="sheet-title"><i class="bi bi-people"></i> الشخصيات المتاحة</div>
+                    <button class="sheet-close" onclick="closeSheet('charactersSheet')"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div class="sheet-instruction">اختر الشخصية المناسبة لتوليد الشعار</div>
+                <div id="charactersList" class="characters-list"></div>
+            </div>
+        </div>
+
+        <!-- نافذة الإشعارات -->
+        <div class="bottom-sheet-overlay" id="notificationsSheet" onclick="closeSheetOnBackdrop(event, 'notificationsSheet')">
+            <div class="bottom-sheet" onclick="event.stopPropagation()">
+                <div class="sheet-header">
+                    <div class="sheet-title"><i class="bi bi-bell"></i> الإشعارات</div>
+                    <button class="sheet-close" onclick="closeSheet('notificationsSheet')"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div id="notificationsList" class="notifications-list"></div>
+            </div>
+        </div>
+
+        <!-- نافذة الإعدادات -->
+        <div class="bottom-sheet-overlay" id="settingsSheet" onclick="closeSheetOnBackdrop(event, 'settingsSheet')">
+            <div class="bottom-sheet" onclick="event.stopPropagation()">
+                <div class="sheet-header">
+                    <div class="sheet-title"><i class="bi bi-gear-wide-connected"></i> إعدادات الحساب</div>
+                    <button class="sheet-close" onclick="closeSheet('settingsSheet')"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div id="settingsContent">
+                    <div class="settings-group">
+                        <label>اسم المستخدم الحالي</label>
+                        <div class="settings-row">
+                            <input type="text" id="settingsUsername" value="" readonly>
+                            <button class="btn-copy" onclick="copyField('settingsUsername')"><i class="bi bi-files"></i></button>
+                        </div>
+                    </div>
+                    <div class="settings-group">
+                        <label>كلمة المرور الحالية</label>
+                        <div class="settings-row">
+                            <input type="text" id="settingsPassword" value="" readonly>
+                            <button class="btn-copy" onclick="copyField('settingsPassword')"><i class="bi bi-files"></i></button>
+                        </div>
+                    </div>
+                    <div style="font-size: 12px; color: #4f367a; text-align: center; margin: 15px 0 5px 0; border-top: 1px solid rgba(101,53,224,0.1); padding-top: 12px;">
+                        يمكنك نسخ بياناتك، أو التواصل مع الإدارة لتغييرها.
+                    </div>
+                    <button class="btn-save-settings" onclick="updateSettings()"><i class="bi bi-check-lg"></i> تحديث بياناتي</button>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .bottom-sheet-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: flex-end; justify-content: center; }
+            .bottom-sheet-overlay.active { display: flex; }
+            .bottom-sheet { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(101, 53, 224, 0.1); border-radius: 25px 25px 0 0; padding: 20px; animation: slideUp 0.4s ease; overflow-y: auto; display: flex; flex-direction: column; }
+            @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+            .sheet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(101,53,224,0.1); }
+            .sheet-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; color: #1f153f; }
+            .sheet-close { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.6); border: 1px solid rgba(101,53,224,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; color: #2d1b4e; }
+            .sheet-instruction { font-size: 12px; text-align: center; margin-bottom: 16px; color: #4f367a; }
+            .characters-list, .notifications-list { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; max-height: 50vh; }
+            .char-list-item, .notif-item { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 16px; width: 100%; background: rgba(255,255,255,0.4); border: 1px solid rgba(101,53,224,0.1); cursor: pointer; transition: all 0.2s; }
+            .char-list-item:active { transform: scale(0.98); }
+            .char-list-item.active { background: rgba(101, 53, 224, 0.1); border-color: #6535e0; }
+            .char-list-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #2d1b4e; }
+            .char-list-info { flex: 1; text-align: right; }
+            .char-list-name { font-size: 14px; font-weight: 700; color: #1f153f; }
+            .char-list-desc { font-size: 11px; color: #4f367a; }
+            .char-list-check { width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; }
+            .char-list-item.active .char-list-check { opacity: 1; background: #6535e0; color: #fff; }
+            
+            .settings-group { margin-bottom: 16px; }
+            .settings-group label { font-size: 13px; font-weight: 700; color: #4f367a; display: block; margin-bottom: 6px; }
+            .settings-row { display: flex; gap: 10px; }
+            .settings-row input { flex: 1; padding: 10px 12px; background: rgba(255,255,255,0.5); border: 1px solid rgba(101,53,224,0.1); border-radius: 12px; font-family: 'Tajawal', sans-serif; color: #1f153f; outline: none; }
+            .settings-row input:focus { border-color: #6535e0; }
+            .btn-copy { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.4); border: none; color: #2d1b4e; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+            .btn-copy:active { transform: scale(0.9); }
+            .btn-save-settings { width: 100%; padding: 12px; background: #6535e0; border: none; border-radius: 14px; color: #fff; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 15px rgba(101, 53, 224, 0.2); }
+
+            .ad-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(4px); z-index: 9999; display: none; justify-content: center; align-items: center; }
+            .ad-modal-overlay.active { display: flex; }
+            .ad-modal-box { padding: 30px; max-width: 400px; width: 90%; text-align: center; position: relative; color: #1f153f; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02); }
+            .ad-modal-title { font-size: 22px; font-weight: 700; color: #1f153f; margin-bottom: 12px; }
+            .ad-modal-text { font-size: 14px; color: #4f367a; margin-bottom: 20px; line-height: 1.5; }
+            .ad-modal-btn { display: inline-block; padding: 12px 24px; margin-bottom: 15px; background: #6535e0; border: none; color: #fff; border-radius: 30px; font-weight: bold; font-size: 15px; text-decoration: none; transition: all 0.2s; cursor: pointer; box-shadow: 0 4px 15px rgba(101, 53, 224, 0.2); }
+            .ad-modal-btn:hover { transform: scale(1.02); }
+            .ad-skip-btn { display: inline-block; padding: 8px 16px; margin-top: 5px; background: transparent; color: #4f367a; border: 1px solid rgba(101,53,224,0.1); border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.2s; }
+            .ad-skip-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+            .ad-skip-btn:not(:disabled):hover { background: rgba(255,255,255,0.2); }
+
+            .credits-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(4px); z-index: 10000; display: none; justify-content: center; align-items: center; }
+            .credits-modal-overlay.active { display: flex; }
+            .credits-modal-box { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(101, 53, 224, 0.1); border-radius: 24px; padding: 30px; max-width: 380px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02); }
+            .credits-modal-box .credits-icon { font-size: 50px; color: #ff4d4d; margin-bottom: 15px; display: block; }
+            .credits-modal-box .credits-title { font-size: 22px; font-weight: 800; color: #1f153f; margin-bottom: 10px; }
+            .credits-modal-box .credits-text { font-size: 14px; color: #4f367a; line-height: 1.6; margin-bottom: 25px; }
+            .credits-modal-box .credits-btns { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+            .credits-modal-box .credits-btns a { display: block; width: 100%; padding: 12px; border-radius: 14px; color: #fff; font-weight: 700; text-decoration: none; transition: all 0.2s; }
+            .credits-modal-box .credits-btns a:active { transform: scale(0.96); }
+            .credits-modal-box .credits-close { background: transparent; border: 1px solid rgba(101,53,224,0.1); color: #4f367a; padding: 8px 16px; border-radius: 30px; font-weight: 600; cursor: pointer; }
+        </style>
+
+        <script>
+            const characters = {{ characters|tojson }};
+            let userId = {{ user_id|tojson }};
+            const latestNotification = {{ latest_notification|tojson }};
+            const latestAd = {{ latest_ad|tojson }};
+            let userData = {{ user_data|tojson }};
+            
+            let currentCharacter = null; 
+            let isProcessing = false;
+            let isStreaming = false;
+            let abortController = null;
+
+            function initScreen() {
+                if (!userId) { 
+                    window.location.href = '/sign'; 
+                    return; 
+                }
+                if (!userData || !userData.username) { 
+                    window.location.href = '/sign'; 
+                    return; 
+                }
+
+                renderStyleButtons();
+                updateWelcomeDisplay();
+                updateCreditsBadge(userData.credits);
+                updateDailyGiftState();
+
+                if (latestNotification && latestNotification.show_in_chat) {
+                    showToastNotification(latestNotification.title + ': ' + latestNotification.text, 10000);
+                }
+                if (latestAd) {
+                    setTimeout(() => { showAdModal(latestAd); }, 1000);
+                }
+            }
+
+            function updateCreditsBadge(credits) {
+                document.getElementById('creditsBadge').innerHTML = `<i class="bi bi-stars"></i> ${credits} نقاط`;
+            }
+
+            function updateDailyGiftState() {
+                const btn = document.getElementById('dailyGiftBtn');
+                const statusMsg = document.getElementById('dailyGiftStatus');
+                if (!userData) return;
+
+                const lastGift = userData.last_daily_gift;
+                const today = new Date().toISOString().split('T')[0];
+
+                if (lastGift === today) {
+                    btn.style.background = '#aaa';
+                    btn.style.cursor = 'default';
+                    btn.innerHTML = '<i class="bi bi-check-circle"></i> تم الاستلام';
+                    btn.disabled = true;
+                    statusMsg.style.display = 'block';
                 } else {
-                    showToastNotification(data.message);
+                    btn.style.background = '#6535e0';
+                    btn.style.cursor = 'pointer';
+                    btn.innerHTML = '<i class="bi bi-stars"></i> الحصول';
+                    btn.disabled = false;
+                    statusMsg.style.display = 'none';
+                }
+            }
+
+            function showToastNotification(message, duration = 10000) {
+                const toast = document.createElement('div');
+                toast.className = 'toast-notification';
+                toast.innerText = message;
+                document.body.appendChild(toast);
+                setTimeout(() => { toast.remove(); }, duration);
+            }
+
+            function renderStyleButtons() {
+                const container = document.getElementById('stylesContainer');
+                if (!characters || characters.length === 0) {
+                    container.innerHTML = '<div class="style-btn" style="cursor:default;">لا توجد شخصيات</div>';
+                    return;
+                }
+                const styleIcons = {
+                    'logo_maker': 'bi-brush',
+                    'creative': 'bi-lightbulb',
+                    'luxury': 'bi-gem',
+                    'minimalist': 'bi-circle',
+                    'modern': 'bi-pentagon'
+                };
+                container.innerHTML = characters.map(char => `
+                    <div class="style-btn ${char.callback_key === currentCharacter ? 'active' : ''}" data-key="${char.callback_key}">
+                        <i class="bi ${styleIcons[char.callback_key] || 'bi-robot'}"></i>
+                        <span>${escapeHtml(char.name)}</span>
+                    </div>
+                `).join('');
+                
+                document.querySelectorAll('.style-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const key = btn.getAttribute('data-key');
+                        if (key) selectCharacter(key);
+                    });
+                });
+            }
+
+            function updateWelcomeDisplay() {
+                const char = characters.find(c => c.callback_key === currentCharacter);
+                const title = document.getElementById('welcomeTitle');
+                const subtitle = document.getElementById('welcomeSubtitle');
+                const input = document.getElementById('mainInput');
+                
+                if (char) {
+                    title.textContent = char.name;
+                    subtitle.innerHTML = char.description.replace(/\n/g, '<br>');
+                    input.placeholder = `اكتب ماتريد لـ ${char.name}...`;
+                } else {
+                    title.textContent = "اختر نمطاً";
+                    subtitle.innerHTML = "يرجى اختيار شخصية من الأزرار أدناه للبدء.";
+                    input.placeholder = "اختر نمطاً أولاً...";
+                }
+            }
+
+            function selectCharacter(key) {
+                currentCharacter = key;
+                renderStyleButtons();
+                updateWelcomeDisplay();
+                renderCharactersSheet();
+                closeSheet('charactersSheet');
+            }
+
+            function renderCharactersSheet() {
+                const list = document.getElementById('charactersList');
+                if (!characters || characters.length === 0) {
+                    list.innerHTML = '<div class="char-list-item" style="justify-content:center; color:#4f367a;">لا توجد شخصيات بعد</div>';
+                    return;
+                }
+                list.innerHTML = characters.map(char => `
+                    <div class="char-list-item ${char.callback_key === currentCharacter ? 'active' : ''}" onclick="selectCharacter('${char.callback_key}')">
+                        <div class="char-list-icon"><i class="bi bi-robot"></i></div>
+                        <div class="char-list-info">
+                            <div class="char-list-name">${escapeHtml(char.name)}</div>
+                            <div class="char-list-desc">${escapeHtml(char.description)}</div>
+                        </div>
+                        <div class="char-list-check"><i class="bi bi-check-lg"></i></div>
+                    </div>
+                `).join('');
+            }
+
+            async function renderNotificationsSheet() {
+                try {
+                    const res = await fetch('/api/notifications');
+                    const notifications = await res.json();
+                    const list = document.getElementById('notificationsList');
+                    const badge = document.getElementById('notifBadge');
+                    if (notifications.length === 0) {
+                        list.innerHTML = '<div class="notif-item" style="justify-content: center; text-align: center; color:#4f367a;">لا توجد إشعارات</div>';
+                        badge.style.display = 'none'; return;
+                    }
+                    badge.textContent = notifications.length; badge.style.display = 'flex';
+                    list.innerHTML = notifications.map(notif => `
+                        <div class="notif-item">
+                            <div class="notif-icon"><i class="bi bi-bell"></i></div>
+                            <div class="notif-content">
+                                <div class="notif-title">${escapeHtml(notif.title)}</div>
+                                <div class="notif-text" style="font-size:11px; color:#4f367a;">${escapeHtml(notif.text)}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } catch (err) { console.error('Failed to load notifications', err); }
+            }
+
+            function openCreditsModal() {
+                updateDailyGiftState();
+                document.getElementById('creditsModal').classList.add('active');
+            }
+            function closeCreditsModal() {
+                document.getElementById('creditsModal').classList.remove('active');
+            }
+
+            async function claimDailyGift() {
+                const btn = document.getElementById('dailyGiftBtn');
+                if (btn.disabled) return;
+                
+                btn.disabled = true;
+                btn.innerHTML = 'جاري التحميل...';
+                
+                try {
+                    const res = await fetch('/api/claim_daily_gift', { method: 'POST' });
+                    const data = await res.json();
+                    
+                    if (data.success) {
+                        showToastNotification('🎉 ' + data.message);
+                        userData.credits = data.credits;
+                        updateCreditsBadge(data.credits);
+                        userData.last_daily_gift = new Date().toISOString().split('T')[0];
+                        updateDailyGiftState();
+                    } else {
+                        showToastNotification(data.message);
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="bi bi-stars"></i> الحصول';
+                    }
+                } catch (err) {
+                    showToastNotification('خطأ في الاتصال بالخادم');
                     btn.disabled = false;
                     btn.innerHTML = '<i class="bi bi-stars"></i> الحصول';
                 }
-            } catch (err) {
-                showToastNotification('خطأ في الاتصال بالخادم');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-stars"></i> الحصول';
-            }
-        }
-
-        async function transferCredits() {
-            const usernameInput = document.getElementById('transferTarget');
-            const amountInput = document.getElementById('transferAmount');
-            const statusMsg = document.getElementById('transferStatus');
-            
-            const target = usernameInput.value.trim();
-            const amount = parseInt(amountInput.value);
-
-            if (!target || amount <= 0) {
-                statusMsg.style.display = 'block';
-                statusMsg.style.color = '#ff4d4d';
-                statusMsg.textContent = 'يرجى ملء البيانات بشكل صحيح';
-                return;
             }
 
-            statusMsg.style.display = 'block';
-            statusMsg.style.color = '#4f367a';
-            statusMsg.textContent = 'جاري التحويل...';
+            async function transferCredits() {
+                const usernameInput = document.getElementById('transferTarget');
+                const amountInput = document.getElementById('transferAmount');
+                const statusMsg = document.getElementById('transferStatus');
+                
+                const target = usernameInput.value.trim();
+                const amount = parseInt(amountInput.value);
 
-            try {
-                const res = await fetch('/api/transfer_credits', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({username: target, amount: amount})
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    statusMsg.style.color = '#27ae60';
-                    statusMsg.textContent = data.message;
-                    userData.credits = data.credits;
-                    updateCreditsBadge(data.credits);
-                    usernameInput.value = '';
-                    amountInput.value = '1';
-                    setTimeout(() => { statusMsg.style.display = 'none'; }, 3000);
-                } else {
+                if (!target || amount <= 0) {
+                    statusMsg.style.display = 'block';
                     statusMsg.style.color = '#ff4d4d';
-                    statusMsg.textContent = data.message;
+                    statusMsg.textContent = 'يرجى ملء البيانات بشكل صحيح';
+                    return;
                 }
-            } catch (err) {
-                statusMsg.style.color = '#ff4d4d';
-                statusMsg.textContent = 'خطأ في الاتصال بالخادم';
-            }
-        }
 
-        // --- دوال النافذة المنبثقة لنفاذ النقاط (No Credits Modal) ---
-        function openNoCreditsModal() { document.getElementById('noCreditsModal').classList.add('active'); }
-        function closeNoCreditsModal() { document.getElementById('noCreditsModal').classList.remove('active'); }
+                statusMsg.style.display = 'block';
+                statusMsg.style.color = '#4f367a';
+                statusMsg.textContent = 'جاري التحويل...';
 
-        // --- دوال الإرسال الأساسية ---
-        function updateSendButton(isStreamingActive) {
-            const btn = document.getElementById('mainSendBtn');
-            if (!btn) return;
-            if (isStreamingActive) {
-                btn.classList.add('stop-btn');
-                btn.innerHTML = '<i class="bi bi-stop-circle"></i> إيقاف';
-            } else {
-                btn.classList.remove('stop-btn');
-                btn.innerHTML = '<i class="bi bi-stars"></i> إنشاء';
-            }
-        }
+                try {
+                    const res = await fetch('/api/transfer_credits', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({username: target, amount: amount})
+                    });
+                    const data = await res.json();
 
-        function showLoadingPrompt() {
-            document.getElementById('promptResultText').value = 'جاري التوليد...';
-        }
-
-        function updatePromptResult(text) {
-            document.getElementById('promptResultText').value = text;
-        }
-
-        function copyGeneratedPrompt() {
-            const text = document.getElementById('promptResultText').value;
-            if (!text) return;
-            navigator.clipboard.writeText(text).then(() => {
-                const btn = document.querySelector('.copy-btn');
-                const original = btn.innerHTML;
-                btn.classList.add('success');
-                btn.innerHTML = '<i class="bi bi-check-lg"></i> تم النسخ';
-                setTimeout(() => {
-                    btn.classList.remove('success');
-                    btn.innerHTML = original;
-                }, 2000);
-            }).catch(() => {
-                alert('فشل نسخ النص');
-            });
-        }
-
-        function stopStreaming() {
-            if (abortController) {
-                abortController.abort();
-                abortController = null;
-                isStreaming = false; isProcessing = false;
-                updateSendButton(false);
-            }
-        }
-
-        async function handleSendWelcome() {
-            if (isStreaming) { stopStreaming(); return; }
-            if (isProcessing) return;
-            
-            if (!currentCharacter) {
-                showToastNotification('يرجى اختيار نمط (شخصية) أولاً قبل الضغط على إنشاء.');
-                return;
-            }
-
-            const input = document.getElementById('mainInput'); 
-            const msg = input.value.trim();
-            if (!msg) return;
-            
-            isProcessing = true; 
-            abortController = new AbortController(); 
-            isStreaming = true;
-            updateSendButton(true);
-            
-            try {
-                const response = await fetch('/api/chat', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ character: currentCharacter, message: msg }), 
-                    signal: abortController.signal 
-                });
-                
-                if (response.status === 402) {
-                    openNoCreditsModal();
-                    throw new Error('no_credits');
-                }
-                
-                if (!isStreaming) { throw new Error('Stream cancelled'); }
-                showLoadingPrompt();
-                
-                const reader = response.body.getReader(); 
-                const decoder = new TextDecoder(); 
-                let fullText = '';
-                while (true) { 
-                    const { done, value } = await reader.read(); 
-                    if (done) break; 
-                    fullText += decoder.decode(value, { stream: true }); 
-                }
-                
-                if (fullText) { 
-                    const creditsBadge = document.getElementById('creditsBadge');
-                    let currentCredits = parseInt(creditsBadge.textContent.match(/\d+/)?.[0] || 0);
-                    if (currentCredits > 0) {
-                        currentCredits--;
-                        updateCreditsBadge(currentCredits);
+                    if (data.success) {
+                        statusMsg.style.color = '#27ae60';
+                        statusMsg.textContent = data.message;
+                        userData.credits = data.credits;
+                        updateCreditsBadge(data.credits);
+                        usernameInput.value = '';
+                        amountInput.value = '1';
+                        setTimeout(() => { statusMsg.style.display = 'none'; }, 3000);
+                    } else {
+                        statusMsg.style.color = '#ff4d4d';
+                        statusMsg.textContent = data.message;
                     }
-                    await fetch('/api/deduct_credit', { method: 'POST' });
-                    
-                    updatePromptResult(fullText); 
-                    document.getElementById('mainInput').value = ''; 
-                } else { 
-                    updatePromptResult('لم يتم استلام رد من الخادم.'); 
+                } catch (err) {
+                    statusMsg.style.color = '#ff4d4d';
+                    statusMsg.textContent = 'خطأ في الاتصال بالخادم';
                 }
-            } catch (err) {
-                if (err.message !== 'no_credits' && err.name !== 'AbortError' && err.message !== 'Stream cancelled') {
-                    updatePromptResult('خطأ في الاتصال بالخادم.');
-                }
-            } finally {
-                isStreaming = false; isProcessing = false; abortController = null; updateSendButton(false);
             }
-        }
 
-        function openSettingsSheet() {
-            document.getElementById('settingsUsername').value = userData.username || '';
-            document.getElementById('settingsPassword').value = '';
-            document.getElementById('settingsSheet').classList.add('active');
-        }
+            function openNoCreditsModal() { document.getElementById('noCreditsModal').classList.add('active'); }
+            function closeNoCreditsModal() { document.getElementById('noCreditsModal').classList.remove('active'); }
 
-        function copyField(id) {
-            const input = document.getElementById(id);
-            if(!input.value) return;
-            navigator.clipboard.writeText(input.value).then(() => {
-                showToastNotification('تم نسخ القيمة');
-            });
-        }
-
-        async function updateSettings() {
-            const username = document.getElementById('settingsUsername').value.trim();
-            const password = document.getElementById('settingsPassword').value.trim();
-            if(!username || !password) {
-                showToastNotification('يرجى ملء جميع الحقول');
-                return;
-            }
-            try {
-                const res = await fetch('/api/update_user', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({username, password})
-                });
-                const data = await res.json();
-                if(data.success) {
-                    showToastNotification('تم تحديث البيانات بنجاح');
-                    userData.username = username;
-                    closeSheet('settingsSheet');
-                    updateWelcomeDisplay();
+            function updateSendButton(isStreamingActive) {
+                const btn = document.getElementById('mainSendBtn');
+                if (!btn) return;
+                if (isStreamingActive) {
+                    btn.classList.add('stop-btn');
+                    btn.innerHTML = '<i class="bi bi-stop-circle"></i> إيقاف';
                 } else {
-                    showToastNotification(data.message);
+                    btn.classList.remove('stop-btn');
+                    btn.innerHTML = '<i class="bi bi-stars"></i> إنشاء';
                 }
-            } catch(err) {
-                showToastNotification('خطأ في الاتصال');
             }
-        }
 
-        function openCharactersSheet() { renderCharactersSheet(); document.getElementById('charactersSheet').classList.add('active'); }
-        async function openNotificationsSheet() { await renderNotificationsSheet(); document.getElementById('notificationsSheet').classList.add('active'); document.getElementById('notifBadge').style.display = 'none'; }
-        function closeSheet(id) { document.getElementById(id).classList.remove('active'); }
-        function closeSheetOnBackdrop(e, id) { if (e.target === e.currentTarget) closeSheet(id); }
+            function showLoadingPrompt() {
+                document.getElementById('promptResultText').value = 'جاري التوليد...';
+            }
 
-        function showAdModal(ad) {
-            document.getElementById('adTitle').textContent = ad.title;
-            document.getElementById('adText').textContent = ad.text;
-            document.getElementById('adButton').textContent = ad.button_text;
-            document.getElementById('adButton').href = ad.button_link;
-            
-            const skipBtn = document.getElementById('adSkipBtn');
-            skipBtn.disabled = true;
-            let countdown = ad.duration_seconds || 5;
-            skipBtn.textContent = `تخط بعد ${countdown} ثواني`;
-            const interval = setInterval(() => {
-                countdown--;
-                if (countdown > 0) { skipBtn.textContent = `تخط بعد ${countdown} ثواني`; } 
-                else { clearInterval(interval); skipBtn.disabled = false; skipBtn.textContent = 'تخط الإعلان'; }
-            }, 1000);
-            skipBtn.onclick = function() { if (!this.disabled) { closeAdModal(); } };
-            document.getElementById('adModal').classList.add('active');
-        }
-        function closeAdModal() { document.getElementById('adModal').classList.remove('active'); }
+            function updatePromptResult(text) {
+                document.getElementById('promptResultText').value = text;
+            }
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m;
+            function copyGeneratedPrompt() {
+                const text = document.getElementById('promptResultText').value;
+                if (!text) return;
+                navigator.clipboard.writeText(text).then(() => {
+                    const btn = document.querySelector('.copy-btn');
+                    const original = btn.innerHTML;
+                    btn.classList.add('success');
+                    btn.innerHTML = '<i class="bi bi-check-lg"></i> تم النسخ';
+                    setTimeout(() => {
+                        btn.classList.remove('success');
+                        btn.innerHTML = original;
+                    }, 2000);
+                }).catch(() => {
+                    alert('فشل نسخ النص');
+                });
+            }
+
+            function stopStreaming() {
+                if (abortController) {
+                    abortController.abort();
+                    abortController = null;
+                    isStreaming = false; isProcessing = false;
+                    updateSendButton(false);
+                }
+            }
+
+            async function handleSendWelcome() {
+                if (isStreaming) { stopStreaming(); return; }
+                if (isProcessing) return;
+                
+                if (!currentCharacter) {
+                    showToastNotification('يرجى اختيار نمط (شخصية) أولاً قبل الضغط على إنشاء.');
+                    return;
+                }
+
+                const input = document.getElementById('mainInput'); 
+                const msg = input.value.trim();
+                if (!msg) return;
+                
+                isProcessing = true; 
+                abortController = new AbortController(); 
+                isStreaming = true;
+                updateSendButton(true);
+                
+                try {
+                    const response = await fetch('/api/chat', { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ character: currentCharacter, message: msg }), 
+                        signal: abortController.signal 
+                    });
+                    
+                    if (response.status === 402) {
+                        openNoCreditsModal();
+                        throw new Error('no_credits');
+                    }
+                    
+                    if (!isStreaming) { throw new Error('Stream cancelled'); }
+                    showLoadingPrompt();
+                    
+                    const reader = response.body.getReader(); 
+                    const decoder = new TextDecoder(); 
+                    let fullText = '';
+                    while (true) { 
+                        const { done, value } = await reader.read(); 
+                        if (done) break; 
+                        fullText += decoder.decode(value, { stream: true }); 
+                    }
+                    
+                    if (fullText) { 
+                        const creditsBadge = document.getElementById('creditsBadge');
+                        let currentCredits = parseInt(creditsBadge.textContent.match(/\d+/)?.[0] || 0);
+                        if (currentCredits > 0) {
+                            currentCredits--;
+                            updateCreditsBadge(currentCredits);
+                        }
+                        await fetch('/api/deduct_credit', { method: 'POST' });
+                        
+                        updatePromptResult(fullText); 
+                        document.getElementById('mainInput').value = ''; 
+                    } else { 
+                        updatePromptResult('لم يتم استلام رد من الخادم.'); 
+                    }
+                } catch (err) {
+                    if (err.message !== 'no_credits' && err.name !== 'AbortError' && err.message !== 'Stream cancelled') {
+                        updatePromptResult('خطأ في الاتصال بالخادم.');
+                    }
+                } finally {
+                    isStreaming = false; isProcessing = false; abortController = null; updateSendButton(false);
+                }
+            }
+
+            function openSettingsSheet() {
+                document.getElementById('settingsUsername').value = userData.username || '';
+                document.getElementById('settingsPassword').value = '';
+                document.getElementById('settingsSheet').classList.add('active');
+            }
+
+            function copyField(id) {
+                const input = document.getElementById(id);
+                if(!input.value) return;
+                navigator.clipboard.writeText(input.value).then(() => {
+                    showToastNotification('تم نسخ القيمة');
+                });
+            }
+
+            async function updateSettings() {
+                const username = document.getElementById('settingsUsername').value.trim();
+                const password = document.getElementById('settingsPassword').value.trim();
+                if(!username || !password) {
+                    showToastNotification('يرجى ملء جميع الحقول');
+                    return;
+                }
+                try {
+                    const res = await fetch('/api/update_user', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({username, password})
+                    });
+                    const data = await res.json();
+                    if(data.success) {
+                        showToastNotification('تم تحديث البيانات بنجاح');
+                        userData.username = username;
+                        closeSheet('settingsSheet');
+                        updateWelcomeDisplay();
+                    } else {
+                        showToastNotification(data.message);
+                    }
+                } catch(err) {
+                    showToastNotification('خطأ في الاتصال');
+                }
+            }
+
+            function openCharactersSheet() { renderCharactersSheet(); document.getElementById('charactersSheet').classList.add('active'); }
+            async function openNotificationsSheet() { await renderNotificationsSheet(); document.getElementById('notificationsSheet').classList.add('active'); document.getElementById('notifBadge').style.display = 'none'; }
+            function closeSheet(id) { document.getElementById(id).classList.remove('active'); }
+            function closeSheetOnBackdrop(e, id) { if (e.target === e.currentTarget) closeSheet(id); }
+
+            function showAdModal(ad) {
+                document.getElementById('adTitle').textContent = ad.title;
+                document.getElementById('adText').textContent = ad.text;
+                document.getElementById('adButton').textContent = ad.button_text;
+                document.getElementById('adButton').href = ad.button_link;
+                
+                const skipBtn = document.getElementById('adSkipBtn');
+                skipBtn.disabled = true;
+                let countdown = ad.duration_seconds || 5;
+                skipBtn.textContent = `تخط بعد ${countdown} ثواني`;
+                const interval = setInterval(() => {
+                    countdown--;
+                    if (countdown > 0) { skipBtn.textContent = `تخط بعد ${countdown} ثواني`; } 
+                    else { clearInterval(interval); skipBtn.disabled = false; skipBtn.textContent = 'تخط الإعلان'; }
+                }, 1000);
+                skipBtn.onclick = function() { if (!this.disabled) { closeAdModal(); } };
+                document.getElementById('adModal').classList.add('active');
+            }
+            function closeAdModal() { document.getElementById('adModal').classList.remove('active'); }
+
+            function escapeHtml(str) {
+                if (!str) return '';
+                return str.replace(/[&<>]/g, function(m) {
+                    if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m;
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                initScreen();
+                document.getElementById('mainInput').addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); } 
+                });
             });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            initScreen();
-            document.getElementById('mainInput').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); } 
-            });
-        });
-    </script>
+        </script>
+    {% endif %}
 </body>
 </html>
