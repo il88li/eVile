@@ -151,36 +151,46 @@
             border: 1px solid rgba(255, 255, 255, 0.85);
             border-radius: 24px;
             padding: 20px 18px 24px 18px;
-            flex-shrink: 0; display: flex; flex-direction: column; gap: 10px;
+            flex-shrink: 0; display: flex; flex-direction: column; gap: 12px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
         }
         .patterns-header { display: flex; justify-content: space-between; align-items: center; }
         .patterns-card-title { font-size: 16px; font-weight: 700; color: #1F2937; display: flex; align-items: center; gap: 8px; }
         .patterns-card-title i { color: #7B61FF; font-size: 20px; }
         
-        .patterns-guidance {
+        /* شريط النص التعليمي المطلوب */
+        .patterns-guidance-strip {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 4px;
+            background: rgba(180, 83, 9, 0.06);
+            border: 1px solid rgba(180, 83, 9, 0.12);
+            border-radius: 30px;
+            padding: 2px 12px;
+            height: 28px;
+            margin-bottom: -14px; /* يتداخل الجزء السفلي مع شريط الأزرار */
+            position: relative;
+            z-index: 2;
         }
         .patterns-instruction {
-            font-size: 12px; color: #B45309; /* اللون الثالث (ذهبي/برتقالي داكن) */
+            font-size: 11px; color: #B45309; /* اللون الذهبي/البرتقالي */
             font-weight: 500;
+            display: flex; align-items: center; gap: 4px;
         }
+        .patterns-instruction i { font-size: 12px; }
         .scroll-arrows {
-            display: flex; gap: 6px;
+            display: flex; gap: 4px;
         }
         .scroll-btn {
-            width: 28px; height: 28px; border-radius: 50%;
-            background: rgba(180, 83, 9, 0.08); /* لون ثالث شفاف */
+            width: 22px; height: 22px; border-radius: 50%;
+            background: rgba(180, 83, 9, 0.08);
             border: 1px solid rgba(180, 83, 9, 0.15);
             color: #B45309;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s;
-            opacity: 0.5; pointer-events: none; /* افتراضيًا معطل */
+            opacity: 0.5; pointer-events: none; /* معطل افتراضيًا */
         }
         .scroll-btn.visible { opacity: 1; pointer-events: auto; }
         .scroll-btn:active { transform: scale(0.9); }
-        .scroll-btn i { font-size: 14px; }
+        .scroll-btn i { font-size: 12px; }
 
         .selected-pattern-container {
             display: flex; align-items: center; justify-content: center;
@@ -240,8 +250,10 @@
             .main-btn { width: 90%; height: 40px; font-size: 14px; }
             .pattern-item { font-size: 12px; padding: 6px 14px; }
             .patterns-container-wrapper { padding: 8px 10px 14px 10px; }
-            .patterns-instruction { font-size: 11px; }
-            .scroll-btn { width: 24px; height: 24px; }
+            .patterns-instruction { font-size: 10px; }
+            .patterns-guidance-strip { height: 24px; padding: 0 8px; margin-bottom: -12px; }
+            .scroll-btn { width: 20px; height: 20px; }
+            .scroll-btn i { font-size: 11px; }
         }
     </style>
 </head>
@@ -308,7 +320,7 @@
                 </div>
             </div>
 
-            <!-- بطاقة الأنماط المحدثة -->
+            <!-- بطاقة الأنماط المحدثة مع شريط النص التعليمي -->
             <div class="patterns-card">
                 <div class="patterns-header">
                     <span class="patterns-card-title">
@@ -316,8 +328,9 @@
                     </span>
                 </div>
                 
-                <div class="patterns-guidance">
-                    <span class="patterns-instruction"><i class="bi bi-info-circle" style="margin-left: 4px;"></i> اختر أحد الأنماط من الأزرار أدناه</span>
+                <!-- شريط النص المتداخل -->
+                <div class="patterns-guidance-strip">
+                    <span class="patterns-instruction"><i class="bi bi-info-circle"></i> اختر أحد الأنماط من الأزرار أدناه</span>
                     <div class="scroll-arrows">
                         <button class="scroll-btn" id="scrollLeftBtn" onclick="scrollPatterns(-150)"><i class="bi bi-chevron-right"></i></button>
                         <button class="scroll-btn" id="scrollRightBtn" onclick="scrollPatterns(150)"><i class="bi bi-chevron-left"></i></button>
@@ -540,7 +553,6 @@
                     updateIndicator(currentPatternId);
                 }
                 
-                // تحديث حالة أزرار الأسهم
                 updateScrollButtons();
             }
 
@@ -557,11 +569,13 @@
                 }
             }
 
+            // دالة اختيار النمط (يتم تحديث الصورة هنا)
             function selectPattern(patternId) {
                 currentPatternId = patternId;
                 const p = patterns.find(p => p.id === patternId);
                 if (p) {
                     const img = document.getElementById('selectedPatternImg');
+                    // تحديث مصدر الصورة وإظهارها
                     img.src = p.image_url;
                     img.style.display = 'block';
                     document.getElementById('noPatternMsg').style.display = 'none';
@@ -570,7 +584,6 @@
                 setTimeout(() => updateIndicator(patternId), 50);
             }
 
-            // --- دوال أزرار التمرير للأنماط ---
             function updateScrollButtons() {
                 const wrapper = document.getElementById('patternsWrapper');
                 const leftBtn = document.getElementById('scrollLeftBtn');
@@ -578,16 +591,14 @@
                 
                 if (!wrapper || !leftBtn || !rightBtn) return;
 
-                // التحقق مما إذا كان المحتوى يتجاوز العرض
                 const isOverflowing = wrapper.scrollWidth > wrapper.clientWidth;
                 
                 if (isOverflowing) {
                     leftBtn.classList.add('visible');
                     rightBtn.classList.add('visible');
                     
-                    // في الـ RTL، نعكس المنطق قليلاً
                     const isAtStart = wrapper.scrollLeft <= 0;
-                    const isAtEnd = wrapper.scrollLeft >= (wrapper.scrollWidth - wrapper.clientWidth - 5); // 5px tolerance
+                    const isAtEnd = wrapper.scrollLeft >= (wrapper.scrollWidth - wrapper.clientWidth - 5);
 
                     leftBtn.style.opacity = isAtStart ? '0.5' : '1';
                     leftBtn.style.pointerEvents = isAtStart ? 'none' : 'auto';
@@ -595,7 +606,6 @@
                     rightBtn.style.opacity = isAtEnd ? '0.5' : '1';
                     rightBtn.style.pointerEvents = isAtEnd ? 'none' : 'auto';
                 } else {
-                    // إخفاء الأسهم إذا لم تكن هناك حاجة للتمرير
                     leftBtn.classList.remove('visible');
                     rightBtn.classList.remove('visible');
                 }
@@ -607,16 +617,13 @@
                 wrapper.scrollLeft += amount;
             }
 
-            // مستمع التمرير لتحديث الأسهم أثناء التمرير بالماوس/اللمس
             document.addEventListener('DOMContentLoaded', () => {
                 const wrapper = document.getElementById('patternsWrapper');
                 if (wrapper) {
                     wrapper.addEventListener('scroll', updateScrollButtons);
-                    // إعادة الحساب عند تغيير حجم الشاشة
                     window.addEventListener('resize', updateScrollButtons);
                 }
             });
-            // ----------------------------------------------------
 
             function updateSendButton(isStreamingActive) {
                 const btn = document.getElementById('mainSendBtn');
@@ -872,7 +879,7 @@
                 initScreen();
                 window.addEventListener('resize', () => {
                     if (currentPatternId) updateIndicator(currentPatternId);
-                    updateScrollButtons(); // تحديث الأسهم عند تغيير الحجم
+                    updateScrollButtons();
                 });
                 document.getElementById('mainInput').addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); } 
