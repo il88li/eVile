@@ -18,7 +18,7 @@
             align-items: center;
             justify-content: center;
         }
-        .glass-card, .modal-content, .category-card, .pattern-card, .notification-item, .login-card, .bottom-nav {
+        .glass-card, .modal-content, .pattern-card, .notification-item, .login-card, .bottom-nav {
             background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.95);
@@ -62,6 +62,7 @@
         }
         .btn-primary { background: #7B61FF; border-color: #7B61FF; color: #fff; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.2); }
         .btn-danger { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #dc2626; }
+        .btn-success { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.2); color: #16a34a; }
         .btn:active { transform: scale(0.96); }
         .btn-login { width: 100%; padding: 14px; font-size: 16px; }
         
@@ -118,18 +119,18 @@
         .tab-content.active { display: block; }
         .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-right: 12px; border-right: 3px solid rgba(123,97,255,0.2); display: flex; align-items: center; gap: 8px; color: #1F2937; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
-        .category-card { padding: 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-        .category-info { display: flex; align-items: center; gap: 10px; }
-        .category-icon { font-size: 24px; color: #7B61FF; }
+        
         .pattern-card { padding: 12px; margin-bottom: 10px; }
         .pattern-header { display: flex; align-items: center; gap: 10px; }
         .pattern-img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(123,97,255,0.1); }
         .pattern-name { font-weight: 700; color: #1F2937; font-size: 14px; }
         .pattern-meta { font-size: 11px; color: #6B7280; }
         .card-actions { display: flex; gap: 8px; }
+        
         .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
         .modal-content { padding: 20px; max-width: 500px; width: 100%; }
+        
         @media (max-width: 600px) {
             .bottom-nav { padding: 6px; gap: 6px; border-radius: 12px; }
             .bottom-nav-btn { width: 38px; height: 38px; font-size: 16px; }
@@ -141,44 +142,13 @@
         {% if session.get('logged_in') %}
             <div style="height: 20px;"></div>
 
-            <div id="tab-categories" class="tab-content active glass-card">
-                <div class="section-title"><i class="bi bi-folder-plus" style="color:#7B61FF;"></i> إدارة الفئات</div>
-                <form method="POST" action="/admin/category/add">
-                    <div class="form-grid">
-                        <div class="form-group"><label>اسم الفئة</label><input type="text" name="name" required></div>
-                        <div class="form-group"><label>أيقونة (Bootstrap Icon)</label><input type="text" name="icon" placeholder="مثال: bi-robot" value="bi-robot"></div>
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> إضافة فئة</button>
-                </form>
+            <!-- تم حذف تبويب الفئات -->
 
-                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-list-ul" style="color:#7B61FF;"></i> قائمة الفئات</div>
-                <div class="categories-list">
-                    {% for cat in categories %}
-                    <div class="category-card glass-card">
-                        <div class="category-info">
-                            <div class="category-icon"><i class="{{ cat.icon }}"></i></div>
-                            <div class="category-name" style="font-weight:700;">{{ cat.name }}</div>
-                        </div>
-                        <div class="card-actions">
-                            <button class="btn btn-danger" onclick="if(confirm('حذف الفئة وجميع أنماطها؟')) location.href='/admin/category/{{ cat.id }}/delete'"><i class="bi bi-trash3"></i> حذف</button>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div id="tab-patterns" class="tab-content glass-card">
+            <div id="tab-patterns" class="tab-content active glass-card">
                 <div class="section-title"><i class="bi bi-plus-circle" style="color:#7B61FF;"></i> إضافة نمط جديد</div>
                 <form method="POST" action="/admin/pattern/add">
                     <div class="form-grid">
-                        <div class="form-group"><label>الفئة التابعة</label>
-                            <select name="category_id" required>
-                                <option value="">اختر الفئة...</option>
-                                {% for cat in categories %}
-                                    <option value="{{ cat.id }}">{{ cat.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
+                        <!-- تم حذف حقل اختيار الفئة -->
                         <div class="form-group"><label>اسم النمط</label><input type="text" name="name" required></div>
                         <div class="form-group"><label>رابط صورة النمط</label><input type="url" name="image_url" required placeholder="https://example.com/image.png"></div>
                         <div class="form-group"><label>البرومبت (بدون وصف)</label><textarea name="prompt" required></textarea></div>
@@ -194,15 +164,11 @@
                             <img src="{{ pat.image_url }}" class="pattern-img" alt="{{ pat.name }}">
                             <div style="flex:1;">
                                 <div class="pattern-name">{{ pat.name }}</div>
-                                <div class="pattern-meta">الفئة: 
-                                    {% for cat in categories %}
-                                        {% if cat.id == pat.category_id %}{{ cat.name }}{% endif %}
-                                    {% endfor %}
-                                </div>
                                 <div class="pattern-meta" style="font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px;">{{ pat.prompt[:80] }}...</div>
                             </div>
                         </div>
                         <div class="card-actions" style="margin-top: 8px;">
+                            <button class="btn btn-success" onclick="openEditPatternModal({{ pat.id }}, '{{ pat.name }}', '{{ pat.image_url }}', `{{ pat.prompt|replace('`', '\\`') }}`)"><i class="bi bi-pencil-square"></i> تعديل</button>
                             <button class="btn btn-danger" onclick="if(confirm('حذف النمط؟')) location.href='/admin/pattern/{{ pat.id }}/delete'"><i class="bi bi-trash3"></i> حذف</button>
                         </div>
                     </div>
@@ -269,9 +235,25 @@
                 </div>
             </div>
 
+            <!-- نافذة تعديل الأنماط الجديدة -->
+            <div id="editPatternModal" class="modal">
+                <div class="modal-content glass-card">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+                        <h3 style="color:#1F2937;"><i class="bi bi-pencil-square" style="color:#7B61FF;"></i> تعديل النمط</h3>
+                        <button onclick="closeEditPatternModal()" style="background:none; border:none; font-size:20px; color:#6B7280;"><i class="bi bi-x-lg"></i></button>
+                    </div>
+                    <form method="POST" id="editPatternForm">
+                        <div class="form-group"><label>اسم النمط</label><input type="text" name="name" id="editPatternName" required></div>
+                        <div class="form-group"><label>رابط صورة النمط</label><input type="url" name="image_url" id="editPatternImage" required></div>
+                        <div class="form-group"><label>البرومبت</label><textarea name="prompt" id="editPatternPrompt" required></textarea></div>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> حفظ التعديلات</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- الشريط السفلي (تم حذف زر الفئات) -->
             <div class="bottom-nav" id="bottomNav">
-                <button class="bottom-nav-btn active" data-tab="categories"><i class="bi bi-folder"></i></button>
-                <button class="bottom-nav-btn" data-tab="patterns"><i class="bi bi-grid"></i></button>
+                <button class="bottom-nav-btn active" data-tab="patterns"><i class="bi bi-grid"></i></button>
                 <button class="bottom-nav-btn" data-tab="notifications"><i class="bi bi-bell"></i></button>
                 <button class="bottom-nav-btn" data-tab="credits"><i class="bi bi-coin"></i></button>
                 <button class="bottom-nav-btn" data-tab="site-control"><i class="bi bi-power"></i></button>
@@ -313,6 +295,23 @@
             });
         });
 
+        // دوال تعديل الأنماط
+        function openEditPatternModal(id, name, image, prompt) {
+            document.getElementById('editPatternForm').action = `/admin/pattern/${id}/edit`;
+            document.getElementById('editPatternName').value = name;
+            document.getElementById('editPatternImage').value = image;
+            document.getElementById('editPatternPrompt').value = prompt;
+            document.getElementById('editPatternModal').classList.add('active');
+        }
+        function closeEditPatternModal() {
+            document.getElementById('editPatternModal').classList.remove('active');
+        }
+        window.onclick = function(e) {
+            const modal = document.getElementById('editPatternModal');
+            if (e.target === modal) closeEditPatternModal();
+        }
+
+        // شحن النقاط
         async function rechargeCredits() {
             const username = document.getElementById('rechargeUsername').value.trim();
             const amount = parseInt(document.getElementById('rechargeAmount').value);
@@ -348,6 +347,7 @@
             }
         }
 
+        // حفظ إعدادات الموقع
         async function saveSiteSettings() {
             const icon = document.getElementById('siteStatusIcon');
             const label = document.getElementById('siteStatusLabel');
