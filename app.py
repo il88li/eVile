@@ -23,7 +23,7 @@ DATABASE_URL = "postgresql://evile_site_user:yxWlZVZsC39DhRtXoY7e84ci6NTJgcaR@dp
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-_characters_cache = {'data': None, 'timestamp': 0}
+_categories_cache = {'data': None, 'timestamp': 0}
 CACHE_TTL = 300
 
 @contextmanager
@@ -100,30 +100,44 @@ def drop_old_telegram_id_column(cur):
     if cur.fetchone():
         cur.execute("ALTER TABLE users DROP COLUMN telegram_id")
 
-# --- إضافة جدول إعدادات الموقع ---
 def ensure_site_settings_table(cur):
     cur.execute('''CREATE TABLE IF NOT EXISTS site_settings (
         id SERIAL PRIMARY KEY,
         status TEXT DEFAULT 'on',
         offline_message TEXT DEFAULT 'الموقع تحت الصيانة حالياً، نعتذر عن الإزعاج.'
     )''')
-    # التأكد من وجود صف واحد على الأقل
     cur.execute("SELECT COUNT(*) FROM site_settings")
     if cur.fetchone()['count'] == 0:
         cur.execute("INSERT INTO site_settings (status, offline_message) VALUES ('on', 'الموقع تحت الصيانة حالياً، نعتذر عن الإزعاج.')")
     logger.info("✅ Ensured site_settings table")
 
+# --- إضافة جداول الفئات والأنماط الجديدة ---
+def ensure_categories_and_patterns(cur):
+    # جدول الفئات
+    cur.execute('''CREATE TABLE IF NOT EXISTS categories (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        icon TEXT DEFAULT 'bi-robot',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )''')
+    
+    # جدول الأنماط (مرتبط بالفئات)
+    cur.execute('''CREATE TABLE IF NOT EXISTS patterns (
+        id SERIAL PRIMARY KEY,
+        category_id INTEGER REFERENCES categories(id) ON DELETE CASCADE,
+        name TEXT NOT NULL,
+        image_url TEXT NOT NULL,
+        prompt TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )''')
+    logger.info("✅ Ensured categories and patterns tables")
+
 def init_db():
     try:
         with get_db() as cur:
-            cur.execute('''CREATE TABLE IF NOT EXISTS characters (
-                id SERIAL PRIMARY KEY,
-                name TEXT NOT NULL,
-                description TEXT NOT NULL,
-                prompt TEXT NOT NULL,
-                callback_key TEXT UNIQUE NOT NULL,
-                logo_url TEXT DEFAULT ''
-            )''')
+            # حذف جداول الشخصيات القديمة لتجنب التعارض (اختياري، لكن الأفضل التعامل معها بحذر)
+            # cur.execute("DROP TABLE IF EXISTS characters") 
+            
             cur.execute('''CREATE TABLE IF NOT EXISTS notifications (
                 id SERIAL PRIMARY KEY,
                 title TEXT NOT NULL,
@@ -136,6 +150,7 @@ def init_db():
             ensure_users_table(cur)
             drop_old_telegram_id_column(cur)
             ensure_site_settings_table(cur)
+            ensure_categories_and_patterns(cur) # إضافة الجداول الجديدة
             
             logger.info("Database initialized/updated successfully")
             print("✅ Database tables ensured successfully.")
@@ -171,20 +186,31 @@ def index():
         logger.error(f"Site settings fetch error: {e}")
         site_settings = {'status': 'on', 'offline_message': 'الموقع تحت الصيانة.'}
 
-    # إذا كان الموقع متوقفاً، نعرض صفحة الإيقاف
+    # فحص حالة الصيانة
     if site_settings and site_settings['status'] == 'off':
         return render_template('index.html', site_status='off', offline_message=site_settings['offline_message'])
 
     # المنطق الطبيعي للموقع
     user_id = session.get('user_id')
     if user_id: update_user_activity(user_id)
+    
     user_data = None
+    categories = []
+    patterns = []
+    
     try:
         with get_db() as cur:
-            cur.execute('SELECT * FROM characters ORDER BY id')
-            characters = cur.fetchall()
+            # جلب جميع الفئات
+            cur.execute('SELECT * FROM categories ORDER BY id')
+            categories = cur.fetchall()
+            
+            # جلب جميع الأنماط (أو فقط الأنماط الخاصة بأول فئة افتراضية)
+            cur.execute('SELECT * FROM patterns ORDER BY id')
+            patterns = cur.fetchall()
+            
             cur.execute('SELECT * FROM notifications WHERE show_in_chat = true ORDER BY created_at DESC LIMIT 1')
             latest_notification = cur.fetchone()
+            
             cur.execute('SELECT * FROM ads ORDER BY created_at DESC LIMIT 1')
             latest_ad = cur.fetchone()
             
@@ -193,13 +219,11 @@ def index():
                 user_data = cur.fetchone()
     except Exception as e:
         logger.error(f"Index error: {e}")
-        characters = []
-        latest_notification = None
-        latest_ad = None
-        user_data = None
+        categories, patterns, latest_notification, latest_ad, user_data = [], [], None, None, None
         
     return render_template('index.html',
-                         characters=characters,
+                         categories=categories,
+                         patterns=patterns,
                          user_id=user_id,
                          latest_notification=latest_notification,
                          latest_ad=latest_ad,
@@ -414,8 +438,10 @@ def admin_panel():
     if session.get('logged_in'):
         try:
             with get_db() as cur:
-                cur.execute('SELECT * FROM characters ORDER BY id DESC')
-                characters = cur.fetchall()
+                cur.execute('SELECT * FROM categories ORDER BY id DESC')
+                categories = cur.fetchall()
+                cur.execute('SELECT * FROM patterns ORDER BY id DESC')
+                patterns = cur.fetchall()
                 cur.execute('SELECT * FROM notifications ORDER BY id DESC')
                 notifications = cur.fetchall()
                 cur.execute('SELECT * FROM ads ORDER BY id DESC')
@@ -427,8 +453,8 @@ def admin_panel():
                 site_settings = cur.fetchone()
         except Exception as e:
             logger.error(f"Admin panel data error: {e}")
-            characters, notifications, ads, users_count, site_settings = [], [], [], 0, {'status': 'on', 'offline_message': ''}
-        return render_template('admin.html', characters=characters, notifications=notifications, ads=ads, users_count=users_count, site_settings=site_settings)
+            categories, patterns, notifications, ads, users_count, site_settings = [], [], [], [], 0, {'status': 'on', 'offline_message': ''}
+        return render_template('admin.html', categories=categories, patterns=patterns, notifications=notifications, ads=ads, users_count=users_count, site_settings=site_settings)
     
     return render_template('admin.html')
 
@@ -437,52 +463,63 @@ def logout():
     session.clear()
     return redirect(url_for('admin_panel'))
 
-@app.route('/admin/character/add', methods=['POST'])
+# --- مسارات إدارة الفئات ---
+@app.route('/admin/category/add', methods=['POST'])
 @admin_required
-def add_character():
+def add_category():
     name = request.form.get('name')
-    description = request.form.get('description')
-    prompt = request.form.get('prompt')
-    callback_key = request.form.get('callback_key', name.lower().replace(' ', '_'))
-    logo_url = request.form.get('logo_url', '')
-    if name and description and prompt:
+    icon = request.form.get('icon', 'bi-robot')
+    if name:
         try:
             with get_db() as cur:
-                cur.execute("INSERT INTO characters (name, description, prompt, callback_key, logo_url) VALUES (%s, %s, %s, %s, %s)",
-                    (name, description, prompt, callback_key, logo_url))
-            flash('تمت إضافة الشخصية بنجاح', 'success')
-        except Exception as e:
-            flash('مفتاح الشخصية موجود مسبقاً' if 'unique' in str(e).lower() else str(e), 'error')
-    return redirect(url_for('admin_panel'))
-
-@app.route('/admin/character/<int:char_id>/edit', methods=['POST'])
-@admin_required
-def edit_character(char_id):
-    name = request.form.get('name')
-    description = request.form.get('description')
-    prompt = request.form.get('prompt')
-    logo_url = request.form.get('logo_url', '')
-    if name and description and prompt:
-        try:
-            with get_db() as cur:
-                cur.execute("UPDATE characters SET name=%s, description=%s, prompt=%s, logo_url=%s WHERE id=%s",
-                    (name, description, prompt, logo_url, char_id))
-            flash('تم تعديل الشخصية بنجاح', 'success')
+                cur.execute("INSERT INTO categories (name, icon) VALUES (%s, %s)", (name, icon))
+            flash('تمت إضافة الفئة بنجاح', 'success')
         except Exception as e:
             flash(str(e), 'error')
     return redirect(url_for('admin_panel'))
 
-@app.route('/admin/character/<int:char_id>/delete')
+@app.route('/admin/category/<int:cat_id>/delete')
 @admin_required
-def delete_character(char_id):
+def delete_category(cat_id):
     try:
         with get_db() as cur:
-            cur.execute("DELETE FROM characters WHERE id=%s", (char_id,))
-        flash('تم حذف الشخصية', 'success')
+            cur.execute("DELETE FROM categories WHERE id=%s", (cat_id,))
+        flash('تم حذف الفئة', 'success')
     except Exception as e:
         flash(str(e), 'error')
     return redirect(url_for('admin_panel'))
 
+# --- مسارات إدارة الأنماط ---
+@app.route('/admin/pattern/add', methods=['POST'])
+@admin_required
+def add_pattern():
+    category_id = request.form.get('category_id', type=int)
+    name = request.form.get('name')
+    image_url = request.form.get('image_url')
+    prompt = request.form.get('prompt')
+    
+    if category_id and name and image_url and prompt:
+        try:
+            with get_db() as cur:
+                cur.execute("INSERT INTO patterns (category_id, name, image_url, prompt) VALUES (%s, %s, %s, %s)",
+                            (category_id, name, image_url, prompt))
+            flash('تمت إضافة النمط بنجاح', 'success')
+        except Exception as e:
+            flash(str(e), 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/pattern/<int:pat_id>/delete')
+@admin_required
+def delete_pattern(pat_id):
+    try:
+        with get_db() as cur:
+            cur.execute("DELETE FROM patterns WHERE id=%s", (pat_id,))
+        flash('تم حذف النمط', 'success')
+    except Exception as e:
+        flash(str(e), 'error')
+    return redirect(url_for('admin_panel'))
+
+# --- مسارات الإعلانات وإعدادات الموقع ---
 @app.route('/admin/notification/add', methods=['POST'])
 @admin_required
 def add_notification():
@@ -580,20 +617,32 @@ def update_credits():
         logger.error(f"Update credits error: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
-@app.route('/api/characters')
-def api_characters():
+# --- مسارات API للواجهة الأمامية ---
+@app.route('/api/categories')
+def api_categories():
     now = time.time()
-    if _characters_cache['data'] and (now - _characters_cache['timestamp']) < CACHE_TTL:
-        return jsonify(_characters_cache['data'])
+    if _categories_cache['data'] and (now - _categories_cache['timestamp']) < CACHE_TTL:
+        return jsonify(_categories_cache['data'])
     try:
         with get_db() as cur:
-            cur.execute('SELECT * FROM characters ORDER BY id')
+            cur.execute('SELECT * FROM categories ORDER BY id')
             data = cur.fetchall()
-        _characters_cache['data'] = data
-        _characters_cache['timestamp'] = now
+        _categories_cache['data'] = data
+        _categories_cache['timestamp'] = now
         return jsonify(data)
     except Exception as e:
-        logger.error(f"API characters error: {e}")
+        logger.error(f"API categories error: {e}")
+        return jsonify([])
+
+@app.route('/api/patterns_by_category/<int:cat_id>')
+def api_patterns_by_category(cat_id):
+    try:
+        with get_db() as cur:
+            cur.execute('SELECT * FROM patterns WHERE category_id=%s ORDER BY id', (cat_id,))
+            data = cur.fetchall()
+        return jsonify(data)
+    except Exception as e:
+        logger.error(f"API patterns error: {e}")
         return jsonify([])
 
 @app.route('/api/notifications')
@@ -609,7 +658,7 @@ def api_notifications():
 @app.route('/api/chat', methods=['POST'])
 def api_chat():
     data = request.json
-    character_key = data.get('character', 'logo_maker')
+    pattern_id = data.get('pattern_id')
     message = data.get('message', '')
     user_id = session.get('user_id')
     
@@ -628,24 +677,24 @@ def api_chat():
         
     try:
         with get_db() as cur:
-            cur.execute("SELECT * FROM characters WHERE callback_key=%s", (character_key,))
-            character = cur.fetchone()
+            cur.execute("SELECT * FROM patterns WHERE id=%s", (pattern_id,))
+            pattern = cur.fetchone()
     except Exception as e:
-        logger.error(f"Get character error: {e}")
+        logger.error(f"Get pattern error: {e}")
         return jsonify({'error': 'Database connection error: ' + str(e)}), 500
-    if not character:
-        return jsonify({'error': 'Character not found'}), 404
+    if not pattern:
+        return jsonify({'error': 'Pattern not found'}), 404
     
     headers = {
         'Authorization': f'Bearer {OPENROUTER_API_KEY}',
         'Content-Type': 'application/json',
         'HTTP-Referer': request.url_root,
-        'X-Title': 'EVILE'
+        'X-Title': 'UFOQ'
     }
     payload = {
         'model': 'openrouter/auto',
         'messages': [
-            {'role': 'system', 'content': character['prompt']},
+            {'role': 'system', 'content': pattern['prompt']},
             {'role': 'user', 'content': message}
         ],
         'temperature': 0.7,
@@ -681,7 +730,7 @@ def api_chat():
     
     return Response(generate(), mimetype='text/plain')
 
-print("🚀 Starting EVILE Application...")
+print("🚀 Starting UFOQ Application...")
 try:
     init_db()
 except Exception as e:
