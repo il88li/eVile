@@ -43,38 +43,19 @@
             width: 100%; height: 100vh; height: 100dvh; 
             display: flex; flex-direction: column; 
             align-items: center; 
-            padding: 80px 16px 110px 16px; /* أضفت مساحة جانبية صغيرة لإبراز البطاقات */
+            padding: 80px 16px 90px 16px;
             position: relative;
             gap: 16px;
         }
         
-        .glass-card, .floating-header {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.95);
-            box-shadow: 0 8px 32px rgba(123, 97, 255, 0.04);
-        }
-        
-        /* البطاقتان - تم تصغير الحجم قليلاً وإضافة حدود أقصى للعرض */
-        .input-card, .patterns-card {
-            width: 100%;
-            max-width: 680px; /* حد أقصى للعرض لتصغير البطاقات قليلاً */
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.95);
-            box-shadow: 0 12px 40px rgba(123, 97, 255, 0.06);
-            border-radius: 24px;
-            padding: 24px;
-            flex-shrink: 0;
-            display: flex; flex-direction: column; gap: 14px;
-        }
-        
+        /* الهيدر العلوي */
         .floating-header {
             position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100;
             display: flex; align-items: center; justify-content: space-between; padding: 8px 16px;
             max-width: 700px; margin: 0 auto; border-radius: 24px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
         .header-logo { font-size: 20px; font-weight: 900; color: #1F2937; letter-spacing: 2px; position: absolute; left: 50%; transform: translateX(-50%); }
         .header-icon {
@@ -94,155 +75,157 @@
         }
         .active-users-dot i { font-size: 14px; color: #7B61FF; }
 
-        /* تنسيق محتويات البطاقة العلوية */
-        .input-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; }
-        .input-label { font-size: 16px; font-weight: 700; color: #1F2937; display: flex; align-items: center; gap: 8px; }
-        .input-label i { color: #7B61FF; font-size: 20px; }
-        .input-hint { font-size: 12px; color: #9CA3AF; margin-top: 2px; display: block; }
-        .credits-badge { background: rgba(123, 97, 255, 0.1); padding: 6px 16px; border-radius: 30px; font-size: 13px; color: #7B61FF; font-weight: 700; border: 1px solid rgba(123,97,255,0.15); cursor: pointer; transition: 0.2s; }
+        /* البطاقة العلوية (حقل الكتابة + المخرجات + زر التوليد) */
+        .input-card { 
+            width: 100%; max-width: 600px;
+            background: #FFFFFF;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(123, 97, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            flex-shrink: 0;
+            display: flex; flex-direction: column; gap: 16px;
+        }
+        .input-header { display: flex; justify-content: space-between; align-items: center; }
+        .input-label { font-size: 16px; font-weight: 700; color: #1F2937; display: flex; align-items: center; gap: 6px; }
+        .input-label i { color: #7B61FF; }
+        .credits-badge { background: rgba(123, 97, 255, 0.08); padding: 4px 14px; border-radius: 30px; font-size: 13px; color: #7B61FF; font-weight: 600; border: 1px solid rgba(123,97,255,0.1); cursor: pointer; transition: 0.2s; }
         .credits-badge:active { transform: scale(0.95); }
         
+        /* حقل الكتابة */
         .textarea-wrapper { 
-            background: rgba(243, 244, 246, 0.9);
-            border: 1px solid rgba(255,255,255,0.9); 
-            border-radius: 14px; padding: 8px 18px; height: 56px; min-height: 56px; max-height: 56px; 
+            background: #F8F9FA;
+            border: 1px solid rgba(0,0,0,0.02); 
+            border-radius: 16px; padding: 0 18px; height: 52px; min-height: 52px; max-height: 52px; 
             display: flex; align-items: center;
         }
         .message-input { 
             width: 100%; background: transparent; border: none; font-family: 'Tajawal', sans-serif; font-size: 15px; outline: none; color: #1F2937; 
             height: 100%; resize: none; overflow-y: auto; text-align: right; padding: 0; line-height: 1.5; display: flex; align-items: center; 
         }
-        .message-input::-webkit-scrollbar { width: 4px; }
-        .message-input::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
         .message-input::placeholder { color: #9CA3AF; }
         
-        .main-btn { width: 60%; max-width: 220px; height: 44px; margin: 0 auto; display: block; background: #7B61FF; border: none; border-radius: 30px; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.2s; box-shadow: 0 6px 20px rgba(123, 97, 255, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
+        /* زر التوليد */
+        .main-btn { width: 80%; max-width: 300px; height: 44px; margin: 0 auto; display: block; background: #7B61FF; border: none; border-radius: 30px; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.2s; box-shadow: 0 6px 20px rgba(123, 97, 255, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
         .main-btn:active { transform: scale(0.96); }
         .main-btn.stop-btn { background: #ef4444; box-shadow: none; }
 
-        /* حقل عرض المخرجات - مخصص للقراءة السلسة */
+        /* حقل عرض المخرجات */
         .prompt-result-wrapper { 
-            padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; 
-            min-height: 120px; max-height: 120px; overflow-y: auto;
-            border-radius: 16px; border: 1px solid rgba(123,97,255,0.1);
-            background: rgba(255, 255, 255, 0.5);
-            margin-top: 6px;
+            padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; 
+            min-height: 100px; max-height: 120px; overflow-y: auto;
+            border-radius: 16px; background: #F8F9FA;
+            border: 1px solid rgba(0,0,0,0.02);
         }
-        .prompt-result-text { font-size: 14px; color: #1F2937; line-height: 1.7; width: 100%; background: transparent; border: none; resize: none; outline: none; font-family: 'Tajawal', sans-serif; height: 100%; text-align: center; }
+        .prompt-result-text { font-size: 14px; color: #1F2937; line-height: 1.6; width: 100%; background: transparent; border: none; resize: none; outline: none; font-family: 'Tajawal', sans-serif; height: 100%; text-align: center; }
         .prompt-result-text::placeholder { color: #9CA3AF; }
-        .prompt-result-actions { display: flex; justify-content: flex-end; gap: 10px; }
+        .prompt-result-actions { display: flex; justify-content: flex-start; gap: 10px; }
         .copy-btn { background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(123,97,255,0.1); border-radius: 30px; padding: 6px 14px; font-size: 12px; color: #6B7280; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: 0.2s; }
         .copy-btn:active { transform: scale(0.9); }
         .copy-btn.success { background: rgba(34, 197, 94, 0.1); color: #16a34a; border-color: rgba(34, 197, 94, 0.2); }
 
-        /* تنسيق محتويات البطاقة السفلية */
-        .patterns-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+        /* --- بطاقة الأنماط (تصميم جديد) --- */
+        .patterns-card { 
+            width: 100%; max-width: 600px;
+            background: #FFFFFF;
+            border-radius: 24px;
+            padding: 24px 20px 30px 20px; /* زيادة مساحة سفلي */
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            flex-shrink: 0; display: flex; flex-direction: column; gap: 14px;
+            box-shadow: 0 8px 32px rgba(123, 97, 255, 0.04);
+        }
+        .patterns-header { display: flex; justify-content: space-between; align-items: center; }
         .patterns-card-title { font-size: 16px; font-weight: 700; color: #1F2937; display: flex; align-items: center; gap: 8px; }
         .patterns-card-title i { color: #7B61FF; font-size: 20px; }
-        .patterns-hint { font-size: 12px; color: #9CA3AF; }
-
+        
+        /* حاوية الصورة الكبيرة للنمط */
         .selected-pattern-container {
             display: flex; align-items: center; justify-content: center;
-            width: 100%; min-height: 140px;
-            background: rgba(243, 244, 246, 0.5); padding: 12px;
-            border-radius: 16px; border: 1px dashed rgba(123,97,255,0.15);
+            width: 100%; min-height: 120px;
+            background: #F8F9FA; padding: 12px;
+            border-radius: 16px; border: 1px solid rgba(0,0,0,0.02);
         }
-        .selected-pattern-img { max-width: 100%; max-height: 200px; border-radius: 12px; object-fit: contain; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .selected-pattern-img { max-width: 100%; max-height: 160px; border-radius: 12px; object-fit: contain; }
 
-        /* --- شريط الأنماط (مصغر عمودياً، طويل أفقياً، مع سكرول بار فقط) --- */
+        /* شريط الأنماط (خلفية زرقاء، أزرار زجاجية، ومؤشر مخصص) */
         .patterns-container-wrapper {
+            position: relative;
             display: flex; align-items: center; justify-content: flex-start;
             width: 100%; margin: 0 auto;
-            background: rgba(243, 244, 246, 0.8);
-            padding: 4px 6px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.9);
+            background: #192f5d; /* خلفية زرقاء داكنة */
+            padding: 10px 12px 16px 12px; /* مساحة للمؤشر */
+            border-radius: 16px;
             overflow-x: auto;
             overflow-y: hidden;
-            scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 #f1f5f9;
-            height: 40px; /* صغير عمودياً */
+            scrollbar-width: none; /* إخفاء شريط التمرير الافتراضي */
             white-space: nowrap;
         }
-        .patterns-container-wrapper::-webkit-scrollbar { height: 6px; }
-        .patterns-container-wrapper::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
-        .patterns-container-wrapper::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-
-        .patterns-container { display: flex; gap: 6px; flex-wrap: nowrap; }
+        .patterns-container-wrapper::-webkit-scrollbar { display: none; }
+        .patterns-container { display: flex; gap: 12px; flex-wrap: nowrap; position: relative; z-index: 1; }
         
+        /* الأزرار الزجاجية */
         .pattern-item {
-            flex-shrink: 0; padding: 6px 14px; border-radius: 8px;
-            background: transparent; border: 1px solid transparent;
-            cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
-            font-size: 12px; font-weight: 600; color: #6B7280; 
+            flex-shrink: 0; padding: 8px 18px; border-radius: 30px;
+            background: rgba(255, 255, 255, 0.1); /* زجاجي شفاف */
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 600; color: #e2e8f0; position: relative;
         }
         .pattern-item.active {
-            background: #7B61FF;
+            background: rgba(255, 255, 255, 0.2); /* تفتيح عند التحديد */
             color: #ffffff;
-            border-color: #7B61FF;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .pattern-item:active { transform: scale(0.95); }
+
+        /* مؤشر التمرير المخصص (ديناميكي) */
+        #active-indicator {
+            position: absolute;
+            bottom: 0px;
+            left: 0;
+            height: 3px;
+            background: #60a5fa; /* لون المؤشر أزرق فاتح */
+            border-radius: 4px 4px 0 0;
+            transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+            width: 0px;
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.4);
+            z-index: 0;
         }
 
-        /* --- الشريط السفلي (الفئات - تصميم داكن) --- */
-        .bottom-nav {
+        /* الشريط السفلي (أيقونات) */
+        .social-bar {
             position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 99;
-            display: flex; gap: 8px; padding: 10px 16px;
-            background: #15171a; /* لون داكن */
-            border: none;
-            border-radius: 24px;
-            width: fit-content; max-width: 90%;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            overflow-x: auto; scrollbar-width: none;
+            display: flex; gap: 12px; padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 40px; width: fit-content; max-width: 90%;
+            box-shadow: 0 4px 20px rgba(123, 97, 255, 0.03);
         }
-        .bottom-nav::-webkit-scrollbar { display: none; }
-        .bottom-nav-btn {
-            flex-shrink: 0; height: 42px; padding: 0 18px; border-radius: 14px;
-            background: transparent; border: none;
-            color: #6B7280; display: flex; align-items: center; gap: 8px;
-            cursor: pointer; transition: all 0.3s ease; font-size: 13px; font-weight: 600;
+        .social-btn {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: #F8F9FA; border: 1px solid rgba(0,0,0,0.02);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; color: #6B7280; text-decoration: none;
+            box-shadow: none;
         }
-        /* تأثير التوهج والإضاءة الحمراء */
-        .bottom-nav-btn.active {
-            color: #FF3B30;
-            text-shadow: 0 0 10px rgba(255, 59, 48, 0.4);
-        }
-        /* شريط الإضاءة العلوي (Spotlight) */
-        .bottom-nav-btn.active::before {
-            content: '';
-            position: absolute;
-            top: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50%;
-            height: 4px;
-            background: #FF3B30;
-            border-radius: 50%;
-            box-shadow: 0 0 15px #FF3B30, 0 0 40px #FF3B30, 0 0 80px #FF3B30;
-            filter: blur(1.5px);
-            z-index: 1;
-        }
-        /* تأثير الإضاءة المسلطة المتدرجة للخلف */
-        .bottom-nav-btn.active::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, rgba(255, 59, 48, 0.15), transparent 60%);
-            pointer-events: none;
-            border-radius: 14px;
-        }
-        .bottom-nav-btn i { font-size: 18px; }
+        .social-btn:active { transform: scale(0.9); }
+        .social-btn i { font-size: 18px; }
+        .social-btn.settings { color: #7B61FF; background: rgba(123,97,255,0.08); }
+        .social-btn.telegram { color: #0088cc; }
+        .social-btn.instagram { color: #e4405f; }
 
         @media (max-width: 600px) {
-            .input-card, .patterns-card { padding: 20px 16px; }
-            .prompt-result-wrapper { min-height: 90px; max-height: 90px; padding: 10px; }
+            .input-card, .patterns-card { padding: 20px 16px; max-width: 100%; border-radius: 20px; }
+            .patterns-card { padding-bottom: 26px; }
+            .prompt-result-wrapper { min-height: 80px; max-height: 80px; padding: 12px; }
             .selected-pattern-container { min-height: 100px; }
-            .main-btn { width: 80%; height: 38px; font-size: 13px; }
-            .bottom-nav-btn { font-size: 12px; padding: 0 12px; height: 36px; }
-            .patterns-container-wrapper { height: 36px; }
-            .pattern-item { font-size: 11px; padding: 4px 10px; }
+            .main-btn { width: 90%; height: 40px; font-size: 14px; }
+            .social-btn { width: 36px; height: 36px; }
+            .pattern-item { font-size: 12px; padding: 6px 14px; }
+            .patterns-container-wrapper { padding: 8px 10px 14px 10px; }
         }
     </style>
 </head>
@@ -266,7 +249,7 @@
     {% else %}
         
         <!-- الهيدر العلوي العائم -->
-        <header class="floating-header glass-card">
+        <header class="floating-header">
             <div class="active-users-dot">
                 <i class="bi bi-person-friends" style="font-size: 12px;"></i>
                 <span id="activeCount">0</span>
@@ -278,60 +261,60 @@
         </header>
 
         <div class="main-container">
-            <!-- بطاقة الإدخال (المخرجات مدمجة بداخلها) -->
+            <!-- بطاقة الإدخال والمخرجات -->
             <div class="input-card">
                 <div class="input-header">
                     <span class="input-label">
                         <i class="bi bi-pencil"></i> اصنع محتواك الان
-                        <span class="input-hint">ابدأ بكتابة وصف فكرتك لتوليد محتوى إبداعي</span>
                     </span>
                     <span class="credits-badge" id="creditsBadge" onclick="openCreditsModal()"><i class="bi bi-stars"></i> 0 نقاط</span>
                 </div>
                 
                 <div class="textarea-wrapper">
-                    <textarea class="message-input" id="mainInput" placeholder="اكتب ما تريد توليده..." rows="1"></textarea>
+                    <textarea class="message-input" id="mainInput" placeholder="اكتب ماتريد لـ كاتب إعلانات..." rows="1"></textarea>
                 </div>
 
                 <button class="main-btn" id="mainSendBtn" onclick="handleSendWelcome()">
-                    <i class="bi bi-stars"></i> توليد
+                    <i class="bi bi-stars"></i> إنشاء
                 </button>
 
                 <div class="prompt-result-wrapper">
-                    <textarea class="prompt-result-text" id="promptResultText" readonly placeholder="سيظهر هنا النص المولد بعد الضغط على توليد..."></textarea>
+                    <textarea class="prompt-result-text" id="promptResultText" readonly placeholder="سيظهر هنا البرومبت المولد بعد الضغط على انشاء"></textarea>
                     <div class="prompt-result-actions">
                         <button class="copy-btn" onclick="copyGeneratedPrompt()"><i class="bi bi-files"></i> نسخ النص</button>
-                    </div>
-                    <div class="result-note" style="font-size:11px; color:#9CA3AF; text-align:center; margin-top:4px;">
-                        <i class="bi bi-info-circle" style="color:#7B61FF;"></i> يرجى مراجعة المخرجات قبل استخدامها.
                     </div>
                 </div>
             </div>
 
-            <!-- بطاقة الأنماط (صورة + شريط أفقي مع سكرول) -->
+            <!-- بطاقة الأنماط (خلفية زرقاء، أزرار زجاجية، مؤشر مخصص) -->
             <div class="patterns-card">
                 <div class="patterns-header">
                     <span class="patterns-card-title">
-                        <i class="bi bi-grid"></i> اختر نمطاً
-                        <span class="patterns-hint">اختر النمط المناسب ليعكس رؤيتك الفنية</span>
+                        <i class="bi bi-palette"></i> اختر نمط يناسبك
                     </span>
                 </div>
                 
                 <div class="selected-pattern-container" id="selectedPatternContainer">
                     <img src="" alt="صورة النمط" class="selected-pattern-img" id="selectedPatternImg" style="display: none;">
-                    <span style="color:#9CA3AF; font-size: 14px;" id="noPatternMsg">اختر نمطاً لعرض صورته هنا</span>
+                    <span style="color:#9CA3AF; font-size: 14px;" id="noPatternMsg">اختر نمطاً</span>
                 </div>
 
                 <div class="patterns-container-wrapper">
                     <div class="patterns-container" id="patternsContainer">
                         <!-- سيتم توليد الأنماط هنا عبر JS -->
                     </div>
+                    <!-- المؤشر الديناميكي الأفقى -->
+                    <div id="active-indicator"></div>
                 </div>
             </div>
         </div>
 
-        <!-- الشريط السفلي (الفئات) -->
-        <div class="bottom-nav" id="bottomNav">
-            <!-- سيتم توليد الفئات هنا عبر JS -->
+        <!-- الشريط السفلي (أيقونات) -->
+        <div class="social-bar">
+            <div class="social-btn settings" onclick="openSettingsSheet()"><i class="bi bi-gear"></i></div>
+            <div class="social-btn" onclick="openNotificationsSheet()"><i class="bi bi-bell"></i></div>
+            <a href="https://www.instagram.com/bla6c7" target="_blank" class="social-btn instagram"><i class="bi bi-instagram"></i></a>
+            <a href="https://t.me/Evile_Prompts" target="_blank" class="social-btn telegram"><i class="bi bi-telegram"></i></a>
         </div>
 
         <!-- نافذة الإعدادات الجانبية -->
@@ -370,7 +353,7 @@
             </div>
         </div>
 
-        <!-- نافذة النقاط (الهدية والتحويل) -->
+        <!-- نافذة النقاط -->
         <div class="credits-modal-overlay" id="creditsModal" onclick="closeCreditsModalOnBackdrop(event)">
             <div class="credits-modal-box" onclick="event.stopPropagation()">
                 <div style="background: rgba(255,255,255,0.8); border-radius: 20px; padding: 20px; border: 1px solid rgba(123,97,255,0.1); text-align: center;">
@@ -468,7 +451,8 @@
                 if (!userId) { window.location.href = '/sign'; return; }
                 if (!userData || !userData.username) { window.location.href = '/sign'; return; }
 
-                renderCategories();
+                // إزالة الفئات لأننا حذفنا الشريط السفلي
+                // renderCategories();
                 renderPatterns(currentCategoryId);
                 updateCreditsBadge(userData.credits);
                 updateDailyGiftState();
@@ -519,35 +503,16 @@
                 setTimeout(() => { toast.remove(); }, duration);
             }
 
-            function renderCategories() {
-                const container = document.getElementById('bottomNav');
-                if (!categories || categories.length === 0) {
-                    container.innerHTML = '<div style="padding: 6px; color:#6B7280; font-size:11px;">لا توجد فئات</div>';
-                    return;
-                }
-                container.innerHTML = categories.map(cat => `
-                    <div class="bottom-nav-btn ${cat.id === currentCategoryId ? 'active' : ''}" data-id="${cat.id}" onclick="selectCategory(${cat.id})">
-                        <i class="${cat.icon}"></i>
-                        <span>${cat.name}</span>
-                    </div>
-                `).join('');
-            }
+            // ** تم حذف دالة renderCategories لأن الشريط السفلي تم حذفه **
 
-            function selectCategory(catId) {
-                currentCategoryId = catId;
-                renderCategories();
-                renderPatterns(catId);
-                currentPatternId = null;
-                document.getElementById('selectedPatternImg').style.display = 'none';
-                document.getElementById('noPatternMsg').style.display = 'block';
-            }
-
+            // تحديث دالة renderPatterns لتحديث المؤشر الديناميكي
             function renderPatterns(catId) {
                 const container = document.getElementById('patternsContainer');
-                const filtered = patterns.filter(p => p.category_id === catId);
+                // جلب جميع الأنماط (نظراً لحذف الفئات، سنعرض جميع الأنماط المتاحة)
+                const filtered = patterns; 
                 
                 if (!filtered || filtered.length === 0) {
-                    container.innerHTML = '<div style="color:#6B7280; font-size:11px; padding:6px;">لا توجد أنماط</div>';
+                    container.innerHTML = '<div style="color:#e2e8f0; font-size:13px; padding:6px;">لا توجد أنماط</div>';
                     return;
                 }
                 container.innerHTML = filtered.map(p => `
@@ -558,6 +523,24 @@
                 
                 if (!currentPatternId || !filtered.some(p => p.id === currentPatternId)) {
                     selectPattern(filtered[0].id);
+                } else {
+                    // إذا كان هناك نمط مختار بالفعل، قم بتحديث المؤشر
+                    updateIndicator(currentPatternId);
+                }
+            }
+
+            // تحديث المؤشر الأفقي الديناميكي
+            function updateIndicator(patternId) {
+                const activeBtn = document.querySelector(`.pattern-item[data-id="${patternId}"]`);
+                const indicator = document.getElementById('active-indicator');
+                if (activeBtn && indicator) {
+                    const btnRect = activeBtn.getBoundingClientRect();
+                    const wrapperRect = document.querySelector('.patterns-container-wrapper').getBoundingClientRect();
+                    
+                    // حساب الموقع والعرض بالنسبة للحاوية
+                    const leftPos = btnRect.left - wrapperRect.left;
+                    indicator.style.width = `${btnRect.width}px`;
+                    indicator.style.left = `${leftPos}px`;
                 }
             }
 
@@ -570,7 +553,9 @@
                     img.style.display = 'block';
                     document.getElementById('noPatternMsg').style.display = 'none';
                 }
-                renderPatterns(currentCategoryId);
+                renderPatterns(null);
+                // استدعاء تحديث المؤشر بعد التصيير
+                setTimeout(() => updateIndicator(patternId), 50);
             }
 
             function updateSendButton(isStreamingActive) {
@@ -581,7 +566,7 @@
                     btn.innerHTML = '<i class="bi bi-stop-circle"></i> إيقاف';
                 } else {
                     btn.classList.remove('stop-btn');
-                    btn.innerHTML = '<i class="bi bi-stars"></i> توليد';
+                    btn.innerHTML = '<i class="bi bi-stars"></i> إنشاء';
                 }
             }
 
@@ -825,6 +810,10 @@
 
             document.addEventListener('DOMContentLoaded', () => {
                 initScreen();
+                // تحديث المؤشر عند تغيير حجم النافذة لضمان دقة الموضع
+                window.addEventListener('resize', () => {
+                    if (currentPatternId) updateIndicator(currentPatternId);
+                });
                 document.getElementById('mainInput').addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); } 
                 });
