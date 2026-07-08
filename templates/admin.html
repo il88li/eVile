@@ -10,49 +10,48 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Tajawal', sans-serif;
-            background: #0c1515;
+            background: linear-gradient(160deg, #ffffff 0%, #e4d8ff 100%);
             min-height: 100vh;
             padding-bottom: 90px;
-            color: #e0e5e5;
+            color: #1f153f;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        /* ثيم الزجاج المطابق */
         .glass-card, .modal-content, .character-card, .notification-item, .login-card, .bottom-nav {
-            background: rgba(45, 90, 80, 0.15);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: inset 0 0 30px rgba(45, 90, 80, 0.05), 0 8px 32px rgba(0, 0, 0, 0.4);
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(101, 53, 224, 0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
             border-radius: 18px;
         }
         .admin-container { max-width: 1200px; width: 100%; margin: 0 auto; padding: 20px; }
         
         .login-wrapper { max-width: 420px; margin: 0 auto; width: 100%; }
         .login-card { padding: 40px 32px; text-align: center; }
-        .login-icon { width: 64px; height: 64px; background: rgba(255,255,255,0.05); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; border: 1px solid rgba(255,255,255,0.1); }
-        .login-icon i { font-size: 36px; color: #62c5b9; }
-        .login-title { font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 8px; }
-        .login-subtitle { color: #94a8a8; font-size: 14px; }
+        .login-icon { width: 64px; height: 64px; background: rgba(255,255,255,0.6); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; border: 1px solid rgba(101,53,224,0.1); }
+        .login-icon i { font-size: 36px; color: #6535e0; }
+        .login-title { font-size: 28px; font-weight: 800; color: #1f153f; margin-bottom: 8px; }
+        .login-subtitle { color: #4f367a; font-size: 14px; }
         .form-group { margin-bottom: 24px; text-align: right; }
-        label { display: block; margin-bottom: 8px; color: #94a8a8; font-weight: 500; font-size: 14px; }
+        label { display: block; margin-bottom: 8px; color: #4f367a; font-weight: 500; font-size: 14px; }
         input, textarea, select {
             width: 100%; padding: 12px 16px;
-            background: rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.5);
+            border: 1px solid rgba(101,53,224,0.1);
             border-radius: 12px;
-            color: #fff;
+            color: #1f153f;
             font-family: 'Tajawal', sans-serif;
             font-size: 14px; outline: none;
         }
-        input:focus, textarea:focus { border-color: rgba(255,255,255,0.2); }
+        input:focus, textarea:focus { border-color: #6535e0; }
         textarea { min-height: 80px; resize: vertical; }
         .btn {
             padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(101, 53, 224, 0.1);
             border-radius: 40px;
-            color: #fff;
+            color: #1f153f;
             font-weight: 600;
             font-size: 13px;
             cursor: pointer;
@@ -61,13 +60,13 @@
             align-items: center;
             gap: 6px;
         }
-        .btn-danger { background: rgba(255,50,50,0.2); border-color: rgba(255,50,50,0.2); color: #ff6b6b; }
-        .btn-success { background: rgba(50,255,50,0.05); border-color: rgba(50,255,50,0.1); color: #6bff6b; }
+        .btn-primary { background: #6535e0; border-color: #6535e0; color: #fff; box-shadow: 0 4px 15px rgba(101, 53, 224, 0.2); }
+        .btn-danger { background: rgba(255,50,50,0.2); border-color: rgba(255,50,50,0.2); color: #ff4d4d; }
         .btn:active { transform: scale(0.96); }
         .btn-login { width: 100%; padding: 14px; font-size: 16px; }
         
-        .flash { padding: 12px; background: rgba(255,50,50,0.1); border: 1px solid rgba(255,50,50,0.2); border-radius: 14px; color: #ff6b6b; margin-bottom: 24px; text-align: center; font-size: 14px; }
-        .flash.success { background: rgba(50,255,50,0.05); border-color: rgba(50,255,50,0.1); color: #6bff6b; }
+        .flash { padding: 12px; background: rgba(255,50,50,0.1); border: 1px solid rgba(255,50,50,0.2); border-radius: 14px; color: #ff4d4d; margin-bottom: 24px; text-align: center; font-size: 14px; }
+        .flash.success { background: rgba(50,255,50,0.05); border-color: rgba(50,255,50,0.1); color: #27ae60; }
 
         .bottom-nav {
             position: fixed;
@@ -79,9 +78,9 @@
             justify-content: center;
             align-items: center;
             padding: 10px;
-            background: rgba(22, 33, 31, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 60px;
             max-width: 700px;
             margin: 0 auto;
@@ -89,7 +88,7 @@
             gap: 12px;
             flex-wrap: nowrap;
             scrollbar-width: none;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
         }
         .bottom-nav::-webkit-scrollbar { display: none; }
         .bottom-nav-btn {
@@ -97,9 +96,9 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            color: rgba(255,255,255,0.5);
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(101, 53, 224, 0.1);
+            color: rgba(79, 54, 122, 0.6);
             font-size: 20px;
             display: flex;
             align-items: center;
@@ -108,26 +107,27 @@
             transition: all 0.2s;
         }
         .bottom-nav-btn.active {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
+            background: #6535e0;
+            border-color: #6535e0;
             color: #fff;
+            box-shadow: 0 4px 15px rgba(101, 53, 224, 0.2);
         }
         .bottom-nav-btn:active { transform: scale(0.85); }
 
         .tab-content { display: none; padding: 20px; margin-top: 10px; }
         .tab-content.active { display: block; }
-        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-right: 12px; border-right: 3px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 8px; color: #fff; }
+        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-right: 12px; border-right: 3px solid rgba(101,53,224,0.2); display: flex; align-items: center; gap: 8px; color: #1f153f; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
         .character-card { padding: 12px; }
-        .character-avatar { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .character-name { font-size: 15px; font-weight: 700; color: #fff; }
-        .character-desc { font-size: 11px; color: #94a8a8; margin-bottom: 8px; }
-        .character-prompt { background: rgba(0,0,0,0.3); padding: 6px; border-radius: 10px; font-size: 10px; color: #94a8a8; max-height: 60px; overflow-y: auto; margin-bottom: 12px; }
+        .character-avatar { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .character-name { font-size: 15px; font-weight: 700; color: #1f153f; }
+        .character-desc { font-size: 11px; color: #4f367a; margin-bottom: 8px; }
+        .character-prompt { background: rgba(0,0,0,0.05); padding: 6px; border-radius: 10px; font-size: 10px; color: #4f367a; max-height: 60px; overflow-y: auto; margin-bottom: 12px; }
         .card-actions { display: flex; gap: 8px; }
         .notification-item { padding: 12px; margin-bottom: 10px; }
-        .notification-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; color: #fff; }
-        .notification-text { font-size: 11px; color: #94a8a8; }
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .notification-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; color: #1f153f; }
+        .notification-text { font-size: 11px; color: #4f367a; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
         .modal-content { padding: 20px; max-width: 500px; width: 100%; }
         @media (max-width: 600px) {
@@ -186,138 +186,71 @@
                 <div class="section-title" style="margin-top: 30px;"><i class="bi bi-clock-history"></i> الإشعارات المرسلة</div>
                 {% for notif in notifications %}
                 <div class="notification-item glass-card">
-                    <div class="notification-title"><i class="bi bi-bell"></i> {{ notif.title }} <span style="font-size: 10px; color:#94a8a8;">({{ notif.created_at }})</span></div>
+                    <div class="notification-title"><i class="bi bi-bell"></i> {{ notif.title }} <span style="font-size: 10px; color:#4f367a;">({{ notif.created_at }})</span></div>
                     <div class="notification-text">{{ notif.text }}</div>
-                    <div class="notification-meta" style="font-size: 10px; color:#94a8a8; margin-top:5px;">المدة: {{ notif.duration_hours }} ساعة</div>
+                    <div class="notification-meta" style="font-size: 10px; color:#4f367a; margin-top:5px;">المدة: {{ notif.duration_hours }} ساعة</div>
                 </div>
                 {% else %}
-                <p style="text-align:center; color:#94a8a8;">لا توجد إشعارات بعد</p>
+                <p style="text-align:center; color:#4f367a;">لا توجد إشعارات بعد</p>
                 {% endfor %}
             </div>
 
-            <!-- تبويب شحن النقاط الجديد -->
             <div id="tab-credits" class="tab-content glass-card">
                 <div class="section-title"><i class="bi bi-coin"></i> شحن نقاط المستخدمين</div>
                 <div style="max-width: 400px;">
                     <div class="form-group"><label>اسم المستخدم</label><input type="text" id="rechargeUsername" placeholder="أدخل اسم المستخدم"></div>
                     <div class="form-group"><label>عدد النقاط</label><input type="number" id="rechargeAmount" value="10" min="1"></div>
-                    <button class="btn btn-success" onclick="rechargeCredits()"><i class="bi bi-plus-circle"></i> شحن النقاط</button>
+                    <button class="btn btn-primary" onclick="rechargeCredits()"><i class="bi bi-plus-circle"></i> شحن النقاط</button>
                 </div>
                 <div id="rechargeResult" style="margin-top: 15px; font-size: 13px; display: none;"></div>
+            </div>
+
+            <!-- تبويب التحكم في الموقع الجديد -->
+            <div id="tab-site-control" class="tab-content glass-card">
+                <div class="section-title"><i class="bi bi-power"></i> التحكم في نشاط الموقع</div>
+                
+                <div style="text-align: center; max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                    
+                    <!-- أيقونة كبيرة -->
+                    <div id="siteStatusIcon" style="font-size: 80px; color: {{ '#27ae60' if site_settings and site_settings.status == 'on' else '#ff4d4d' }};">
+                        <i class="bi {{ 'bi-toggle-on' if site_settings and site_settings.status == 'on' else 'bi-toggle-off' }}"></i>
+                    </div>
+
+                    <!-- حالة الموقع والنص -->
+                    <div style="width: 100%;">
+                        <div style="font-size: 18px; font-weight: 700; margin-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                            <span>الحالة الحالية:</span>
+                            <span id="siteStatusLabel" style="color: {{ '#27ae60' if site_settings and site_settings.status == 'on' else '#ff4d4d' }};">
+                                {{ 'مفعل' if site_settings and site_settings.status == 'on' else 'متوقف' }}
+                            </span>
+                        </div>
+                        
+                        <div class="form-group" style="text-align: right;">
+                            <label>نص الرسالة عند التوقف</label>
+                            <textarea id="offlineMessageInput" rows="4" style="width: 100%;">{{ site_settings.offline_message if site_settings else 'الموقع تحت الصيانة حالياً، نعتذر عن الإزعاج.' }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- أيقونات التواصل الاجتماعي -->
+                    <div style="display: flex; gap: 15px; margin-top: 5px; font-size: 24px;">
+                        <a href="https://t.me/Evile_Prompts" target="_blank" style="color: #0088cc; transition: 0.2s;"><i class="bi bi-telegram"></i></a>
+                        <a href="https://www.instagram.com/bla6c7" target="_blank" style="color: #e4405f; transition: 0.2s;"><i class="bi bi-instagram"></i></a>
+                        <a href="https://wa.me/967730577358" target="_blank" style="color: #25d366; transition: 0.2s;"><i class="bi bi-whatsapp"></i></a>
+                    </div>
+
+                    <!-- زر الحفظ -->
+                    <button class="btn btn-primary" onclick="saveSiteSettings()" style="width: 100%; padding: 14px; justify-content: center;">
+                        <i class="bi bi-floppy"></i> حفظ الإعدادات
+                    </button>
+                </div>
             </div>
 
             <!-- نافذة التعديل -->
             <div id="editModal" class="modal">
                 <div class="modal-content glass-card">
                     <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
-                        <h3 style="color:#fff;"><i class="bi bi-pencil-square"></i> تعديل الشخصية</h3>
-                        <button onclick="closeEditModal()" style="background:none; border:none; font-size:20px; color:#94a8a8;"><i class="bi bi-x-lg"></i></button>
+                        <h3 style="color:#1f153f;"><i class="bi bi-pencil-square"></i> تعديل الشخصية</h3>
+                        <button onclick="closeEditModal()" style="background:none; border:none; font-size:20px; color:#4f367a;"><i class="bi bi-x-lg"></i></button>
                     </div>
                     <form method="POST" id="editForm">
-                        <div class="form-group"><label>اسم الشخصية</label><input type="text" name="name" id="editName" required></div>
-                        <div class="form-group"><label>رابط الصورة</label><input type="url" name="logo_url" id="editImage"></div>
-                        <div class="form-group"><label>وصف مختصر</label><input type="text" name="description" id="editDesc" required></div>
-                        <div class="form-group"><label>البرومبت</label><textarea name="prompt" id="editPrompt" required></textarea></div>
-                        <button type="submit" class="btn"><i class="bi bi-save"></i> حفظ التعديلات</button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- الشريط السفلي مع تبويب النقاط -->
-            <div class="bottom-nav" id="bottomNav">
-                <button class="bottom-nav-btn active" data-tab="characters"><i class="bi bi-people"></i></button>
-                <button class="bottom-nav-btn" data-tab="notifications"><i class="bi bi-bell"></i></button>
-                <button class="bottom-nav-btn" data-tab="credits"><i class="bi bi-coin"></i></button>
-            </div>
-
-        {% else %}
-            <div class="login-wrapper">
-                <div class="login-card glass-card">
-                    <div class="login-icon"><i class="bi bi-shield-lock"></i></div>
-                    <div class="login-title">لوحة التحكم</div>
-                    <div class="login-subtitle">EVILE Admin Panel</div>
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="flash {% if category == 'success' %}success{% endif %}">{{ message }}</div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-                    <form method="POST" action="/admin">
-                        <div class="form-group">
-                            <label><i class="bi bi-key"></i> كلمة المرور</label>
-                            <input type="password" name="password" required placeholder="••••••••">
-                        </div>
-                        <button type="submit" class="btn btn-login">دخول</button>
-                    </form>
-                </div>
-            </div>
-        {% endif %}
-    </div>
-
-    <script>
-        // التبويبات
-        document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const tabId = btn.getAttribute('data-tab');
-                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-                document.getElementById(`tab-${tabId}`).classList.add('active');
-                document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-        });
-
-        function openEditModal(id, name, desc, prompt, image) {
-            document.getElementById('editForm').action = `/admin/character/${id}/edit`;
-            document.getElementById('editName').value = name;
-            document.getElementById('editDesc').value = desc;
-            document.getElementById('editPrompt').value = prompt;
-            document.getElementById('editImage').value = image;
-            document.getElementById('editModal').classList.add('active');
-        }
-        function closeEditModal() {
-            document.getElementById('editModal').classList.remove('active');
-        }
-        window.onclick = function(e) {
-            const modal = document.getElementById('editModal');
-            if (e.target === modal) closeEditModal();
-        }
-
-        // شحن النقاط
-        async function rechargeCredits() {
-            const username = document.getElementById('rechargeUsername').value.trim();
-            const amount = parseInt(document.getElementById('rechargeAmount').value);
-            const resultDiv = document.getElementById('rechargeResult');
-            resultDiv.style.display = 'block';
-            resultDiv.textContent = 'جاري الشحن...';
-            resultDiv.style.color = '#94a8a8';
-
-            if (!username || amount <= 0) {
-                resultDiv.textContent = 'يرجى إدخال اسم مستخدم صحيح وعدد نقاط صحيح.';
-                resultDiv.style.color = '#ff6b6b';
-                return;
-            }
-
-            try {
-                const res = await fetch('/api/admin/update_credits', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({username, amount})
-                });
-                const data = await res.json();
-                if(data.success) {
-                    resultDiv.textContent = data.message;
-                    resultDiv.style.color = '#6bff6b';
-                    document.getElementById('rechargeUsername').value = '';
-                } else {
-                    resultDiv.textContent = data.message;
-                    resultDiv.style.color = '#ff6b6b';
-                }
-            } catch(err) {
-                resultDiv.textContent = 'خطأ في الاتصال بالخادم.';
-                resultDiv.style.color = '#ff6b6b';
-            }
-        }
-    </script>
-</body>
-</html>
+                        <div class="form-group"><label>اسم الشخصية</label><input type="
