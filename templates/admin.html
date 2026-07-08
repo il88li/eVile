@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - EVILE</title>
+    <title>لوحة التحكم - UFOQ</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -18,7 +18,7 @@
             align-items: center;
             justify-content: center;
         }
-        .glass-card, .modal-content, .character-card, .notification-item, .login-card, .bottom-nav {
+        .glass-card, .modal-content, .category-card, .pattern-card, .notification-item, .login-card, .bottom-nav {
             background: rgba(255, 255, 255, 0.45);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(101, 53, 224, 0.15);
@@ -118,15 +118,15 @@
         .tab-content.active { display: block; }
         .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-right: 12px; border-right: 3px solid rgba(101,53,224,0.2); display: flex; align-items: center; gap: 8px; color: #1f153f; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
-        .character-card { padding: 12px; }
-        .character-avatar { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .character-name { font-size: 15px; font-weight: 700; color: #1f153f; }
-        .character-desc { font-size: 11px; color: #4f367a; margin-bottom: 8px; }
-        .character-prompt { background: rgba(0,0,0,0.05); padding: 6px; border-radius: 10px; font-size: 10px; color: #4f367a; max-height: 60px; overflow-y: auto; margin-bottom: 12px; }
+        .category-card { padding: 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .category-info { display: flex; align-items: center; gap: 10px; }
+        .category-icon { font-size: 24px; color: #6535e0; }
+        .pattern-card { padding: 12px; margin-bottom: 10px; }
+        .pattern-header { display: flex; align-items: center; gap: 10px; }
+        .pattern-img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(101,53,224,0.1); }
+        .pattern-name { font-weight: 700; color: #1f153f; font-size: 14px; }
+        .pattern-meta { font-size: 11px; color: #4f367a; }
         .card-actions { display: flex; gap: 8px; }
-        .notification-item { padding: 12px; margin-bottom: 10px; }
-        .notification-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; color: #1f153f; }
-        .notification-text { font-size: 11px; color: #4f367a; }
         .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
         .modal-content { padding: 20px; max-width: 500px; width: 100%; }
@@ -141,34 +141,69 @@
         {% if session.get('logged_in') %}
             <div style="height: 20px;"></div>
 
-            <div id="tab-characters" class="tab-content active glass-card">
-                <div class="section-title"><i class="bi bi-plus-circle"></i> إضافة شخصية جديدة</div>
-                <form method="POST" action="/admin/character/add">
+            <div id="tab-categories" class="tab-content active glass-card">
+                <div class="section-title"><i class="bi bi-folder-plus"></i> إدارة الفئات</div>
+                <form method="POST" action="/admin/category/add">
                     <div class="form-grid">
-                        <div class="form-group"><label>اسم الشخصية</label><input type="text" name="name" required></div>
-                        <div class="form-group"><label>رابط الصورة</label><input type="url" name="logo_url" placeholder="اختياري"></div>
-                        <div class="form-group"><label>وصف مختصر</label><input type="text" name="description" required></div>
-                        <div class="form-group"><label>البرومبت</label><textarea name="prompt" required></textarea></div>
-                        <div class="form-group"><label>مفتاح الاستدعاء</label><input type="text" name="callback_key" placeholder="مثال: logo_maker"></div>
+                        <div class="form-group"><label>اسم الفئة</label><input type="text" name="name" required></div>
+                        <div class="form-group"><label>أيقونة (Bootstrap Icon)</label><input type="text" name="icon" placeholder="مثال: bi-robot" value="bi-robot"></div>
                     </div>
-                    <button type="submit" class="btn"><i class="bi bi-save"></i> إضافة شخصية</button>
+                    <button type="submit" class="btn"><i class="bi bi-save"></i> إضافة فئة</button>
                 </form>
 
-                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-list-ul"></i> قائمة الشخصيات</div>
-                <div class="characters-grid">
-                    {% for char in characters %}
-                    <div class="character-card glass-card">
-                        <div class="character-header" style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-                            <div class="character-avatar">
-                                {% if char.logo_url %}<img src="{{ char.logo_url }}" width="40" height="40" style="border-radius:12px; object-fit:cover;">{% else %}<i class="bi bi-robot"></i>{% endif %}
-                            </div>
-                            <div class="character-name">{{ char.name }}</div>
+                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-list-ul"></i> قائمة الفئات</div>
+                <div class="categories-list">
+                    {% for cat in categories %}
+                    <div class="category-card glass-card">
+                        <div class="category-info">
+                            <div class="category-icon"><i class="{{ cat.icon }}"></i></div>
+                            <div class="category-name">{{ cat.name }}</div>
                         </div>
-                        <div class="character-desc">{{ char.description }}</div>
-                        <div class="character-prompt">{{ char.prompt[:80] }}{% if char.prompt|length > 80 %}...{% endif %}</div>
                         <div class="card-actions">
-                            <button class="btn" onclick="openEditModal({{ char.id }}, '{{ char.name }}', '{{ char.description }}', `{{ char.prompt|replace('`', '\\`') }}`, '{{ char.logo_url }}')"><i class="bi bi-pencil-square"></i> تعديل</button>
-                            <button class="btn btn-danger" onclick="if(confirm('حذف الشخصية؟')) location.href='/admin/character/{{ char.id }}/delete'"><i class="bi bi-trash3"></i> حذف</button>
+                            <button class="btn btn-danger" onclick="if(confirm('حذف الفئة وجميع أنماطها؟')) location.href='/admin/category/{{ cat.id }}/delete'"><i class="bi bi-trash3"></i> حذف</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div id="tab-patterns" class="tab-content glass-card">
+                <div class="section-title"><i class="bi bi-plus-circle"></i> إضافة نمط جديد</div>
+                <form method="POST" action="/admin/pattern/add">
+                    <div class="form-grid">
+                        <div class="form-group"><label>الفئة التابعة</label>
+                            <select name="category_id" required>
+                                <option value="">اختر الفئة...</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group"><label>اسم النمط</label><input type="text" name="name" required></div>
+                        <div class="form-group"><label>رابط صورة النمط</label><input type="url" name="image_url" required placeholder="https://example.com/image.png"></div>
+                        <div class="form-group"><label>البرومبت (بدون وصف)</label><textarea name="prompt" required></textarea></div>
+                    </div>
+                    <button type="submit" class="btn"><i class="bi bi-save"></i> إضافة نمط</button>
+                </form>
+
+                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-list-ul"></i> قائمة الأنماط</div>
+                <div class="patterns-list">
+                    {% for pat in patterns %}
+                    <div class="pattern-card glass-card">
+                        <div class="pattern-header">
+                            <img src="{{ pat.image_url }}" class="pattern-img" alt="{{ pat.name }}">
+                            <div style="flex:1;">
+                                <div class="pattern-name">{{ pat.name }}</div>
+                                <div class="pattern-meta">الفئة: 
+                                    {% for cat in categories %}
+                                        {% if cat.id == pat.category_id %}{{ cat.name }}{% endif %}
+                                    {% endfor %}
+                                </div>
+                                <div class="pattern-meta" style="font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px;">{{ pat.prompt[:80] }}...</div>
+                            </div>
+                        </div>
+                        <div class="card-actions" style="margin-top: 8px;">
+                            <button class="btn btn-danger" onclick="if(confirm('حذف النمط؟')) location.href='/admin/pattern/{{ pat.id }}/delete'"><i class="bi bi-trash3"></i> حذف</button>
                         </div>
                     </div>
                     {% endfor %}
@@ -205,18 +240,12 @@
                 <div id="rechargeResult" style="margin-top: 15px; font-size: 13px; display: none;"></div>
             </div>
 
-            <!-- تبويب التحكم في الموقع الجديد -->
             <div id="tab-site-control" class="tab-content glass-card">
                 <div class="section-title"><i class="bi bi-power"></i> التحكم في نشاط الموقع</div>
-                
                 <div style="text-align: center; max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 20px;">
-                    
-                    <!-- أيقونة كبيرة -->
                     <div id="siteStatusIcon" style="font-size: 80px; color: {{ '#27ae60' if site_settings and site_settings.status == 'on' else '#ff4d4d' }};">
                         <i class="bi {{ 'bi-toggle-on' if site_settings and site_settings.status == 'on' else 'bi-toggle-off' }}"></i>
                     </div>
-
-                    <!-- حالة الموقع والنص -->
                     <div style="width: 100%;">
                         <div style="font-size: 18px; font-weight: 700; margin-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 10px;">
                             <span>الحالة الحالية:</span>
@@ -224,47 +253,25 @@
                                 {{ 'مفعل' if site_settings and site_settings.status == 'on' else 'متوقف' }}
                             </span>
                         </div>
-                        
                         <div class="form-group" style="text-align: right;">
                             <label>نص الرسالة عند التوقف</label>
                             <textarea id="offlineMessageInput" rows="4" style="width: 100%;">{{ site_settings.offline_message if site_settings else 'الموقع تحت الصيانة حالياً، نعتذر عن الإزعاج.' }}</textarea>
                         </div>
                     </div>
-
-                    <!-- أيقونات التواصل الاجتماعي -->
                     <div style="display: flex; gap: 15px; margin-top: 5px; font-size: 24px;">
                         <a href="https://t.me/Evile_Prompts" target="_blank" style="color: #0088cc; transition: 0.2s;"><i class="bi bi-telegram"></i></a>
                         <a href="https://www.instagram.com/bla6c7" target="_blank" style="color: #e4405f; transition: 0.2s;"><i class="bi bi-instagram"></i></a>
                         <a href="https://wa.me/967730577358" target="_blank" style="color: #25d366; transition: 0.2s;"><i class="bi bi-whatsapp"></i></a>
                     </div>
-
-                    <!-- زر الحفظ -->
                     <button class="btn btn-primary" onclick="saveSiteSettings()" style="width: 100%; padding: 14px; justify-content: center;">
                         <i class="bi bi-floppy"></i> حفظ الإعدادات
                     </button>
                 </div>
             </div>
 
-            <!-- نافذة التعديل -->
-            <div id="editModal" class="modal">
-                <div class="modal-content glass-card">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
-                        <h3 style="color:#1f153f;"><i class="bi bi-pencil-square"></i> تعديل الشخصية</h3>
-                        <button onclick="closeEditModal()" style="background:none; border:none; font-size:20px; color:#4f367a;"><i class="bi bi-x-lg"></i></button>
-                    </div>
-                    <form method="POST" id="editForm">
-                        <div class="form-group"><label>اسم الشخصية</label><input type="text" name="name" id="editName" required></div>
-                        <div class="form-group"><label>رابط الصورة</label><input type="url" name="logo_url" id="editImage"></div>
-                        <div class="form-group"><label>وصف مختصر</label><input type="text" name="description" id="editDesc" required></div>
-                        <div class="form-group"><label>البرومبت</label><textarea name="prompt" id="editPrompt" required></textarea></div>
-                        <button type="submit" class="btn"><i class="bi bi-save"></i> حفظ التعديلات</button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- الشريط السفلي -->
             <div class="bottom-nav" id="bottomNav">
-                <button class="bottom-nav-btn active" data-tab="characters"><i class="bi bi-people"></i></button>
+                <button class="bottom-nav-btn active" data-tab="categories"><i class="bi bi-folder"></i></button>
+                <button class="bottom-nav-btn" data-tab="patterns"><i class="bi bi-grid"></i></button>
                 <button class="bottom-nav-btn" data-tab="notifications"><i class="bi bi-bell"></i></button>
                 <button class="bottom-nav-btn" data-tab="credits"><i class="bi bi-coin"></i></button>
                 <button class="bottom-nav-btn" data-tab="site-control"><i class="bi bi-power"></i></button>
@@ -275,7 +282,7 @@
                 <div class="login-card glass-card">
                     <div class="login-icon"><i class="bi bi-shield-lock"></i></div>
                     <div class="login-title">لوحة التحكم</div>
-                    <div class="login-subtitle">EVILE Admin Panel</div>
+                    <div class="login-subtitle">UFOQ Admin Panel</div>
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
                             {% for category, message in messages %}
@@ -296,7 +303,6 @@
     </div>
 
     <script>
-        // التبويبات
         document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const tabId = btn.getAttribute('data-tab');
@@ -307,23 +313,6 @@
             });
         });
 
-        function openEditModal(id, name, desc, prompt, image) {
-            document.getElementById('editForm').action = `/admin/character/${id}/edit`;
-            document.getElementById('editName').value = name;
-            document.getElementById('editDesc').value = desc;
-            document.getElementById('editPrompt').value = prompt;
-            document.getElementById('editImage').value = image;
-            document.getElementById('editModal').classList.add('active');
-        }
-        function closeEditModal() {
-            document.getElementById('editModal').classList.remove('active');
-        }
-        window.onclick = function(e) {
-            const modal = document.getElementById('editModal');
-            if (e.target === modal) closeEditModal();
-        }
-
-        // شحن النقاط
         async function rechargeCredits() {
             const username = document.getElementById('rechargeUsername').value.trim();
             const amount = parseInt(document.getElementById('rechargeAmount').value);
@@ -359,14 +348,12 @@
             }
         }
 
-        // حفظ إعدادات الموقع
         async function saveSiteSettings() {
             const icon = document.getElementById('siteStatusIcon');
             const label = document.getElementById('siteStatusLabel');
             const messageInput = document.getElementById('offlineMessageInput');
-            const btn = event.target;
+            const btn = document.querySelector('#tab-site-control .btn-primary');
 
-            // تبديل الحالة
             let newStatus = 'on';
             if (icon.querySelector('i').classList.contains('bi-toggle-on')) {
                 newStatus = 'off';
@@ -387,7 +374,6 @@
                 const data = await res.json();
                 
                 if (data.success) {
-                    // تحديث الواجهة
                     if (newStatus === 'off') {
                         icon.style.color = '#ff4d4d';
                         icon.innerHTML = '<i class="bi bi-toggle-off"></i>';
