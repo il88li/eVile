@@ -10,7 +10,8 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: 'Tajawal', sans-serif;
-            background: linear-gradient(160deg, #ffffff 0%, #f5f3ff 100%);
+            /* تم تعتيم الخلفية قليلاً لتبرز الزجاج */
+            background: linear-gradient(160deg, #f2f4f8 0%, #e1dbf5 100%);
             color: #1F2937;
             overflow: hidden;
             touch-action: manipulation;
@@ -24,7 +25,7 @@
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             text-align: center; padding: 20px;
-            background: linear-gradient(160deg, #ffffff 0%, #f5f3ff 100%);
+            background: linear-gradient(160deg, #f2f4f8 0%, #e1dbf5 100%);
             color: #1F2937;
         }
         .offline-icon { font-size: 64px; color: #7B61FF; margin-bottom: 20px; animation: pulse 2s infinite; }
@@ -43,7 +44,7 @@
             width: 100%; height: 100vh; height: 100dvh; 
             display: flex; flex-direction: column; 
             align-items: center; 
-            padding: 80px 16px 90px 16px;
+            padding: 80px 16px 100px 16px;
             position: relative;
             gap: 16px;
         }
@@ -53,9 +54,9 @@
             position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100;
             display: flex; align-items: center; justify-content: space-between; padding: 8px 16px;
             max-width: 700px; margin: 0 auto; border-radius: 24px;
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
         }
         .header-logo { font-size: 20px; font-weight: 900; color: #1F2937; letter-spacing: 2px; position: absolute; left: 50%; transform: translateX(-50%); }
         .header-icon {
@@ -75,14 +76,15 @@
         }
         .active-users-dot i { font-size: 14px; color: #7B61FF; }
 
-        /* البطاقة العلوية (حقل الكتابة + المخرجات + زر التوليد) */
+        /* البطاقة العلوية */
         .input-card { 
             width: 100%; max-width: 600px;
-            background: #FFFFFF;
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.85);
             border-radius: 24px;
             padding: 24px;
-            box-shadow: 0 8px 32px rgba(123, 97, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
             flex-shrink: 0;
             display: flex; flex-direction: column; gap: 16px;
         }
@@ -92,10 +94,9 @@
         .credits-badge { background: rgba(123, 97, 255, 0.08); padding: 4px 14px; border-radius: 30px; font-size: 13px; color: #7B61FF; font-weight: 600; border: 1px solid rgba(123,97,255,0.1); cursor: pointer; transition: 0.2s; }
         .credits-badge:active { transform: scale(0.95); }
         
-        /* حقل الكتابة */
         .textarea-wrapper { 
-            background: #F8F9FA;
-            border: 1px solid rgba(0,0,0,0.02); 
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0,0,0,0.03); 
             border-radius: 16px; padding: 0 18px; height: 52px; min-height: 52px; max-height: 52px; 
             display: flex; align-items: center;
         }
@@ -105,88 +106,91 @@
         }
         .message-input::placeholder { color: #9CA3AF; }
         
-        /* زر التوليد */
         .main-btn { width: 80%; max-width: 300px; height: 44px; margin: 0 auto; display: block; background: #7B61FF; border: none; border-radius: 30px; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.2s; box-shadow: 0 6px 20px rgba(123, 97, 255, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
         .main-btn:active { transform: scale(0.96); }
         .main-btn.stop-btn { background: #ef4444; box-shadow: none; }
 
         /* حقل عرض المخرجات */
         .prompt-result-wrapper { 
-            padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; 
+            padding: 16px 20px; display: flex; flex-direction: column; 
             min-height: 100px; max-height: 120px; overflow-y: auto;
-            border-radius: 16px; background: #F8F9FA;
-            border: 1px solid rgba(0,0,0,0.02);
+            border-radius: 16px; background: rgba(255, 255, 255, 0.35);
+            border: 1px solid rgba(0,0,0,0.03);
         }
         .prompt-result-text { font-size: 14px; color: #1F2937; line-height: 1.6; width: 100%; background: transparent; border: none; resize: none; outline: none; font-family: 'Tajawal', sans-serif; height: 100%; text-align: center; }
         .prompt-result-text::placeholder { color: #9CA3AF; }
-        .prompt-result-actions { display: flex; justify-content: flex-start; gap: 10px; }
-        .copy-btn { background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(123,97,255,0.1); border-radius: 30px; padding: 6px 14px; font-size: 12px; color: #6B7280; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: 0.2s; }
+        
+        /* زر النسخ (أصبح خارج الحقل) */
+        .copy-wrapper {
+            display: flex; justify-content: flex-start; margin-top: -8px; padding-left: 4px;
+        }
+        .copy-btn { 
+            background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(123,97,255,0.1); 
+            border-radius: 30px; padding: 6px 14px; font-size: 12px; color: #6B7280; cursor: pointer; 
+            display: flex; align-items: center; gap: 4px; transition: 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
         .copy-btn:active { transform: scale(0.9); }
         .copy-btn.success { background: rgba(34, 197, 94, 0.1); color: #16a34a; border-color: rgba(34, 197, 94, 0.2); }
 
-        /* --- بطاقة الأنماط (تصميم جديد) --- */
+        /* --- بطاقة الأنماط (تصغير العرض لتفادي التداخل) --- */
         .patterns-card { 
-            width: 100%; max-width: 600px;
-            background: #FFFFFF;
+            width: 100%; max-width: 500px; /* تم تصغير العرض */
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.85);
             border-radius: 24px;
-            padding: 24px 20px 30px 20px; /* زيادة مساحة سفلي */
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            padding: 20px 18px 24px 18px;
             flex-shrink: 0; display: flex; flex-direction: column; gap: 14px;
-            box-shadow: 0 8px 32px rgba(123, 97, 255, 0.04);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
         }
         .patterns-header { display: flex; justify-content: space-between; align-items: center; }
         .patterns-card-title { font-size: 16px; font-weight: 700; color: #1F2937; display: flex; align-items: center; gap: 8px; }
         .patterns-card-title i { color: #7B61FF; font-size: 20px; }
         
-        /* حاوية الصورة الكبيرة للنمط */
         .selected-pattern-container {
             display: flex; align-items: center; justify-content: center;
             width: 100%; min-height: 120px;
-            background: #F8F9FA; padding: 12px;
-            border-radius: 16px; border: 1px solid rgba(0,0,0,0.02);
+            background: rgba(255, 255, 255, 0.3); padding: 12px;
+            border-radius: 16px; border: 1px solid rgba(0,0,0,0.03);
         }
         .selected-pattern-img { max-width: 100%; max-height: 160px; border-radius: 12px; object-fit: contain; }
 
-        /* شريط الأنماط (خلفية زرقاء، أزرار زجاجية، ومؤشر مخصص) */
+        /* شريط الأنماط */
         .patterns-container-wrapper {
             position: relative;
             display: flex; align-items: center; justify-content: flex-start;
             width: 100%; margin: 0 auto;
-            background: #192f5d; /* خلفية زرقاء داكنة */
-            padding: 10px 12px 16px 12px; /* مساحة للمؤشر */
+            background: #192f5d;
+            padding: 10px 12px 16px 12px;
             border-radius: 16px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            scrollbar-width: none; /* إخفاء شريط التمرير الافتراضي */
+            overflow-x: auto; scrollbar-width: none;
             white-space: nowrap;
         }
         .patterns-container-wrapper::-webkit-scrollbar { display: none; }
         .patterns-container { display: flex; gap: 12px; flex-wrap: nowrap; position: relative; z-index: 1; }
         
-        /* الأزرار الزجاجية */
         .pattern-item {
             flex-shrink: 0; padding: 8px 18px; border-radius: 30px;
-            background: rgba(255, 255, 255, 0.1); /* زجاجي شفاف */
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;
             font-size: 13px; font-weight: 600; color: #e2e8f0; position: relative;
         }
         .pattern-item.active {
-            background: rgba(255, 255, 255, 0.2); /* تفتيح عند التحديد */
+            background: rgba(255, 255, 255, 0.2);
             color: #ffffff;
             border-color: rgba(255, 255, 255, 0.3);
         }
         .pattern-item:active { transform: scale(0.95); }
 
-        /* مؤشر التمرير المخصص (ديناميكي) */
+        /* مؤشر التمرير المخصص */
         #active-indicator {
             position: absolute;
             bottom: 0px;
             left: 0;
             height: 3px;
-            background: #60a5fa; /* لون المؤشر أزرق فاتح */
+            background: #60a5fa;
             border-radius: 4px 4px 0 0;
             transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
             width: 0px;
@@ -194,22 +198,21 @@
             z-index: 0;
         }
 
-        /* الشريط السفلي (أيقونات) */
+        /* الشريط السفلي */
         .social-bar {
             position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 99;
             display: flex; gap: 12px; padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.9);
             border-radius: 40px; width: fit-content; max-width: 90%;
-            box-shadow: 0 4px 20px rgba(123, 97, 255, 0.03);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
         .social-btn {
             width: 40px; height: 40px; border-radius: 50%;
-            background: #F8F9FA; border: 1px solid rgba(0,0,0,0.02);
+            background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(0,0,0,0.03);
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s; color: #6B7280; text-decoration: none;
-            box-shadow: none;
         }
         .social-btn:active { transform: scale(0.9); }
         .social-btn i { font-size: 18px; }
@@ -218,8 +221,8 @@
         .social-btn.instagram { color: #e4405f; }
 
         @media (max-width: 600px) {
-            .input-card, .patterns-card { padding: 20px 16px; max-width: 100%; border-radius: 20px; }
-            .patterns-card { padding-bottom: 26px; }
+            .input-card { padding: 20px 16px; max-width: 100%; border-radius: 20px; }
+            .patterns-card { padding: 18px 14px 20px 14px; max-width: 100%; border-radius: 20px; }
             .prompt-result-wrapper { min-height: 80px; max-height: 80px; padding: 12px; }
             .selected-pattern-container { min-height: 100px; }
             .main-btn { width: 90%; height: 40px; font-size: 14px; }
@@ -278,15 +281,18 @@
                     <i class="bi bi-stars"></i> إنشاء
                 </button>
 
+                <!-- حقل المخرجات -->
                 <div class="prompt-result-wrapper">
                     <textarea class="prompt-result-text" id="promptResultText" readonly placeholder="سيظهر هنا البرومبت المولد بعد الضغط على انشاء"></textarea>
-                    <div class="prompt-result-actions">
-                        <button class="copy-btn" onclick="copyGeneratedPrompt()"><i class="bi bi-files"></i> نسخ النص</button>
-                    </div>
+                </div>
+                
+                <!-- زر نسخ النص (خارج المخرجات) -->
+                <div class="copy-wrapper">
+                    <button class="copy-btn" onclick="copyGeneratedPrompt()"><i class="bi bi-files"></i> نسخ النص</button>
                 </div>
             </div>
 
-            <!-- بطاقة الأنماط (خلفية زرقاء، أزرار زجاجية، مؤشر مخصص) -->
+            <!-- بطاقة الأنماط -->
             <div class="patterns-card">
                 <div class="patterns-header">
                     <span class="patterns-card-title">
@@ -303,13 +309,12 @@
                     <div class="patterns-container" id="patternsContainer">
                         <!-- سيتم توليد الأنماط هنا عبر JS -->
                     </div>
-                    <!-- المؤشر الديناميكي الأفقى -->
                     <div id="active-indicator"></div>
                 </div>
             </div>
         </div>
 
-        <!-- الشريط السفلي (أيقونات) -->
+        <!-- الشريط السفلي -->
         <div class="social-bar">
             <div class="social-btn settings" onclick="openSettingsSheet()"><i class="bi bi-gear"></i></div>
             <div class="social-btn" onclick="openNotificationsSheet()"><i class="bi bi-bell"></i></div>
@@ -451,8 +456,6 @@
                 if (!userId) { window.location.href = '/sign'; return; }
                 if (!userData || !userData.username) { window.location.href = '/sign'; return; }
 
-                // إزالة الفئات لأننا حذفنا الشريط السفلي
-                // renderCategories();
                 renderPatterns(currentCategoryId);
                 updateCreditsBadge(userData.credits);
                 updateDailyGiftState();
@@ -503,12 +506,8 @@
                 setTimeout(() => { toast.remove(); }, duration);
             }
 
-            // ** تم حذف دالة renderCategories لأن الشريط السفلي تم حذفه **
-
-            // تحديث دالة renderPatterns لتحديث المؤشر الديناميكي
             function renderPatterns(catId) {
                 const container = document.getElementById('patternsContainer');
-                // جلب جميع الأنماط (نظراً لحذف الفئات، سنعرض جميع الأنماط المتاحة)
                 const filtered = patterns; 
                 
                 if (!filtered || filtered.length === 0) {
@@ -524,12 +523,10 @@
                 if (!currentPatternId || !filtered.some(p => p.id === currentPatternId)) {
                     selectPattern(filtered[0].id);
                 } else {
-                    // إذا كان هناك نمط مختار بالفعل، قم بتحديث المؤشر
                     updateIndicator(currentPatternId);
                 }
             }
 
-            // تحديث المؤشر الأفقي الديناميكي
             function updateIndicator(patternId) {
                 const activeBtn = document.querySelector(`.pattern-item[data-id="${patternId}"]`);
                 const indicator = document.getElementById('active-indicator');
@@ -537,7 +534,6 @@
                     const btnRect = activeBtn.getBoundingClientRect();
                     const wrapperRect = document.querySelector('.patterns-container-wrapper').getBoundingClientRect();
                     
-                    // حساب الموقع والعرض بالنسبة للحاوية
                     const leftPos = btnRect.left - wrapperRect.left;
                     indicator.style.width = `${btnRect.width}px`;
                     indicator.style.left = `${leftPos}px`;
@@ -554,7 +550,6 @@
                     document.getElementById('noPatternMsg').style.display = 'none';
                 }
                 renderPatterns(null);
-                // استدعاء تحديث المؤشر بعد التصيير
                 setTimeout(() => updateIndicator(patternId), 50);
             }
 
@@ -810,7 +805,6 @@
 
             document.addEventListener('DOMContentLoaded', () => {
                 initScreen();
-                // تحديث المؤشر عند تغيير حجم النافذة لضمان دقة الموضع
                 window.addEventListener('resize', () => {
                     if (currentPatternId) updateIndicator(currentPatternId);
                 });
