@@ -80,7 +80,7 @@
         }
         .active-users-dot i { font-size: 13px; color: #7B61FF; }
 
-        /* البطاقة العلوية */
+        /* بطاقة الإدخال والمخرجات */
         .input-card { 
             width: 100%; max-width: 600px;
             background: rgba(255, 255, 255, 0.65);
@@ -89,7 +89,7 @@
             border-radius: 24px;
             padding: 24px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
-            flex-shrink: 0; display: flex; flex-direction: column; gap: 16px;
+            flex-shrink: 0; display: flex; flex-direction: column; gap: 12px;
         }
         .input-header { display: flex; justify-content: space-between; align-items: center; }
         .input-label { font-size: 16px; font-weight: 700; color: #1F2937; display: flex; align-items: center; gap: 6px; }
@@ -118,14 +118,27 @@
         .prompt-result-text { font-size: 14px; color: #1F2937; line-height: 1.6; width: 100%; background: transparent; border: none; resize: none; outline: none; font-family: 'Tajawal', sans-serif; height: 100%; text-align: center; }
         .prompt-result-text::placeholder { color: #9CA3AF; }
 
-        /* بطاقة الأنماط (إعادة تصميم كاملة لتطابق الصورة) */
+        /* زر النسخ (موضوع في أسفل البطاقة العلوية) */
+        .copy-wrapper {
+            display: flex; justify-content: flex-end;
+            margin-top: -4px;
+        }
+        .copy-btn { 
+            background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(123,97,255,0.1); 
+            border-radius: 30px; padding: 6px 14px; font-size: 12px; color: #6B7280; cursor: pointer; 
+            display: flex; align-items: center; gap: 4px; transition: 0.2s;
+        }
+        .copy-btn:active { transform: scale(0.9); }
+        .copy-btn.success { background: rgba(34, 197, 94, 0.1); color: #16a34a; border-color: rgba(34, 197, 94, 0.2); }
+
+        /* بطاقة الأنماط (تصميم جديد - صورة واحدة + شريط داكن) */
         .patterns-card { 
             width: 100%; max-width: 600px; 
             background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.85);
             border-radius: 24px;
-            padding: 20px 20px 24px 20px;
+            padding: 20px;
             flex-shrink: 0; display: flex; flex-direction: column; gap: 16px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
         }
@@ -133,7 +146,7 @@
         .patterns-card-title { font-size: 16px; font-weight: 700; color: #1F2937; display: flex; align-items: center; gap: 8px; }
         .patterns-card-title i { color: #7B61FF; font-size: 20px; }
 
-        /* شريط التوجيه */
+        /* شريط التوجيه التعليمي */
         .patterns-guidance-strip {
             display: flex; justify-content: space-between; align-items: center;
             background: rgba(180, 83, 9, 0.06);
@@ -155,75 +168,70 @@
         .scroll-btn:active { transform: scale(0.9); }
         .scroll-btn i { font-size: 14px; }
 
-        /* شبكة عرض الأنماط (2x2) */
-        .patterns-grid-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            width: 100%;
-        }
-        .pattern-grid-item {
-            position: relative;
-            border-radius: 16px;
-            overflow: hidden;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s ease;
-            background: #ffffff;
-            aspect-ratio: 1 / 1;
+        /* صورة النمط المفردة */
+        .single-pattern-container {
             display: flex; align-items: center; justify-content: center;
+            width: 100%; min-height: 150px;
+            background: rgba(255, 255, 255, 0.3); padding: 12px;
+            border-radius: 16px; border: 1px solid rgba(0,0,0,0.03);
+            transition: all 0.3s ease;
         }
-        .pattern-grid-item img {
-            width: 100%; height: 100%; object-fit: contain; padding: 10px;
-        }
-        .pattern-grid-item.active {
-            border-color: #7B61FF;
-            box-shadow: 0 0 0 2px rgba(123, 97, 255, 0.2);
-        }
-        .pattern-grid-item:active { transform: scale(0.95); }
+        .single-pattern-img { max-width: 100%; max-height: 200px; border-radius: 12px; object-fit: contain; }
 
-        /* الشريط السفلي (أزرار الفئات + زر النسخ) */
-        .patterns-action-strip {
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 30px; padding: 4px 6px;
-            gap: 10px;
-            flex-wrap: wrap;
-            border: 1px solid rgba(0,0,0,0.03);
+        /* الشريط السفلي الجديد (تصميم داكن - أسماء فقط) */
+        .patterns-strip-container {
+            width: 100%;
+            background: #11121A; /* خلفية داكنة تشبه الصورة */
+            border-radius: 20px;
+            padding: 6px 8px;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            align-items: center;
         }
-        .category-tabs-wrapper {
-            display: flex; gap: 6px; flex-wrap: wrap;
+        .patterns-strip-container::-webkit-scrollbar { display: none; }
+        
+        .strip-btn {
+            flex-shrink: 0;
+            padding: 8px 12px;
+            border-radius: 12px;
+            background: transparent;
+            border: none;
+            color: #8B8FA0; /* لون رمادي داكن للأزرار غير النشطة */
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            min-width: 50px;
+            display: flex; align-items: center; justify-content: center;
+            white-space: nowrap;
         }
-        .category-tab-btn {
-            padding: 6px 16px; border-radius: 30px; background: transparent;
-            border: 1px solid transparent; font-size: 12px; font-weight: 600;
-            color: #6B7280; cursor: pointer; transition: all 0.2s;
+        .strip-btn:active { transform: scale(0.95); }
+        .strip-btn.active {
+            color: #7B61FF; /* اللون الأساسي للموقع عند التفعيل */
         }
-        .category-tab-btn.active {
-            background: #192f5d; color: #ffffff;
+        /* شريط الإضاءة العلوي للزر النشط */
+        .strip-btn.active::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 3px;
+            background: #7B61FF;
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(123, 97, 255, 0.6);
         }
-        .pattern-copy-wrapper {
-            display: flex; align-items: center; justify-content: flex-end; flex: 1;
-        }
-        .copy-btn { 
-            background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(123,97,255,0.1); 
-            border-radius: 30px; padding: 6px 14px; font-size: 12px; color: #6B7280; cursor: pointer; 
-            display: flex; align-items: center; gap: 4px; transition: 0.2s;
-        }
-        .copy-btn:active { transform: scale(0.9); }
-        .copy-btn.success { background: rgba(34, 197, 94, 0.1); color: #16a34a; border-color: rgba(34, 197, 94, 0.2); }
 
         @media (max-width: 600px) {
             .input-card, .patterns-card { padding: 20px 16px; max-width: 100%; border-radius: 20px; }
             .prompt-result-wrapper { min-height: 80px; max-height: 80px; padding: 12px; }
             .main-btn { width: 90%; height: 40px; font-size: 14px; }
-            .patterns-grid-container { gap: 8px; }
-            .pattern-grid-item img { padding: 6px; }
-            .patterns-action-strip { flex-direction: column; align-items: stretch; gap: 8px; padding: 8px; }
-            .pattern-copy-wrapper { justify-content: center; margin-top: 4px; }
+            .strip-btn { font-size: 12px; padding: 6px 10px; }
             .patterns-guidance-strip { padding: 4px 10px; }
-            .patterns-instruction { font-size: 11px; }
-            .scroll-btn { width: 20px; height: 20px; }
         }
     </style>
 </head>
@@ -263,7 +271,7 @@
         </header>
 
         <div class="main-container">
-            <!-- البطاقة العلوية -->
+            <!-- البطاقة العلوية (حقل الكتابة والمخرجات وزر النسخ) -->
             <div class="input-card">
                 <div class="input-header">
                     <span class="input-label">
@@ -283,9 +291,14 @@
                 <div class="prompt-result-wrapper">
                     <textarea class="prompt-result-text" id="promptResultText" readonly placeholder="سيظهر هنا المحتوى المُنشأ بعد الضغط على إنشاء"></textarea>
                 </div>
+
+                <!-- زر النسخ أسفل البطاقة العلوية -->
+                <div class="copy-wrapper">
+                    <button class="copy-btn" onclick="copyGeneratedPrompt()"><i class="bi bi-files"></i> نسخ النص</button>
+                </div>
             </div>
 
-            <!-- البطاقة السفلية (تصميم الشبكة الجديد) -->
+            <!-- البطاقة السفلية (صورة مفردة + شريط داكن) -->
             <div class="patterns-card">
                 <div class="patterns-header">
                     <span class="patterns-card-title">
@@ -296,24 +309,20 @@
                 <div class="patterns-guidance-strip">
                     <span class="patterns-instruction"><i class="bi bi-info-circle"></i> اختر أحد الأنماط من الأزرار أدناه</span>
                     <div class="scroll-arrows">
-                        <button class="scroll-btn" id="scrollLeftBtn" onclick="scrollPatterns(-100)"><i class="bi bi-chevron-right"></i></button>
-                        <button class="scroll-btn" id="scrollRightBtn" onclick="scrollPatterns(100)"><i class="bi bi-chevron-left"></i></button>
+                        <button class="scroll-btn" id="scrollLeftBtn" onclick="scrollPatterns(-60)"><i class="bi bi-chevron-right"></i></button>
+                        <button class="scroll-btn" id="scrollRightBtn" onclick="scrollPatterns(60)"><i class="bi bi-chevron-left"></i></button>
                     </div>
                 </div>
                 
-                <div class="patterns-grid-container" id="patternsGrid">
-                    <!-- سيتم توليد الأنماط هنا عبر JS -->
+                <!-- صورة النمط المفردة -->
+                <div class="single-pattern-container" id="selectedPatternContainer">
+                    <img src="" alt="صورة النمط" class="single-pattern-img" id="selectedPatternImg" style="display: none;">
+                    <span style="color:#9CA3AF; font-size: 14px;" id="noPatternMsg">اختر نمطاً لعرض صورته هنا</span>
                 </div>
 
-                <div class="patterns-action-strip">
-                    <div class="category-tabs-wrapper">
-                        <button class="category-tab-btn active">شعارات</button>
-                        <button class="category-tab-btn">بوسترات</button>
-                        <button class="category-tab-btn">نماذج</button>
-                    </div>
-                    <div class="pattern-copy-wrapper">
-                        <button class="copy-btn" onclick="copyGeneratedPrompt()"><i class="bi bi-files"></i> نسخ النص</button>
-                    </div>
+                <!-- شريط الأزرار (أسماء الأنماط فقط - تصميم داكن) -->
+                <div class="patterns-strip-container" id="patternsStrip">
+                    <!-- سيتم توليد الأنماط هنا عبر JS -->
                 </div>
             </div>
         </div>
@@ -450,7 +459,7 @@
                 if (!userId) { window.location.href = '/sign'; return; }
                 if (!userData || !userData.username) { window.location.href = '/sign'; return; }
 
-                renderPatternsGrid();
+                renderPatternsStrip();
                 updateCreditsBadge(userData.credits);
                 updateDailyGiftState();
                 updateSettingsDisplay();
@@ -500,53 +509,58 @@
                 setTimeout(() => { toast.remove(); }, duration);
             }
 
-            /* --- دوال الأنماط الجديدة --- */
-            function renderPatternsGrid() {
-                const container = document.getElementById('patternsGrid');
+            /* --- دوال الأنماط الجديدة (صورة مفردة + شريط داكن) --- */
+            function renderPatternsStrip() {
+                const container = document.getElementById('patternsStrip');
                 if (!patterns || patterns.length === 0) {
-                    container.innerHTML = '<div style="text-align:center; color:#9CA3AF; padding: 20px; grid-column: 1 / -1;">لا توجد أنماط</div>';
+                    container.innerHTML = '<div style="color:#8B8FA0; padding: 6px; font-size:13px;">لا توجد أنماط</div>';
                     return;
                 }
                 
                 container.innerHTML = patterns.map(p => `
-                    <div class="pattern-grid-item ${p.id === currentPatternId ? 'active' : ''}" onclick="selectPatternGrid(${p.id})">
-                        <img src="${p.image_url}" alt="${p.name}" title="${p.name}">
-                    </div>
+                    <button class="strip-btn ${p.id === currentPatternId ? 'active' : ''}" onclick="selectPatternStrip(${p.id})">
+                        ${p.name}
+                    </button>
                 `).join('');
 
                 if (!currentPatternId || !patterns.some(p => p.id === currentPatternId)) {
-                    selectPatternGrid(patterns[0].id);
+                    selectPatternStrip(patterns[0].id);
                 }
-                updateScrollButtons();
+                
+                updateStripScrollButtons();
             }
 
-            function selectPatternGrid(patternId) {
+            function selectPatternStrip(patternId) {
                 currentPatternId = patternId;
-                renderPatternsGrid();
-                // تحديث البيانات عند التحديد
+                
+                // تحديث الصورة المفردة
                 const p = patterns.find(p => p.id === patternId);
                 if (p) {
-                    // يمكن حفظ بيانات النمط هنا للاستخدام المستقبلي إذا لزم الأمر
+                    const img = document.getElementById('selectedPatternImg');
+                    img.src = p.image_url;
+                    img.style.display = 'block';
+                    document.getElementById('noPatternMsg').style.display = 'none';
                 }
+                
+                // تحديث حالة الأزرار في الشريط
+                renderPatternsStrip();
             }
 
             /* --- دوال التمرير --- */
-            function updateScrollButtons() {
-                const wrapper = document.getElementById('patternsGrid');
+            function updateStripScrollButtons() {
+                const container = document.getElementById('patternsStrip');
                 const leftBtn = document.getElementById('scrollLeftBtn');
                 const rightBtn = document.getElementById('scrollRightBtn');
                 
-                if (!wrapper || !leftBtn || !rightBtn) return;
+                if (!container || !leftBtn || !rightBtn) return;
 
-                // الشبكة لا تحتاج لتمرير في العادة، لكننا نحافظ على الأسهم للنص التعليمي
-                // لجعل الأسهم تعمل، سنقوم بتمرير الشبكة إذا فاضت
-                const isOverflowing = wrapper.scrollWidth > wrapper.clientWidth;
+                const isOverflowing = container.scrollWidth > container.clientWidth;
                 
                 if (isOverflowing) {
                     leftBtn.classList.add('visible');
                     rightBtn.classList.add('visible');
-                    const isAtStart = wrapper.scrollLeft <= 0;
-                    const isAtEnd = wrapper.scrollLeft >= (wrapper.scrollWidth - wrapper.clientWidth - 5);
+                    const isAtStart = container.scrollLeft <= 0;
+                    const isAtEnd = container.scrollLeft >= (container.scrollWidth - container.clientWidth - 5);
                     leftBtn.style.opacity = isAtStart ? '0.5' : '1';
                     leftBtn.style.pointerEvents = isAtStart ? 'none' : 'auto';
                     rightBtn.style.opacity = isAtEnd ? '0.5' : '1';
@@ -558,10 +572,18 @@
             }
 
             function scrollPatterns(amount) {
-                const wrapper = document.getElementById('patternsGrid');
-                if (!wrapper) return;
-                wrapper.scrollLeft += amount;
+                const container = document.getElementById('patternsStrip');
+                if (!container) return;
+                container.scrollLeft += amount;
             }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const container = document.getElementById('patternsStrip');
+                if (container) {
+                    container.addEventListener('scroll', updateStripScrollButtons);
+                    window.addEventListener('resize', updateStripScrollButtons);
+                }
+            });
 
             /* --- الإرسال والنسخ --- */
             function updateSendButton(isStreamingActive) {
