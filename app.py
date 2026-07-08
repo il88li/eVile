@@ -23,7 +23,7 @@ DATABASE_URL = "postgresql://evile_site_user:yxWlZVZsC39DhRtXoY7e84ci6NTJgcaR@dp
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-_categories_cache = {'data': None, 'timestamp': 0}
+_characters_cache = {'data': None, 'timestamp': 0}
 CACHE_TTL = 300
 
 @contextmanager
@@ -111,9 +111,7 @@ def ensure_site_settings_table(cur):
         cur.execute("INSERT INTO site_settings (status, offline_message) VALUES ('on', 'الموقع تحت الصيانة حالياً، نعتذر عن الإزعاج.')")
     logger.info("✅ Ensured site_settings table")
 
-# --- إضافة جداول الفئات والأنماط الجديدة ---
 def ensure_categories_and_patterns(cur):
-    # جدول الفئات
     cur.execute('''CREATE TABLE IF NOT EXISTS categories (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
@@ -121,7 +119,6 @@ def ensure_categories_and_patterns(cur):
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )''')
     
-    # جدول الأنماط (مرتبط بالفئات)
     cur.execute('''CREATE TABLE IF NOT EXISTS patterns (
         id SERIAL PRIMARY KEY,
         category_id INTEGER REFERENCES categories(id) ON DELETE CASCADE,
@@ -135,9 +132,6 @@ def ensure_categories_and_patterns(cur):
 def init_db():
     try:
         with get_db() as cur:
-            # حذف جداول الشخصيات القديمة لتجنب التعارض (اختياري، لكن الأفضل التعامل معها بحذر)
-            # cur.execute("DROP TABLE IF EXISTS characters") 
-            
             cur.execute('''CREATE TABLE IF NOT EXISTS notifications (
                 id SERIAL PRIMARY KEY,
                 title TEXT NOT NULL,
@@ -150,7 +144,7 @@ def init_db():
             ensure_users_table(cur)
             drop_old_telegram_id_column(cur)
             ensure_site_settings_table(cur)
-            ensure_categories_and_patterns(cur) # إضافة الجداول الجديدة
+            ensure_categories_and_patterns(cur)
             
             logger.info("Database initialized/updated successfully")
             print("✅ Database tables ensured successfully.")
@@ -177,7 +171,6 @@ def admin_required(f):
 
 @app.route('/')
 def index():
-    # جلب إعدادات الموقع
     try:
         with get_db() as cur:
             cur.execute("SELECT status, offline_message FROM site_settings LIMIT 1")
@@ -186,11 +179,9 @@ def index():
         logger.error(f"Site settings fetch error: {e}")
         site_settings = {'status': 'on', 'offline_message': 'الموقع تحت الصيانة.'}
 
-    # فحص حالة الصيانة
     if site_settings and site_settings['status'] == 'off':
         return render_template('index.html', site_status='off', offline_message=site_settings['offline_message'])
 
-    # المنطق الطبيعي للموقع
     user_id = session.get('user_id')
     if user_id: update_user_activity(user_id)
     
@@ -200,11 +191,6 @@ def index():
     
     try:
         with get_db() as cur:
-            # جلب جميع الفئات
-            cur.execute('SELECT * FROM categories ORDER BY id')
-            categories = cur.fetchall()
-            
-            # جلب جميع الأنماط (أو فقط الأنماط الخاصة بأول فئة افتراضية)
             cur.execute('SELECT * FROM patterns ORDER BY id')
             patterns = cur.fetchall()
             
@@ -219,10 +205,9 @@ def index():
                 user_data = cur.fetchone()
     except Exception as e:
         logger.error(f"Index error: {e}")
-        categories, patterns, latest_notification, latest_ad, user_data = [], [], None, None, None
+        patterns, latest_notification, latest_ad, user_data = [], None, None, None
         
     return render_template('index.html',
-                         categories=categories,
                          patterns=patterns,
                          user_id=user_id,
                          latest_notification=latest_notification,
@@ -438,8 +423,6 @@ def admin_panel():
     if session.get('logged_in'):
         try:
             with get_db() as cur:
-                cur.execute('SELECT * FROM categories ORDER BY id DESC')
-                categories = cur.fetchall()
                 cur.execute('SELECT * FROM patterns ORDER BY id DESC')
                 patterns = cur.fetchall()
                 cur.execute('SELECT * FROM notifications ORDER BY id DESC')
@@ -451,10 +434,15 @@ def admin_panel():
                 users_count = row['count'] if row else 0
                 cur.execute('SELECT * FROM site_settings LIMIT 1')
                 site_settings = cur.fetchone()
+                
+                # جلب أول فئة لاستخدامها كمعرف افتراضي عند إضافة الأنماط (لأنه تم حذف واجهة الفئات)
+                cur.execute('SELECT id FROM categories LIMIT 1')
+                default_category = cur.fetchone()
+                default_category_id = default_category['id'] if default_category else 1
         except Exception as e:
             logger.error(f"Admin panel data error: {e}")
-            categories, patterns, notifications, ads, users_count, site_settings = [], [], [], [], 0, {'status': 'on', 'offline_message': ''}
-        return render_template('admin.html', categories=categories, patterns=patterns, notifications=notifications, ads=ads, users_count=users_count, site_settings=site_settings)
+            patterns, notifications, ads, users_count, site_settings, default_category_id = [], [], [], 0, {'status': 'on', 'offline_message': ''}, 1
+        return render_template('admin.html', patterns=patterns, notifications=notifications, ads=ads, users_count=users_count, site_settings=site_settings, default_category_id=default_category_id)
     
     return render_template('admin.html')
 
@@ -463,47 +451,42 @@ def logout():
     session.clear()
     return redirect(url_for('admin_panel'))
 
-# --- مسارات إدارة الفئات ---
-@app.route('/admin/category/add', methods=['POST'])
-@admin_required
-def add_category():
-    name = request.form.get('name')
-    icon = request.form.get('icon', 'bi-robot')
-    if name:
-        try:
-            with get_db() as cur:
-                cur.execute("INSERT INTO categories (name, icon) VALUES (%s, %s)", (name, icon))
-            flash('تمت إضافة الفئة بنجاح', 'success')
-        except Exception as e:
-            flash(str(e), 'error')
-    return redirect(url_for('admin_panel'))
-
-@app.route('/admin/category/<int:cat_id>/delete')
-@admin_required
-def delete_category(cat_id):
-    try:
-        with get_db() as cur:
-            cur.execute("DELETE FROM categories WHERE id=%s", (cat_id,))
-        flash('تم حذف الفئة', 'success')
-    except Exception as e:
-        flash(str(e), 'error')
-    return redirect(url_for('admin_panel'))
-
 # --- مسارات إدارة الأنماط ---
 @app.route('/admin/pattern/add', methods=['POST'])
 @admin_required
 def add_pattern():
-    category_id = request.form.get('category_id', type=int)
     name = request.form.get('name')
     image_url = request.form.get('image_url')
     prompt = request.form.get('prompt')
     
-    if category_id and name and image_url and prompt:
+    if name and image_url and prompt:
         try:
+            # جلب أول فئة متاحة لربط النمط بها
             with get_db() as cur:
+                cur.execute("SELECT id FROM categories LIMIT 1")
+                category = cur.fetchone()
+                category_id = category['id'] if category else 1 # افتراضي 1 إذا لم توجد فئات
+                
                 cur.execute("INSERT INTO patterns (category_id, name, image_url, prompt) VALUES (%s, %s, %s, %s)",
                             (category_id, name, image_url, prompt))
             flash('تمت إضافة النمط بنجاح', 'success')
+        except Exception as e:
+            flash(str(e), 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/pattern/<int:pat_id>/edit', methods=['POST'])
+@admin_required
+def edit_pattern(pat_id):
+    name = request.form.get('name')
+    image_url = request.form.get('image_url')
+    prompt = request.form.get('prompt')
+    
+    if name and image_url and prompt:
+        try:
+            with get_db() as cur:
+                cur.execute("UPDATE patterns SET name=%s, image_url=%s, prompt=%s WHERE id=%s",
+                            (name, image_url, prompt, pat_id))
+            flash('تم تعديل النمط بنجاح', 'success')
         except Exception as e:
             flash(str(e), 'error')
     return redirect(url_for('admin_panel'))
@@ -519,7 +502,7 @@ def delete_pattern(pat_id):
         flash(str(e), 'error')
     return redirect(url_for('admin_panel'))
 
-# --- مسارات الإعلانات وإعدادات الموقع ---
+# --- مسارات الإعلانات ---
 @app.route('/admin/notification/add', methods=['POST'])
 @admin_required
 def add_notification():
@@ -617,32 +600,20 @@ def update_credits():
         logger.error(f"Update credits error: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
-# --- مسارات API للواجهة الأمامية ---
-@app.route('/api/categories')
-def api_categories():
+@app.route('/api/characters')
+def api_characters():
     now = time.time()
-    if _categories_cache['data'] and (now - _categories_cache['timestamp']) < CACHE_TTL:
-        return jsonify(_categories_cache['data'])
+    if _characters_cache['data'] and (now - _characters_cache['timestamp']) < CACHE_TTL:
+        return jsonify(_characters_cache['data'])
     try:
         with get_db() as cur:
-            cur.execute('SELECT * FROM categories ORDER BY id')
+            cur.execute('SELECT * FROM characters ORDER BY id')
             data = cur.fetchall()
-        _categories_cache['data'] = data
-        _categories_cache['timestamp'] = now
+        _characters_cache['data'] = data
+        _characters_cache['timestamp'] = now
         return jsonify(data)
     except Exception as e:
-        logger.error(f"API categories error: {e}")
-        return jsonify([])
-
-@app.route('/api/patterns_by_category/<int:cat_id>')
-def api_patterns_by_category(cat_id):
-    try:
-        with get_db() as cur:
-            cur.execute('SELECT * FROM patterns WHERE category_id=%s ORDER BY id', (cat_id,))
-            data = cur.fetchall()
-        return jsonify(data)
-    except Exception as e:
-        logger.error(f"API patterns error: {e}")
+        logger.error(f"API characters error: {e}")
         return jsonify([])
 
 @app.route('/api/notifications')
