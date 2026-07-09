@@ -15,6 +15,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
 from sqlalchemy.exc import SQLAlchemyError
+import threading
 
 from models import db, User, Category, Pattern, Notification, Ad, SiteSetting
 from config import Config
@@ -38,6 +39,7 @@ Talisman(app, force_https=False, content_security_policy={
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# ----- دوال المساعدة -----
 def hash_password(password): return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 def check_password(password, hashed): return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
@@ -56,12 +58,23 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
-@app.before_first_request
-def create_tables():
-    db.create_all()
-    if not SiteSetting.query.first(): db.session.add(SiteSetting()); db.session.commit()
-    logger.info("✅ Database ready.")
+# ----- حل مشكلة التهيئة (إصلاح before_first_request) -----
+_db_initialized = False
 
+@app.before_request
+def ensure_db_initialized():
+    global _db_initialized
+    if not _db_initialized:
+        with threading.Lock(): # تأمين ضد التنفيذ المتكرر من العمال المتعددين
+            if not _db_initialized:
+                db.create_all()
+                if not SiteSetting.query.first():
+                    db.session.add(SiteSetting())
+                    db.session.commit()
+                _db_initialized = True
+                logger.info("✅ Database initialized successfully.")
+
+# ----- مسارات المستخدم (UI) -----
 @app.route('/')
 def index():
     site = SiteSetting.query.first()
@@ -82,6 +95,7 @@ def index():
 def sign():
     return render_template('sign.html', csrf_token=generate_csrf_token())
 
+# ----- مسارات API (Signup/Login/Profiles) -----
 @app.route('/api/signup', methods=['POST'])
 @limiter.limit("5 per minute")
 def signup():
@@ -124,6 +138,7 @@ def update_user():
     db.session.commit()
     return jsonify({'success': True, 'message': 'تم التحديث'})
 
+# ----- مسارات النقاط -----
 @app.route('/api/claim_daily_gift', methods=['POST'])
 def claim_daily_gift():
     user = User.query.get(session.get('user_id'))
@@ -156,6 +171,7 @@ def deduct_credit():
         return jsonify({'success': True, 'credits': user.credits})
     return jsonify({'success': False, 'message': 'نفاذ الرصيد'}), 402
 
+# ----- مسارات البيانات والتخزين المؤقت -----
 @app.route('/api/patterns_by_category/<int:cat_id>')
 @cache.cached(timeout=300)
 def api_patterns_by_category(cat_id):
@@ -166,6 +182,7 @@ def api_patterns_by_category(cat_id):
 def api_notifications():
     return jsonify([{'id': n.id, 'title': n.title, 'text': n.text, 'created_at': n.created_at.isoformat()} for n in Notification.query.order_by(Notification.id.desc()).all()])
 
+# ----- مسار الذكاء الاصطناعي -----
 @app.route('/api/chat', methods=['POST'])
 @limiter.limit("30 per minute")
 def api_chat():
@@ -208,7 +225,7 @@ def api_chat():
         logger.error(f"Unexpected chat error: {e}"); logger.error(traceback.format_exc())
         return jsonify({'error': 'خطأ داخلي'}), 500
 
-# --- Admin Routes ---
+# ----- مسارات لوحة التحكم (Admin) -----
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_panel():
     if request.method == 'POST' and request.form.get('password') == Config.ADMIN_PASSWORD:
@@ -252,6 +269,7 @@ def update_site_settings():
     s = SiteSetting.query.first(); s.status = request.json.get('status'); s.offline_message = request.json.get('offline_message')
     db.session.commit(); return jsonify({'success': True})
 
-# ---------------------- Run ----------------------
+# ----- التشغيل -----
 if __name__ == '__main__':
+    # للتشغيل المحلي فقط
     app.run(host='0.0.0.0', port=5000, debug=False)
