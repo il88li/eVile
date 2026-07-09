@@ -86,7 +86,7 @@ def index():
         user_data.last_active = datetime.utcnow()
         db.session.commit()
         
-    # تمت إزالة العلاقة مع الفئات
+    # جلب جميع الأنماط بدون أي علاقات مع الفئات
     patterns = Pattern.query.all()
     
     notif = Notification.query.filter_by(show_in_chat=True).order_by(Notification.created_at.desc()).first()
@@ -173,9 +173,7 @@ def deduct_credit():
         return jsonify({'success': True, 'credits': user.credits})
     return jsonify({'success': False, 'message': 'نفاذ الرصيد'}), 402
 
-# ----- مسارات البيانات والتخزين المؤقت -----
-# تم حذف مسار api/patterns_by_category لأنه لم يعد موجوداً في قاعدة البيانات الجديدة
-
+# ----- مسارات البيانات والتخزين المؤقت (تم حذف مسار الفئات القديم) -----
 @app.route('/api/notifications')
 @cache.cached(timeout=120)
 def api_notifications():
