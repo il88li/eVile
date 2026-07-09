@@ -86,12 +86,22 @@ def index():
                 'last_daily_gift': user.last_daily_gift.isoformat() if user.last_daily_gift else None
             }
         
+    # تحويل الأنماط إلى قائمة قواميس لتكون قابلة للتحويل إلى JSON
     patterns = Pattern.query.all()
+    patterns_data = [
+        {
+            'id': p.id,
+            'name': p.name,
+            'image_url': p.image_url,
+            'prompt': p.prompt
+        } for p in patterns
+    ]
+    
     notif = Notification.query.filter_by(show_in_chat=True).order_by(Notification.created_at.desc()).first()
     ad = Ad.query.order_by(Ad.created_at.desc()).first()
     
     return render_template('index.html', 
-                         patterns=patterns, 
+                         patterns=patterns_data, 
                          user_id=user_id, 
                          latest_notification=notif, 
                          latest_ad=ad, 
