@@ -28,7 +28,7 @@ class Config:
     SESSION_USE_SIGNER = True
     SESSION_KEY_PREFIX = 'ufoq_session:'
 
-    # Rate Limiting
+    # Rate Limiting (تم إصلاح الاستراتيجية)
     RATELIMIT_ENABLED = True
     RATELIMIT_STORAGE_URI = REDIS_URL
-    RATELIMIT_STRATEGY = 'fixed-window-elastic-expiry'
+    RATELIMIT_STRATEGY = 'fixed-window'  # <--- تم التغيير هنا
