@@ -241,6 +241,7 @@
             .btn-copy { width: 40px; height: 40px; border-radius: 12px; background: rgba(123,97,255,0.08); border: none; color: #7B61FF; cursor: pointer; display: flex; align-items: center; justify-content: center; }
             .btn-copy:active { transform: scale(0.9); }
             .btn-save-settings { width: 100%; padding: 12px; background: #7B61FF; border: none; border-radius: 14px; color: #fff; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.2); }
+
             .credits-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(4px); z-index: 10000; display: none; justify-content: center; align-items: center; }
             .credits-modal-overlay.active { display: flex; }
             .credits-modal-box { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 24px; padding: 25px; max-width: 480px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02); display: flex; flex-direction: column; gap: 20px; }
@@ -281,19 +282,18 @@
             }
             function showToastNotification(message, duration = 10000) { const toast = document.createElement('div'); toast.className = 'toast-notification'; toast.innerText = message; document.body.appendChild(toast); setTimeout(() => { toast.remove(); }, duration); }
 
-            /* --- دوال الأنماط الجديدة (آمنة ضد XSS) --- */
+            /* --- دوال الأنماط (آمنة ضد XSS) --- */
             function renderPatternsStrip() {
                 const container = document.getElementById('patternsStrip');
                 if (!patterns || patterns.length === 0) { container.innerHTML = '<div style="color:#6B7280; padding: 6px; font-size:13px; font-weight:600;">لا توجد أنماط</div>'; return; }
                 
-                // إفراغ الحاوية وإنشاء الأزرار بشكل آمن باستخدام DOM API
                 container.innerHTML = '';
                 patterns.forEach(p => {
                     const btn = document.createElement('button');
                     btn.className = 'strip-btn' + (p.id === currentPatternId ? ' active' : '');
                     btn.setAttribute('data-id', p.id);
                     btn.onclick = function() { selectPatternStrip(p.id); };
-                    btn.textContent = p.name; // استخدام textContent يمنع تنفيذ أكواد XSS
+                    btn.textContent = p.name;
                     container.appendChild(btn);
                 });
 
@@ -313,7 +313,6 @@
                 renderPatternsStrip();
             }
 
-            /* --- دوال التمرير --- */
             function updateStripScrollButtons() {
                 const container = document.getElementById('patternsStrip'); const leftBtn = document.getElementById('scrollLeftBtn'); const rightBtn = document.getElementById('scrollRightBtn');
                 if (!container || !leftBtn || !rightBtn) return;
