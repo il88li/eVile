@@ -8,25 +8,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Tajawal', sans-serif;
-            background: linear-gradient(160deg, #f2f4f8 0%, #e1dbf5 100%);
-            min-height: 100vh;
-            padding-bottom: 90px;
-            color: #1F2937;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .glass-card, .modal-content, .pattern-card, .notification-item, .login-card, .bottom-nav {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.95);
-            box-shadow: 0 8px 32px rgba(123, 97, 255, 0.04);
-            border-radius: 18px;
-        }
+        body { font-family: 'Tajawal', sans-serif; background: linear-gradient(160deg, #f2f4f8 0%, #e1dbf5 100%); min-height: 100vh; padding-bottom: 90px; color: #1F2937; display: flex; align-items: center; justify-content: center; }
+        .glass-card, .modal-content, .pattern-card, .notification-item, .login-card, .bottom-nav { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.95); box-shadow: 0 8px 32px rgba(123, 97, 255, 0.04); border-radius: 18px; }
         .admin-container { max-width: 1200px; width: 100%; margin: 0 auto; padding: 20px; }
-        
         .login-wrapper { max-width: 420px; margin: 0 auto; width: 100%; }
         .login-card { padding: 40px 32px; text-align: center; }
         .login-icon { width: 64px; height: 64px; background: rgba(123, 97, 255, 0.08); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; border: 1px solid rgba(123,97,255,0.15); }
@@ -35,106 +19,35 @@
         .login-subtitle { color: #6B7280; font-size: 14px; }
         .form-group { margin-bottom: 24px; text-align: right; }
         label { display: block; margin-bottom: 8px; color: #6B7280; font-weight: 500; font-size: 14px; }
-        input, textarea, select {
-            width: 100%; padding: 12px 16px;
-            background: rgba(243, 244, 246, 0.8);
-            border: 1px solid rgba(123,97,255,0.1);
-            border-radius: 12px;
-            color: #1F2937;
-            font-family: 'Tajawal', sans-serif;
-            font-size: 14px; outline: none;
-        }
+        input, textarea, select { width: 100%; padding: 12px 16px; background: rgba(243, 244, 246, 0.8); border: 1px solid rgba(123,97,255,0.1); border-radius: 12px; color: #1F2937; font-family: 'Tajawal', sans-serif; font-size: 14px; outline: none; }
         input:focus, textarea:focus { border-color: #7B61FF; background: #ffffff; }
         textarea { min-height: 80px; resize: vertical; }
-        .btn {
-            padding: 10px 20px;
-            background: rgba(243, 244, 246, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            border-radius: 40px;
-            color: #6B7280;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
+        .btn { padding: 10px 20px; background: rgba(243, 244, 246, 0.8); border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 40px; color: #6B7280; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
         .btn-primary { background: #7B61FF; border-color: #7B61FF; color: #fff; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.2); }
         .btn-danger { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #dc2626; }
-        .btn-success { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.2); color: #16a34a; }
         .btn:active { transform: scale(0.96); }
         .btn-login { width: 100%; padding: 14px; font-size: 16px; }
-        
         .flash { padding: 12px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 14px; color: #dc2626; margin-bottom: 24px; text-align: center; font-size: 14px; }
         .flash.success { background: rgba(34,197,94,0.05); border-color: rgba(34,197,94,0.1); color: #16a34a; }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            z-index: 999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.95);
-            border-radius: 16px;
-            max-width: 700px;
-            margin: 0 auto;
-            overflow-x: auto;
-            gap: 8px;
-            flex-wrap: nowrap;
-            scrollbar-width: none;
-            box-shadow: 0 8px 32px rgba(123, 97, 255, 0.03);
-        }
+        .bottom-nav { position: fixed; bottom: 20px; left: 20px; right: 20px; z-index: 999; display: flex; justify-content: center; align-items: center; padding: 8px 12px; background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.95); border-radius: 16px; max-width: 700px; margin: 0 auto; overflow-x: auto; gap: 8px; flex-wrap: nowrap; scrollbar-width: none; box-shadow: 0 8px 32px rgba(123, 97, 255, 0.03); }
         .bottom-nav::-webkit-scrollbar { display: none; }
-        .bottom-nav-btn {
-            flex-shrink: 0;
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            background: rgba(243, 244, 246, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            color: #6B7280;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .bottom-nav-btn.active {
-            background: #7B61FF;
-            border-color: #7B61FF;
-            color: #fff;
-            box-shadow: 0 4px 15px rgba(123, 97, 255, 0.2);
-        }
+        .bottom-nav-btn { flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px; background: rgba(243, 244, 246, 0.8); border: 1px solid rgba(255, 255, 255, 0.9); color: #6B7280; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+        .bottom-nav-btn.active { background: #7B61FF; border-color: #7B61FF; color: #fff; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.2); }
         .bottom-nav-btn:active { transform: scale(0.85); }
-
         .tab-content { display: none; padding: 20px; margin-top: 10px; }
         .tab-content.active { display: block; }
         .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-right: 12px; border-right: 3px solid rgba(123,97,255,0.2); display: flex; align-items: center; gap: 8px; color: #1F2937; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
-        
         .pattern-card { padding: 12px; margin-bottom: 10px; }
         .pattern-header { display: flex; align-items: center; gap: 10px; }
         .pattern-img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(123,97,255,0.1); }
         .pattern-name { font-weight: 700; color: #1F2937; font-size: 14px; }
         .pattern-meta { font-size: 11px; color: #6B7280; }
         .card-actions { display: flex; gap: 8px; }
-        
         .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
         .modal-content { padding: 20px; max-width: 500px; width: 100%; }
-        
-        @media (max-width: 600px) {
-            .bottom-nav { padding: 6px; gap: 6px; border-radius: 12px; }
-            .bottom-nav-btn { width: 38px; height: 38px; font-size: 16px; }
-        }
+        @media (max-width: 600px) { .bottom-nav { padding: 6px; gap: 6px; border-radius: 12px; } .bottom-nav-btn { width: 38px; height: 38px; font-size: 16px; } }
     </style>
 </head>
 <body>
@@ -142,13 +55,19 @@
         {% if session.get('logged_in') %}
             <div style="height: 20px;"></div>
 
-            <!-- تم حذف تبويب الفئات -->
-
             <div id="tab-patterns" class="tab-content active glass-card">
                 <div class="section-title"><i class="bi bi-plus-circle" style="color:#7B61FF;"></i> إضافة نمط جديد</div>
                 <form method="POST" action="/admin/pattern/add">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <div class="form-grid">
-                        <!-- تم حذف حقل اختيار الفئة -->
+                        <div class="form-group"><label>الفئة التابعة</label>
+                            <select name="category_id" required>
+                                <option value="">اختر الفئة...</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                         <div class="form-group"><label>اسم النمط</label><input type="text" name="name" required></div>
                         <div class="form-group"><label>رابط صورة النمط</label><input type="url" name="image_url" required placeholder="https://example.com/image.png"></div>
                         <div class="form-group"><label>البرومبت (بدون وصف)</label><textarea name="prompt" required></textarea></div>
@@ -168,7 +87,6 @@
                             </div>
                         </div>
                         <div class="card-actions" style="margin-top: 8px;">
-                            <button class="btn btn-success" onclick="openEditPatternModal({{ pat.id }}, '{{ pat.name }}', '{{ pat.image_url }}', `{{ pat.prompt|replace('`', '\\`') }}`)"><i class="bi bi-pencil-square"></i> تعديل</button>
                             <button class="btn btn-danger" onclick="if(confirm('حذف النمط؟')) location.href='/admin/pattern/{{ pat.id }}/delete'"><i class="bi bi-trash3"></i> حذف</button>
                         </div>
                     </div>
@@ -179,6 +97,7 @@
             <div id="tab-notifications" class="tab-content glass-card">
                 <div class="section-title"><i class="bi bi-send" style="color:#7B61FF;"></i> إرسال إشعار جديد</div>
                 <form method="POST" action="/admin/notification/add">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <div class="form-group"><label>العنوان</label><input type="text" name="title" required></div>
                     <div class="form-group"><label>النص</label><textarea name="text" required></textarea></div>
                     <div class="form-group"><label>مدة الظهور (ساعات)</label><input type="number" name="duration_hours" value="1" min="1" step="1"></div>
@@ -235,23 +154,6 @@
                 </div>
             </div>
 
-            <!-- نافذة تعديل الأنماط الجديدة -->
-            <div id="editPatternModal" class="modal">
-                <div class="modal-content glass-card">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
-                        <h3 style="color:#1F2937;"><i class="bi bi-pencil-square" style="color:#7B61FF;"></i> تعديل النمط</h3>
-                        <button onclick="closeEditPatternModal()" style="background:none; border:none; font-size:20px; color:#6B7280;"><i class="bi bi-x-lg"></i></button>
-                    </div>
-                    <form method="POST" id="editPatternForm">
-                        <div class="form-group"><label>اسم النمط</label><input type="text" name="name" id="editPatternName" required></div>
-                        <div class="form-group"><label>رابط صورة النمط</label><input type="url" name="image_url" id="editPatternImage" required></div>
-                        <div class="form-group"><label>البرومبت</label><textarea name="prompt" id="editPatternPrompt" required></textarea></div>
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> حفظ التعديلات</button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- الشريط السفلي (تم حذف زر الفئات) -->
             <div class="bottom-nav" id="bottomNav">
                 <button class="bottom-nav-btn active" data-tab="patterns"><i class="bi bi-grid"></i></button>
                 <button class="bottom-nav-btn" data-tab="notifications"><i class="bi bi-bell"></i></button>
@@ -295,23 +197,6 @@
             });
         });
 
-        // دوال تعديل الأنماط
-        function openEditPatternModal(id, name, image, prompt) {
-            document.getElementById('editPatternForm').action = `/admin/pattern/${id}/edit`;
-            document.getElementById('editPatternName').value = name;
-            document.getElementById('editPatternImage').value = image;
-            document.getElementById('editPatternPrompt').value = prompt;
-            document.getElementById('editPatternModal').classList.add('active');
-        }
-        function closeEditPatternModal() {
-            document.getElementById('editPatternModal').classList.remove('active');
-        }
-        window.onclick = function(e) {
-            const modal = document.getElementById('editPatternModal');
-            if (e.target === modal) closeEditPatternModal();
-        }
-
-        // شحن النقاط
         async function rechargeCredits() {
             const username = document.getElementById('rechargeUsername').value.trim();
             const amount = parseInt(document.getElementById('rechargeAmount').value);
@@ -347,7 +232,6 @@
             }
         }
 
-        // حفظ إعدادات الموقع
         async function saveSiteSettings() {
             const icon = document.getElementById('siteStatusIcon');
             const label = document.getElementById('siteStatusLabel');
@@ -368,7 +252,8 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         status: newStatus,
-                        offline_message: messageInput.value
+                        offline_message: messageInput.value,
+                        csrf_token: '{{ csrf_token }}'
                     })
                 });
                 const data = await res.json();
