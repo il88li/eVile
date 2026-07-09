@@ -17,16 +17,7 @@
             height: 100vh; height: 100dvh;
             position: relative;
         }
-
-        /* --- شاشة التوقف (OFF) --- */
-        .offline-container {
-            width: 100%; height: 100vh; height: 100dvh;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            text-align: center; padding: 20px;
-            background: linear-gradient(160deg, #f2f4f8 0%, #e1dbf5 100%);
-            color: #1F2937;
-        }
+        .offline-container { width: 100%; height: 100vh; height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; background: linear-gradient(160deg, #f2f4f8 0%, #e1dbf5 100%); color: #1F2937; }
         .offline-icon { font-size: 64px; color: #7B61FF; margin-bottom: 20px; animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
         .offline-title { font-size: 28px; font-weight: 800; margin-bottom: 10px; color: #1F2937; }
@@ -38,177 +29,54 @@
         .offline-socials a { color: #6B7280; transition: all 0.2s; background: rgba(255,255,255,0.6); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(123,97,255,0.1); text-decoration: none; }
         .offline-socials a:active { transform: scale(0.9); }
 
-        /* --- واجهة التوليد (ON) --- */
-        .main-container { 
-            width: 100%; height: 100vh; height: 100dvh; 
-            display: flex; flex-direction: column; 
-            align-items: center; 
-            padding: 80px 16px 30px 16px;
-            position: relative;
-            gap: 14px; /* تقليل الفجوة بين البطاقات */
-        }
-        
-        /* الهيدر العلوي */
-        .floating-header {
-            position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100;
-            display: flex; align-items: center; justify-content: space-between; padding: 6px 12px;
-            max-width: 700px; margin: 0 auto; border-radius: 24px;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            gap: 8px;
-        }
+        .main-container { width: 100%; height: 100vh; height: 100dvh; display: flex; flex-direction: column; align-items: center; padding: 80px 16px 30px 16px; position: relative; gap: 14px; }
+        .floating-header { position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 6px 12px; max-width: 700px; margin: 0 auto; border-radius: 24px; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.9); gap: 8px; }
         .header-left, .header-right { display: flex; align-items: center; gap: 6px; }
         .header-center { position: absolute; left: 50%; transform: translateX(-50%); font-size: 18px; font-weight: 900; color: #1F2937; letter-spacing: 2px; white-space: nowrap; }
-        .header-btn {
-            width: 34px; height: 34px; border-radius: 12px;
-            background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.9);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s; color: #6B7280; text-decoration: none;
-        }
+        .header-btn { width: 34px; height: 34px; border-radius: 12px; background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.9); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: #6B7280; text-decoration: none; }
         .header-btn:active { transform: scale(0.9); }
         .header-btn i { font-size: 16px; }
         .header-btn.special { background: rgba(123, 97, 255, 0.08); color: #7B61FF; border-color: rgba(123,97,255,0.1); }
         .header-btn.telegram { color: #0088cc; }
         .header-btn.instagram { color: #e4405f; }
-        .active-users-dot {
-            display: flex; align-items: center; gap: 4px;
-            font-size: 11px; color: #6B7280; font-weight: 600;
-            background: rgba(255,255,255,0.6); padding: 4px 10px; border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            white-space: nowrap;
-        }
+        .active-users-dot { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #6B7280; font-weight: 600; background: rgba(255,255,255,0.6); padding: 4px 10px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.9); white-space: nowrap; }
         .active-users-dot i { font-size: 13px; color: #7B61FF; }
 
-        /* بطاقة الإدخال والمخرجات (تم تقليل الحواف العمودية) */
-        .input-card { 
-            width: 100%; max-width: 600px;
-            background: rgba(255, 255, 255, 0.65);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.85);
-            border-radius: 24px;
-            padding: 16px 20px; /* تم تصغير الحواشي الداخلية */
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
-            flex-shrink: 0; display: flex; flex-direction: column; gap: 12px;
-        }
+        .input-card { width: 100%; max-width: 600px; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.85); border-radius: 24px; padding: 16px 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04); flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
         .input-header { display: flex; justify-content: space-between; align-items: center; }
         .input-label { font-size: 16px; font-weight: 700; color: #1F2937; display: flex; align-items: center; gap: 6px; }
         .input-label i { color: #7B61FF; }
         .credits-badge { background: rgba(123, 97, 255, 0.08); padding: 4px 14px; border-radius: 30px; font-size: 13px; color: #7B61FF; font-weight: 600; border: 1px solid rgba(123,97,255,0.1); cursor: pointer; transition: 0.2s; }
         .credits-badge:active { transform: scale(0.95); }
-        .textarea-wrapper { 
-            background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(0,0,0,0.03); 
-            border-radius: 16px; padding: 0 18px; height: 52px; min-height: 52px; max-height: 52px; 
-            display: flex; align-items: center;
-        }
-        .message-input { 
-            width: 100%; background: transparent; border: none; font-family: 'Tajawal', sans-serif; font-size: 15px; outline: none; color: #1F2937; 
-            height: 100%; resize: none; overflow-y: auto; text-align: right; padding: 0; line-height: 1.5; display: flex; align-items: center; 
-        }
+        .textarea-wrapper { background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(0,0,0,0.03); border-radius: 16px; padding: 0 18px; height: 52px; min-height: 52px; max-height: 52px; display: flex; align-items: center; }
+        .message-input { width: 100%; background: transparent; border: none; font-family: 'Tajawal', sans-serif; font-size: 15px; outline: none; color: #1F2937; height: 100%; resize: none; overflow-y: auto; text-align: right; padding: 0; line-height: 1.5; display: flex; align-items: center; }
         .message-input::placeholder { color: #9CA3AF; }
         .main-btn { width: 80%; max-width: 300px; height: 44px; margin: 0 auto; display: block; background: #7B61FF; border: none; border-radius: 30px; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.2s; box-shadow: 0 6px 20px rgba(123, 97, 255, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
         .main-btn:active { transform: scale(0.96); }
         .main-btn.stop-btn { background: #ef4444; box-shadow: none; }
-
-        .prompt-result-wrapper { 
-            padding: 16px 20px; display: flex; flex-direction: column; 
-            min-height: 100px; max-height: 120px; overflow-y: auto;
-            border-radius: 16px; background: rgba(255, 255, 255, 0.35); border: 1px solid rgba(0,0,0,0.03);
-        }
+        .prompt-result-wrapper { padding: 16px 20px; display: flex; flex-direction: column; min-height: 100px; max-height: 120px; overflow-y: auto; border-radius: 16px; background: rgba(255, 255, 255, 0.35); border: 1px solid rgba(0,0,0,0.03); }
         .prompt-result-text { font-size: 14px; color: #1F2937; line-height: 1.6; width: 100%; background: transparent; border: none; resize: none; outline: none; font-family: 'Tajawal', sans-serif; height: 100%; text-align: center; }
         .prompt-result-text::placeholder { color: #9CA3AF; }
-
-        /* زر النسخ */
         .copy-wrapper { display: flex; justify-content: flex-end; margin-top: -4px; }
-        .copy-btn { 
-            background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(123,97,255,0.1); 
-            border-radius: 30px; padding: 6px 14px; font-size: 12px; color: #6B7280; cursor: pointer; 
-            display: flex; align-items: center; gap: 4px; transition: 0.2s;
-        }
+        .copy-btn { background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(123,97,255,0.1); border-radius: 30px; padding: 6px 14px; font-size: 12px; color: #6B7280; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: 0.2s; }
         .copy-btn:active { transform: scale(0.9); }
         .copy-btn.success { background: rgba(34, 197, 94, 0.1); color: #16a34a; border-color: rgba(34, 197, 94, 0.2); }
 
-        /* بطاقة الأنماط (تم تقليل الحواف العمودية وحذف العنوان العلوي) */
-        .patterns-card { 
-            width: 100%; max-width: 600px; 
-            background: rgba(255, 255, 255, 0.65);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.85);
-            border-radius: 24px;
-            padding: 16px 20px; /* تم تصغير الحواشي الداخلية */
-            flex-shrink: 0; display: flex; flex-direction: column; gap: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
-        }
-
-        /* شريط التوجيه التعليمي */
-        .patterns-guidance-strip {
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(180, 83, 9, 0.06);
-            border: 1px solid rgba(180, 83, 9, 0.12);
-            border-radius: 30px;
-            padding: 4px 14px;
-        }
-        .patterns-instruction {
-            font-size: 12px; color: #B45309; font-weight: 500; display: flex; align-items: center; gap: 4px;
-        }
+        .patterns-card { width: 100%; max-width: 600px; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.85); border-radius: 24px; padding: 16px 20px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04); }
+        .patterns-guidance-strip { display: flex; justify-content: space-between; align-items: center; background: rgba(180, 83, 9, 0.06); border: 1px solid rgba(180, 83, 9, 0.12); border-radius: 30px; padding: 4px 14px; }
+        .patterns-instruction { font-size: 12px; color: #B45309; font-weight: 500; display: flex; align-items: center; gap: 4px; }
         .scroll-arrows { display: flex; gap: 6px; }
-        .scroll-btn {
-            width: 24px; height: 24px; border-radius: 50%;
-            background: rgba(180, 83, 9, 0.08); border: 1px solid rgba(180, 83, 9, 0.15);
-            color: #B45309; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s; opacity: 0.5; pointer-events: none;
-        }
+        .scroll-btn { width: 24px; height: 24px; border-radius: 50%; background: rgba(180, 83, 9, 0.08); border: 1px solid rgba(180, 83, 9, 0.15); color: #B45309; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; opacity: 0.5; pointer-events: none; }
         .scroll-btn.visible { opacity: 1; pointer-events: auto; }
         .scroll-btn:active { transform: scale(0.9); }
         .scroll-btn i { font-size: 14px; }
-
-        /* صورة النمط المفردة */
-        .single-pattern-container {
-            display: flex; align-items: center; justify-content: center;
-            width: 100%; min-height: 140px;
-            background: rgba(255, 255, 255, 0.3); padding: 8px;
-            border-radius: 16px; border: 1px solid rgba(0,0,0,0.03);
-            transition: all 0.3s ease;
-        }
+        .single-pattern-container { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 140px; background: rgba(255, 255, 255, 0.3); padding: 8px; border-radius: 16px; border: 1px solid rgba(0,0,0,0.03); transition: all 0.3s ease; }
         .single-pattern-img { max-width: 100%; max-height: 200px; border-radius: 12px; object-fit: contain; }
-
-        /* الشريط السفلي الجديد (ألوان الموقع - بنفسجي فاتح مع زر بنفسجي غامق) */
-        .patterns-strip-container {
-            width: 100%;
-            background: #F5F3FF; /* لون بنفسجي فاتح جداً من الموقع */
-            border: 1px solid rgba(123, 97, 255, 0.12);
-            border-radius: 16px;
-            padding: 6px 8px;
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            scrollbar-width: none;
-            align-items: center;
-        }
+        .patterns-strip-container { width: 100%; background: #F5F3FF; border: 1px solid rgba(123, 97, 255, 0.12); border-radius: 16px; padding: 6px 8px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; align-items: center; }
         .patterns-strip-container::-webkit-scrollbar { display: none; }
-        
-        .strip-btn {
-            flex-shrink: 0;
-            padding: 8px 16px;
-            border-radius: 12px;
-            background: transparent;
-            border: none;
-            color: #6B7280; /* لون رمادي داكن للأزرار غير النشطة */
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            min-width: 50px;
-            display: flex; align-items: center; justify-content: center;
-            white-space: nowrap;
-        }
+        .strip-btn { flex-shrink: 0; padding: 8px 16px; border-radius: 12px; background: transparent; border: none; color: #6B7280; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; min-width: 50px; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
         .strip-btn:active { transform: scale(0.95); }
-        .strip-btn.active {
-            background: #7B61FF; /* اللون الأساسي للموقع */
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(123, 97, 255, 0.3);
-        }
-
+        .strip-btn.active { background: #7B61FF; color: #ffffff; box-shadow: 0 4px 12px rgba(123, 97, 255, 0.3); }
         @media (max-width: 600px) {
             .input-card, .patterns-card { padding: 14px 16px; max-width: 100%; border-radius: 20px; }
             .prompt-result-wrapper { min-height: 80px; max-height: 80px; padding: 12px; }
@@ -220,9 +88,7 @@
     </style>
 </head>
 <body>
-
     {% if site_status == 'off' %}
-        <!-- شاشة التوقف -->
         <div class="offline-container">
             <div class="offline-icon"><i class="bi bi-tools"></i></div>
             <h1 class="offline-title">الموقع متوقف مؤقتاً</h1>
@@ -236,8 +102,6 @@
             </div>
         </div>
     {% else %}
-        
-        <!-- الهيدر العلوي -->
         <header class="floating-header">
             <div class="header-left">
                 <div class="header-btn special" onclick="openSettingsSheet()"><i class="bi bi-gear"></i></div>
@@ -255,37 +119,24 @@
         </header>
 
         <div class="main-container">
-            <!-- البطاقة العلوية -->
             <div class="input-card">
                 <div class="input-header">
-                    <span class="input-label">
-                        <i class="bi bi-pencil"></i> اصنع محتواك الان
-                    </span>
+                    <span class="input-label"><i class="bi bi-pencil"></i> اصنع محتواك الان</span>
                     <span class="credits-badge" id="creditsBadge" onclick="openCreditsModal()"><i class="bi bi-stars"></i> 0 نقاط</span>
                 </div>
-                
                 <div class="textarea-wrapper">
                     <textarea class="message-input" id="mainInput" placeholder="اكتب ماتريد لـ كاتب إعلانات..." rows="1"></textarea>
                 </div>
-
-                <button class="main-btn" id="mainSendBtn" onclick="handleSendWelcome()">
-                    <i class="bi bi-stars"></i> إنشاء
-                </button>
-
+                <button class="main-btn" id="mainSendBtn" onclick="handleSendWelcome()"><i class="bi bi-stars"></i> إنشاء</button>
                 <div class="prompt-result-wrapper">
                     <textarea class="prompt-result-text" id="promptResultText" readonly placeholder="سيظهر هنا المحتوى المُنشأ بعد الضغط على إنشاء"></textarea>
                 </div>
-
-                <!-- زر النسخ -->
                 <div class="copy-wrapper">
                     <button class="copy-btn" onclick="copyGeneratedPrompt()"><i class="bi bi-files"></i> نسخ النص</button>
                 </div>
             </div>
 
-            <!-- البطاقة السفلية (تصميم جديد مع شريط ألوان الموقع) -->
             <div class="patterns-card">
-                <!-- تم حذف عنوان "اختر نمطاً" لتوفير المساحة -->
-                
                 <div class="patterns-guidance-strip">
                     <span class="patterns-instruction"><i class="bi bi-info-circle"></i> اختر أحد الأنماط من الأزرار أدناه</span>
                     <div class="scroll-arrows">
@@ -293,21 +144,15 @@
                         <button class="scroll-btn" id="scrollRightBtn" onclick="scrollPatterns(60)"><i class="bi bi-chevron-left"></i></button>
                     </div>
                 </div>
-                
-                <!-- صورة النمط المفردة -->
                 <div class="single-pattern-container" id="selectedPatternContainer">
                     <img src="" alt="صورة النمط" class="single-pattern-img" id="selectedPatternImg" style="display: none;">
                     <span style="color:#9CA3AF; font-size: 14px;" id="noPatternMsg">اختر نمطاً لعرض صورته هنا</span>
                 </div>
-
-                <!-- شريط الأزرار (أسماء الأنماط فقط - ألوان الموقع) -->
                 <div class="patterns-strip-container" id="patternsStrip">
-                    <!-- سيتم توليد الأنماط هنا عبر JS -->
                 </div>
             </div>
         </div>
 
-        <!-- نافذة الإعدادات الجانبية -->
         <div class="bottom-sheet-overlay" id="settingsSheet" onclick="closeSheetOnBackdrop(event, 'settingsSheet')">
             <div class="bottom-sheet" onclick="event.stopPropagation()">
                 <div class="sheet-header">
@@ -333,7 +178,6 @@
                         <i class="bi bi-gift-fill" style="color: #7B61FF;"></i> نقاطك: <strong id="settingsCreditsDisplay" style="color: #1F2937;">0</strong>
                     </div>
                     <button class="btn-save-settings" onclick="updateSettings()" style="background: #7B61FF; color: #fff; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.3);"><i class="bi bi-check-lg"></i> تحديث بياناتي</button>
-                    
                     <div style="margin-top: 15px; border-top: 1px solid rgba(123,97,255,0.1); padding-top: 15px; display: flex; justify-content: center; gap: 15px; font-size: 20px;">
                         <a href="https://t.me/Evile_Prompts" target="_blank" style="color: #7B61FF;"><i class="bi bi-telegram"></i></a>
                         <a href="https://www.instagram.com/bla6c7" target="_blank" style="color: #7B61FF;"><i class="bi bi-instagram"></i></a>
@@ -343,33 +187,23 @@
             </div>
         </div>
 
-        <!-- نافذة النقاط -->
         <div class="credits-modal-overlay" id="creditsModal" onclick="closeCreditsModalOnBackdrop(event)">
             <div class="credits-modal-box" onclick="event.stopPropagation()">
                 <div style="background: rgba(255,255,255,0.8); border-radius: 20px; padding: 20px; border: 1px solid rgba(123,97,255,0.1); text-align: center;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <div style="font-weight: 700; font-size: 16px; color: #1F2937;">
-                            <i class="bi bi-gift-fill" style="color: #7B61FF; margin-left: 6px;"></i> هدية يومية
-                        </div>
+                        <div style="font-weight: 700; font-size: 16px; color: #1F2937;"><i class="bi bi-gift-fill" style="color: #7B61FF; margin-left: 6px;"></i> هدية يومية</div>
                         <span style="font-size: 12px; color: #6B7280;">+ 3 نقاط</span>
                     </div>
-                    <button id="dailyGiftBtn" onclick="claimDailyGift()" style="width: 100%; padding: 10px; border: none; border-radius: 30px; background: #7B61FF; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.3);">
-                        <i class="bi bi-stars"></i> الحصول
-                    </button>
+                    <button id="dailyGiftBtn" onclick="claimDailyGift()" style="width: 100%; padding: 10px; border: none; border-radius: 30px; background: #7B61FF; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.3);"><i class="bi bi-stars"></i> الحصول</button>
                     <div id="dailyGiftStatus" style="margin-top: 8px; font-size: 12px; color: #6B7280; display: none;">تم استلام الهدية اليوم!</div>
                 </div>
-
                 <div style="background: rgba(255,255,255,0.8); border-radius: 20px; padding: 20px; border: 1px solid rgba(123,97,255,0.1);">
-                    <div style="font-weight: 700; font-size: 16px; color: #1F2937; margin-bottom: 12px; text-align: center;">
-                        <i class="bi bi-arrow-left-right" style="color: #7B61FF; margin-left: 6px;"></i> تحويل النقاط
-                    </div>
+                    <div style="font-weight: 700; font-size: 16px; color: #1F2937; margin-bottom: 12px; text-align: center;"><i class="bi bi-arrow-left-right" style="color: #7B61FF; margin-left: 6px;"></i> تحويل النقاط</div>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <input type="text" id="transferTarget" placeholder="اسم المستخدم" style="padding: 10px 14px; border: 1px solid rgba(123,97,255,0.1); border-radius: 12px; background: rgba(255,255,255,0.9); font-family: inherit; outline: none; width: 100%; color: #1F2937;">
                         <div style="display: flex; gap: 10px;">
                             <input type="number" id="transferAmount" placeholder="عدد النقاط" min="1" value="1" style="padding: 10px 14px; border: 1px solid rgba(123,97,255,0.1); border-radius: 12px; background: rgba(255,255,255,0.9); font-family: inherit; outline: none; width: 50%; color: #1F2937;">
-                            <button onclick="transferCredits()" style="flex: 1; padding: 10px; border: none; border-radius: 30px; background: #7B61FF; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.3);">
-                                <i class="bi bi-send"></i> إرسال
-                            </button>
+                            <button onclick="transferCredits()" style="flex: 1; padding: 10px; border: none; border-radius: 30px; background: #7B61FF; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.3);"><i class="bi bi-send"></i> إرسال</button>
                         </div>
                     </div>
                     <div id="transferStatus" style="margin-top: 10px; font-size: 12px; text-align: center; display: none;"></div>
@@ -378,14 +212,11 @@
             </div>
         </div>
 
-        <!-- نافذة نفاذ النقاط -->
         <div class="credits-modal-overlay" id="noCreditsModal" onclick="closeNoCreditsModalOnBackdrop(event)">
             <div class="credits-modal-box" style="max-width: 380px;" onclick="event.stopPropagation()">
                 <i class="bi bi-exclamation-triangle-fill" style="font-size: 50px; color: #ef4444; margin-bottom: 15px; display: block;"></i>
                 <h2 style="font-size: 22px; font-weight: 800; color: #1F2937; margin-bottom: 10px;">بلغت حدك المسموح</h2>
-                <p style="font-size: 14px; color: #6B7280; line-height: 1.6; margin-bottom: 25px;">
-                    لقد استنفذت جميع نقاطك المجانية. للحصول على المزيد من التوليدات ومواصلة الإبداع، يرجى التواصل معنا.
-                </p>
+                <p style="font-size: 14px; color: #6B7280; line-height: 1.6; margin-bottom: 25px;">لقد استنفذت جميع نقاطك المجانية. للحصول على المزيد من التوليدات ومواصلة الإبداع، يرجى التواصل معنا.</p>
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
                     <a href="https://wa.me/967730577358" target="_blank" style="display: block; width: 100%; padding: 12px; border-radius: 14px; color: #fff; font-weight: 700; text-decoration: none; background: #25d366; text-align: center;">واتساب</a>
                     <a href="https://t.me/OlIiIl7" target="_blank" style="display: block; width: 100%; padding: 12px; border-radius: 14px; color: #fff; font-weight: 700; text-decoration: none; background: #7B61FF; text-align: center;">تلجرام</a>
@@ -410,7 +241,6 @@
             .btn-copy { width: 40px; height: 40px; border-radius: 12px; background: rgba(123,97,255,0.08); border: none; color: #7B61FF; cursor: pointer; display: flex; align-items: center; justify-content: center; }
             .btn-copy:active { transform: scale(0.9); }
             .btn-save-settings { width: 100%; padding: 12px; background: #7B61FF; border: none; border-radius: 14px; color: #fff; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.2); }
-
             .credits-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(4px); z-index: 10000; display: none; justify-content: center; align-items: center; }
             .credits-modal-overlay.active { display: flex; }
             .credits-modal-box { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 24px; padding: 25px; max-width: 480px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02); display: flex; flex-direction: column; gap: 20px; }
@@ -429,7 +259,6 @@
             const latestNotification = {{ latest_notification|tojson }};
             const latestAd = {{ latest_ad|tojson }};
             let userData = {{ user_data|tojson }};
-
             let currentPatternId = null;
             let isProcessing = false;
             let isStreaming = false;
@@ -438,82 +267,42 @@
             function initScreen() {
                 if (!userId) { window.location.href = '/sign'; return; }
                 if (!userData || !userData.username) { window.location.href = '/sign'; return; }
-
-                renderPatternsStrip();
-                updateCreditsBadge(userData.credits);
-                updateDailyGiftState();
-                updateSettingsDisplay();
-
-                if (latestNotification && latestNotification.show_in_chat) {
-                    showToastNotification(latestNotification.title + ': ' + latestNotification.text, 10000);
-                }
+                renderPatternsStrip(); updateCreditsBadge(userData.credits); updateDailyGiftState(); updateSettingsDisplay();
+                if (latestNotification && latestNotification.show_in_chat) { showToastNotification(latestNotification.title + ': ' + latestNotification.text, 10000); }
             }
-
-            function updateCreditsBadge(credits) {
-                document.getElementById('creditsBadge').innerHTML = `<i class="bi bi-stars"></i> ${credits} نقاط`;
-                document.getElementById('settingsCreditsDisplay').textContent = credits;
-            }
-
-            function updateSettingsDisplay() {
-                document.getElementById('settingsUsername').value = userData.username || '';
-            }
-
+            function updateCreditsBadge(credits) { document.getElementById('creditsBadge').innerHTML = `<i class="bi bi-stars"></i> ${credits} نقاط`; document.getElementById('settingsCreditsDisplay').textContent = credits; }
+            function updateSettingsDisplay() { document.getElementById('settingsUsername').value = userData.username || ''; }
             function updateDailyGiftState() {
-                const btn = document.getElementById('dailyGiftBtn');
-                const statusMsg = document.getElementById('dailyGiftStatus');
+                const btn = document.getElementById('dailyGiftBtn'); const statusMsg = document.getElementById('dailyGiftStatus');
                 if (!userData) return;
-
-                const lastGift = userData.last_daily_gift;
-                const today = new Date().toISOString().split('T')[0];
-
-                if (lastGift === today) {
-                    btn.style.background = '#9CA3AF';
-                    btn.style.cursor = 'default';
-                    btn.innerHTML = '<i class="bi bi-check-circle"></i> تم الاستلام';
-                    btn.disabled = true;
-                    statusMsg.style.display = 'block';
-                } else {
-                    btn.style.background = '#7B61FF';
-                    btn.style.cursor = 'pointer';
-                    btn.innerHTML = '<i class="bi bi-stars"></i> الحصول';
-                    btn.disabled = false;
-                    statusMsg.style.display = 'none';
-                }
+                const lastGift = userData.last_daily_gift; const today = new Date().toISOString().split('T')[0];
+                if (lastGift === today) { btn.style.background = '#9CA3AF'; btn.style.cursor = 'default'; btn.innerHTML = '<i class="bi bi-check-circle"></i> تم الاستلام'; btn.disabled = true; statusMsg.style.display = 'block'; } 
+                else { btn.style.background = '#7B61FF'; btn.style.cursor = 'pointer'; btn.innerHTML = '<i class="bi bi-stars"></i> الحصول'; btn.disabled = false; statusMsg.style.display = 'none'; }
             }
+            function showToastNotification(message, duration = 10000) { const toast = document.createElement('div'); toast.className = 'toast-notification'; toast.innerText = message; document.body.appendChild(toast); setTimeout(() => { toast.remove(); }, duration); }
 
-            function showToastNotification(message, duration = 10000) {
-                const toast = document.createElement('div');
-                toast.className = 'toast-notification';
-                toast.innerText = message;
-                document.body.appendChild(toast);
-                setTimeout(() => { toast.remove(); }, duration);
-            }
-
-            /* --- دوال الأنماط الجديدة (صورة مفردة + شريط) --- */
+            /* --- دوال الأنماط الجديدة (آمنة ضد XSS) --- */
             function renderPatternsStrip() {
                 const container = document.getElementById('patternsStrip');
-                if (!patterns || patterns.length === 0) {
-                    container.innerHTML = '<div style="color:#6B7280; padding: 6px; font-size:13px; font-weight:600;">لا توجد أنماط</div>';
-                    return;
-                }
+                if (!patterns || patterns.length === 0) { container.innerHTML = '<div style="color:#6B7280; padding: 6px; font-size:13px; font-weight:600;">لا توجد أنماط</div>'; return; }
                 
-                container.innerHTML = patterns.map(p => `
-                    <button class="strip-btn ${p.id === currentPatternId ? 'active' : ''}" onclick="selectPatternStrip(${p.id})">
-                        ${p.name}
-                    </button>
-                `).join('');
+                // إفراغ الحاوية وإنشاء الأزرار بشكل آمن باستخدام DOM API
+                container.innerHTML = '';
+                patterns.forEach(p => {
+                    const btn = document.createElement('button');
+                    btn.className = 'strip-btn' + (p.id === currentPatternId ? ' active' : '');
+                    btn.setAttribute('data-id', p.id);
+                    btn.onclick = function() { selectPatternStrip(p.id); };
+                    btn.textContent = p.name; // استخدام textContent يمنع تنفيذ أكواد XSS
+                    container.appendChild(btn);
+                });
 
-                if (!currentPatternId || !patterns.some(p => p.id === currentPatternId)) {
-                    selectPatternStrip(patterns[0].id);
-                }
-                
-                updateStripScrollButtons();
+                if (!currentPatternId || !patterns.some(p => p.id === currentPatternId)) { selectPatternStrip(patterns[0].id); }
+                else { updateStripScrollButtons(); }
             }
 
             function selectPatternStrip(patternId) {
                 currentPatternId = patternId;
-                
-                // تحديث الصورة المفردة
                 const p = patterns.find(p => p.id === patternId);
                 if (p) {
                     const img = document.getElementById('selectedPatternImg');
@@ -521,308 +310,73 @@
                     img.style.display = 'block';
                     document.getElementById('noPatternMsg').style.display = 'none';
                 }
-                
-                // تحديث حالة الأزرار في الشريط
                 renderPatternsStrip();
             }
 
             /* --- دوال التمرير --- */
             function updateStripScrollButtons() {
-                const container = document.getElementById('patternsStrip');
-                const leftBtn = document.getElementById('scrollLeftBtn');
-                const rightBtn = document.getElementById('scrollRightBtn');
-                
+                const container = document.getElementById('patternsStrip'); const leftBtn = document.getElementById('scrollLeftBtn'); const rightBtn = document.getElementById('scrollRightBtn');
                 if (!container || !leftBtn || !rightBtn) return;
-
                 const isOverflowing = container.scrollWidth > container.clientWidth;
-                
                 if (isOverflowing) {
-                    leftBtn.classList.add('visible');
-                    rightBtn.classList.add('visible');
-                    const isAtStart = container.scrollLeft <= 0;
-                    const isAtEnd = container.scrollLeft >= (container.scrollWidth - container.clientWidth - 5);
-                    leftBtn.style.opacity = isAtStart ? '0.5' : '1';
-                    leftBtn.style.pointerEvents = isAtStart ? 'none' : 'auto';
-                    rightBtn.style.opacity = isAtEnd ? '0.5' : '1';
-                    rightBtn.style.pointerEvents = isAtEnd ? 'none' : 'auto';
-                } else {
-                    leftBtn.classList.remove('visible');
-                    rightBtn.classList.remove('visible');
-                }
+                    leftBtn.classList.add('visible'); rightBtn.classList.add('visible');
+                    const isAtStart = container.scrollLeft <= 0; const isAtEnd = container.scrollLeft >= (container.scrollWidth - container.clientWidth - 5);
+                    leftBtn.style.opacity = isAtStart ? '0.5' : '1'; leftBtn.style.pointerEvents = isAtStart ? 'none' : 'auto';
+                    rightBtn.style.opacity = isAtEnd ? '0.5' : '1'; rightBtn.style.pointerEvents = isAtEnd ? 'none' : 'auto';
+                } else { leftBtn.classList.remove('visible'); rightBtn.classList.remove('visible'); }
             }
-
-            function scrollPatterns(amount) {
-                const container = document.getElementById('patternsStrip');
-                if (!container) return;
-                container.scrollLeft += amount;
-            }
-
+            function scrollPatterns(amount) { const container = document.getElementById('patternsStrip'); if (!container) return; container.scrollLeft += amount; }
             document.addEventListener('DOMContentLoaded', () => {
                 const container = document.getElementById('patternsStrip');
-                if (container) {
-                    container.addEventListener('scroll', updateStripScrollButtons);
-                    window.addEventListener('resize', updateStripScrollButtons);
-                }
+                if (container) { container.addEventListener('scroll', updateStripScrollButtons); window.addEventListener('resize', updateStripScrollButtons); }
             });
 
             /* --- الإرسال والنسخ --- */
-            function updateSendButton(isStreamingActive) {
-                const btn = document.getElementById('mainSendBtn');
-                if (!btn) return;
-                if (isStreamingActive) {
-                    btn.classList.add('stop-btn');
-                    btn.innerHTML = '<i class="bi bi-stop-circle"></i> إيقاف';
-                } else {
-                    btn.classList.remove('stop-btn');
-                    btn.innerHTML = '<i class="bi bi-stars"></i> إنشاء';
-                }
-            }
-
-            function showLoadingPrompt() {
-                document.getElementById('promptResultText').value = 'جاري التوليد...';
-            }
-
-            function updatePromptResult(text) {
-                document.getElementById('promptResultText').value = text;
-            }
-
+            function updateSendButton(isStreamingActive) { const btn = document.getElementById('mainSendBtn'); if (!btn) return; if (isStreamingActive) { btn.classList.add('stop-btn'); btn.innerHTML = '<i class="bi bi-stop-circle"></i> إيقاف'; } else { btn.classList.remove('stop-btn'); btn.innerHTML = '<i class="bi bi-stars"></i> إنشاء'; } }
+            function showLoadingPrompt() { document.getElementById('promptResultText').value = 'جاري التوليد...'; }
+            function updatePromptResult(text) { document.getElementById('promptResultText').value = text; }
             function copyGeneratedPrompt() {
-                const text = document.getElementById('promptResultText').value;
-                if (!text) return;
-                navigator.clipboard.writeText(text).then(() => {
-                    const btn = document.querySelector('.copy-btn');
-                    const original = btn.innerHTML;
-                    btn.classList.add('success');
-                    btn.innerHTML = '<i class="bi bi-check-lg"></i> تم النسخ';
-                    setTimeout(() => {
-                        btn.classList.remove('success');
-                        btn.innerHTML = original;
-                    }, 2000);
-                }).catch(() => {
-                    alert('فشل نسخ النص');
-                });
+                const text = document.getElementById('promptResultText').value; if (!text) return;
+                navigator.clipboard.writeText(text).then(() => { const btn = document.querySelector('.copy-btn'); const original = btn.innerHTML; btn.classList.add('success'); btn.innerHTML = '<i class="bi bi-check-lg"></i> تم النسخ'; setTimeout(() => { btn.classList.remove('success'); btn.innerHTML = original; }, 2000); }).catch(() => { alert('فشل نسخ النص'); });
             }
-
-            function stopStreaming() {
-                if (abortController) {
-                    abortController.abort();
-                    abortController = null;
-                    isStreaming = false; isProcessing = false;
-                    updateSendButton(false);
-                }
-            }
-
+            function stopStreaming() { if (abortController) { abortController.abort(); abortController = null; isStreaming = false; isProcessing = false; updateSendButton(false); } }
             async function handleSendWelcome() {
-                if (isStreaming) { stopStreaming(); return; }
-                if (isProcessing) return;
-                
-                if (!currentPatternId) {
-                    showToastNotification('يرجى اختيار نمط أولاً.');
-                    return;
-                }
-
-                const input = document.getElementById('mainInput'); 
-                const msg = input.value.trim();
-                if (!msg) return;
-                
-                isProcessing = true; 
-                abortController = new AbortController(); 
-                isStreaming = true;
-                updateSendButton(true);
-                
+                if (isStreaming) { stopStreaming(); return; } if (isProcessing) return;
+                if (!currentPatternId) { showToastNotification('يرجى اختيار نمط أولاً.'); return; }
+                const input = document.getElementById('mainInput'); const msg = input.value.trim(); if (!msg) return;
+                isProcessing = true; abortController = new AbortController(); isStreaming = true; updateSendButton(true);
                 try {
-                    const response = await fetch('/api/chat', { 
-                        method: 'POST', 
-                        headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify({ pattern_id: currentPatternId, message: msg }), 
-                        signal: abortController.signal 
-                    });
-                    
-                    if (response.status === 402) {
-                        openNoCreditsModal();
-                        throw new Error('no_credits');
-                    }
-                    
-                    if (!isStreaming) { throw new Error('Stream cancelled'); }
-                    showLoadingPrompt();
-                    
-                    const reader = response.body.getReader(); 
-                    const decoder = new TextDecoder(); 
-                    let fullText = '';
-                    while (true) { 
-                        const { done, value } = await reader.read(); 
-                        if (done) break; 
-                        fullText += decoder.decode(value, { stream: true }); 
-                    }
-                    
-                    if (fullText) { 
-                        const creditsBadge = document.getElementById('creditsBadge');
-                        let currentCredits = parseInt(creditsBadge.textContent.match(/\d+/)?.[0] || 0);
-                        if (currentCredits > 0) {
-                            currentCredits--;
-                            updateCreditsBadge(currentCredits);
-                        }
+                    const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pattern_id: currentPatternId, message: msg }), signal: abortController.signal });
+                    if (response.status === 402) { openNoCreditsModal(); throw new Error('no_credits'); }
+                    if (!isStreaming) { throw new Error('Stream cancelled'); } showLoadingPrompt();
+                    const reader = response.body.getReader(); const decoder = new TextDecoder(); let fullText = '';
+                    while (true) { const { done, value } = await reader.read(); if (done) break; fullText += decoder.decode(value, { stream: true }); }
+                    if (fullText) {
+                        const badge = document.getElementById('creditsBadge'); let credits = parseInt(badge.textContent.match(/\d+/)?.[0] || 0);
+                        if (credits > 0) { credits--; updateCreditsBadge(credits); }
                         await fetch('/api/deduct_credit', { method: 'POST' });
-                        
-                        updatePromptResult(fullText); 
-                        document.getElementById('mainInput').value = ''; 
-                    } else { 
-                        updatePromptResult('لم يتم استلام رد من الخادم.'); 
-                    }
+                        updatePromptResult(fullText); document.getElementById('mainInput').value = '';
+                    } else { updatePromptResult('لم يتم استلام رد من الخادم.'); }
                 } catch (err) {
-                    if (err.message !== 'no_credits' && err.name !== 'AbortError' && err.message !== 'Stream cancelled') {
-                        updatePromptResult('خطأ في الاتصال بالخادم.');
-                    }
-                } finally {
-                    isStreaming = false; isProcessing = false; abortController = null; updateSendButton(false);
-                }
+                    if (err.message !== 'no_credits' && err.name !== 'AbortError' && err.message !== 'Stream cancelled') { updatePromptResult('خطأ في الاتصال بالخادم.'); }
+                } finally { isStreaming = false; isProcessing = false; abortController = null; updateSendButton(false); }
             }
 
             /* --- الإعدادات والإشعارات --- */
-            function openSettingsSheet() {
-                document.getElementById('settingsUsername').value = userData.username || '';
-                document.getElementById('settingsPassword').value = '';
-                document.getElementById('settingsSheet').classList.add('active');
-            }
-
-            function copyField(id) {
-                const input = document.getElementById(id);
-                if(!input.value) return;
-                navigator.clipboard.writeText(input.value).then(() => {
-                    showToastNotification('تم نسخ القيمة');
-                });
-            }
-
-            async function updateSettings() {
-                const username = document.getElementById('settingsUsername').value.trim();
-                const password = document.getElementById('settingsPassword').value.trim();
-                if(!username || !password) {
-                    showToastNotification('يرجى ملء جميع الحقول');
-                    return;
-                }
-                try {
-                    const res = await fetch('/api/update_user', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({username, password})
-                    });
-                    const data = await res.json();
-                    if(data.success) {
-                        showToastNotification('تم تحديث البيانات بنجاح');
-                        userData.username = username;
-                        closeSheet('settingsSheet');
-                    } else {
-                        showToastNotification(data.message);
-                    }
-                } catch(err) {
-                    showToastNotification('خطأ في الاتصال');
-                }
-            }
-
+            function openSettingsSheet() { document.getElementById('settingsUsername').value = userData.username || ''; document.getElementById('settingsPassword').value = ''; document.getElementById('settingsSheet').classList.add('active'); }
+            function copyField(id) { const input = document.getElementById(id); if(!input.value) return; navigator.clipboard.writeText(input.value).then(() => { showToastNotification('تم نسخ القيمة'); }); }
+            async function updateSettings() { const username = document.getElementById('settingsUsername').value.trim(); const password = document.getElementById('settingsPassword').value.trim(); if(!username || !password) { showToastNotification('يرجى ملء جميع الحقول'); return; } try { const res = await fetch('/api/update_user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({username, password}) }); const data = await res.json(); if(data.success) { showToastNotification('تم تحديث البيانات بنجاح'); userData.username = username; closeSheet('settingsSheet'); } else { showToastNotification(data.message); } } catch(err) { showToastNotification('خطأ في الاتصال'); } }
             function closeSheet(id) { document.getElementById(id).classList.remove('active'); }
             function closeSheetOnBackdrop(e, id) { if (e.target === e.currentTarget) closeSheet(id); }
 
-            function openCreditsModal() {
-                updateDailyGiftState();
-                document.getElementById('creditsModal').classList.add('active');
-            }
-            function closeCreditsModal() { document.getElementById('creditsModal').classList.remove('active'); }
+            function openCreditsModal() { updateDailyGiftState(); document.getElementById('creditsModal').classList.add('active'); } function closeCreditsModal() { document.getElementById('creditsModal').classList.remove('active'); }
             function closeCreditsModalOnBackdrop(e) { if (e.target === e.currentTarget) closeCreditsModal(); }
-
-            async function claimDailyGift() {
-                const btn = document.getElementById('dailyGiftBtn');
-                if (btn.disabled) return;
-                
-                btn.disabled = true;
-                btn.innerHTML = 'جاري التحميل...';
-                
-                try {
-                    const res = await fetch('/api/claim_daily_gift', { method: 'POST' });
-                    const data = await res.json();
-                    
-                    if (data.success) {
-                        showToastNotification('🎉 ' + data.message);
-                        userData.credits = data.credits;
-                        updateCreditsBadge(data.credits);
-                        userData.last_daily_gift = new Date().toISOString().split('T')[0];
-                        updateDailyGiftState();
-                    } else {
-                        showToastNotification(data.message);
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="bi bi-stars"></i> الحصول';
-                    }
-                } catch (err) {
-                    showToastNotification('خطأ في الاتصال بالخادم');
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="bi bi-stars"></i> الحصول';
-                }
-            }
-
-            async function transferCredits() {
-                const usernameInput = document.getElementById('transferTarget');
-                const amountInput = document.getElementById('transferAmount');
-                const statusMsg = document.getElementById('transferStatus');
-                
-                const target = usernameInput.value.trim();
-                const amount = parseInt(amountInput.value);
-
-                if (!target || amount <= 0) {
-                    statusMsg.style.display = 'block';
-                    statusMsg.style.color = '#ef4444';
-                    statusMsg.textContent = 'يرجى ملء البيانات بشكل صحيح';
-                    return;
-                }
-
-                statusMsg.style.display = 'block';
-                statusMsg.style.color = '#6B7280';
-                statusMsg.textContent = 'جاري التحويل...';
-
-                try {
-                    const res = await fetch('/api/transfer_credits', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({username: target, amount: amount})
-                    });
-                    const data = await res.json();
-
-                    if (data.success) {
-                        statusMsg.style.color = '#16a34a';
-                        statusMsg.textContent = data.message;
-                        userData.credits = data.credits;
-                        updateCreditsBadge(data.credits);
-                        usernameInput.value = '';
-                        amountInput.value = '1';
-                        setTimeout(() => { statusMsg.style.display = 'none'; }, 3000);
-                    } else {
-                        statusMsg.style.color = '#ef4444';
-                        statusMsg.textContent = data.message;
-                    }
-                } catch (err) {
-                    statusMsg.style.color = '#ef4444';
-                    statusMsg.textContent = 'خطأ في الاتصال بالخادم';
-                }
-            }
-
-            function openNoCreditsModal() { document.getElementById('noCreditsModal').classList.add('active'); }
-            function closeNoCreditsModal() { document.getElementById('noCreditsModal').classList.remove('active'); }
+            async function claimDailyGift() { const btn = document.getElementById('dailyGiftBtn'); if (btn.disabled) return; btn.disabled = true; btn.innerHTML = 'جاري التحميل...'; try { const res = await fetch('/api/claim_daily_gift', { method: 'POST' }); const data = await res.json(); if(data.success) { showToastNotification('🎉 ' + data.message); userData.credits = data.credits; updateCreditsBadge(data.credits); userData.last_daily_gift = new Date().toISOString().split('T')[0]; updateDailyGiftState(); } else { showToastNotification(data.message); btn.disabled = false; btn.innerHTML = '<i class="bi bi-stars"></i> الحصول'; } } catch (err) { showToastNotification('خطأ في الاتصال بالخادم'); btn.disabled = false; btn.innerHTML = '<i class="bi bi-stars"></i> الحصول'; } }
+            async function transferCredits() { const usernameInput = document.getElementById('transferTarget'); const amountInput = document.getElementById('transferAmount'); const statusMsg = document.getElementById('transferStatus'); const target = usernameInput.value.trim(); const amount = parseInt(amountInput.value); if (!target || amount <= 0) { statusMsg.style.display = 'block'; statusMsg.style.color = '#ef4444'; statusMsg.textContent = 'يرجى ملء البيانات بشكل صحيح'; return; } statusMsg.style.display = 'block'; statusMsg.style.color = '#6B7280'; statusMsg.textContent = 'جاري التحويل...'; try { const res = await fetch('/api/transfer_credits', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({username: target, amount: amount}) }); const data = await res.json(); if(data.success) { statusMsg.style.color = '#16a34a'; statusMsg.textContent = data.message; userData.credits = data.credits; updateCreditsBadge(data.credits); usernameInput.value = ''; amountInput.value = '1'; setTimeout(() => { statusMsg.style.display = 'none'; }, 3000); } else { statusMsg.style.color = '#ef4444'; statusMsg.textContent = data.message; } } catch (err) { statusMsg.style.color = '#ef4444'; statusMsg.textContent = 'خطأ في الاتصال بالخادم'; } }
+            function openNoCreditsModal() { document.getElementById('noCreditsModal').classList.add('active'); } function closeNoCreditsModal() { document.getElementById('noCreditsModal').classList.remove('active'); }
             function closeNoCreditsModalOnBackdrop(e) { if (e.target === e.currentTarget) closeNoCreditsModal(); }
-
-            function checkMaintenancePass() {
-                const pass = document.getElementById('maintenancePass').value;
-                if (pass === 'EVILE_PROMPTS_2007') {
-                    document.cookie = "maintenance_bypass=true; path=/";
-                    location.reload();
-                } else {
-                    alert('كلمة المرور غير صحيحة.');
-                }
-            }
-
-            document.addEventListener('DOMContentLoaded', () => {
-                initScreen();
-                document.getElementById('mainInput').addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); } 
-                });
-            });
+            function checkMaintenancePass() { const pass = document.getElementById('maintenancePass').value; if (pass === 'EVILE_PROMPTS_2007') { document.cookie = "maintenance_bypass=true; path=/"; location.reload(); } else { alert('كلمة المرور غير صحيحة.'); } }
+            document.addEventListener('DOMContentLoaded', () => { initScreen(); document.getElementById('mainInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); } }); });
         </script>
     {% endif %}
 </body>
