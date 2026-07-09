@@ -17,7 +17,6 @@ from flask_talisman import Talisman
 from sqlalchemy.exc import SQLAlchemyError
 import threading
 
-# تم حذف استيراد Category
 from models import db, User, Pattern, Notification, Ad, SiteSetting
 from config import Config
 
@@ -230,7 +229,6 @@ def admin_panel():
         session['logged_in'] = True
         return redirect(url_for('admin_panel'))
     if session.get('logged_in'):
-        # تم حذف categories
         return render_template('admin.html', patterns=Pattern.query.all(), notifications=Notification.query.all(), ads=Ad.query.all(), users_count=User.query.count(), site_settings=SiteSetting.query.first(), csrf_token=generate_csrf_token())
     return render_template('admin.html')
 
