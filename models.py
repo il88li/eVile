@@ -15,14 +15,13 @@ class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), nullable=False)
     icon = db.Column(db.String(50), default='bi-robot')
-    patterns = db.relationship('Pattern', backref='category', lazy=True, cascade="all, delete-orphan")
 
 class Pattern(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
     name = db.Column(db.String(100), nullable=False)
     image_url = db.Column(db.String(500), nullable=False)
     prompt = db.Column(db.Text, nullable=False)
+    # تم إزالة علاقة category_id و ForeignKey بالكامل
 
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -44,4 +43,4 @@ class Ad(db.Model):
 class SiteSetting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(10), default='on')
-    offline_message = db.Column(db.Text, default='الموقع تحت الصيانة حالياً.') 
+    offline_message = db.Column(db.Text, default='الموقع تحت الصيانة حالياً.')
