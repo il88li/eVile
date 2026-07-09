@@ -3,110 +3,594 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>انضم إلينا - UFOQ</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <title>انضم إلى UFOQ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Tajawal', sans-serif; background: linear-gradient(160deg, #f2f4f8 0%, #e1dbf5 100%); color: #1F2937; min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }
-        .sign-wrapper { width: 100%; max-width: 400px; height: 100vh; height: 100dvh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
-        .logo-area { text-align: center; margin-bottom: 12px; }
-        .logo-icon { width: 48px; height: 48px; border-radius: 16px; background: #7B61FF; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px auto; box-shadow: 0 8px 20px rgba(123, 97, 255, 0.2); }
-        .logo-icon i { font-size: 24px; }
-        .logo-title { font-size: 22px; font-weight: 800; color: #1F2937; letter-spacing: 1px; }
-        .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; margin-bottom: 16px; }
-        .feature-item { background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(123, 97, 255, 0.08); border-radius: 12px; padding: 10px 8px; text-align: center; transition: 0.2s; }
-        .feature-item i { font-size: 20px; color: #7B61FF; display: block; margin-bottom: 2px; }
-        .feature-item span { font-size: 10px; font-weight: 600; color: #6B7280; }
-        .sign-card { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 20px; padding: 20px 20px; width: 100%; box-shadow: 0 10px 40px rgba(123, 97, 255, 0.03); }
-        .form-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; text-align: center; color: #1F2937; }
-        .input-group { margin-bottom: 12px; }
-        .input-group label { display: block; font-size: 11px; font-weight: 700; color: #6B7280; margin-bottom: 4px; }
-        .input-group input { width: 100%; padding: 10px 14px; background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(123, 97, 255, 0.1); border-radius: 12px; font-family: 'Tajawal', sans-serif; font-size: 14px; color: #1F2937; outline: none; transition: 0.2s; }
-        .input-group input:focus { border-color: #7B61FF; background: #ffffff; }
-        .btn-primary { width: 100%; padding: 12px; margin-top: 6px; background: #7B61FF; border: none; border-radius: 12px; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.3); }
-        .btn-primary:active { transform: scale(0.96); }
-        .sign-error { color: #ef4444; font-size: 12px; margin-top: 8px; display: none; text-align: center; }
-        .auth-switch { text-align: center; margin-top: 12px; font-size: 12px; color: #6B7280; }
-        .auth-switch a { color: #7B61FF; font-weight: 700; text-decoration: none; }
-        @media (max-width: 480px) { .sign-wrapper { max-width: 100%; padding: 16px; } .feature-item span { font-size: 9px; } }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(160deg, #f2f4f8 0%, #e1dbf5 100%);
+            color: #1F2937;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        /* Floating soft orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.5;
+            animation: orbFloat 18s ease-in-out infinite;
+        }
+        .orb-1 { width: 350px; height: 350px; background: #7B61FF; top: -15%; left: -10%; animation-delay: 0s; }
+        .orb-2 { width: 280px; height: 280px; background: #e1dbf5; bottom: -10%; right: -5%; animation-delay: -6s; }
+        .orb-3 { width: 200px; height: 200px; background: rgba(123, 97, 255, 0.3); top: 50%; left: 55%; animation-delay: -12s; }
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -20px) scale(1.08); }
+            66% { transform: translate(-20px, 25px) scale(0.95); }
+        }
+
+        /* Particles */
+        .particle-field { position: absolute; inset: 0; pointer-events: none; }
+        .particle {
+            position: absolute;
+            width: 2px; height: 2px;
+            background: rgba(123, 97, 255, 0.25);
+            border-radius: 50%;
+            animation: particleRise linear infinite;
+        }
+        @keyframes particleRise {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        /* Main Card */
+        .auth-card {
+            display: flex;
+            width: 100%;
+            max-width: 900px;
+            min-height: 520px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(123, 97, 255, 0.03);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Visual Side */
+        .card-visual {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 36px;
+            overflow: hidden;
+            background: linear-gradient(160deg, rgba(123,97,255,0.06) 0%, rgba(225,219,245,0.3) 100%);
+        }
+        .visual-bg {
+            position: absolute;
+            inset: 0;
+        }
+        .visual-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%237B61FF' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .visual-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            color: #1F2937;
+        }
+
+        /* Animated Logo */
+        .logo-ring {
+            position: relative;
+            width: 100px; height: 100px;
+            margin: 0 auto 16px;
+        }
+        .logo-core {
+            position: absolute;
+            inset: 16px;
+            background: #7B61FF;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(123, 97, 255, 0.2);
+            animation: corePulse 3s ease-in-out infinite;
+            z-index: 2;
+        }
+        .logo-core i { font-size: 32px; color: white; }
+        @keyframes corePulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 8px 20px rgba(123,97,255,0.2); }
+            50% { transform: scale(1.05); box-shadow: 0 12px 30px rgba(123,97,255,0.3); }
+        }
+        .ring {
+            position: absolute;
+            border: 2px solid rgba(123,97,255,0.2);
+            border-radius: 50%;
+            inset: 0;
+            animation: ringExpand 3s ease-out infinite;
+        }
+        .ring-1 { animation-delay: 0s; }
+        .ring-2 { animation-delay: 1s; border-color: rgba(123,97,255,0.12); }
+        .ring-3 { animation-delay: 2s; border-color: rgba(123,97,255,0.08); }
+        @keyframes ringExpand {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
+        .visual-title {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+            color: #1F2937;
+        }
+        .visual-subtitle {
+            font-size: 13px;
+            color: #6B7280;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        /* Feature List */
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: right;
+        }
+        .feature-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 14px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 12px;
+            border: 1px solid rgba(123,97,255,0.08);
+            transition: all 0.2s ease;
+            animation: slideInLeft 0.5s ease-out backwards;
+        }
+        .feature-row:nth-child(1) { animation-delay: 0.1s; }
+        .feature-row:nth-child(2) { animation-delay: 0.2s; }
+        .feature-row:nth-child(3) { animation-delay: 0.3s; }
+        .feature-row:nth-child(4) { animation-delay: 0.4s; }
+        .feature-row:hover {
+            background: rgba(255,255,255,0.9);
+            transform: translateX(-4px);
+            border-color: rgba(123,97,255,0.15);
+        }
+        .feature-row span {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6B7280;
+        }
+        .feature-icon {
+            width: 28px; height: 28px;
+            min-width: 28px;
+            background: rgba(123, 97, 255, 0.08);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .feature-icon i { font-size: 14px; color: #7B61FF; }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Form Side */
+        .card-form {
+            flex: 1;
+            padding: 40px 36px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+        .form-header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .form-header h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1F2937;
+            margin-bottom: 6px;
+        }
+        .form-header p {
+            font-size: 13px;
+            color: #6B7280;
+            font-weight: 400;
+        }
+
+        /* Inputs */
+        .input-wrap {
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .input-wrap label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #6B7280;
+            margin-bottom: 6px;
+        }
+        .input-wrap label i { font-size: 14px; color: #7B61FF; }
+        .input-wrap input {
+            width: 100%;
+            padding: 12px 14px;
+            padding-left: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(123, 97, 255, 0.1);
+            border-radius: 12px;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 14px;
+            color: #1F2937;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .input-wrap input::placeholder { color: #9CA3AF; }
+        .input-wrap input:focus {
+            border-color: #7B61FF;
+            background: #ffffff;
+        }
+        .toggle-pass {
+            position: absolute;
+            left: 10px;
+            bottom: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: #9CA3AF;
+            transition: color 0.2s;
+        }
+        .toggle-pass:hover { color: #6B7280; }
+        .toggle-pass i { font-size: 16px; }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 4px;
+            background: #7B61FF;
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(123, 97, 255, 0.3);
+        }
+        .submit-btn:active { transform: scale(0.96); }
+        .submit-btn.loading .btn-text,
+        .submit-btn.loading .btn-arrow { opacity: 0; }
+        .btn-loader {
+            position: absolute;
+            width: 20px; height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            opacity: 0;
+        }
+        .submit-btn.loading .btn-loader { opacity: 1; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .btn-arrow { font-size: 15px; transition: transform 0.2s ease; }
+        .submit-btn:hover .btn-arrow { transform: translateX(-3px); }
+
+        /* Footer */
+        .form-footer {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 12px;
+            color: #6B7280;
+        }
+        .switch-btn {
+            background: none;
+            border: none;
+            color: #7B61FF;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-right: 4px;
+            transition: color 0.2s;
+            position: relative;
+        }
+        .switch-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0; right: 0;
+            height: 1px;
+            background: #7B61FF;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+            transform-origin: right;
+        }
+        .switch-btn:hover::after { transform: scaleX(1); }
+        .switch-btn:hover { color: #5b3fd9; }
+
+        /* Error Toast */
+        .error-toast {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s ease;
+            white-space: nowrap;
+        }
+        .error-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .error-toast i { font-size: 16px; flex-shrink: 0; }
+
+        /* Mode Transition */
+        .form-fade { opacity: 0; pointer-events: none; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .auth-card {
+                flex-direction: column;
+                max-width: 420px;
+                min-height: auto;
+            }
+            .card-visual {
+                padding: 24px 18px;
+                min-height: 240px;
+            }
+            .logo-ring { width: 80px; height: 80px; }
+            .logo-core { inset: 12px; border-radius: 16px; }
+            .logo-core i { font-size: 26px; }
+            .visual-title { font-size: 20px; }
+            .feature-list {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 6px;
+            }
+            .feature-row {
+                padding: 7px 10px;
+                flex: 0 0 auto;
+            }
+            .feature-row span { font-size: 11px; }
+            .card-form { padding: 24px 20px; }
+        }
+        @media (max-width: 380px) {
+            body { padding: 12px; }
+            .card-visual { padding: 18px 14px; }
+            .card-form { padding: 20px 16px; }
+        }
     </style>
 </head>
 <body>
-    <div class="sign-wrapper">
-        <div class="logo-area">
-            <div class="logo-icon"><i class="bi bi-magic"></i></div>
-            <div class="logo-title">UFOQ</div>
+    <!-- Floating soft orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="particle-field" id="particles"></div>
+
+    <div class="auth-card">
+        <!-- Right Side: Visual / Brand -->
+        <div class="card-visual">
+            <div class="visual-bg"></div>
+            <div class="visual-content">
+                <div class="logo-ring">
+                    <div class="logo-core"><i class="bi bi-magic"></i></div>
+                    <div class="ring ring-1"></div>
+                    <div class="ring ring-2"></div>
+                    <div class="ring ring-3"></div>
+                </div>
+                <h2 class="visual-title">UFOQ</h2>
+                <p class="visual-subtitle">اصنع محتواك الآن</p>
+
+                <div class="feature-list">
+                    <div class="feature-row">
+                        <div class="feature-icon"><i class="bi bi-pencil"></i></div>
+                        <span>كاتب إعلانات ذكي</span>
+                    </div>
+                    <div class="feature-row">
+                        <div class="feature-icon"><i class="bi bi-layers"></i></div>
+                        <span>أنماط متعددة للتوليد</span>
+                    </div>
+                    <div class="feature-row">
+                        <div class="feature-icon"><i class="bi bi-gift"></i></div>
+                        <span>هدية يومية + تحويل نقاط</span>
+                    </div>
+                    <div class="feature-row">
+                        <div class="feature-icon"><i class="bi bi-stars"></i></div>
+                        <span>10 نقاط مجانية للبداية</span>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="features-grid">
-            <div class="feature-item"><i class="bi bi-lightning-charge-fill"></i><span>توليد نصوص</span></div>
-            <div class="feature-item"><i class="bi bi-robot"></i><span>فئات ذكية</span></div>
-            <div class="feature-item"><i class="bi bi-pencil-square"></i><span>أنماط متعددة</span></div>
-            <div class="feature-item"><i class="bi bi-gem"></i><span>10 نقاط مجانية</span></div>
-        </div>
-        <div class="sign-card">
-            <div class="form-title">انضم لتبدأ الإبداع</div>
-            <form id="signForm" onsubmit="handleSignup(event)">
-                <div class="input-group">
-                    <label><i class="bi bi-person" style="color: #7B61FF;"></i> اسم المستخدم</label>
-                    <input type="text" id="username" placeholder="أدخل اسماً فريداً" required>
+
+        <!-- Left Side: Form -->
+        <div class="card-form">
+            <div class="form-header">
+                <h1 id="formTitle">تسجيل الدخول</h1>
+                <p id="formDesc">أهلاً بعودتك! سجل دخولك للمتابعة</p>
+            </div>
+
+            <form id="authForm" onsubmit="handleAuth(event)">
+                <div class="input-wrap">
+                    <label for="username"><i class="bi bi-person"></i> اسم المستخدم</label>
+                    <input type="text" id="username" placeholder="أدخل اسم المستخدم" required autocomplete="username">
                 </div>
-                <div class="input-group">
-                    <label><i class="bi bi-lock" style="color: #7B61FF;"></i> كلمة المرور</label>
-                    <input type="password" id="password" placeholder="******" required>
+
+                <div class="input-wrap">
+                    <label for="password"><i class="bi bi-lock"></i> كلمة المرور</label>
+                    <input type="password" id="password" placeholder="••••••" required autocomplete="current-password">
+                    <button type="button" class="toggle-pass" onclick="togglePassword()">
+                        <i class="bi bi-eye" id="eyeIcon"></i>
+                    </button>
                 </div>
-                <button type="submit" class="btn-primary">ابدأ مجاناً <i class="bi bi-arrow-left"></i></button>
-                <div id="signError" class="sign-error"></div>
-                <div class="auth-switch">
-                    لديك حساب؟ <a href="#" onclick="switchToLogin()">سجل دخولك</a>
-                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span class="btn-text">تسجيل الدخول</span>
+                    <span class="btn-loader"></span>
+                    <i class="bi bi-arrow-left btn-arrow"></i>
+                </button>
             </form>
-            
-            <form id="loginForm" onsubmit="handleLogin(event)" style="display:none;">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                <div class="input-group">
-                    <label><i class="bi bi-person" style="color: #7B61FF;"></i> اسم المستخدم</label>
-                    <input type="text" id="loginUsername" placeholder="اسم المستخدم" required>
-                </div>
-                <div class="input-group">
-                    <label><i class="bi bi-lock" style="color: #7B61FF;"></i> كلمة المرور</label>
-                    <input type="password" id="loginPassword" placeholder="******" required>
-                </div>
-                <button type="submit" class="btn-primary">دخول <i class="bi bi-box-arrow-in-left"></i></button>
-                <div id="loginError" class="sign-error"></div>
-                <div class="auth-switch">
-                    جديد هنا؟ <a href="#" onclick="switchToSignup()">أنشئ حساباً</a>
-                </div>
-            </form>
+
+            <div class="form-footer">
+                <span id="footerText">ليس لديك حساب؟</span>
+                <button type="button" class="switch-btn" id="switchBtn" onclick="toggleMode()">أنشئ حساباً</button>
+            </div>
+
+            <div class="error-toast" id="errorToast">
+                <i class="bi bi-exclamation-circle"></i>
+                <span id="errorText">حدث خطأ ما</span>
+            </div>
         </div>
     </div>
+
     <script>
-        function handleSignup(e) {
+        // Generate particles
+        const particleContainer = document.getElementById('particles');
+        for (let i = 0; i < 25; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random() * 100 + '%';
+            p.style.animationDuration = (Math.random() * 15 + 10) + 's';
+            p.style.animationDelay = (Math.random() * 15) + 's';
+            p.style.width = p.style.height = (Math.random() * 3 + 1) + 'px';
+            particleContainer.appendChild(p);
+        }
+
+        let isLogin = true;
+
+        function toggleMode() {
+            const form = document.getElementById('authForm');
+            const title = document.getElementById('formTitle');
+            const desc = document.getElementById('formDesc');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const footerText = document.getElementById('footerText');
+            const switchBtn = document.getElementById('switchBtn');
+
+            form.classList.add('form-fade');
+
+            setTimeout(() => {
+                isLogin = !isLogin;
+
+                if (isLogin) {
+                    title.textContent = 'تسجيل الدخول';
+                    desc.textContent = 'أهلاً بعودتك! سجل دخولك للمتابعة';
+                    btnText.textContent = 'تسجيل الدخول';
+                    footerText.textContent = 'ليس لديك حساب؟';
+                    switchBtn.textContent = 'أنشئ حساباً';
+                    document.getElementById('password').setAttribute('autocomplete', 'current-password');
+                } else {
+                    title.textContent = 'إنشاء حساب';
+                    desc.textContent = 'انضم إلينا وابدأ رحلتك الإبداعية';
+                    btnText.textContent = 'إنشاء حساب';
+                    footerText.textContent = 'لديك حساب بالفعل؟';
+                    switchBtn.textContent = 'سجل دخولك';
+                    document.getElementById('password').setAttribute('autocomplete', 'new-password');
+                }
+
+                form.classList.remove('form-fade');
+            }, 300);
+        }
+
+        function togglePassword() {
+            const input = document.getElementById('password');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+
+        function handleAuth(e) {
             e.preventDefault();
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
-            const errorDiv = document.getElementById('signError'); errorDiv.style.display = 'none';
-            const btn = e.target.querySelector('button[type="submit"]'); btn.disabled = true; btn.innerHTML = 'جاري التسجيل...';
-            fetch('/api/signup', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({username, password}) })
-            .then(res => res.json()).then(data => {
-                btn.disabled = false; btn.innerHTML = 'ابدأ مجاناً <i class="bi bi-arrow-left"></i>';
-                if(data.success) { window.location.href = '/'; } else { errorDiv.textContent = data.message; errorDiv.style.display = 'block'; }
-            }).catch(() => { btn.disabled = false; btn.innerHTML = 'ابدأ مجاناً <i class="bi bi-arrow-left"></i>'; errorDiv.textContent = 'تعذر الاتصال بالخادم.'; errorDiv.style.display = 'block'; });
+            const btn = document.getElementById('submitBtn');
+            const errorToast = document.getElementById('errorToast');
+            const errorText = document.getElementById('errorText');
+
+            errorToast.classList.remove('show');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            const endpoint = isLogin ? '/api/login' : '/api/signup';
+
+            fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+                if (data.success) {
+                    window.location.href = '/';
+                } else {
+                    errorText.textContent = data.message || 'حدث خطأ ما، حاول مرة أخرى';
+                    errorToast.classList.add('show');
+                    setTimeout(() => errorToast.classList.remove('show'), 4000);
+                }
+            })
+            .catch(() => {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+                errorText.textContent = 'تعذر الاتصال بالخادم';
+                errorToast.classList.add('show');
+                setTimeout(() => errorToast.classList.remove('show'), 4000);
+            });
         }
-        function handleLogin(e) {
-            e.preventDefault();
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-            const errorDiv = document.getElementById('loginError'); errorDiv.style.display = 'none';
-            const btn = e.target.querySelector('button[type="submit"]'); btn.disabled = true; btn.innerHTML = 'جاري الدخول...';
-            fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({username, password}) })
-            .then(res => res.json()).then(data => {
-                btn.disabled = false; btn.innerHTML = 'دخول <i class="bi bi-box-arrow-in-left"></i>';
-                if(data.success) { window.location.href = '/'; } else { errorDiv.textContent = data.message; errorDiv.style.display = 'block'; }
-            }).catch(() => { btn.disabled = false; btn.innerHTML = 'دخول <i class="bi bi-box-arrow-in-left"></i>'; errorDiv.textContent = 'تعذر الاتصال بالخادم.'; errorDiv.style.display = 'block'; });
-        }
-        function switchToLogin() { document.getElementById('signForm').style.display = 'none'; document.getElementById('loginForm').style.display = 'block'; }
-        function switchToSignup() { document.getElementById('signForm').style.display = 'block'; document.getElementById('loginForm').style.display = 'none'; }
     </script>
 </body>
 </html>
