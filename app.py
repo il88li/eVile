@@ -4,7 +4,8 @@ import bcrypt
 import requests
 import json
 import traceback
-from datetime import datetime, timedelta
+import secrets
+from datetime import datetime
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, Response
 from flask_sqlalchemy import SQLAlchemy
@@ -40,6 +41,14 @@ logger = logging.getLogger(__name__)
 def hash_password(password): return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 def check_password(password, hashed): return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
+def generate_csrf_token():
+    if 'csrf_token' not in session:
+        session['csrf_token'] = secrets.token_urlsafe(32)
+    return session['csrf_token']
+
+def validate_csrf_token(token):
+    return token == session.get('csrf_token')
+
 def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -70,7 +79,8 @@ def index():
     return render_template('index.html', patterns=patterns, user_id=user_id, latest_notification=notif, latest_ad=ad, user_data=user_data, site_status='on')
 
 @app.route('/sign')
-def sign(): return render_template('sign.html')
+def sign():
+    return render_template('sign.html', csrf_token=generate_csrf_token())
 
 @app.route('/api/signup', methods=['POST'])
 @limiter.limit("5 per minute")
@@ -205,7 +215,7 @@ def admin_panel():
         session['logged_in'] = True
         return redirect(url_for('admin_panel'))
     if session.get('logged_in'):
-        return render_template('admin.html', categories=Category.query.all(), patterns=Pattern.query.all(), notifications=Notification.query.all(), ads=Ad.query.all(), users_count=User.query.count(), site_settings=SiteSetting.query.first())
+        return render_template('admin.html', categories=Category.query.all(), patterns=Pattern.query.all(), notifications=Notification.query.all(), ads=Ad.query.all(), users_count=User.query.count(), site_settings=SiteSetting.query.first(), csrf_token=generate_csrf_token())
     return render_template('admin.html')
 
 @app.route('/admin/logout')
@@ -214,6 +224,7 @@ def logout(): session.clear(); return redirect(url_for('login'))
 @app.route('/admin/category/add', methods=['POST'])
 @admin_required
 def add_category():
+    if not validate_csrf_token(request.form.get('csrf_token')): return "CSRF Error", 400
     c = Category(name=request.form.get('name'), icon=request.form.get('icon', 'bi-robot'))
     db.session.add(c); db.session.commit(); flash('تمت إضافة الفئة', 'success')
     return redirect(url_for('admin_panel'))
@@ -221,6 +232,7 @@ def add_category():
 @app.route('/admin/pattern/add', methods=['POST'])
 @admin_required
 def add_pattern():
+    if not validate_csrf_token(request.form.get('csrf_token')): return "CSRF Error", 400
     p = Pattern(category_id=request.form.get('category_id'), name=request.form.get('name'), image_url=request.form.get('image_url'), prompt=request.form.get('prompt'))
     db.session.add(p); db.session.commit(); flash('تمت إضافة النمط', 'success')
     return redirect(url_for('admin_panel'))
@@ -228,6 +240,7 @@ def add_pattern():
 @app.route('/admin/notification/add', methods=['POST'])
 @admin_required
 def add_notification():
+    if not validate_csrf_token(request.form.get('csrf_token')): return "CSRF Error", 400
     n = Notification(title=request.form.get('title'), text=request.form.get('text'), duration_hours=request.form.get('duration_hours', 1), show_in_chat=request.form.get('show_in_chat') == 'on')
     db.session.add(n); db.session.commit(); flash('تم إرسال الإشعار', 'success')
     return redirect(url_for('admin_panel'))
@@ -235,6 +248,7 @@ def add_notification():
 @app.route('/api/admin/update_site_settings', methods=['POST'])
 @admin_required
 def update_site_settings():
+    if not validate_csrf_token(request.json.get('csrf_token')): return jsonify({'error': 'CSRF Error'}), 400
     s = SiteSetting.query.first(); s.status = request.json.get('status'); s.offline_message = request.json.get('offline_message')
     db.session.commit(); return jsonify({'success': True})
 
