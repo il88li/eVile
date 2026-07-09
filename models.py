@@ -11,13 +11,11 @@ class User(db.Model):
     last_daily_gift = db.Column(db.Date)
     last_active = db.Column(db.DateTime, default=datetime.utcnow)
 
-# تم حذف جدول Categories بالكامل
 class Pattern(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     image_url = db.Column(db.String(500), nullable=False)
     prompt = db.Column(db.Text, nullable=False)
-    # تم حذف category_id والعلاقات بالكامل
 
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
