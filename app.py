@@ -58,14 +58,14 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
-# ----- حل مشكلة التهيئة (إصلاح before_first_request) -----
+# ----- تهيئة قاعدة البيانات (باستخدام before_request) -----
 _db_initialized = False
 
 @app.before_request
 def ensure_db_initialized():
     global _db_initialized
     if not _db_initialized:
-        with threading.Lock(): # تأمين ضد التنفيذ المتكرر من العمال المتعددين
+        with threading.Lock():
             if not _db_initialized:
                 db.create_all()
                 if not SiteSetting.query.first():
@@ -86,7 +86,9 @@ def index():
         user_data.last_active = datetime.utcnow()
         db.session.commit()
         
-    patterns = Pattern.query.options(db.joinedload(Pattern.category)).all()
+    # تم إصلاح الخطأ هنا: حذف db.joinedload(Pattern.category)
+    patterns = Pattern.query.all()
+    
     notif = Notification.query.filter_by(show_in_chat=True).order_by(Notification.created_at.desc()).first()
     ad = Ad.query.order_by(Ad.created_at.desc()).first()
     return render_template('index.html', patterns=patterns, user_id=user_id, latest_notification=notif, latest_ad=ad, user_data=user_data, site_status='on')
@@ -250,7 +252,7 @@ def add_category():
 @admin_required
 def add_pattern():
     if not validate_csrf_token(request.form.get('csrf_token')): return "CSRF Error", 400
-    p = Pattern(category_id=request.form.get('category_id'), name=request.form.get('name'), image_url=request.form.get('image_url'), prompt=request.form.get('prompt'))
+    p = Pattern(name=request.form.get('name'), image_url=request.form.get('image_url'), prompt=request.form.get('prompt'))
     db.session.add(p); db.session.commit(); flash('تمت إضافة النمط', 'success')
     return redirect(url_for('admin_panel'))
 
@@ -271,5 +273,4 @@ def update_site_settings():
 
 # ----- التشغيل -----
 if __name__ == '__main__':
-    # للتشغيل المحلي فقط
     app.run(host='0.0.0.0', port=5000, debug=False)
