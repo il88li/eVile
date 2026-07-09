@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: ufoq_user
+      POSTGRES_PASSWORD: secure_password_here
+      POSTGRES_DB: ufoq_db
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    ports: ["5432:5432"]
+    networks: [ufoq_network]
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports: ["6379:6379"]
+    networks: [ufoq_network]
+
+  app:
+    build: .
+    restart: always
+    depends_on: [postgres, redis]
+    environment:
+      - DATABASE_URL=postgresql://ufoq_user:secure_password_here@postgres:5432/ufoq_db
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=super_secret_key
+      - OPENROUTER_API_KEY=your_key_here
+      - ADMIN_PASSWORD=admin_pass
+    ports: ["5000:5000"]
+    networks: [ufoq_network]
+
+volumes: [postgres_data]
+networks: [ufoq_network: {driver: bridge}]
