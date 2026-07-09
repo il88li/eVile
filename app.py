@@ -58,7 +58,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
-# ----- تهيئة قاعدة البيانات (باستخدام before_request) -----
+# ----- تهيئة قاعدة البيانات -----
 _db_initialized = False
 
 @app.before_request
@@ -86,7 +86,7 @@ def index():
         user_data.last_active = datetime.utcnow()
         db.session.commit()
         
-    # تم إصلاح الخطأ هنا: حذف db.joinedload(Pattern.category)
+    # تمت إزالة العلاقة مع الفئات
     patterns = Pattern.query.all()
     
     notif = Notification.query.filter_by(show_in_chat=True).order_by(Notification.created_at.desc()).first()
@@ -174,10 +174,7 @@ def deduct_credit():
     return jsonify({'success': False, 'message': 'نفاذ الرصيد'}), 402
 
 # ----- مسارات البيانات والتخزين المؤقت -----
-@app.route('/api/patterns_by_category/<int:cat_id>')
-@cache.cached(timeout=300)
-def api_patterns_by_category(cat_id):
-    return jsonify([{'id': p.id, 'name': p.name, 'image_url': p.image_url, 'prompt': p.prompt} for p in Pattern.query.filter_by(category_id=cat_id).all()])
+# تم حذف مسار api/patterns_by_category لأنه لم يعد موجوداً في قاعدة البيانات الجديدة
 
 @app.route('/api/notifications')
 @cache.cached(timeout=120)
