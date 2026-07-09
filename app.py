@@ -17,7 +17,8 @@ from flask_talisman import Talisman
 from sqlalchemy.exc import SQLAlchemyError
 import threading
 
-from models import db, User, Category, Pattern, Notification, Ad, SiteSetting
+# تم حذف استيراد Category
+from models import db, User, Pattern, Notification, Ad, SiteSetting
 from config import Config
 
 app = Flask(__name__)
@@ -39,18 +40,14 @@ Talisman(app, force_https=False, content_security_policy={
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ----- دوال المساعدة -----
 def hash_password(password): return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 def check_password(password, hashed): return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
-
 def generate_csrf_token():
     if 'csrf_token' not in session:
         session['csrf_token'] = secrets.token_urlsafe(32)
     return session['csrf_token']
-
 def validate_csrf_token(token):
     return token == session.get('csrf_token')
-
 def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -58,9 +55,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
-# ----- تهيئة قاعدة البيانات -----
 _db_initialized = False
-
 @app.before_request
 def ensure_db_initialized():
     global _db_initialized
@@ -74,7 +69,6 @@ def ensure_db_initialized():
                 _db_initialized = True
                 logger.info("✅ Database initialized successfully.")
 
-# ----- مسارات المستخدم (UI) -----
 @app.route('/')
 def index():
     site = SiteSetting.query.first()
@@ -82,15 +76,11 @@ def index():
     
     user_id = session.get('user_id')
     user_data_dict = None
-    
     if user_id:
         user = User.query.get(user_id)
         if user:
-            # تحديث وقت النشاط
             user.last_active = datetime.utcnow()
             db.session.commit()
-            
-            # تحويل البيانات إلى قاموس لإرسالها بشكل آمن للقالب
             user_data_dict = {
                 'username': user.username,
                 'credits': user.credits,
@@ -98,7 +88,6 @@ def index():
             }
         
     patterns = Pattern.query.all()
-    
     notif = Notification.query.filter_by(show_in_chat=True).order_by(Notification.created_at.desc()).first()
     ad = Ad.query.order_by(Ad.created_at.desc()).first()
     
@@ -114,7 +103,6 @@ def index():
 def sign():
     return render_template('sign.html', csrf_token=generate_csrf_token())
 
-# ----- مسارات API (Signup/Login/Profiles) -----
 @app.route('/api/signup', methods=['POST'])
 @limiter.limit("5 per minute")
 def signup():
@@ -157,7 +145,6 @@ def update_user():
     db.session.commit()
     return jsonify({'success': True, 'message': 'تم التحديث'})
 
-# ----- مسارات النقاط -----
 @app.route('/api/claim_daily_gift', methods=['POST'])
 def claim_daily_gift():
     user = User.query.get(session.get('user_id'))
@@ -190,13 +177,11 @@ def deduct_credit():
         return jsonify({'success': True, 'credits': user.credits})
     return jsonify({'success': False, 'message': 'نفاذ الرصيد'}), 402
 
-# ----- مسارات البيانات والتخزين المؤقت -----
 @app.route('/api/notifications')
 @cache.cached(timeout=120)
 def api_notifications():
     return jsonify([{'id': n.id, 'title': n.title, 'text': n.text, 'created_at': n.created_at.isoformat()} for n in Notification.query.order_by(Notification.id.desc()).all()])
 
-# ----- مسار الذكاء الاصطناعي -----
 @app.route('/api/chat', methods=['POST'])
 @limiter.limit("30 per minute")
 def api_chat():
@@ -239,26 +224,18 @@ def api_chat():
         logger.error(f"Unexpected chat error: {e}"); logger.error(traceback.format_exc())
         return jsonify({'error': 'خطأ داخلي'}), 500
 
-# ----- مسارات لوحة التحكم (Admin) -----
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_panel():
     if request.method == 'POST' and request.form.get('password') == Config.ADMIN_PASSWORD:
         session['logged_in'] = True
         return redirect(url_for('admin_panel'))
     if session.get('logged_in'):
-        return render_template('admin.html', categories=Category.query.all(), patterns=Pattern.query.all(), notifications=Notification.query.all(), ads=Ad.query.all(), users_count=User.query.count(), site_settings=SiteSetting.query.first(), csrf_token=generate_csrf_token())
+        # تم حذف categories
+        return render_template('admin.html', patterns=Pattern.query.all(), notifications=Notification.query.all(), ads=Ad.query.all(), users_count=User.query.count(), site_settings=SiteSetting.query.first(), csrf_token=generate_csrf_token())
     return render_template('admin.html')
 
 @app.route('/admin/logout')
-def logout(): session.clear(); return redirect(url_for('login'))
-
-@app.route('/admin/category/add', methods=['POST'])
-@admin_required
-def add_category():
-    if not validate_csrf_token(request.form.get('csrf_token')): return "CSRF Error", 400
-    c = Category(name=request.form.get('name'), icon=request.form.get('icon', 'bi-robot'))
-    db.session.add(c); db.session.commit(); flash('تمت إضافة الفئة', 'success')
-    return redirect(url_for('admin_panel'))
+def logout(): session.clear(); return redirect(url_for('admin_panel'))
 
 @app.route('/admin/pattern/add', methods=['POST'])
 @admin_required
@@ -283,6 +260,5 @@ def update_site_settings():
     s = SiteSetting.query.first(); s.status = request.json.get('status'); s.offline_message = request.json.get('offline_message')
     db.session.commit(); return jsonify({'success': True})
 
-# ----- التشغيل -----
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
