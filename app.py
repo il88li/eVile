@@ -81,17 +81,34 @@ def index():
     if site and site.status == 'off': return render_template('index.html', site_status='off', offline_message=site.offline_message)
     
     user_id = session.get('user_id')
-    user_data = User.query.get(user_id) if user_id else None
-    if user_data:
-        user_data.last_active = datetime.utcnow()
-        db.session.commit()
+    user_data_dict = None
+    
+    if user_id:
+        user = User.query.get(user_id)
+        if user:
+            # تحديث وقت النشاط
+            user.last_active = datetime.utcnow()
+            db.session.commit()
+            
+            # تحويل البيانات إلى قاموس لإرسالها بشكل آمن للقالب
+            user_data_dict = {
+                'username': user.username,
+                'credits': user.credits,
+                'last_daily_gift': user.last_daily_gift.isoformat() if user.last_daily_gift else None
+            }
         
-    # جلب جميع الأنماط بدون أي علاقات مع الفئات
     patterns = Pattern.query.all()
     
     notif = Notification.query.filter_by(show_in_chat=True).order_by(Notification.created_at.desc()).first()
     ad = Ad.query.order_by(Ad.created_at.desc()).first()
-    return render_template('index.html', patterns=patterns, user_id=user_id, latest_notification=notif, latest_ad=ad, user_data=user_data, site_status='on')
+    
+    return render_template('index.html', 
+                         patterns=patterns, 
+                         user_id=user_id, 
+                         latest_notification=notif, 
+                         latest_ad=ad, 
+                         user_data=user_data_dict, 
+                         site_status='on')
 
 @app.route('/sign')
 def sign():
@@ -173,7 +190,7 @@ def deduct_credit():
         return jsonify({'success': True, 'credits': user.credits})
     return jsonify({'success': False, 'message': 'نفاذ الرصيد'}), 402
 
-# ----- مسارات البيانات والتخزين المؤقت (تم حذف مسار الفئات القديم) -----
+# ----- مسارات البيانات والتخزين المؤقت -----
 @app.route('/api/notifications')
 @cache.cached(timeout=120)
 def api_notifications():
