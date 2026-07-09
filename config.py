@@ -1,7 +1,9 @@
 import os
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key-change-this')
@@ -16,19 +18,36 @@ class Config:
     SQLALCHEMY_MAX_OVERFLOW = 40
     SQLALCHEMY_POOL_PRE_PING = True
 
-    # Redis للتخزين المؤقت والجلسات
-    REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
-    CACHE_TYPE = 'RedisCache'
-    CACHE_REDIS_URL = REDIS_URL
-    CACHE_DEFAULT_TIMEOUT = 300
+    # إعدادات Redis (تمت إضافة مرونة)
+    REDIS_URL = os.getenv('REDIS_URL')
+    
+    if REDIS_URL:
+        # إعدادات الأداء العالي (مع Redis)
+        CACHE_TYPE = 'RedisCache'
+        CACHE_REDIS_URL = REDIS_URL
+        CACHE_DEFAULT_TIMEOUT = 300
 
-    SESSION_TYPE = 'redis'
-    SESSION_REDIS = REDIS_URL
-    SESSION_PERMANENT = False
-    SESSION_USE_SIGNER = True
-    SESSION_KEY_PREFIX = 'ufoq_session:'
+        SESSION_TYPE = 'redis'
+        SESSION_REDIS = REDIS_URL
+        SESSION_PERMANENT = False
+        SESSION_USE_SIGNER = True
+        SESSION_KEY_PREFIX = 'ufoq_session:'
 
-    # Rate Limiting (تم إصلاح الاستراتيجية)
-    RATELIMIT_ENABLED = True
-    RATELIMIT_STORAGE_URI = REDIS_URL
-    RATELIMIT_STRATEGY = 'fixed-window'  # <--- تم التغيير هنا
+        RATELIMIT_ENABLED = True
+        RATELIMIT_STORAGE_URI = REDIS_URL
+        RATELIMIT_STRATEGY = 'fixed-window'
+        logger.info("✅ Redis configured successfully using REDIS_URL.")
+    else:
+        # حل بديل آمن (يعمل فوراً بدون Redis، لكنه لا يتوسع مع عدة عمال)
+        CACHE_TYPE = 'SimpleCache'
+        CACHE_DEFAULT_TIMEOUT = 300
+
+        SESSION_TYPE = 'filesystem'
+        SESSION_PERMANENT = False
+        SESSION_USE_SIGNER = True
+        SESSION_KEY_PREFIX = 'ufoq_session:'
+
+        RATELIMIT_ENABLED = True
+        RATELIMIT_STORAGE_URI = 'memory://'
+        RATELIMIT_STRATEGY = 'fixed-window'
+        logger.warning("⚠️ REDIS_URL not set. Falling back to in-memory cache/limiter. Session persistence and scaling will NOT work properly with multiple workers.")
