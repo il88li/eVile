@@ -655,13 +655,17 @@
 
     <!-- Bottom Nav -->
     <nav class="bottom-nav-bar">
+        <button type="button" class="nav-item active" onclick="handleNavClick(event, '/library')">
+            <i class="bi bi-collection-fill"></i>
+            <span class="nav-label">المكتبة</span>
+        </button>
         <button type="button" class="nav-item" onclick="handleNavClick(event, '/')">
             <i class="bi bi-house-door"></i>
             <span class="nav-label">الرئيسية</span>
         </button>
-        <button type="button" class="nav-item active" onclick="handleNavClick(event, '/library')">
-            <i class="bi bi-collection-fill"></i>
-            <span class="nav-label">المكتبة</span>
+        <button type="button" class="nav-item" onclick="handleNavClick(event, '/about')">
+            <i class="bi bi-info-circle"></i>
+            <span class="nav-label">حول</span>
         </button>
     </nav>
 
