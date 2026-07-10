@@ -1,404 +1,668 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - UFOQ</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Tajawal', sans-serif; background: linear-gradient(160deg, #f2f4f8 0%, #e1dbf5 100%); min-height: 100vh; padding-bottom: 90px; color: #1F2937; display: flex; align-items: center; justify-content: center; }
-        .glass-card, .modal-content, .pattern-card, .notification-item, .login-card, .bottom-nav { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.95); box-shadow: 0 8px 32px rgba(123, 97, 255, 0.04); border-radius: 18px; }
-        .admin-container { max-width: 1200px; width: 100%; margin: 0 auto; padding: 20px; }
-        .login-wrapper { max-width: 420px; margin: 0 auto; width: 100%; }
-        .login-card { padding: 40px 32px; text-align: center; }
-        .login-icon { width: 64px; height: 64px; background: rgba(123, 97, 255, 0.08); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; border: 1px solid rgba(123,97,255,0.15); }
-        .login-icon i { font-size: 36px; color: #7B61FF; }
-        .login-title { font-size: 28px; font-weight: 800; color: #1F2937; margin-bottom: 8px; }
-        .login-subtitle { color: #6B7280; font-size: 14px; }
-        .form-group { margin-bottom: 24px; text-align: right; }
-        label { display: block; margin-bottom: 8px; color: #6B7280; font-weight: 500; font-size: 14px; }
-        input, textarea, select { width: 100%; padding: 12px 16px; background: rgba(243, 244, 246, 0.8); border: 1px solid rgba(123,97,255,0.1); border-radius: 12px; color: #1F2937; font-family: 'Tajawal', sans-serif; font-size: 14px; outline: none; }
-        input:focus, textarea:focus { border-color: #7B61FF; background: #ffffff; }
-        textarea { min-height: 80px; resize: vertical; }
-        .btn { padding: 10px 20px; background: rgba(243, 244, 246, 0.8); border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 40px; color: #6B7280; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-primary { background: #7B61FF; border-color: #7B61FF; color: #fff; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.2); }
-        .btn-danger { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #dc2626; }
-        .btn-success { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.2); color: #16a34a; }
-        .btn-warning { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); color: #d97706; }
-        .btn:active { transform: scale(0.96); }
-        .btn-login { width: 100%; padding: 14px; font-size: 16px; }
-        .flash { padding: 12px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 14px; color: #dc2626; margin-bottom: 24px; text-align: center; font-size: 14px; }
-        .flash.success { background: rgba(34,197,94,0.05); border-color: rgba(34,197,94,0.1); color: #16a34a; }
-        .bottom-nav { position: fixed; bottom: 20px; left: 20px; right: 20px; z-index: 999; display: flex; justify-content: center; align-items: center; padding: 8px 12px; background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.95); border-radius: 16px; max-width: 700px; margin: 0 auto; overflow-x: auto; gap: 8px; flex-wrap: nowrap; scrollbar-width: none; box-shadow: 0 8px 32px rgba(123, 97, 255, 0.03); }
-        .bottom-nav::-webkit-scrollbar { display: none; }
-        .bottom-nav-btn { flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px; background: rgba(243, 244, 246, 0.8); border: 1px solid rgba(255, 255, 255, 0.9); color: #6B7280; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
-        .bottom-nav-btn.active { background: #7B61FF; border-color: #7B61FF; color: #fff; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.2); }
-        .bottom-nav-btn:active { transform: scale(0.85); }
-        .tab-content { display: none; padding: 20px; margin-top: 10px; }
-        .tab-content.active { display: block; }
-        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-right: 12px; border-right: 3px solid rgba(123,97,255,0.2); display: flex; align-items: center; gap: 8px; color: #1F2937; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
-        .pattern-card { padding: 12px; margin-bottom: 10px; }
-        .pattern-header { display: flex; align-items: center; gap: 10px; }
-        .pattern-img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(123,97,255,0.1); }
-        .pattern-name { font-weight: 700; color: #1F2937; font-size: 14px; }
-        .pattern-meta { font-size: 11px; color: #6B7280; }
-        .card-actions { display: flex; gap: 8px; }
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
-        .modal.active { display: flex; }
-        .modal-content { padding: 20px; max-width: 500px; width: 100%; }
-        .library-item { padding: 12px; margin-bottom: 10px; }
-        .library-item-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(123,97,255,0.1); }
-        .library-item-category { display: inline-block; padding: 2px 10px; background: rgba(123,97,255,0.08); border-radius: 20px; font-size: 11px; color: #7B61FF; margin-top: 4px; }
-        .category-tag { display: inline-block; padding: 4px 12px; background: rgba(123,97,255,0.08); border-radius: 20px; font-size: 12px; color: #7B61FF; margin: 2px; border: 1px solid rgba(123,97,255,0.15); }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
-        .stat-card { background: rgba(123,97,255,0.05); border: 1px solid rgba(123,97,255,0.1); border-radius: 14px; padding: 16px; text-align: center; }
-        .stat-number { font-size: 28px; font-weight: 900; color: #7B61FF; }
-        .stat-label { font-size: 12px; color: #6B7280; margin-top: 4px; }
-        @media (max-width: 600px) { .bottom-nav { padding: 6px; gap: 6px; border-radius: 12px; } .bottom-nav-btn { width: 38px; height: 38px; font-size: 16px; } }
-    </style>
-</head>
-<body>
-    <div class="admin-container">
-        {% if session.get('logged_in') %}
-            <div style="height: 20px;"></div>
+import os
+import logging
+import bcrypt
+import requests
+import json
+import traceback
+import secrets
+from datetime import datetime
+from functools import wraps
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, Response
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_caching import Cache
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_talisman import Talisman
+from sqlalchemy.exc import SQLAlchemyError
+import threading
 
-            <!-- Patterns Tab -->
-            <div id="tab-patterns" class="tab-content active glass-card">
-                <div class="section-title"><i class="bi bi-plus-circle" style="color:#7B61FF;"></i> إضافة نمط جديد</div>
-                <form method="POST" action="/admin/pattern/add">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                    <div class="form-grid">
-                        <div class="form-group"><label>اسم النمط</label><input type="text" name="name" required></div>
-                        <div class="form-group"><label>رابط صورة النمط</label><input type="url" name="image_url" required placeholder="https://example.com/image.png"></div>
-                        <div class="form-group"><label>البرومبت (بدون وصف)</label><textarea name="prompt" required></textarea></div>
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> إضافة نمط</button>
-                </form>
+from models import db, User, Pattern, Category, PromptLibrary, Notification, Ad, SiteSetting
+from config import Config
 
-                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-list-ul" style="color:#7B61FF;"></i> قائمة الأنماط</div>
-                <div class="patterns-list">
-                    {% for pat in patterns %}
-                    <div class="pattern-card glass-card">
-                        <div class="pattern-header">
-                            <img src="{{ pat.image_url }}" class="pattern-img" alt="{{ pat.name }}">
-                            <div style="flex:1;">
-                                <div class="pattern-name">{{ pat.name }}</div>
-                                <div class="pattern-meta" style="font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px;">{{ pat.prompt[:80] }}...</div>
-                            </div>
-                        </div>
-                        <div class="card-actions" style="margin-top: 8px;">
-                            <form method="POST" action="/admin/pattern/{{ pat.id }}/delete" style="display:inline;" onsubmit="return confirm('حذف النمط؟')">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i> حذف</button>
-                            </form>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
+app = Flask(__name__)
+app.config.from_object(Config)
 
-            <!-- Categories Tab (NEW - Full Admin Control) -->
-            <div id="tab-categories" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-tags" style="color:#7B61FF;"></i> إدارة التصنيفات</div>
+db.init_app(app)
+migrate = Migrate(app, db)
+cache = Cache(app)
+limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day", "50 per hour"], storage_uri=app.config['RATELIMIT_STORAGE_URI'])
+Talisman(app, force_https=False, content_security_policy={
+    'default-src': ["'self'"],
+    'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
+    'script-src': ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+    'font-src': ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net"],
+    'img-src': ["'self'", "data:", "https:"],
+    'connect-src': ["'self'"]
+})
 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number">{{ categories|length }}</div>
-                        <div class="stat-label">عدد التصنيفات</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">{{ library_items|length }}</div>
-                        <div class="stat-label">عدد البرومبتات</div>
-                    </div>
-                </div>
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-                <form method="POST" action="/admin/category/add">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                    <div class="form-grid">
-                        <div class="form-group"><label>معرف التصنيف (بالإنجليزية)</label><input type="text" name="name" required placeholder="مثال: images, writing, coding"></div>
-                        <div class="form-group"><label>اسم العرض (بالعربية)</label><input type="text" name="display_name" required placeholder="مثال: توليد صور"></div>
-                        <div class="form-group"><label>الأيقونة (Bootstrap Icon)</label><input type="text" name="icon" value="bi-tag" placeholder="مثال: bi-image, bi-code"></div>
-                        <div class="form-group"><label>الترتيب</label><input type="number" name="sort_order" value="0" min="0"></div>
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> إضافة تصنيف</button>
-                </form>
+def hash_password(password): return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+def check_password(password, hashed): return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+def generate_csrf_token():
+    if 'csrf_token' not in session:
+        session['csrf_token'] = secrets.token_urlsafe(32)
+    return session['csrf_token']
+def validate_csrf_token(token):
+    return token == session.get('csrf_token')
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('logged_in'): return redirect(url_for('admin_panel'))
+        return f(*args, **kwargs)
+    return decorated
 
-                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-grid-3x3-gap" style="color:#7B61FF;"></i> التصنيفات الحالية</div>
-                <div class="categories-list">
-                    {% for cat in categories %}
-                    <div class="pattern-card glass-card">
-                        <div class="pattern-header">
-                            <div style="width:40px;height:40px;border-radius:8px;background:rgba(123,97,255,0.1);display:flex;align-items:center;justify-content:center;">
-                                <i class="bi {{ cat.icon }}" style="color:#7B61FF;font-size:18px;"></i>
-                            </div>
-                            <div style="flex:1;">
-                                <div class="pattern-name">{{ cat.display_name }}</div>
-                                <div class="pattern-meta">معرف: {{ cat.name }} | ترتيب: {{ cat.sort_order }}</div>
-                            </div>
-                        </div>
-                        <div class="card-actions" style="margin-top: 8px;">
-                            <form method="POST" action="/admin/category/{{ cat.id }}/delete" style="display:inline;" onsubmit="return confirm('حذف التصنيف؟ سيتم نقل البرومبتات إلى "عام"')">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i> حذف</button>
-                            </form>
-                        </div>
-                    </div>
-                    {% else %}
-                    <p style="text-align:center; color:#6B7280; padding: 20px;">لا توجد تصنيفات بعد</p>
-                    {% endfor %}
-                </div>
-            </div>
+_db_initialized = False
+@app.before_request
+def ensure_db_initialized():
+    global _db_initialized
+    if not _db_initialized:
+        with threading.Lock():
+            if not _db_initialized:
+                try:
+                    db.create_all()
+                    if not SiteSetting.query.first():
+                        db.session.add(SiteSetting())
+                        db.session.commit()
+                    # Initialize default categories if table exists and none exist
+                    try:
+                        if not Category.query.first():
+                            default_categories = [
+                                Category(name='images', display_name='توليد صور', sort_order=1),
+                                Category(name='writing', display_name='كتابة محتوى', sort_order=2),
+                                Category(name='coding', display_name='برمجة', sort_order=3),
+                                Category(name='design', display_name='تصميم UI', sort_order=4),
+                                Category(name='analysis', display_name='تحليل بيانات', sort_order=5),
+                                Category(name='creative', display_name='إبداعي', sort_order=6),
+                            ]
+                            for cat in default_categories:
+                                db.session.add(cat)
+                            db.session.commit()
+                            logger.info("✅ Default categories initialized.")
+                    except Exception as e:
+                        logger.warning(f"⚠️ Categories table not ready yet: {e}")
+                        db.session.rollback()
+                    _db_initialized = True
+                    logger.info("✅ Database initialized successfully.")
+                except Exception as e:
+                    logger.error(f"❌ Database initialization error: {e}")
+                    db.session.rollback()
 
-            <!-- Library Tab -->
-            <div id="tab-library" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-collection" style="color:#7B61FF;"></i> إضافة برومبت للمكتبة</div>
-                <form method="POST" action="/admin/library/add">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                    <div class="form-grid">
-                        <div class="form-group"><label>عنوان البرومبت</label><input type="text" name="title" required placeholder="مثال: مدينة سايبر بانك"></div>
-                        <div class="form-group"><label>التصنيف</label>
-                            <select name="category" required>
-                                {% for cat in categories %}
-                                <option value="{{ cat.name }}">{{ cat.display_name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-group"><label>رابط صورة المعاينة</label><input type="url" name="image_url" required placeholder="https://example.com/image.png"></div>
-                        <div class="form-group" style="grid-column: 1 / -1;"><label>نص البرومبت</label><textarea name="prompt_text" required rows="5" placeholder="اكتب البرومبت الكامل هنا..."></textarea></div>
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> إضافة للمكتبة</button>
-                </form>
+# ============================================================
+# PUBLIC ROUTES
+# ============================================================
 
-                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-grid-3x3-gap" style="color:#7B61FF;"></i> برومبتات المكتبة</div>
-                <div class="library-list">
-                    {% for item in library_items %}
-                    <div class="library-item glass-card">
-                        <div class="pattern-header">
-                            <img src="{{ item.image_url }}" class="library-item-img" alt="{{ item.title }}">
-                            <div style="flex:1;">
-                                <div class="pattern-name">{{ item.title }}</div>
-                                <span class="library-item-category">{{ item.category }}</span>
-                                <div class="pattern-meta" style="font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px; margin-top:4px;">{{ item.prompt_text[:80] }}...</div>
-                            </div>
-                        </div>
-                        <div class="card-actions" style="margin-top: 8px;">
-                            <form method="POST" action="/admin/library/{{ item.id }}/delete" style="display:inline;" onsubmit="return confirm('حذف البرومبت من المكتبة؟')">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i> حذف</button>
-                            </form>
-                        </div>
-                    </div>
-                    {% else %}
-                    <p style="text-align:center; color:#6B7280; padding: 20px;">لا توجد برومبتات في المكتبة بعد</p>
-                    {% endfor %}
-                </div>
-            </div>
+@app.route('/')
+def index():
+    site = SiteSetting.query.first()
+    if site and site.status == 'off':
+        return render_template('index.html', site_status='off', offline_message=site.offline_message)
 
-            <!-- Notifications Tab -->
-            <div id="tab-notifications" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-send" style="color:#7B61FF;"></i> إرسال إشعار جديد</div>
-                <form method="POST" action="/admin/notification/add">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                    <div class="form-group"><label>العنوان</label><input type="text" name="title" required></div>
-                    <div class="form-group"><label>النص</label><textarea name="text" required></textarea></div>
-                    <div class="form-group"><label>مدة الظهور (ساعات)</label><input type="number" name="duration_hours" value="1" min="1" step="1"></div>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-bell"></i> إرسال الإشعار</button>
-                </form>
-                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-clock-history" style="color:#7B61FF;"></i> الإشعارات المرسلة</div>
-                {% for notif in notifications %}
-                <div class="notification-item glass-card">
-                    <div class="notification-title"><i class="bi bi-bell" style="color:#7B61FF;"></i> {{ notif.title }} <span style="font-size: 10px; color:#6B7280;">({{ notif.created_at }})</span></div>
-                    <div class="notification-text" style="color: #6B7280;">{{ notif.text }}</div>
-                    <div class="notification-meta" style="font-size: 10px; color:#9CA3AF; margin-top:5px;">المدة: {{ notif.duration_hours }} ساعة</div>
-                </div>
-                {% else %}
-                <p style="text-align:center; color:#6B7280;">لا توجد إشعارات بعد</p>
-                {% endfor %}
-            </div>
-
-            <!-- Credits Tab -->
-            <div id="tab-credits" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-coin" style="color:#7B61FF;"></i> شحن نقاط المستخدمين</div>
-                <div style="max-width: 400px;">
-                    <div class="form-group"><label>اسم المستخدم</label><input type="text" id="rechargeUsername" placeholder="أدخل اسم المستخدم"></div>
-                    <div class="form-group"><label>عدد النقاط</label><input type="number" id="rechargeAmount" value="10" min="1"></div>
-                    <button class="btn btn-primary" onclick="rechargeCredits()"><i class="bi bi-plus-circle"></i> شحن النقاط</button>
-                </div>
-                <div id="rechargeResult" style="margin-top: 15px; font-size: 13px; display: none;"></div>
-            </div>
-
-            <!-- Site Control Tab - FIXED -->
-            <div id="tab-site-control" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-power" style="color:#7B61FF;"></i> التحكم في نشاط الموقع</div>
-                <div style="text-align: center; max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 20px;">
-                    <div id="siteStatusIcon" style="font-size: 80px; cursor: pointer; transition: all 0.3s;"
-                         onclick="toggleSiteStatus()"
-                         data-status="{{ site_settings.status if site_settings else 'on' }}">
-                        <i class="bi {{ 'bi-toggle-on' if site_settings and site_settings.status == 'on' else 'bi-toggle-off' }}"></i>
-                    </div>
-                    <div style="width: 100%;">
-                        <div style="font-size: 18px; font-weight: 700; margin-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 10px;">
-                            <span>الحالة الحالية:</span>
-                            <span id="siteStatusLabel" style="color: {{ '#16a34a' if site_settings and site_settings.status == 'on' else '#ef4444' }};">
-                                {{ 'مفعل' if site_settings and site_settings.status == 'on' else 'متوقف' }}
-                            </span>
-                        </div>
-                        <div class="form-group" style="text-align: right;">
-                            <label>نص الرسالة عند التوقف</label>
-                            <textarea id="offlineMessageInput" rows="4" style="width: 100%;">{{ site_settings.offline_message if site_settings else 'الموقع تحت الصيانة حالياً، نعتذر عن الإزعاج.' }}</textarea>
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 15px; margin-top: 5px; font-size: 24px; color: #7B61FF;">
-                        <a href="https://t.me/Evile_Prompts" target="_blank" style="color: #7B61FF; transition: 0.2s;"><i class="bi bi-telegram"></i></a>
-                        <a href="https://www.instagram.com/bla6c7" target="_blank" style="color: #7B61FF; transition: 0.2s;"><i class="bi bi-instagram"></i></a>
-                        <a href="https://wa.me/967730577358" target="_blank" style="color: #7B61FF; transition: 0.2s;"><i class="bi bi-whatsapp"></i></a>
-                    </div>
-                    <button class="btn btn-primary" onclick="saveSiteSettings()" style="width: 100%; padding: 14px; justify-content: center;">
-                        <i class="bi bi-floppy"></i> حفظ الإعدادات
-                    </button>
-                </div>
-            </div>
-
-            <div class="bottom-nav" id="bottomNav">
-                <button class="bottom-nav-btn active" data-tab="patterns"><i class="bi bi-grid"></i></button>
-                <button class="bottom-nav-btn" data-tab="categories"><i class="bi bi-tags"></i></button>
-                <button class="bottom-nav-btn" data-tab="library"><i class="bi bi-collection"></i></button>
-                <button class="bottom-nav-btn" data-tab="notifications"><i class="bi bi-bell"></i></button>
-                <button class="bottom-nav-btn" data-tab="credits"><i class="bi bi-coin"></i></button>
-                <button class="bottom-nav-btn" data-tab="site-control"><i class="bi bi-power"></i></button>
-            </div>
-
-        {% else %}
-            <div class="login-wrapper">
-                <div class="login-card glass-card">
-                    <div class="login-icon"><i class="bi bi-shield-lock"></i></div>
-                    <div class="login-title">لوحة التحكم</div>
-                    <div class="login-subtitle">UFOQ Admin Panel</div>
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="flash {% if category == 'success' %}success{% endif %}">{{ message }}</div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-                    <form method="POST" action="/admin">
-                        <div class="form-group">
-                            <label><i class="bi bi-key" style="color:#7B61FF;"></i> كلمة المرور</label>
-                            <input type="password" name="password" required placeholder="••••••••">
-                        </div>
-                        <button type="submit" class="btn btn-login btn-primary">دخول</button>
-                    </form>
-                </div>
-            </div>
-        {% endif %}
-    </div>
-
-    <script>
-        // Tab switching
-        document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const tabId = btn.getAttribute('data-tab');
-                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-                document.getElementById(`tab-${tabId}`).classList.add('active');
-                document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-        });
-
-        // Recharge credits
-        async function rechargeCredits() {
-            const username = document.getElementById('rechargeUsername').value.trim();
-            const amount = parseInt(document.getElementById('rechargeAmount').value);
-            const resultDiv = document.getElementById('rechargeResult');
-            resultDiv.style.display = 'block';
-            resultDiv.textContent = 'جاري الشحن...';
-            resultDiv.style.color = '#6B7280';
-
-            if (!username || amount <= 0) {
-                resultDiv.textContent = 'يرجى إدخال اسم مستخدم صحيح وعدد نقاط صحيح.';
-                resultDiv.style.color = '#ef4444';
-                return;
+    user_id = session.get('user_id')
+    user_data_dict = None
+    if user_id:
+        user = User.query.get(user_id)
+        if user:
+            user.last_active = datetime.utcnow()
+            db.session.commit()
+            user_data_dict = {
+                'username': user.username,
+                'credits': user.credits,
+                'last_daily_gift': user.last_daily_gift.isoformat() if user.last_daily_gift else None
             }
 
-            try {
-                const res = await fetch('/api/admin/update_credits', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({username, amount, csrf_token: '{{ csrf_token }}'})
-                });
-                const data = await res.json();
-                if(data.success) {
-                    resultDiv.textContent = data.message;
-                    resultDiv.style.color = '#16a34a';
-                    document.getElementById('rechargeUsername').value = '';
-                } else {
-                    resultDiv.textContent = data.message;
-                    resultDiv.style.color = '#ef4444';
-                }
-            } catch(err) {
-                resultDiv.textContent = 'خطأ في الاتصال بالخادم.';
-                resultDiv.style.color = '#ef4444';
+    patterns = Pattern.query.all()
+    patterns_data = [
+        {
+            'id': p.id,
+            'name': p.name,
+            'image_url': p.image_url,
+            'prompt': p.prompt
+        } for p in patterns
+    ]
+
+    notif = Notification.query.filter_by(show_in_chat=True).order_by(Notification.created_at.desc()).first()
+    ad = Ad.query.order_by(Ad.created_at.desc()).first()
+
+    return render_template('index.html', 
+                         patterns=patterns_data, 
+                         user_id=user_id, 
+                         latest_notification=notif, 
+                         latest_ad=ad, 
+                         user_data=user_data_dict, 
+                         site_status='on')
+
+@app.route('/library')
+def library():
+    """صفحة مكتبة البرومبتات - تصنيفات ديناميكية من الأدمن"""
+    site = SiteSetting.query.first()
+    if site and site.status == 'off':
+        return render_template('index.html', site_status='off', offline_message=site.offline_message)
+
+    user_id = session.get('user_id')
+    user_data_dict = None
+    if user_id:
+        user = User.query.get(user_id)
+        if user:
+            user.last_active = datetime.utcnow()
+            db.session.commit()
+            user_data_dict = {
+                'username': user.username,
+                'credits': user.credits,
+                'last_daily_gift': user.last_daily_gift.isoformat() if user.last_daily_gift else None
             }
+
+    # جلب التصنيفات الديناميكية من الأدمن - معالجة خطأ الجدول غير الموجود
+    categories_data = []
+    try:
+        categories = Category.query.order_by(Category.sort_order).all()
+        categories_data = [
+            {
+                'name': c.name,
+                'display_name': c.display_name,
+                'icon': c.icon
+            } for c in categories
+        ]
+    except Exception as e:
+        logger.warning(f"Categories table not available yet: {e}")
+
+    # جلب البرومبتات - معالجة خطأ الجدول غير الموجود
+    library_data = []
+    try:
+        library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
+        library_data = [
+            {
+                'id': item.id,
+                'title': item.title,
+                'category': item.category,
+                'image_url': item.image_url,
+                'prompt_text': item.prompt_text
+            } for item in library_items
+        ]
+    except Exception as e:
+        logger.warning(f"PromptLibrary table not available yet: {e}")
+
+    return render_template('library.html',
+                         categories=categories_data,
+                         library_items=library_data,
+                         user_id=user_id,
+                         user_data=user_data_dict,
+                         site_status='on')
+
+@app.route('/sign')
+def sign():
+    return render_template('sign.html', csrf_token=generate_csrf_token())
+
+# ============================================================
+# AUTHENTICATION API
+# ============================================================
+
+@app.route('/api/signup', methods=['POST'])
+@limiter.limit("5 per minute")
+def signup():
+    data = request.get_json()
+    if not data.get('username') or not data.get('password'): return jsonify({'success': False, 'message': 'بيانات غير كاملة'}), 400
+    if User.query.filter_by(username=data['username']).first(): return jsonify({'success': False, 'message': 'اسم المستخدم موجود مسبقاً'}), 400
+    try:
+        user = User(username=data['username'], password_hash=hash_password(data['password']))
+        db.session.add(user); db.session.commit()
+        session['user_id'] = user.id
+        return jsonify({'success': True, 'message': 'تم التسجيل', 'credits': user.credits})
+    except SQLAlchemyError as e:
+        db.session.rollback(); logger.error(f"Signup DB error: {e}")
+        return jsonify({'success': False, 'message': 'خطأ في قاعدة البيانات'}), 500
+
+@app.route('/api/login', methods=['POST'])
+@limiter.limit("10 per minute")
+def login():
+    data = request.get_json()
+    user = User.query.filter_by(username=data.get('username')).first()
+    if user and check_password(data.get('password'), user.password_hash):
+        session['user_id'] = user.id
+        return jsonify({'success': True, 'message': 'تم الدخول', 'credits': user.credits})
+    return jsonify({'success': False, 'message': 'بيانات غير صحيحة'}), 401
+
+@app.route('/api/user_info')
+def user_info():
+    user = User.query.get(session.get('user_id'))
+    if not user: return jsonify(None)
+    return jsonify({'username': user.username, 'credits': user.credits, 'last_daily_gift': str(user.last_daily_gift) if user.last_daily_gift else None})
+
+@app.route('/api/update_user', methods=['POST'])
+def update_user():
+    user = User.query.get(session.get('user_id'))
+    if not user: return jsonify({'success': False, 'message': 'غير مسجل'}), 401
+    data = request.get_json()
+    if user.username != data['username'] and User.query.filter_by(username=data['username']).first():
+        return jsonify({'success': False, 'message': 'الاسم مستخدم'}), 400
+    user.username = data['username']; user.password_hash = hash_password(data['password'])
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'تم التحديث'})
+
+# ============================================================
+# CREDITS API
+# ============================================================
+
+@app.route('/api/claim_daily_gift', methods=['POST'])
+def claim_daily_gift():
+    user = User.query.get(session.get('user_id'))
+    today = datetime.utcnow().date()
+    if user.last_daily_gift == today: return jsonify({'success': False, 'message': 'أخذتها اليوم'}), 400
+    user.credits += 3; user.last_daily_gift = today
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'تم الحصول على 3 نقاط', 'credits': user.credits})
+
+@app.route('/api/transfer_credits', methods=['POST'])
+def transfer_credits():
+    sender = User.query.get(session.get('user_id'))
+    if not sender: return jsonify({'success': False, 'message': 'غير مسجل'}), 401
+    data = request.get_json()
+    receiver = User.query.filter_by(username=data.get('username')).first()
+    amount = int(data.get('amount', 0))
+    if not receiver: return jsonify({'success': False, 'message': 'المستخدم غير موجود'}), 404
+    if receiver.id == sender.id: return jsonify({'success': False, 'message': 'لا يمكنك التحويل لنفسك'}), 400
+    if sender.credits < amount: return jsonify({'success': False, 'message': 'رصيدك غير كافٍ'}), 400
+    sender.credits -= amount; receiver.credits += amount
+    db.session.commit()
+    return jsonify({'success': True, 'message': f'تم تحويل {amount}', 'credits': sender.credits})
+
+# ============================================================
+# CHAT API - FIXED: No double credit deduction
+# ============================================================
+
+@app.route('/api/deduct_credit', methods=['POST'])
+def deduct_credit():
+    """هذا الـ endpoint يُستخدم فقط للتحقق من الرصيد، لا للخصم"""
+    user = User.query.get(session.get('user_id'))
+    if not user: return jsonify({'success': False, 'message': 'غير مسجل'}), 401
+    return jsonify({'success': True, 'credits': user.credits})
+
+@app.route('/api/chat', methods=['POST'])
+@limiter.limit("30 per minute")
+def api_chat():
+    data = request.get_json()
+    pattern_id = data.get('pattern_id'); message = data.get('message', '').strip()
+    user = User.query.get(session.get('user_id'))
+    if not user: return jsonify({'error': 'غير مسجل'}), 401
+    if user.credits <= 0: return jsonify({'error': 'no_credits'}), 402
+    pattern = Pattern.query.get(pattern_id)
+    if not pattern: return jsonify({'error': 'النمط غير موجود'}), 404
+
+    # خصم النقطة مرة واحدة فقط هنا
+    try:
+        user.credits -= 1
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Credit deduction error: {e}")
+        return jsonify({'error': 'خطأ في خصم النقاط'}), 500
+
+    try:
+        headers = {
+            'Authorization': f'Bearer {app.config["OPENROUTER_API_KEY"]}',
+            'Content-Type': 'application/json',
+            'HTTP-Referer': request.url_root,
+            'X-Title': 'UFOQ'
         }
-
-        // FIXED: Site status toggle with proper state tracking
-        let currentSiteStatus = '{{ site_settings.status if site_settings else "on" }}';
-
-        function toggleSiteStatus() {
-            const icon = document.getElementById('siteStatusIcon');
-            const label = document.getElementById('siteStatusLabel');
-
-            // Toggle the local state
-            currentSiteStatus = currentSiteStatus === 'on' ? 'off' : 'on';
-
-            // Update UI immediately
-            if (currentSiteStatus === 'off') {
-                icon.style.color = '#ef4444';
-                icon.innerHTML = '<i class="bi bi-toggle-off"></i>';
-                label.style.color = '#ef4444';
-                label.textContent = 'متوقف';
-            } else {
-                icon.style.color = '#16a34a';
-                icon.innerHTML = '<i class="bi bi-toggle-on"></i>';
-                label.style.color = '#16a34a';
-                label.textContent = 'مفعل';
-            }
+        payload = {
+            'model': 'openrouter/auto',
+            'messages': [
+                {'role': 'system', 'content': pattern.prompt},
+                {'role': 'user', 'content': message}
+            ],
+            'temperature': 0.7,
+            'stream': True
         }
+        response = requests.post(app.config["OPENROUTER_URL"], json=payload, headers=headers, stream=True, timeout=30)
+        response.raise_for_status()
 
-        async function saveSiteSettings() {
-            const btn = document.querySelector('#tab-site-control .btn-primary');
-            const messageInput = document.getElementById('offlineMessageInput');
+        def generate():
+            for chunk in response.iter_lines():
+                if chunk:
+                    decoded = chunk.decode('utf-8')
+                    if decoded.startswith('data: '):
+                        data_str = decoded[6:]
+                        if data_str != '[DONE]':
+                            try:
+                                content = json.loads(data_str)['choices'][0]['delta'].get('content', '')
+                                if content: yield content
+                            except Exception as e:
+                                logger.error(f"Stream decode error: {e}")
 
-            btn.disabled = true;
-            btn.innerHTML = 'جاري الحفظ...';
+        return Response(generate(), mimetype='text/plain')
+    except requests.RequestException as e:
+        logger.error(f"OpenRouter API Exception: {e}")
+        # إرجاع النقطة في حالة فشل الاتصال
+        try:
+            user.credits += 1
+            db.session.commit()
+        except:
+            db.session.rollback()
+        return jsonify({'error': 'خطأ في مزود الذكاء الاصطناعي'}), 502
+    except Exception as e:
+        logger.error(f"Unexpected chat error: {e}")
+        logger.error(traceback.format_exc())
+        # إرجاع النقطة في حالة خطأ غير متوقع
+        try:
+            user.credits += 1
+            db.session.commit()
+        except:
+            db.session.rollback()
+        return jsonify({'error': 'خطأ داخلي'}), 500
 
-            try {
-                const res = await fetch('/api/admin/update_site_settings', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        status: currentSiteStatus,
-                        offline_message: messageInput.value,
-                        csrf_token: '{{ csrf_token }}'
-                    })
-                });
-                const data = await res.json();
+@app.route('/api/notifications')
+@cache.cached(timeout=120)
+def api_notifications():
+    return jsonify([{'id': n.id, 'title': n.title, 'text': n.text, 'created_at': n.created_at.isoformat()} for n in Notification.query.order_by(Notification.id.desc()).all()])
 
-                if (data.success) {
-                    alert('تم حفظ الإعدادات بنجاح!');
-                } else {
-                    alert('حدث خطأ أثناء الحفظ: ' + (data.message || 'خطأ غير معروف'));
-                }
-            } catch(err) {
-                alert('خطأ في الاتصال بالخادم.');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-floppy"></i> حفظ الإعدادات';
-            }
-        }
-    </script>
-</body>
-</html>
+# ============================================================
+# ADMIN PANEL
+# ============================================================
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin_panel():
+    if request.method == 'POST' and request.form.get('password') == Config.ADMIN_PASSWORD:
+        session['logged_in'] = True
+        return redirect(url_for('admin_panel'))
+    if session.get('logged_in'):
+        # جلب التصنيفات للأدمن - معالجة خطأ الجدول غير الموجود
+        categories = []
+        library_items = []
+        try:
+            categories = Category.query.order_by(Category.sort_order).all()
+        except Exception as e:
+            logger.warning(f"Categories table not available yet: {e}")
+        try:
+            library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
+        except Exception as e:
+            logger.warning(f"PromptLibrary table not available yet: {e}")
+
+        return render_template('admin.html',
+            patterns=Pattern.query.all(),
+            notifications=Notification.query.all(),
+            ads=Ad.query.all(),
+            library_items=library_items,
+            categories=categories,
+            users_count=User.query.count(),
+            site_settings=SiteSetting.query.first(),
+            csrf_token=generate_csrf_token()
+        )
+    return render_template('admin.html')
+
+@app.route('/admin/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('admin_panel'))
+
+# --- Patterns Management ---
+
+@app.route('/admin/pattern/add', methods=['POST'])
+@admin_required
+def add_pattern():
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    p = Pattern(
+        name=request.form.get('name'),
+        image_url=request.form.get('image_url'),
+        prompt=request.form.get('prompt')
+    )
+    db.session.add(p); db.session.commit()
+    flash('تمت إضافة النمط', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/pattern/<int:pattern_id>/delete', methods=['POST'])
+@admin_required
+def delete_pattern(pattern_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    p = Pattern.query.get_or_404(pattern_id)
+    db.session.delete(p); db.session.commit()
+    flash('تم حذف النمط', 'success')
+    return redirect(url_for('admin_panel'))
+
+# --- Category Management (NEW - Admin Full Control) ---
+
+@app.route('/admin/category/add', methods=['POST'])
+@admin_required
+def add_category():
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+
+    try:
+        name = request.form.get('name', '').strip().lower().replace(' ', '_')
+        display_name = request.form.get('display_name', '').strip()
+        icon = request.form.get('icon', 'bi-tag').strip()
+        sort_order = int(request.form.get('sort_order', 0))
+
+        if not name or not display_name:
+            flash('اسم التصنيف واسم العرض مطلوبان', 'error')
+            return redirect(url_for('admin_panel'))
+
+        if Category.query.filter_by(name=name).first():
+            flash('التصنيف موجود مسبقاً', 'error')
+            return redirect(url_for('admin_panel'))
+
+        cat = Category(name=name, display_name=display_name, icon=icon, sort_order=sort_order)
+        db.session.add(cat); db.session.commit()
+        flash('تمت إضافة التصنيف', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding category: {e}")
+        flash('خطأ في قاعدة البيانات - تأكد من تشغيل migrations', 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/category/<int:category_id>/delete', methods=['POST'])
+@admin_required
+def delete_category(category_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        cat = Category.query.get_or_404(category_id)
+        # Update prompts with this category to 'general'
+        PromptLibrary.query.filter_by(category=cat.name).update({'category': 'general'})
+        db.session.delete(cat); db.session.commit()
+        flash('تم حذف التصنيف', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting category: {e}")
+        flash('خطأ في حذف التصنيف', 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/category/<int:category_id>/update', methods=['POST'])
+@admin_required
+def update_category(category_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    cat = Category.query.get_or_404(category_id)
+    cat.display_name = request.form.get('display_name', cat.display_name).strip()
+    cat.icon = request.form.get('icon', cat.icon).strip()
+    cat.sort_order = int(request.form.get('sort_order', cat.sort_order))
+    db.session.commit()
+    flash('تم تحديث التصنيف', 'success')
+    return redirect(url_for('admin_panel'))
+
+# --- Library Management ---
+
+@app.route('/admin/library/add', methods=['POST'])
+@admin_required
+def add_library_item():
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        item = PromptLibrary(
+            title=request.form.get('title'),
+            category=request.form.get('category', 'general'),
+            image_url=request.form.get('image_url'),
+            prompt_text=request.form.get('prompt_text')
+        )
+        db.session.add(item); db.session.commit()
+        flash('تمت إضافة البرومبت للمكتبة', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding library item: {e}")
+        flash('خطأ في قاعدة البيانات - تأكد من تشغيل migrations', 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/library/<int:item_id>/delete', methods=['POST'])
+@admin_required
+def delete_library_item(item_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    item = PromptLibrary.query.get_or_404(item_id)
+    db.session.delete(item); db.session.commit()
+    flash('تم حذف البرومبت من المكتبة', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/library/<int:item_id>/update', methods=['POST'])
+@admin_required
+def update_library_item(item_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    item = PromptLibrary.query.get_or_404(item_id)
+    item.title = request.form.get('title', item.title)
+    item.category = request.form.get('category', item.category)
+    item.image_url = request.form.get('image_url', item.image_url)
+    item.prompt_text = request.form.get('prompt_text', item.prompt_text)
+    db.session.commit()
+    flash('تم تحديث البرومبت', 'success')
+    return redirect(url_for('admin_panel'))
+
+# --- Notifications Management ---
+
+@app.route('/admin/notification/add', methods=['POST'])
+@admin_required
+def add_notification():
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    n = Notification(
+        title=request.form.get('title'),
+        text=request.form.get('text'),
+        duration_hours=request.form.get('duration_hours', 1),
+        show_in_chat=request.form.get('show_in_chat') == 'on'
+    )
+    db.session.add(n); db.session.commit()
+    flash('تم إرسال الإشعار', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/notification/<int:notification_id>/delete', methods=['POST'])
+@admin_required
+def delete_notification(notification_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    n = Notification.query.get_or_404(notification_id)
+    db.session.delete(n); db.session.commit()
+    flash('تم حذف الإشعار', 'success')
+    return redirect(url_for('admin_panel'))
+
+# --- Credits Management ---
+
+@app.route('/api/admin/update_credits', methods=['POST'])
+@admin_required
+def update_credits():
+    if not validate_csrf_token(request.json.get('csrf_token')):
+        return jsonify({'error': 'CSRF Error'}), 400
+    data = request.get_json()
+    user = User.query.filter_by(username=data.get('username')).first()
+    if not user:
+        return jsonify({'success': False, 'message': 'المستخدم غير موجود'}), 404
+    amount = int(data.get('amount', 0))
+    user.credits += amount
+    db.session.commit()
+    return jsonify({'success': True, 'message': f'تم شحن {amount} نقطة للمستخدم {user.username}', 'credits': user.credits})
+
+# --- Site Settings ---
+
+@app.route('/api/admin/update_site_settings', methods=['POST'])
+@admin_required
+def update_site_settings():
+    if not validate_csrf_token(request.json.get('csrf_token')):
+        return jsonify({'error': 'CSRF Error'}), 400
+    s = SiteSetting.query.first()
+    s.status = request.json.get('status')
+    s.offline_message = request.json.get('offline_message')
+    db.session.commit()
+    return jsonify({'success': True})
+
+@app.route('/api/admin/get_site_status')
+@admin_required
+def get_site_status():
+    s = SiteSetting.query.first()
+    return jsonify({
+        'status': s.status if s else 'on',
+        'offline_message': s.offline_message if s else 'الموقع تحت الصيانة حالياً.'
+    })
+
+# Auto-create all tables on startup (no migration needed)
+# If tables exist with old schema, they will be dropped and recreated
+with app.app_context():
+    try:
+        from sqlalchemy import inspect, text
+        inspector = inspect(db.engine)
+
+        # Check if category table exists but missing display_name column
+        category_cols = []
+        try:
+            category_cols = [col['name'] for col in inspector.get_columns('category')]
+        except Exception:
+            pass  # Table doesn't exist yet
+
+        # Check if prompt_library table exists
+        library_cols = []
+        try:
+            library_cols = [col['name'] for col in inspector.get_columns('prompt_library')]
+        except Exception:
+            pass
+
+        # If category table exists but missing display_name, drop and recreate
+        needs_recreate = False
+        if category_cols and 'display_name' not in category_cols:
+            logger.warning("⚠️ Category table has old schema. Dropping and recreating...")
+            needs_recreate = True
+
+        if needs_recreate:
+            # Drop tables that need updating (order matters for FK constraints)
+            try:
+                db.session.execute(text("DROP TABLE IF EXISTS prompt_library CASCADE"))
+                db.session.execute(text("DROP TABLE IF EXISTS category CASCADE"))
+                db.session.commit()
+                logger.info("✅ Old tables dropped.")
+            except Exception as e:
+                logger.warning(f"⚠️ Could not drop old tables: {e}")
+                db.session.rollback()
+
+        # Create all tables with current schema
+        db.create_all()
+        logger.info("✅ All database tables created/verified.")
+
+        # Initialize site settings if not exists
+        if not SiteSetting.query.first():
+            db.session.add(SiteSetting())
+            db.session.commit()
+            logger.info("✅ Site settings initialized.")
+
+        # Initialize default categories if none exist
+        try:
+            if not Category.query.first():
+                default_categories = [
+                    Category(name='images', display_name='توليد صور', sort_order=1),
+                    Category(name='writing', display_name='كتابة محتوى', sort_order=2),
+                    Category(name='coding', display_name='برمجة', sort_order=3),
+                    Category(name='design', display_name='تصميم UI', sort_order=4),
+                    Category(name='analysis', display_name='تحليل بيانات', sort_order=5),
+                    Category(name='creative', display_name='إبداعي', sort_order=6),
+                ]
+                for cat in default_categories:
+                    db.session.add(cat)
+                db.session.commit()
+                logger.info("✅ Default categories initialized.")
+        except Exception as e:
+            logger.warning(f"⚠️ Could not initialize categories: {e}")
+            db.session.rollback()
+
+    except Exception as e:
+        logger.error(f"❌ Error creating tables: {e}")
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=False)
