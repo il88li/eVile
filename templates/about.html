@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>UFOQ - حول المنصة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(160deg, #f2f4f8 0%, #e1dbf5 100%);
+            color: #1F2937;
+            min-height: 100vh;
+            min-height: 100dvh;
+            position: relative;
+        }
+
+        /* ===== Header (matches site pattern) ===== */
+        .floating-header { position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 6px 12px; max-width: 700px; margin: 0 auto; border-radius: 24px; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.9); gap: 8px; }
+        .header-left, .header-right { display: flex; align-items: center; gap: 6px; }
+        .header-center { position: absolute; left: 50%; transform: translateX(-50%); font-size: 18px; font-weight: 900; color: #1F2937; letter-spacing: 2px; white-space: nowrap; }
+        .header-btn { width: 34px; height: 34px; border-radius: 12px; background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.9); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: #6B7280; text-decoration: none; }
+        .header-btn:active { transform: scale(0.9); }
+        .header-btn i { font-size: 16px; }
+        .header-btn.special { background: rgba(123, 97, 255, 0.08); color: #7B61FF; border-color: rgba(123,97,255,0.1); }
+
+        /* ===== Layout ===== */
+        .main-container { width: 100%; max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; padding: 80px 16px 110px 16px; gap: 14px; }
+
+        /* ===== Hero card ===== */
+        .about-hero { width: 100%; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.85); border-radius: 24px; padding: 34px 24px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.04); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        .about-hero-icon { width: 74px; height: 74px; border-radius: 22px; background: linear-gradient(135deg, #7C3AED, #8B5CF6); display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(123,97,255,0.35); }
+        .about-hero-icon i { font-size: 32px; color: #fff; }
+        .about-hero h1 { font-size: 24px; font-weight: 900; letter-spacing: 1px; }
+        .about-hero p { font-size: 14px; color: #6B7280; line-height: 1.7; max-width: 420px; }
+        .about-hero-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 4px; }
+        .about-tag { font-size: 12px; font-weight: 600; color: #7B61FF; background: rgba(123,97,255,0.08); border: 1px solid rgba(123,97,255,0.12); padding: 5px 14px; border-radius: 30px; }
+
+        /* ===== Section card (shared) ===== */
+        .about-card { width: 100%; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.85); border-radius: 24px; padding: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.04); }
+        .about-card-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+        .about-card-title i { color: #7B61FF; font-size: 17px; }
+
+        .story-text { font-size: 14px; color: #4B5563; line-height: 1.9; }
+        .story-text .highlight { color: #7B61FF; font-weight: 800; }
+
+        /* ===== Features grid ===== */
+        .features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .feature-item { background: rgba(255,255,255,0.5); border: 1px solid rgba(0,0,0,0.03); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+        .feature-icon { width: 36px; height: 36px; border-radius: 11px; background: rgba(123,97,255,0.08); display: flex; align-items: center; justify-content: center; }
+        .feature-icon i { color: #7B61FF; font-size: 17px; }
+        .feature-name { font-size: 13px; font-weight: 700; color: #1F2937; }
+        .feature-desc { font-size: 12px; color: #6B7280; line-height: 1.6; }
+
+        /* ===== Steps (how it works) ===== */
+        .steps-list { display: flex; flex-direction: column; gap: 0; }
+        .step-row { display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; position: relative; }
+        .step-row:not(:last-child)::after { content: ''; position: absolute; right: 17px; top: 42px; bottom: -4px; width: 2px; background: rgba(123,97,255,0.15); }
+        .step-num { flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #7C3AED, #8B5CF6); color: #fff; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; z-index: 1; }
+        .step-body h4 { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+        .step-body p { font-size: 12px; color: #6B7280; line-height: 1.6; }
+
+        /* ===== Stats ===== */
+        .stats-row { display: flex; justify-content: space-between; gap: 8px; }
+        .stat-box { flex: 1; text-align: center; background: rgba(255,255,255,0.5); border: 1px solid rgba(0,0,0,0.03); border-radius: 16px; padding: 14px 6px; }
+        .stat-num { font-size: 19px; font-weight: 900; color: #7B61FF; }
+        .stat-label { font-size: 11px; color: #6B7280; margin-top: 4px; }
+
+        /* ===== Contact / socials ===== */
+        .contact-list { display: flex; flex-direction: column; gap: 10px; }
+        .contact-link { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.5); border: 1px solid rgba(0,0,0,0.03); border-radius: 16px; padding: 12px 14px; text-decoration: none; color: #1F2937; transition: 0.2s; }
+        .contact-link:active { transform: scale(0.98); }
+        .contact-link-icon { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; flex-shrink: 0; }
+        .contact-link-icon.telegram { background: #0088cc; }
+        .contact-link-icon.instagram { background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+        .contact-link-icon.whatsapp { background: #25D366; }
+        .contact-link-text { display: flex; flex-direction: column; gap: 1px; flex: 1; }
+        .contact-link-text strong { font-size: 13px; font-weight: 700; }
+        .contact-link-text span { font-size: 11px; color: #6B7280; }
+        .contact-link .bi-chevron-left { color: #9CA3AF; font-size: 14px; }
+
+        .version-footer { font-size: 12px; color: #9CA3AF; text-align: center; padding: 4px 0 0 0; }
+
+        /* ===== Bottom nav (matches site pattern) ===== */
+        .bottom-nav-bar { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; align-items: center; gap: 4px; padding: 6px 10px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 50px; box-shadow: 0 8px 32px rgba(123, 97, 255, 0.15), 0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255,255,255,0.8); max-width: 500px; width: auto; }
+        .nav-item { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; border-radius: 40px; background: transparent; border: none; color: #9CA3AF; font-family: 'Tajawal', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-decoration: none; position: relative; white-space: nowrap; }
+        .nav-item i { font-size: 18px; transition: all 0.3s; }
+        .nav-item:hover { color: #7B61FF; background: rgba(123, 97, 255, 0.08); }
+        .nav-item.active { background: linear-gradient(135deg, #7C3AED, #8B5CF6); color: white; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.35), 0 0 0 2px rgba(123, 97, 255, 0.15); transform: scale(1.05); }
+        .nav-item.active i { transform: scale(1.1); }
+        .nav-label { max-width: 0; overflow: hidden; transition: max-width 0.3s ease, opacity 0.3s ease; opacity: 0; }
+        .nav-item.active .nav-label { max-width: 80px; opacity: 1; }
+
+        @media (max-width: 600px) {
+            .about-hero, .about-card { padding: 18px 16px; border-radius: 20px; }
+            .about-hero { padding: 28px 18px; }
+            .features-grid { grid-template-columns: 1fr; }
+            .bottom-nav-bar { padding: 5px 8px; border-radius: 40px; }
+            .nav-item { padding: 6px 12px; font-size: 12px; }
+            .nav-item i { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="floating-header">
+        <div class="header-left">
+            <div class="header-btn special" onclick="history.back()"><i class="bi bi-arrow-right"></i></div>
+        </div>
+        <div class="header-center">UFOQ</div>
+        <div class="header-right">
+            <a href="https://t.me/Evile_Prompts" target="_blank" class="header-btn"><i class="bi bi-telegram"></i></a>
+        </div>
+    </header>
+
+    <div class="main-container">
+
+        <!-- Hero -->
+        <div class="about-hero">
+            <div class="about-hero-icon"><i class="bi bi-stars"></i></div>
+            <h1>UFOQ</h1>
+            <p>مساعدك الذكي لصناعة محتوى وبرومبتات احترافية خلال ثوانٍ، بدون خبرة سابقة في هندسة الأوامر</p>
+            <div class="about-hero-tags">
+                <span class="about-tag"><i class="bi bi-cpu"></i> ذكاء اصطناعي</span>
+                <span class="about-tag"><i class="bi bi-lightning-charge"></i> نتائج فورية</span>
+                <span class="about-tag"><i class="bi bi-shield-check"></i> سهل الاستخدام</span>
+            </div>
+        </div>
+
+        <!-- Story -->
+        <div class="about-card">
+            <div class="about-card-title"><i class="bi bi-heart"></i> قصتنا</div>
+            <p class="story-text">
+                ولدت منصة <span class="highlight">UFOQ</span> من رحم المعاناة مع تعلّم هندسة الأوامر (Prompt Engineering)، لتختصر عليك سنوات من التجربة والخطأ. بدل أن تبحث عن الصياغة المثالية، اختر النمط الذي يناسبك واكتب فكرتك بكلماتك الخاصة، وسيتولى UFOQ تحويلها إلى محتوى احترافي جاهز للاستخدام مباشرة.
+            </p>
+        </div>
+
+        <!-- Features -->
+        <div class="about-card">
+            <div class="about-card-title"><i class="bi bi-grid"></i> ماذا نقدّم لك</div>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="bi bi-magic"></i></div>
+                    <div class="feature-name">توليد بالذكاء الاصطناعي</div>
+                    <div class="feature-desc">حوّل أفكارك إلى محتوى جاهز بضغطة واحدة</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="bi bi-layout-text-window"></i></div>
+                    <div class="feature-name">أنماط جاهزة</div>
+                    <div class="feature-desc">مجموعة أنماط متنوعة تناسب مختلف الاستخدامات</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="bi bi-collection"></i></div>
+                    <div class="feature-name">مكتبة برومبتات</div>
+                    <div class="feature-desc">آلاف البرومبتات الجاهزة للاستلهام والنسخ</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="bi bi-gift"></i></div>
+                    <div class="feature-name">نقاط ومكافآت يومية</div>
+                    <div class="feature-desc">احصل على نقاط مجانية يومياً وحوّلها لأصدقائك</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How it works -->
+        <div class="about-card">
+            <div class="about-card-title"><i class="bi bi-signpost-split"></i> كيف يعمل UFOQ</div>
+            <div class="steps-list">
+                <div class="step-row">
+                    <div class="step-num">1</div>
+                    <div class="step-body">
+                        <h4>اختر نمطاً</h4>
+                        <p>تصفّح الأنماط المتاحة واختر ما يناسب فكرتك</p>
+                    </div>
+                </div>
+                <div class="step-row">
+                    <div class="step-num">2</div>
+                    <div class="step-body">
+                        <h4>اكتب فكرتك</h4>
+                        <p>صف ما تريده بجملة بسيطة بكلماتك الخاصة</p>
+                    </div>
+                </div>
+                <div class="step-row">
+                    <div class="step-num">3</div>
+                    <div class="step-body">
+                        <h4>اضغط إنشاء</h4>
+                        <p>سيقوم UFOQ بتوليد المحتوى المطلوب خلال ثوانٍ</p>
+                    </div>
+                </div>
+                <div class="step-row">
+                    <div class="step-num">4</div>
+                    <div class="step-body">
+                        <h4>انسخ واستخدم</h4>
+                        <p>انسخ النتيجة مباشرة واستخدمها أينما تريد</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="about-card">
+            <div class="about-card-title"><i class="bi bi-bar-chart"></i> UFOQ بالأرقام</div>
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-num" id="statUsers">--</div>
+                    <div class="stat-label">مستخدم نشط</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">+٢٤</div>
+                    <div class="stat-label">نمط جاهز</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num">١٠٠٪</div>
+                    <div class="stat-label">مجاني للبدء</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="about-card">
+            <div class="about-card-title"><i class="bi bi-chat-dots"></i> تواصل معنا</div>
+            <div class="contact-list">
+                <a href="https://t.me/Evile_Prompts" target="_blank" class="contact-link">
+                    <div class="contact-link-icon telegram"><i class="bi bi-telegram"></i></div>
+                    <div class="contact-link-text"><strong>قناة تيليجرام</strong><span>آخر التحديثات والأخبار</span></div>
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+                <a href="https://www.instagram.com/bla6c7" target="_blank" class="contact-link">
+                    <div class="contact-link-icon instagram"><i class="bi bi-instagram"></i></div>
+                    <div class="contact-link-text"><strong>إنستغرام</strong><span>تابعنا للمزيد</span></div>
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+                <a href="https://wa.me/967730577358" target="_blank" class="contact-link">
+                    <div class="contact-link-icon whatsapp"><i class="bi bi-whatsapp"></i></div>
+                    <div class="contact-link-text"><strong>واتساب</strong><span>تواصل مباشر مع الدعم</span></div>
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="version-footer">UFOQ · الإصدار 1.0 · {{ current_year|default('2026') }}</div>
+    </div>
+
+    <!-- Bottom nav -->
+    <nav class="bottom-nav-bar">
+        <a href="/library" class="nav-item">
+            <i class="bi bi-collection"></i>
+            <span class="nav-label">المكتبة</span>
+        </a>
+        <a href="/" class="nav-item">
+            <i class="bi bi-house-door"></i>
+            <span class="nav-label">الرئيسية</span>
+        </a>
+        <a href="/about" class="nav-item active">
+            <i class="bi bi-info-circle-fill"></i>
+            <span class="nav-label">حول</span>
+        </a>
+    </nav>
+
+    <script>
+        // Optional: fetch live active-users count if the endpoint exists
+        (async () => {
+            try {
+                const res = await fetch('/api/active_users');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.count !== undefined) {
+                        document.getElementById('statUsers').textContent = data.count;
+                        return;
+                    }
+                }
+                throw new Error('no endpoint');
+            } catch (e) {
+                document.getElementById('statUsers').textContent = '+٥٠٠';
+            }
+        })();
+    </script>
+</body>
+</html>
