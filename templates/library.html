@@ -80,7 +80,7 @@
         .main-content {
             position: relative;
             z-index: 10;
-            padding: 80px 16px 140px 16px;
+            padding: 20px 16px 140px 16px;
             max-width: 1400px;
             margin: 0 auto;
         }
@@ -395,14 +395,6 @@
         .prompt-card:has(.inline-prompt-overlay.show) .image-wrapper img {
             filter: blur(6px) brightness(0.5);
         }
-        .inline-prompt-title {
-            color: white;
-            font-weight: 800;
-            font-size: 1rem;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-            margin-bottom: 12px;
-            text-align: center;
-        }
         .inline-prompt-box {
             flex: 1;
             background: rgba(255, 255, 255, 0.12);
@@ -632,35 +624,6 @@
             opacity: 1;
         }
 
-        /* Nav transition effect */
-        .nav-transition-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(123, 97, 255, 0.1);
-            backdrop-filter: blur(2px);
-            z-index: 9999;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .nav-transition-overlay.show {
-            display: flex;
-            opacity: 1;
-        }
-        .nav-transition-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(123, 97, 255, 0.2);
-            border-top-color: #7B61FF;
-            border-radius: 50%;
-            animation: nav-spin 0.8s linear infinite;
-        }
-        @keyframes nav-spin {
-            to { transform: rotate(360deg); }
-        }
-
         @media (max-width: 768px) {
             .hero-card { flex-direction: column-reverse; height: auto; padding: 24px 16px; text-align: center; min-height: 200px; }
             .hero-content { padding-left: 0; text-align: center; }
@@ -679,16 +642,6 @@
     </style>
 </head>
 <body>
-    <!-- Floating Header -->
-    <header class="floating-header">
-        <div class="header-left">
-            <div class="header-btn special" onclick="history.back()"><i class="bi bi-arrow-right"></i></div>
-        </div>
-        <div class="header-center">UFOQ</div>
-        <div class="header-right">
-            <span class="credits-badge" id="creditsBadge"><i class="bi bi-stars"></i> 0 نقاط</span>
-        </div>
-    </header>
 
     <div class="main-content">
         <!-- Hero Card -->
@@ -747,7 +700,6 @@
                     {% for item in library_items %}
                     <div class="prompt-card" id="card-{{ item.id }}" data-category="{{ item.category }}">
                         <div class="inline-prompt-overlay" id="inline-{{ item.id }}" onclick="toggleInlinePrompt({{ item.id }})">
-                            <div class="inline-prompt-title">{{ item.title }}</div>
                             <div class="inline-prompt-box">
                                 <p class="inline-prompt-text">{{ item.prompt_text }}</p>
                             </div>
@@ -758,7 +710,7 @@
                             <div class="image-title">{{ item.title }}</div>
                         </div>
                         <div class="card-actions">
-                            <button class="copy-btn" onclick="handleCopy(event, '{{ item.prompt_text|replace("'", "\'") }}')">
+                            <button class="copy-btn" data-prompt="{{ item.prompt_text }}" onclick="handleCopyFromData(event)">
                                 <i class="bi bi-files"></i> نسخ
                             </button>
                             <button class="eye-btn" onclick="handleEyeClick(event, {{ item.id }})">
@@ -807,11 +759,6 @@
             <div class="ad-timer" id="adTimer">5</div>
             <button class="ad-close-x" onclick="skipAd()">✕</button>
         </div>
-    </div>
-
-    <!-- Nav Transition Overlay -->
-    <div class="nav-transition-overlay" id="navTransition">
-        <div class="nav-transition-spinner"></div>
     </div>
 
     <!-- Bottom Nav -->
@@ -916,7 +863,20 @@
         // ===== AD SYSTEM =====
         function handleCopy(event, text) {
             event.stopPropagation();
-            if (activeAd) {
+            if (activeAd && activeAd.id) {
+                pendingCopyText = text;
+                showAdPopup();
+            } else {
+                doCopy(text);
+            }
+        }
+
+        function handleCopyFromData(event) {
+            event.stopPropagation();
+            const btn = event.currentTarget;
+            const text = btn.getAttribute('data-prompt');
+            if (!text) return;
+            if (activeAd && activeAd.id) {
                 pendingCopyText = text;
                 showAdPopup();
             } else {
@@ -930,19 +890,19 @@
             const btnText = document.getElementById('adBtnText');
 
             overlay.classList.add('show');
-            let seconds = activeAd ? activeAd.duration_seconds : 5;
+            let seconds = activeAd && activeAd.duration_seconds ? activeAd.duration_seconds : 5;
             timerEl.textContent = seconds;
-            btnText.textContent = `${activeAd.button_text} (${seconds})`;
+            btnText.textContent = `${activeAd && activeAd.button_text ? activeAd.button_text : 'زيارة'} (${seconds})`;
 
             adTimerInterval = setInterval(() => {
                 seconds--;
                 timerEl.textContent = seconds;
-                btnText.textContent = `${activeAd.button_text} (${seconds})`;
+                btnText.textContent = `${activeAd && activeAd.button_text ? activeAd.button_text : 'زيارة'} (${seconds})`;
 
                 if (seconds <= 0) {
                     clearInterval(adTimerInterval);
                     timerEl.style.display = 'none';
-                    btnText.textContent = activeAd.button_text;
+                    btnText.textContent = activeAd && activeAd.button_text ? activeAd.button_text : 'زيارة';
                     closeAdPopup();
                     if (pendingCopyText) {
                         doCopy(pendingCopyText);
@@ -1001,14 +961,18 @@
             setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
-        // Smooth navigation with transition effect
+        // Fast navigation with button press animation
         function handleNavClick(event, url) {
             event.preventDefault();
-            const overlay = document.getElementById('navTransition');
-            overlay.classList.add('show');
+            const btn = event.currentTarget;
+            btn.style.transform = 'scale(0.85)';
+            btn.style.transition = 'transform 0.15s ease';
             setTimeout(() => {
-                window.location.href = url;
-            }, 400);
+                btn.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    window.location.href = url;
+                }, 120);
+            }, 150);
         }
 
         document.addEventListener('keydown', function(e) {
