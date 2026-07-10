@@ -16,6 +16,10 @@
             min-height: 100dvh;
             overflow-x: hidden;
             position: relative;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         /* Floating Header */
@@ -283,12 +287,6 @@
             box-shadow: 0 15px 35px rgba(124, 58, 237, 0.15);
             border-color: rgba(124, 58, 237, 0.2);
         }
-        .prompt-card.blurred {
-            filter: blur(4px) brightness(0.7);
-            transform: scale(0.98);
-            pointer-events: none;
-            transition: all 0.5s ease;
-        }
         .prompt-card .image-wrapper {
             position: relative;
             overflow: hidden;
@@ -312,6 +310,7 @@
             inset: 0;
             background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 40%);
             pointer-events: none;
+            transition: opacity 0.3s ease;
         }
         .prompt-card .image-title {
             position: absolute;
@@ -322,6 +321,7 @@
             font-size: 1rem;
             text-shadow: 0 2px 8px rgba(0,0,0,0.6);
             pointer-events: none;
+            transition: opacity 0.3s ease;
         }
         .prompt-card .card-actions {
             padding: 14px;
@@ -345,6 +345,10 @@
             gap: 8px;
             font-size: 0.9rem;
             font-family: 'Tajawal', sans-serif;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
         .copy-btn:hover {
             background: linear-gradient(135deg, #6D28D9, #7C3AED);
@@ -363,6 +367,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
         .eye-btn:hover {
             background: #EDE9FE;
@@ -371,7 +379,7 @@
             transform: scale(1.08);
         }
 
-        /* Inline Prompt Overlay - Simple toggle, no X, no copy button */
+        /* Inline Prompt Overlay - INSIDE image-wrapper */
         .inline-prompt-overlay {
             position: absolute;
             inset: 0;
@@ -384,24 +392,21 @@
             transform: scale(0.95);
             transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: 20px;
-            background: transparent;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
         }
         .inline-prompt-overlay.show {
             opacity: 1;
             visibility: visible;
             transform: scale(1);
         }
-        .inline-prompt-overlay.show ~ .image-wrapper img,
-        .prompt-card:has(.inline-prompt-overlay.show) .image-wrapper img {
-            filter: blur(6px) brightness(0.5);
+        /* When overlay is shown, hide image title and overlay */
+        .image-wrapper:has(.inline-prompt-overlay.show) .image-title,
+        .image-wrapper:has(.inline-prompt-overlay.show) .image-overlay {
+            opacity: 0;
         }
         .inline-prompt-box {
             flex: 1;
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(20px);
-            border-radius: 14px;
-            padding: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
             overflow-y: auto;
             margin-bottom: 12px;
         }
@@ -412,6 +417,10 @@
             white-space: pre-wrap;
             font-family: 'Tajawal', sans-serif;
             text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
         /* Empty State */
@@ -598,14 +607,31 @@
             text-decoration: none;
             position: relative;
             white-space: nowrap;
+            overflow: hidden;
         }
         .nav-item i { font-size: 18px; transition: all 0.3s; }
         .nav-item:hover {
             color: #7B61FF;
             background: rgba(123, 97, 255, 0.08);
         }
-        .nav-item.active {
+        /* Sliding indicator */
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
             background: linear-gradient(135deg, #7C3AED, #8B5CF6);
+            border-radius: 40px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: -1;
+        }
+        .nav-item.active::before {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .nav-item.active {
+            background: transparent;
             color: white;
             box-shadow: 
                 0 4px 15px rgba(123, 97, 255, 0.35),
@@ -642,6 +668,16 @@
     </style>
 </head>
 <body>
+    <!-- Floating Header -->
+    <header class="floating-header">
+        <div class="header-left">
+            <div class="header-btn special" onclick="history.back()"><i class="bi bi-arrow-right"></i></div>
+        </div>
+        <div class="header-center">UFOQ</div>
+        <div class="header-right">
+            <span class="credits-badge" id="creditsBadge"><i class="bi bi-stars"></i> 0 نقاط</span>
+        </div>
+    </header>
 
     <div class="main-content">
         <!-- Hero Card -->
@@ -699,15 +735,15 @@
                 {% if library_items and library_items|length > 0 %}
                     {% for item in library_items %}
                     <div class="prompt-card" id="card-{{ item.id }}" data-category="{{ item.category }}">
-                        <div class="inline-prompt-overlay" id="inline-{{ item.id }}" onclick="toggleInlinePrompt({{ item.id }})">
-                            <div class="inline-prompt-box">
-                                <p class="inline-prompt-text">{{ item.prompt_text }}</p>
-                            </div>
-                        </div>
-                        <div class="image-wrapper" onclick="toggleInlinePrompt({{ item.id }})">
+                        <div class="image-wrapper" onclick="toggleInlinePrompt({{ item.id }})" id="wrapper-{{ item.id }}">
                             <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300/7C3AED/FFFFFF?text={{ item.title|urlencode }}'">
                             <div class="image-overlay"></div>
                             <div class="image-title">{{ item.title }}</div>
+                            <div class="inline-prompt-overlay" id="inline-{{ item.id }}">
+                                <div class="inline-prompt-box">
+                                    <p class="inline-prompt-text">{{ item.prompt_text }}</p>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-actions">
                             <button class="copy-btn" data-prompt="{{ item.prompt_text }}" onclick="handleCopyFromData(event)">
@@ -820,28 +856,24 @@
             }
         }
 
-        // Toggle inline prompt - click image or eye to show/hide, click overlay to hide
+        // Toggle inline prompt
         function toggleInlinePrompt(id) {
             const overlay = document.getElementById(`inline-${id}`);
             if (!overlay) return;
 
-            // If clicking the same card that's already open, close it
+            // If this card is already open, close it
             if (activeInlineCard === id) {
                 closeInlinePrompt(id);
                 return;
             }
 
             // Close any other open card first
-            if (activeInlineCard !== null && activeInlineCard !== id) {
+            if (activeInlineCard !== null) {
                 closeInlinePrompt(activeInlineCard);
             }
 
+            // Open this card
             activeInlineCard = id;
-            document.querySelectorAll('.prompt-card').forEach(card => {
-                if (card.id !== `card-${id}`) {
-                    card.classList.add('blurred');
-                }
-            });
             overlay.classList.add('show');
         }
 
@@ -850,15 +882,22 @@
             if (!overlay) return;
             overlay.classList.remove('show');
             activeInlineCard = null;
-            document.querySelectorAll('.prompt-card').forEach(card => {
-                card.classList.remove('blurred');
-            });
         }
 
         function handleEyeClick(event, id) {
             event.stopPropagation();
             toggleInlinePrompt(id);
         }
+
+        // Close prompt when clicking outside any card
+        document.addEventListener('click', function(e) {
+            if (activeInlineCard !== null) {
+                const card = document.getElementById(`card-${activeInlineCard}`);
+                if (card && !card.contains(e.target)) {
+                    closeInlinePrompt(activeInlineCard);
+                }
+            }
+        });
 
         // ===== AD SYSTEM =====
         function handleCopy(event, text) {
@@ -961,18 +1000,22 @@
             setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
-        // Fast navigation with button press animation
+        // Navigation with sliding indicator animation
         function handleNavClick(event, url) {
             event.preventDefault();
             const btn = event.currentTarget;
-            btn.style.transform = 'scale(0.85)';
-            btn.style.transition = 'transform 0.15s ease';
+            const allBtns = document.querySelectorAll('.bottom-nav-bar .nav-item');
+
+            // Remove active from all
+            allBtns.forEach(b => b.classList.remove('active'));
+
+            // Add active to clicked (triggers the sliding ::before animation)
+            btn.classList.add('active');
+
+            // Navigate after animation
             setTimeout(() => {
-                btn.style.transform = 'scale(1.05)';
-                setTimeout(() => {
-                    window.location.href = url;
-                }, 120);
-            }, 150);
+                window.location.href = url;
+            }, 250);
         }
 
         document.addEventListener('keydown', function(e) {
