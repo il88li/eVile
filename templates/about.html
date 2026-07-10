@@ -198,22 +198,20 @@
             </div>
         </div>
 
-        <!-- Stats -->
+        <!-- Channels -->
         <div class="about-card">
-            <div class="about-card-title"><i class="bi bi-bar-chart"></i> UFOQ بالأرقام</div>
-            <div class="stats-row">
-                <div class="stat-box">
-                    <div class="stat-num" id="statUsers">--</div>
-                    <div class="stat-label">مستخدم نشط</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-num">+٢٤</div>
-                    <div class="stat-label">نمط جاهز</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-num">١٠٠٪</div>
-                    <div class="stat-label">مجاني للبدء</div>
-                </div>
+            <div class="about-card-title"><i class="bi bi-telegram"></i> قنواتنا</div>
+            <div class="contact-list">
+                <a href="https://t.me/Evile_Prompts" target="_blank" class="contact-link">
+                    <div class="contact-link-icon telegram"><i class="bi bi-telegram"></i></div>
+                    <div class="contact-link-text"><strong>قناة الموقع الرسمية</strong><span>آخر التحديثات والأخبار</span></div>
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+                <a href="https://t.me/aipromptsAl" target="_blank" class="contact-link">
+                    <div class="contact-link-icon telegram"><i class="bi bi-telegram"></i></div>
+                    <div class="contact-link-text"><strong>قناة المكتبة</strong><span>آلاف البرومبتات الجاهزة للنسخ</span></div>
+                    <i class="bi bi-chevron-left"></i>
+                </a>
             </div>
         </div>
 
@@ -221,11 +219,6 @@
         <div class="about-card">
             <div class="about-card-title"><i class="bi bi-chat-dots"></i> تواصل معنا</div>
             <div class="contact-list">
-                <a href="https://t.me/Evile_Prompts" target="_blank" class="contact-link">
-                    <div class="contact-link-icon telegram"><i class="bi bi-telegram"></i></div>
-                    <div class="contact-link-text"><strong>قناة تيليجرام</strong><span>آخر التحديثات والأخبار</span></div>
-                    <i class="bi bi-chevron-left"></i>
-                </a>
                 <a href="https://www.instagram.com/bla6c7" target="_blank" class="contact-link">
                     <div class="contact-link-icon instagram"><i class="bi bi-instagram"></i></div>
                     <div class="contact-link-text"><strong>إنستغرام</strong><span>تابعنا للمزيد</span></div>
@@ -257,24 +250,5 @@
             <span class="nav-label">حول</span>
         </a>
     </nav>
-
-    <script>
-        // Optional: fetch live active-users count if the endpoint exists
-        (async () => {
-            try {
-                const res = await fetch('/api/active_users');
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && data.count !== undefined) {
-                        document.getElementById('statUsers').textContent = data.count;
-                        return;
-                    }
-                }
-                throw new Error('no endpoint');
-            } catch (e) {
-                document.getElementById('statUsers').textContent = '+٥٠٠';
-            }
-        })();
-    </script>
 </body>
 </html>
