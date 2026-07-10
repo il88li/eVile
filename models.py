@@ -67,3 +67,16 @@ class SiteSetting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(10), default='on')
     offline_message = db.Column(db.Text, default='الموقع تحت الصيانة حالياً.')
+
+class PageVisit(db.Model):
+    """عداد زيارات يومي مُستخدم لحساب متوسط الزيارات في لوحة الإحصائيات"""
+    id = db.Column(db.Integer, primary_key=True)
+    visit_date = db.Column(db.Date, unique=True, nullable=False)
+    count = db.Column(db.Integer, default=0)
+
+class AdView(db.Model):
+    """سجل مشاهدات الإعلان (المدة الفعلية بالثواني) لحساب ساعات المشاهدة"""
+    id = db.Column(db.Integer, primary_key=True)
+    ad_id = db.Column(db.Integer, nullable=True)
+    viewed_seconds = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
