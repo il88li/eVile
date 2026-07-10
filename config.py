@@ -6,14 +6,22 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 class Config:
-    SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key-change-this')
-    
-    # كلمة مرور المسؤول الجديدة
-    ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'UFOQ_Admin_Secure2026')
-    
+    SECRET_KEY = os.getenv('SECRET_KEY')
+    if not SECRET_KEY:
+        raise ValueError("SECRET_KEY environment variable is required!")
+
+    # كلمة مرور المسؤول - يجب تعيينها عبر متغيرات البيئة
+    ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
+    if not ADMIN_PASSWORD:
+        logger.warning("⚠️ ADMIN_PASSWORD not set! Using fallback - CHANGE THIS IN PRODUCTION!")
+        ADMIN_PASSWORD = 'CHANGE_ME_IMMEDIATELY_2026'
+
     OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
+    if not OPENROUTER_API_KEY:
+        logger.warning("⚠️ OPENROUTER_API_KEY not set! AI features will not work.")
+
     OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-    
+
     DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://user:pass@localhost:5432/db')
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -22,7 +30,7 @@ class Config:
     SQLALCHEMY_POOL_PRE_PING = True
 
     REDIS_URL = os.getenv('REDIS_URL')
-    
+
     if REDIS_URL:
         CACHE_TYPE = 'RedisCache'
         CACHE_REDIS_URL = REDIS_URL
