@@ -81,72 +81,68 @@
         /* ===== BOTTOM NAVIGATION BAR ===== */
         .bottom-nav-bar {
             position: fixed;
-            bottom: 16px;
+            bottom: 12px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(123, 97, 255, 0.15), 0 2px 8px rgba(0, 0, 0, 0.05);
-            max-width: 400px;
+            gap: 4px;
+            padding: 6px 10px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 50px;
+            box-shadow: 
+                0 8px 32px rgba(123, 97, 255, 0.15),
+                0 2px 8px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255,255,255,0.8);
+            max-width: 500px;
             width: auto;
-        }
-        .bottom-nav-bar::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 24px;
-            background: linear-gradient(135deg, rgba(123, 97, 255, 0.1), rgba(139, 92, 246, 0.05));
-            pointer-events: none;
-            z-index: -1;
         }
         .nav-item {
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 4px;
-            padding: 8px 20px;
-            border-radius: 16px;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 40px;
             background: transparent;
             border: none;
-            color: #6B7280;
+            color: #9CA3AF;
             font-family: 'Tajawal', sans-serif;
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
-            min-width: 70px;
+            position: relative;
+            white-space: nowrap;
         }
-        .nav-item i {
-            font-size: 20px;
-            transition: all 0.3s ease;
-        }
+        .nav-item i { font-size: 18px; transition: all 0.3s; }
         .nav-item:hover {
             color: #7B61FF;
             background: rgba(123, 97, 255, 0.08);
         }
         .nav-item.active {
-            color: #7B61FF;
-            background: rgba(123, 97, 255, 0.15);
-            box-shadow: 0 2px 12px rgba(123, 97, 255, 0.2);
+            background: linear-gradient(135deg, #7C3AED, #8B5CF6);
+            color: white;
+            box-shadow: 
+                0 4px 15px rgba(123, 97, 255, 0.35),
+                0 0 0 2px rgba(123, 97, 255, 0.15);
+            transform: scale(1.05);
         }
-        .nav-item.active i {
-            transform: scale(1.1);
+        .nav-item.active i { transform: scale(1.1); }
+        .nav-label {
+            max-width: 0;
+            overflow: hidden;
+            transition: max-width 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
         }
-        .nav-divider {
-            width: 1px;
-            height: 32px;
-            background: rgba(123, 97, 255, 0.15);
-            margin: 0 4px;
+        .nav-item.active .nav-label {
+            max-width: 80px;
+            opacity: 1;
         }
 
         @media (max-width: 600px) {
@@ -157,9 +153,9 @@
             .patterns-guidance-strip { padding: 4px 10px; }
             .single-pattern-container { min-height: 100px; }
             .main-container { padding-bottom: 100px; }
-            .bottom-nav-bar { padding: 6px 12px; border-radius: 20px; }
-            .nav-item { padding: 6px 14px; min-width: 60px; font-size: 10px; }
-            .nav-item i { font-size: 18px; }
+            .bottom-nav-bar { padding: 5px 8px; border-radius: 40px; }
+            .nav-item { padding: 6px 12px; font-size: 12px; }
+            .nav-item i { font-size: 16px; }
         }
     </style>
 </head>
@@ -233,12 +229,11 @@
         <nav class="bottom-nav-bar">
             <a href="/" class="nav-item active">
                 <i class="bi bi-house-door-fill"></i>
-                <span>الرئيسية</span>
+                <span class="nav-label">الرئيسية</span>
             </a>
-            <div class="nav-divider"></div>
             <a href="/library" class="nav-item">
-                <i class="bi bi-collection-fill"></i>
-                <span>المكتبة</span>
+                <i class="bi bi-collection"></i>
+                <span class="nav-label">المكتبة</span>
             </a>
         </nav>
 
