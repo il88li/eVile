@@ -17,7 +17,7 @@ from flask_talisman import Talisman
 from sqlalchemy.exc import SQLAlchemyError
 import threading
 
-from models import db, User, Pattern, Notification, Ad, SiteSetting
+from models import db, User, Pattern, PromptLibrary, Notification, Ad, SiteSetting
 from config import Config
 
 app = Flask(__name__)
@@ -68,11 +68,16 @@ def ensure_db_initialized():
                 _db_initialized = True
                 logger.info("✅ Database initialized successfully.")
 
+# ============================================================
+# PUBLIC ROUTES
+# ============================================================
+
 @app.route('/')
 def index():
     site = SiteSetting.query.first()
-    if site and site.status == 'off': return render_template('index.html', site_status='off', offline_message=site.offline_message)
-    
+    if site and site.status == 'off':
+        return render_template('index.html', site_status='off', offline_message=site.offline_message)
+
     user_id = session.get('user_id')
     user_data_dict = None
     if user_id:
@@ -85,8 +90,7 @@ def index():
                 'credits': user.credits,
                 'last_daily_gift': user.last_daily_gift.isoformat() if user.last_daily_gift else None
             }
-        
-    # تحويل الأنماط إلى قائمة قواميس لتكون قابلة للتحويل إلى JSON
+
     patterns = Pattern.query.all()
     patterns_data = [
         {
@@ -96,10 +100,10 @@ def index():
             'prompt': p.prompt
         } for p in patterns
     ]
-    
+
     notif = Notification.query.filter_by(show_in_chat=True).order_by(Notification.created_at.desc()).first()
     ad = Ad.query.order_by(Ad.created_at.desc()).first()
-    
+
     return render_template('index.html', 
                          patterns=patterns_data, 
                          user_id=user_id, 
@@ -108,16 +112,60 @@ def index():
                          user_data=user_data_dict, 
                          site_status='on')
 
+@app.route('/library')
+def library():
+    """صفحة مكتبة البرومبتات"""
+    site = SiteSetting.query.first()
+    if site and site.status == 'off':
+        return render_template('index.html', site_status='off', offline_message=site.offline_message)
+
+    user_id = session.get('user_id')
+    user_data_dict = None
+    if user_id:
+        user = User.query.get(user_id)
+        if user:
+            user.last_active = datetime.utcnow()
+            db.session.commit()
+            user_data_dict = {
+                'username': user.username,
+                'credits': user.credits,
+                'last_daily_gift': user.last_daily_gift.isoformat() if user.last_daily_gift else None
+            }
+
+    # جلب البرومبتات من قاعدة البيانات
+    library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
+    library_data = [
+        {
+            'id': item.id,
+            'title': item.title,
+            'category': item.category,
+            'image_url': item.image_url,
+            'prompt_text': item.prompt_text
+        } for item in library_items
+    ]
+
+    return render_template('library.html',
+                         library_items=library_data,
+                         user_id=user_id,
+                         user_data=user_data_dict,
+                         site_status='on')
+
 @app.route('/sign')
 def sign():
     return render_template('sign.html', csrf_token=generate_csrf_token())
+
+# ============================================================
+# AUTHENTICATION API
+# ============================================================
 
 @app.route('/api/signup', methods=['POST'])
 @limiter.limit("5 per minute")
 def signup():
     data = request.get_json()
-    if not data.get('username') or not data.get('password'): return jsonify({'success': False, 'message': 'بيانات غير كاملة'}), 400
-    if User.query.filter_by(username=data['username']).first(): return jsonify({'success': False, 'message': 'اسم المستخدم موجود مسبقاً'}), 400
+    if not data.get('username') or not data.get('password'):
+        return jsonify({'success': False, 'message': 'بيانات غير كاملة'}), 400
+    if User.query.filter_by(username=data['username']).first():
+        return jsonify({'success': False, 'message': 'اسم المستخدم موجود مسبقاً'}), 400
     try:
         user = User(username=data['username'], password_hash=hash_password(data['password']))
         db.session.add(user); db.session.commit()
@@ -154,6 +202,10 @@ def update_user():
     db.session.commit()
     return jsonify({'success': True, 'message': 'تم التحديث'})
 
+# ============================================================
+# CREDITS API
+# ============================================================
+
 @app.route('/api/claim_daily_gift', methods=['POST'])
 def claim_daily_gift():
     user = User.query.get(session.get('user_id'))
@@ -177,19 +229,16 @@ def transfer_credits():
     db.session.commit()
     return jsonify({'success': True, 'message': f'تم تحويل {amount}', 'credits': sender.credits})
 
+# ============================================================
+# CHAT API - FIXED: No double credit deduction
+# ============================================================
+
 @app.route('/api/deduct_credit', methods=['POST'])
 def deduct_credit():
+    """هذا الـ endpoint يُستخدم فقط للتحقق من الرصيد، لا للخصم"""
     user = User.query.get(session.get('user_id'))
     if not user: return jsonify({'success': False, 'message': 'غير مسجل'}), 401
-    if user.credits > 0:
-        user.credits -= 1; db.session.commit()
-        return jsonify({'success': True, 'credits': user.credits})
-    return jsonify({'success': False, 'message': 'نفاذ الرصيد'}), 402
-
-@app.route('/api/notifications')
-@cache.cached(timeout=120)
-def api_notifications():
-    return jsonify([{'id': n.id, 'title': n.title, 'text': n.text, 'created_at': n.created_at.isoformat()} for n in Notification.query.order_by(Notification.id.desc()).all()])
+    return jsonify({'success': True, 'credits': user.credits})
 
 @app.route('/api/chat', methods=['POST'])
 @limiter.limit("30 per minute")
@@ -201,19 +250,36 @@ def api_chat():
     if user.credits <= 0: return jsonify({'error': 'no_credits'}), 402
     pattern = Pattern.query.get(pattern_id)
     if not pattern: return jsonify({'error': 'النمط غير موجود'}), 404
-    
+
+    # خصم النقطة مرة واحدة فقط هنا
     try:
-        headers = {'Authorization': f'Bearer {app.config["OPENROUTER_API_KEY"]}', 'Content-Type': 'application/json', 'HTTP-Referer': request.url_root, 'X-Title': 'UFOQ'}
-        payload = {'model': 'openrouter/auto', 'messages': [{'role': 'system', 'content': pattern.prompt}, {'role': 'user', 'content': message}], 'temperature': 0.7, 'stream': True}
+        user.credits -= 1
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Credit deduction error: {e}")
+        return jsonify({'error': 'خطأ في خصم النقاط'}), 500
+
+    try:
+        headers = {
+            'Authorization': f'Bearer {app.config["OPENROUTER_API_KEY"]}',
+            'Content-Type': 'application/json',
+            'HTTP-Referer': request.url_root,
+            'X-Title': 'UFOQ'
+        }
+        payload = {
+            'model': 'openrouter/auto',
+            'messages': [
+                {'role': 'system', 'content': pattern.prompt},
+                {'role': 'user', 'content': message}
+            ],
+            'temperature': 0.7,
+            'stream': True
+        }
         response = requests.post(app.config["OPENROUTER_URL"], json=payload, headers=headers, stream=True, timeout=30)
         response.raise_for_status()
-        
+
         def generate():
-            try:
-                user.credits -= 1
-                db.session.commit()
-            except Exception as e:
-                logger.error(f"DB credit deduction error: {e}")
             for chunk in response.iter_lines():
                 if chunk:
                     decoded = chunk.decode('utf-8')
@@ -225,13 +291,36 @@ def api_chat():
                                 if content: yield content
                             except Exception as e:
                                 logger.error(f"Stream decode error: {e}")
+
         return Response(generate(), mimetype='text/plain')
     except requests.RequestException as e:
         logger.error(f"OpenRouter API Exception: {e}")
+        # إرجاع النقطة في حالة فشل الاتصال
+        try:
+            user.credits += 1
+            db.session.commit()
+        except:
+            db.session.rollback()
         return jsonify({'error': 'خطأ في مزود الذكاء الاصطناعي'}), 502
     except Exception as e:
-        logger.error(f"Unexpected chat error: {e}"); logger.error(traceback.format_exc())
+        logger.error(f"Unexpected chat error: {e}")
+        logger.error(traceback.format_exc())
+        # إرجاع النقطة في حالة خطأ غير متوقع
+        try:
+            user.credits += 1
+            db.session.commit()
+        except:
+            db.session.rollback()
         return jsonify({'error': 'خطأ داخلي'}), 500
+
+@app.route('/api/notifications')
+@cache.cached(timeout=120)
+def api_notifications():
+    return jsonify([{'id': n.id, 'title': n.title, 'text': n.text, 'created_at': n.created_at.isoformat()} for n in Notification.query.order_by(Notification.id.desc()).all()])
+
+# ============================================================
+# ADMIN PANEL
+# ============================================================
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_panel():
@@ -239,34 +328,139 @@ def admin_panel():
         session['logged_in'] = True
         return redirect(url_for('admin_panel'))
     if session.get('logged_in'):
-        return render_template('admin.html', patterns=Pattern.query.all(), notifications=Notification.query.all(), ads=Ad.query.all(), users_count=User.query.count(), site_settings=SiteSetting.query.first(), csrf_token=generate_csrf_token())
+        return render_template('admin.html',
+            patterns=Pattern.query.all(),
+            notifications=Notification.query.all(),
+            ads=Ad.query.all(),
+            library_items=PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all(),
+            users_count=User.query.count(),
+            site_settings=SiteSetting.query.first(),
+            csrf_token=generate_csrf_token()
+        )
     return render_template('admin.html')
 
 @app.route('/admin/logout')
-def logout(): session.clear(); return redirect(url_for('admin_panel'))
+def logout():
+    session.clear()
+    return redirect(url_for('admin_panel'))
+
+# --- Patterns Management ---
 
 @app.route('/admin/pattern/add', methods=['POST'])
 @admin_required
 def add_pattern():
-    if not validate_csrf_token(request.form.get('csrf_token')): return "CSRF Error", 400
-    p = Pattern(name=request.form.get('name'), image_url=request.form.get('image_url'), prompt=request.form.get('prompt'))
-    db.session.add(p); db.session.commit(); flash('تمت إضافة النمط', 'success')
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    p = Pattern(
+        name=request.form.get('name'),
+        image_url=request.form.get('image_url'),
+        prompt=request.form.get('prompt')
+    )
+    db.session.add(p); db.session.commit()
+    flash('تمت إضافة النمط', 'success')
     return redirect(url_for('admin_panel'))
+
+@app.route('/admin/pattern/<int:pattern_id>/delete', methods=['POST'])
+@admin_required
+def delete_pattern(pattern_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    p = Pattern.query.get_or_404(pattern_id)
+    db.session.delete(p); db.session.commit()
+    flash('تم حذف النمط', 'success')
+    return redirect(url_for('admin_panel'))
+
+# --- Library Management (NEW) ---
+
+@app.route('/admin/library/add', methods=['POST'])
+@admin_required
+def add_library_item():
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    item = PromptLibrary(
+        title=request.form.get('title'),
+        category=request.form.get('category', 'images'),
+        image_url=request.form.get('image_url'),
+        prompt_text=request.form.get('prompt_text')
+    )
+    db.session.add(item); db.session.commit()
+    flash('تمت إضافة البرومبت للمكتبة', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/library/<int:item_id>/delete', methods=['POST'])
+@admin_required
+def delete_library_item(item_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    item = PromptLibrary.query.get_or_404(item_id)
+    db.session.delete(item); db.session.commit()
+    flash('تم حذف البرومبت من المكتبة', 'success')
+    return redirect(url_for('admin_panel'))
+
+# --- Notifications Management ---
 
 @app.route('/admin/notification/add', methods=['POST'])
 @admin_required
 def add_notification():
-    if not validate_csrf_token(request.form.get('csrf_token')): return "CSRF Error", 400
-    n = Notification(title=request.form.get('title'), text=request.form.get('text'), duration_hours=request.form.get('duration_hours', 1), show_in_chat=request.form.get('show_in_chat') == 'on')
-    db.session.add(n); db.session.commit(); flash('تم إرسال الإشعار', 'success')
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    n = Notification(
+        title=request.form.get('title'),
+        text=request.form.get('text'),
+        duration_hours=request.form.get('duration_hours', 1),
+        show_in_chat=request.form.get('show_in_chat') == 'on'
+    )
+    db.session.add(n); db.session.commit()
+    flash('تم إرسال الإشعار', 'success')
     return redirect(url_for('admin_panel'))
+
+@app.route('/admin/notification/<int:notification_id>/delete', methods=['POST'])
+@admin_required
+def delete_notification(notification_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    n = Notification.query.get_or_404(notification_id)
+    db.session.delete(n); db.session.commit()
+    flash('تم حذف الإشعار', 'success')
+    return redirect(url_for('admin_panel'))
+
+# --- Credits Management ---
+
+@app.route('/api/admin/update_credits', methods=['POST'])
+@admin_required
+def update_credits():
+    if not validate_csrf_token(request.json.get('csrf_token')):
+        return jsonify({'error': 'CSRF Error'}), 400
+    data = request.get_json()
+    user = User.query.filter_by(username=data.get('username')).first()
+    if not user:
+        return jsonify({'success': False, 'message': 'المستخدم غير موجود'}), 404
+    amount = int(data.get('amount', 0))
+    user.credits += amount
+    db.session.commit()
+    return jsonify({'success': True, 'message': f'تم شحن {amount} نقطة للمستخدم {user.username}', 'credits': user.credits})
+
+# --- Site Settings ---
 
 @app.route('/api/admin/update_site_settings', methods=['POST'])
 @admin_required
 def update_site_settings():
-    if not validate_csrf_token(request.json.get('csrf_token')): return jsonify({'error': 'CSRF Error'}), 400
-    s = SiteSetting.query.first(); s.status = request.json.get('status'); s.offline_message = request.json.get('offline_message')
-    db.session.commit(); return jsonify({'success': True})
+    if not validate_csrf_token(request.json.get('csrf_token')):
+        return jsonify({'error': 'CSRF Error'}), 400
+    s = SiteSetting.query.first()
+    s.status = request.json.get('status')
+    s.offline_message = request.json.get('offline_message')
+    db.session.commit()
+    return jsonify({'success': True})
+
+@app.route('/api/admin/get_site_status')
+@admin_required
+def get_site_status():
+    s = SiteSetting.query.first()
+    return jsonify({
+        'status': s.status if s else 'on',
+        'offline_message': s.offline_message if s else 'الموقع تحت الصيانة حالياً.'
+    })
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
