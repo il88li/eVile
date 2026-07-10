@@ -17,7 +17,7 @@ from flask_talisman import Talisman
 from sqlalchemy.exc import SQLAlchemyError
 import threading
 
-from models import db, User, Pattern, Category, PromptLibrary, Notification, Ad, SiteSetting
+from models import db, User, Pattern, Category, PromptLibrary, LibraryAd, Notification, Ad, SiteSetting
 from config import Config
 
 app = Flask(__name__)
@@ -184,9 +184,27 @@ def library():
     except Exception as e:
         logger.warning(f"PromptLibrary table not available yet: {e}")
 
+    # جلب الإعلان النشط للمكتبة
+    active_ad = None
+    try:
+        active_ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
+        if active_ad:
+            active_ad = {
+                'id': active_ad.id,
+                'title': active_ad.title,
+                'text': active_ad.text,
+                'image_url': active_ad.image_url,
+                'button_text': active_ad.button_text,
+                'button_link': active_ad.button_link,
+                'duration_seconds': active_ad.duration_seconds
+            }
+    except Exception as e:
+        logger.warning(f"LibraryAd table not available yet: {e}")
+
     return render_template('library.html',
                          categories=categories_data,
                          library_items=library_data,
+                         active_ad=active_ad,
                          user_id=user_id,
                          user_data=user_data_dict,
                          site_status='on')
@@ -620,15 +638,27 @@ with app.app_context():
         except Exception:
             pass
 
+        # Check if library_ad table exists
+        ad_cols = []
+        try:
+            ad_cols = [col['name'] for col in inspector.get_columns('library_ad')]
+        except Exception:
+            pass
+
         # If category table exists but missing display_name, drop and recreate
         needs_recreate = False
         if category_cols and 'display_name' not in category_cols:
             logger.warning("⚠️ Category table has old schema. Dropping and recreating...")
             needs_recreate = True
 
+        # If library_ad table doesn't exist, we need to create it
+        if not ad_cols:
+            logger.info("ℹ️ LibraryAd table will be created.")
+
         if needs_recreate:
             # Drop tables that need updating (order matters for FK constraints)
             try:
+                db.session.execute(text("DROP TABLE IF EXISTS library_ad CASCADE"))
                 db.session.execute(text("DROP TABLE IF EXISTS prompt_library CASCADE"))
                 db.session.execute(text("DROP TABLE IF EXISTS category CASCADE"))
                 db.session.commit()
@@ -668,6 +698,63 @@ with app.app_context():
 
     except Exception as e:
         logger.error(f"❌ Error creating tables: {e}")
+
+# --- Library Ads Management ---
+
+@app.route('/admin/library_ad/add', methods=['POST'])
+@admin_required
+def add_library_ad():
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        ad = LibraryAd(
+            title=request.form.get('title'),
+            text=request.form.get('text'),
+            image_url=request.form.get('image_url') or None,
+            button_text=request.form.get('button_text'),
+            button_link=request.form.get('button_link'),
+            duration_seconds=int(request.form.get('duration_seconds', 5)),
+            is_active=request.form.get('is_active') == 'on'
+        )
+        db.session.add(ad); db.session.commit()
+        flash('تمت إضافة الإعلان', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding library ad: {e}")
+        flash('خطأ في إضافة الإعلان', 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/library_ad/<int:ad_id>/delete', methods=['POST'])
+@admin_required
+def delete_library_ad(ad_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        ad = LibraryAd.query.get_or_404(ad_id)
+        db.session.delete(ad); db.session.commit()
+        flash('تم حذف الإعلان', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting library ad: {e}")
+        flash('خطأ في حذف الإعلان', 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/library_ad/<int:ad_id>/toggle', methods=['POST'])
+@admin_required
+def toggle_library_ad(ad_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        ad = LibraryAd.query.get_or_404(ad_id)
+        ad.is_active = not ad.is_active
+        db.session.commit()
+        flash('تم تغيير حالة الإعلان', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error toggling library ad: {e}")
+        flash('خطأ في تغيير حالة الإعلان', 'error')
+    return redirect(url_for('admin_panel'))
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
