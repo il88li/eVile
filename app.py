@@ -15,9 +15,10 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import text
 import threading
 
-from models import db, User, Pattern, Category, PromptLibrary, LibraryAd, Notification, Ad, SiteSetting
+from models import db, User, Pattern, Category, PromptLibrary, LibraryAd, Notification, Ad, SiteSetting, PageVisit, AdView
 from config import Config
 
 app = Flask(__name__)
@@ -89,6 +90,23 @@ def ensure_db_initialized():
                 except Exception as e:
                     logger.error(f"❌ Database initialization error: {e}")
                     db.session.rollback()
+
+@app.before_request
+def track_visit():
+    """يسجّل زيارة يومية للصفحتين الرئيسية والمكتبة فقط، تُستخدم لحساب متوسط الزيارات اليومي في لوحة الإحصائيات"""
+    if request.method == 'GET' and request.endpoint in ('index', 'library'):
+        try:
+            today = datetime.utcnow().date()
+            visit = PageVisit.query.filter_by(visit_date=today).first()
+            if visit:
+                visit.count += 1
+            else:
+                visit = PageVisit(visit_date=today, count=1)
+                db.session.add(visit)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            logger.warning(f"⚠️ Visit tracking error: {e}")
 
 # ============================================================
 # PUBLIC ROUTES
@@ -424,6 +442,23 @@ def api_chat():
 def api_notifications():
     return jsonify([{'id': n.id, 'title': n.title, 'text': n.text, 'created_at': n.created_at.isoformat()} for n in Notification.query.order_by(Notification.id.desc()).all()])
 
+@app.route('/api/track_ad_view', methods=['POST'])
+def track_ad_view():
+    """يسجّل عدد ثواني مشاهدة الإعلان (يُستدعى عند اكتمال العد التنازلي للإعلان في المكتبة)"""
+    data = request.get_json(silent=True) or {}
+    try:
+        seconds = int(data.get('seconds', 0))
+        ad_id = data.get('ad_id')
+        if seconds > 0:
+            view = AdView(ad_id=ad_id, viewed_seconds=seconds)
+            db.session.add(view)
+            db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        logger.warning(f"⚠️ Ad view tracking error: {e}")
+        return jsonify({'success': False}), 500
+
 # ============================================================
 # ADMIN PANEL
 # ============================================================
@@ -447,6 +482,38 @@ def admin_panel():
             except Exception as e:
                 logger.warning(f"PromptLibrary table not available yet: {e}")
 
+            # --- إحصائيات متوسط الزيارات اليومي ---
+            avg_daily_visits = 0
+            try:
+                totals = db.session.query(
+                    db.func.coalesce(db.func.sum(PageVisit.count), 0),
+                    db.func.count(PageVisit.id)
+                ).first()
+                total_visits, days_recorded = totals[0], totals[1]
+                if days_recorded:
+                    avg_daily_visits = round(total_visits / days_recorded, 1)
+            except Exception as e:
+                logger.warning(f"PageVisit stats not available yet: {e}")
+
+            # --- إحصائيات ساعات مشاهدة الإعلان ---
+            ad_currently_exists = False
+            total_ad_hours = 0
+            try:
+                ad_currently_exists = LibraryAd.query.filter_by(is_active=True).first() is not None
+                total_ad_seconds = db.session.query(db.func.coalesce(db.func.sum(AdView.viewed_seconds), 0)).scalar()
+                total_ad_hours = round((total_ad_seconds or 0) / 3600, 2)
+            except Exception as e:
+                logger.warning(f"AdView stats not available yet: {e}")
+
+            # --- استهلاك قاعدة بيانات Postgres ---
+            postgres_size = None
+            try:
+                postgres_size = db.session.execute(
+                    text("SELECT pg_size_pretty(pg_database_size(current_database()))")
+                ).scalar()
+            except Exception as e:
+                logger.warning(f"Postgres size query not available: {e}")
+
             return render_template('admin.html',
                 patterns=Pattern.query.all(),
                 notifications=Notification.query.all(),
@@ -455,6 +522,10 @@ def admin_panel():
                 categories=categories,
                 library_ads=LibraryAd.query.order_by(LibraryAd.created_at.desc()).all(),
                 users_count=User.query.count(),
+                avg_daily_visits=avg_daily_visits,
+                ad_currently_exists=ad_currently_exists,
+                total_ad_hours=total_ad_hours,
+                postgres_size=postgres_size,
                 site_settings=SiteSetting.query.first(),
                 csrf_token=generate_csrf_token()
             )
