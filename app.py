@@ -303,14 +303,26 @@ def deduct_credit():
 @limiter.limit("30 per minute")
 def api_chat():
     data = request.get_json()
-    pattern_id = data.get('pattern_id'); message = data.get('message', '').strip()
-    user = User.query.get(session.get('user_id'))
-    if not user: return jsonify({'error': 'غير مسجل'}), 401
-    if user.credits <= 0: return jsonify({'error': 'no_credits'}), 402
-    pattern = Pattern.query.get(pattern_id)
-    if not pattern: return jsonify({'error': 'النمط غير موجود'}), 404
+    pattern_id = data.get('pattern_id')
+    message = data.get('message', '').strip()
 
-    # خصم النقطة مرة واحدة فقط هنا
+    user = User.query.get(session.get('user_id'))
+    if not user:
+        return jsonify({'error': 'غير مسجل'}), 401
+    if user.credits <= 0:
+        return jsonify({'error': 'no_credits'}), 402
+
+    pattern = Pattern.query.get(pattern_id)
+    if not pattern:
+        return jsonify({'error': 'النمط غير موجود'}), 404
+
+    # Check API key
+    api_key = app.config.get("OPENROUTER_API_KEY")
+    if not api_key:
+        logger.error("OPENROUTER_API_KEY is not configured!")
+        return jsonify({'error': 'مفتاح API غير مُهيأ'}), 503
+
+    # خصم النقطة
     try:
         user.credits -= 1
         db.session.commit()
@@ -321,7 +333,7 @@ def api_chat():
 
     try:
         headers = {
-            'Authorization': f'Bearer {app.config["OPENROUTER_API_KEY"]}',
+            'Authorization': f'Bearer {api_key}',
             'Content-Type': 'application/json',
             'HTTP-Referer': request.url_root,
             'X-Title': 'UFOQ'
@@ -335,7 +347,27 @@ def api_chat():
             'temperature': 0.7,
             'stream': True
         }
-        response = requests.post(app.config["OPENROUTER_URL"], json=payload, headers=headers, stream=True, timeout=30)
+
+        response = requests.post(
+            app.config["OPENROUTER_URL"],
+            json=payload,
+            headers=headers,
+            stream=True,
+            timeout=30
+        )
+
+        # Check if response is an error (non-2xx status)
+        if response.status_code != 200:
+            error_body = response.text[:500]
+            logger.error(f"OpenRouter returned status {response.status_code}: {error_body}")
+            # Return credit
+            try:
+                user.credits += 1
+                db.session.commit()
+            except:
+                db.session.rollback()
+            return jsonify({'error': f'خطأ في مزود الذكاء الاصطناعي (HTTP {response.status_code})'}), 502
+
         response.raise_for_status()
 
         def generate():
@@ -346,25 +378,40 @@ def api_chat():
                         data_str = decoded[6:]
                         if data_str != '[DONE]':
                             try:
-                                content = json.loads(data_str)['choices'][0]['delta'].get('content', '')
-                                if content: yield content
+                                json_data = json.loads(data_str)
+                                if 'choices' in json_data and len(json_data['choices']) > 0:
+                                    delta = json_data['choices'][0].get('delta', {})
+                                    content = delta.get('content', '')
+                                    if content:
+                                        yield content
+                            except json.JSONDecodeError:
+                                logger.warning(f"Invalid JSON in stream: {data_str[:100]}")
                             except Exception as e:
                                 logger.error(f"Stream decode error: {e}")
 
         return Response(generate(), mimetype='text/plain')
-    except requests.RequestException as e:
-        logger.error(f"OpenRouter API Exception: {e}")
-        # إرجاع النقطة في حالة فشل الاتصال
+
+    except requests.Timeout:
+        logger.error("OpenRouter API timeout")
         try:
             user.credits += 1
             db.session.commit()
         except:
             db.session.rollback()
-        return jsonify({'error': 'خطأ في مزود الذكاء الاصطناعي'}), 502
+        return jsonify({'error': 'انتهى وقت الاتصال بمزود الذكاء الاصطناعي'}), 504
+
+    except requests.RequestException as e:
+        logger.error(f"OpenRouter API Exception: {e}")
+        try:
+            user.credits += 1
+            db.session.commit()
+        except:
+            db.session.rollback()
+        return jsonify({'error': 'خطأ في الاتصال بمزود الذكاء الاصطناعي'}), 502
+
     except Exception as e:
         logger.error(f"Unexpected chat error: {e}")
         logger.error(traceback.format_exc())
-        # إرجاع النقطة في حالة خطأ غير متوقع
         try:
             user.credits += 1
             db.session.commit()
