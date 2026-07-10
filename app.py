@@ -17,7 +17,7 @@ from flask_talisman import Talisman
 from sqlalchemy.exc import SQLAlchemyError
 import threading
 
-from models import db, User, Pattern, PromptLibrary, Notification, Ad, SiteSetting
+from models import db, User, Pattern, Category, PromptLibrary, Notification, Ad, SiteSetting
 from config import Config
 
 app = Flask(__name__)
@@ -65,6 +65,20 @@ def ensure_db_initialized():
                 if not SiteSetting.query.first():
                     db.session.add(SiteSetting())
                     db.session.commit()
+                # Initialize default categories if none exist
+                if not Category.query.first():
+                    default_categories = [
+                        Category(name='images', display_name='توليد صور', sort_order=1),
+                        Category(name='writing', display_name='كتابة محتوى', sort_order=2),
+                        Category(name='coding', display_name='برمجة', sort_order=3),
+                        Category(name='design', display_name='تصميم UI', sort_order=4),
+                        Category(name='analysis', display_name='تحليل بيانات', sort_order=5),
+                        Category(name='creative', display_name='إبداعي', sort_order=6),
+                    ]
+                    for cat in default_categories:
+                        db.session.add(cat)
+                    db.session.commit()
+                    logger.info("✅ Default categories initialized.")
                 _db_initialized = True
                 logger.info("✅ Database initialized successfully.")
 
@@ -114,7 +128,7 @@ def index():
 
 @app.route('/library')
 def library():
-    """صفحة مكتبة البرومبتات"""
+    """صفحة مكتبة البرومبتات - تصنيفات ديناميكية من الأدمن"""
     site = SiteSetting.query.first()
     if site and site.status == 'off':
         return render_template('index.html', site_status='off', offline_message=site.offline_message)
@@ -132,7 +146,17 @@ def library():
                 'last_daily_gift': user.last_daily_gift.isoformat() if user.last_daily_gift else None
             }
 
-    # جلب البرومبتات من قاعدة البيانات
+    # جلب التصنيفات الديناميكية من الأدمن
+    categories = Category.query.order_by(Category.sort_order).all()
+    categories_data = [
+        {
+            'name': c.name,
+            'display_name': c.display_name,
+            'icon': c.icon
+        } for c in categories
+    ]
+
+    # جلب البرومبتات
     library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
     library_data = [
         {
@@ -145,6 +169,7 @@ def library():
     ]
 
     return render_template('library.html',
+                         categories=categories_data,
                          library_items=library_data,
                          user_id=user_id,
                          user_data=user_data_dict,
@@ -162,10 +187,8 @@ def sign():
 @limiter.limit("5 per minute")
 def signup():
     data = request.get_json()
-    if not data.get('username') or not data.get('password'):
-        return jsonify({'success': False, 'message': 'بيانات غير كاملة'}), 400
-    if User.query.filter_by(username=data['username']).first():
-        return jsonify({'success': False, 'message': 'اسم المستخدم موجود مسبقاً'}), 400
+    if not data.get('username') or not data.get('password'): return jsonify({'success': False, 'message': 'بيانات غير كاملة'}), 400
+    if User.query.filter_by(username=data['username']).first(): return jsonify({'success': False, 'message': 'اسم المستخدم موجود مسبقاً'}), 400
     try:
         user = User(username=data['username'], password_hash=hash_password(data['password']))
         db.session.add(user); db.session.commit()
@@ -328,11 +351,14 @@ def admin_panel():
         session['logged_in'] = True
         return redirect(url_for('admin_panel'))
     if session.get('logged_in'):
+        # جلب التصنيفات للأدمن
+        categories = Category.query.order_by(Category.sort_order).all()
         return render_template('admin.html',
             patterns=Pattern.query.all(),
             notifications=Notification.query.all(),
             ads=Ad.query.all(),
             library_items=PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all(),
+            categories=categories,
             users_count=User.query.count(),
             site_settings=SiteSetting.query.first(),
             csrf_token=generate_csrf_token()
@@ -370,7 +396,57 @@ def delete_pattern(pattern_id):
     flash('تم حذف النمط', 'success')
     return redirect(url_for('admin_panel'))
 
-# --- Library Management (NEW) ---
+# --- Category Management (NEW - Admin Full Control) ---
+
+@app.route('/admin/category/add', methods=['POST'])
+@admin_required
+def add_category():
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    name = request.form.get('name', '').strip().lower().replace(' ', '_')
+    display_name = request.form.get('display_name', '').strip()
+    icon = request.form.get('icon', 'bi-tag').strip()
+    sort_order = int(request.form.get('sort_order', 0))
+
+    if not name or not display_name:
+        flash('اسم التصنيف واسم العرض مطلوبان', 'error')
+        return redirect(url_for('admin_panel'))
+
+    if Category.query.filter_by(name=name).first():
+        flash('التصنيف موجود مسبقاً', 'error')
+        return redirect(url_for('admin_panel'))
+
+    cat = Category(name=name, display_name=display_name, icon=icon, sort_order=sort_order)
+    db.session.add(cat); db.session.commit()
+    flash('تمت إضافة التصنيف', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/category/<int:category_id>/delete', methods=['POST'])
+@admin_required
+def delete_category(category_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    cat = Category.query.get_or_404(category_id)
+    # Update prompts with this category to 'general'
+    PromptLibrary.query.filter_by(category=cat.name).update({'category': 'general'})
+    db.session.delete(cat); db.session.commit()
+    flash('تم حذف التصنيف', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/category/<int:category_id>/update', methods=['POST'])
+@admin_required
+def update_category(category_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    cat = Category.query.get_or_404(category_id)
+    cat.display_name = request.form.get('display_name', cat.display_name).strip()
+    cat.icon = request.form.get('icon', cat.icon).strip()
+    cat.sort_order = int(request.form.get('sort_order', cat.sort_order))
+    db.session.commit()
+    flash('تم تحديث التصنيف', 'success')
+    return redirect(url_for('admin_panel'))
+
+# --- Library Management ---
 
 @app.route('/admin/library/add', methods=['POST'])
 @admin_required
@@ -379,7 +455,7 @@ def add_library_item():
         return "CSRF Error", 400
     item = PromptLibrary(
         title=request.form.get('title'),
-        category=request.form.get('category', 'images'),
+        category=request.form.get('category', 'general'),
         image_url=request.form.get('image_url'),
         prompt_text=request.form.get('prompt_text')
     )
@@ -395,6 +471,20 @@ def delete_library_item(item_id):
     item = PromptLibrary.query.get_or_404(item_id)
     db.session.delete(item); db.session.commit()
     flash('تم حذف البرومبت من المكتبة', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/library/<int:item_id>/update', methods=['POST'])
+@admin_required
+def update_library_item(item_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    item = PromptLibrary.query.get_or_404(item_id)
+    item.title = request.form.get('title', item.title)
+    item.category = request.form.get('category', item.category)
+    item.image_url = request.form.get('image_url', item.image_url)
+    item.prompt_text = request.form.get('prompt_text', item.prompt_text)
+    db.session.commit()
+    flash('تم تحديث البرومبت', 'success')
     return redirect(url_for('admin_panel'))
 
 # --- Notifications Management ---
