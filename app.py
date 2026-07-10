@@ -135,6 +135,7 @@ def index():
                          site_status='on')
 
 @app.route('/library')
+@cache.cached(timeout=60, query_string=True)
 def library():
     """صفحة مكتبة البرومبتات - تصنيفات ديناميكية من الأدمن"""
     site = SiteSetting.query.first()
@@ -243,6 +244,7 @@ def login():
     return jsonify({'success': False, 'message': 'بيانات غير صحيحة'}), 401
 
 @app.route('/api/user_info')
+@cache.cached(timeout=30)
 def user_info():
     user = User.query.get(session.get('user_id'))
     if not user: return jsonify(None)
@@ -756,6 +758,11 @@ def toggle_library_ad(ad_id):
         flash('خطأ في تغيير حالة الإعلان', 'error')
     return redirect(url_for('admin_panel'))
 
+
+
+@app.route('/health')
+def health_check():
+    return jsonify({'status': 'ok', 'timestamp': datetime.utcnow().isoformat()})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
