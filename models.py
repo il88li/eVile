@@ -34,6 +34,18 @@ class PromptLibrary(db.Model):
     prompt_text = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+class LibraryAd(db.Model):
+    """إعلانات المكتبة المنبثقة"""
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    image_url = db.Column(db.String(500), nullable=True)
+    button_text = db.Column(db.String(100), nullable=False)
+    button_link = db.Column(db.String(500), nullable=False)
+    duration_seconds = db.Column(db.Integer, default=5)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
