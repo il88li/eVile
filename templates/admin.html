@@ -283,6 +283,37 @@
                 <div id="rechargeResult" style="margin-top: 15px; font-size: 13px; display: none;"></div>
             </div>
 
+            <!-- Statistics Tab -->
+            <div id="tab-stats" class="tab-content glass-card">
+                <div class="section-title"><i class="bi bi-bar-chart-line" style="color:#7B61FF;"></i> إحصائيات الموقع</div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ users_count }}</div>
+                        <div class="stat-label">عدد الأعضاء المسجلين</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ avg_daily_visits }}</div>
+                        <div class="stat-label">متوسط الزيارات اليومي</div>
+                    </div>
+                    <div class="stat-card">
+                        {% if ad_currently_exists %}
+                        <div class="stat-number">{{ total_ad_hours }}</div>
+                        <div class="stat-label">ساعة مشاهدة للإعلان</div>
+                        {% else %}
+                        <div class="stat-number" style="font-size: 15px; color: #9CA3AF;"><i class="bi bi-dash-circle"></i></div>
+                        <div class="stat-label">لا يوجد إعلان نشط حالياً</div>
+                        {% endif %}
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="font-size: 20px;">{{ postgres_size if postgres_size else '—' }}</div>
+                        <div class="stat-label">استهلاك قاعدة بيانات Postgres</div>
+                    </div>
+                </div>
+                <p style="font-size: 12px; color: #9CA3AF; text-align: center; margin-top: 6px;">
+                    <i class="bi bi-info-circle"></i> تتحدّث الزيارات وساعات مشاهدة الإعلان تلقائياً مع كل زيارة وكل مشاهدة إعلان مكتملة.
+                </p>
+            </div>
+
             <!-- Site Control Tab -->
             <div id="tab-site-control" class="tab-content glass-card">
                 <div class="section-title"><i class="bi bi-power" style="color:#7B61FF;"></i> التحكم في نشاط الموقع</div>
@@ -322,6 +353,7 @@
                 <button class="bottom-nav-btn" data-tab="library-ads"><i class="bi bi-badge-ad"></i></button>
                 <button class="bottom-nav-btn" data-tab="notifications"><i class="bi bi-bell"></i></button>
                 <button class="bottom-nav-btn" data-tab="credits"><i class="bi bi-coin"></i></button>
+                <button class="bottom-nav-btn" data-tab="stats"><i class="bi bi-bar-chart-line"></i></button>
                 <button class="bottom-nav-btn" data-tab="site-control"><i class="bi bi-power"></i></button>
             </div>
 
