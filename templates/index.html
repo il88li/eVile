@@ -227,11 +227,11 @@
 
         <!-- ===== BOTTOM NAVIGATION BAR ===== -->
         <nav class="bottom-nav-bar">
-            <a href="/" class="nav-item active">
+            <a href="/" class="nav-item active" onclick="handleNavClick(event, '/')">
                 <i class="bi bi-house-door-fill"></i>
                 <span class="nav-label">الرئيسية</span>
             </a>
-            <a href="/library" class="nav-item">
+            <a href="/library" class="nav-item" onclick="handleNavClick(event, '/library')">
                 <i class="bi bi-collection"></i>
                 <span class="nav-label">المكتبة</span>
             </a>
@@ -461,8 +461,52 @@
             function openNoCreditsModal() { document.getElementById('noCreditsModal').classList.add('active'); } function closeNoCreditsModal() { document.getElementById('noCreditsModal').classList.remove('active'); }
             function closeNoCreditsModalOnBackdrop(e) { if (e.target === e.currentTarget) closeNoCreditsModal(); }
             function checkMaintenancePass() { const pass = document.getElementById('maintenancePass').value; if (pass === 'EVILE_PROMPTS_2007') { document.cookie = "maintenance_bypass=true; path=/"; location.reload(); } else { alert('كلمة المرور غير صحيحة.'); } }
-            document.addEventListener('DOMContentLoaded', () => { initScreen(); document.getElementById('mainInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); } }); });
+            function handleNavClick(event, url) {
+            event.preventDefault();
+            const overlay = document.getElementById('navTransition');
+            overlay.classList.add('show');
+            setTimeout(() => {
+                window.location.href = url;
+            }, 400);
+        }
+        document.addEventListener('DOMContentLoaded', () => { initScreen(); document.getElementById('mainInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); } }); });
         </script>
     {% endif %}
+
+    <!-- Nav Transition Overlay -->
+    <div class="nav-transition-overlay" id="navTransition">
+        <div class="nav-transition-spinner"></div>
+    </div>
+
+    <style>
+        .nav-transition-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(123, 97, 255, 0.1);
+            backdrop-filter: blur(2px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .nav-transition-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+        .nav-transition-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(123, 97, 255, 0.2);
+            border-top-color: #7B61FF;
+            border-radius: 50%;
+            animation: nav-spin 0.8s linear infinite;
+        }
+        @keyframes nav-spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+
 </body>
 </html>
