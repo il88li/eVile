@@ -125,8 +125,27 @@
             color: #7B61FF;
             background: rgba(123, 97, 255, 0.08);
         }
-        .nav-item.active {
+        .nav-item {
+            position: relative;
+            overflow: hidden;
+        }
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
             background: linear-gradient(135deg, #7C3AED, #8B5CF6);
+            border-radius: 40px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: -1;
+        }
+        .nav-item.active::before {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .nav-item.active {
+            background: transparent;
             color: white;
             box-shadow: 
                 0 4px 15px rgba(123, 97, 255, 0.35),
