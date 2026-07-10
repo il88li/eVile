@@ -463,50 +463,21 @@
             function checkMaintenancePass() { const pass = document.getElementById('maintenancePass').value; if (pass === 'EVILE_PROMPTS_2007') { document.cookie = "maintenance_bypass=true; path=/"; location.reload(); } else { alert('كلمة المرور غير صحيحة.'); } }
             function handleNavClick(event, url) {
             event.preventDefault();
-            const overlay = document.getElementById('navTransition');
-            overlay.classList.add('show');
+            const btn = event.currentTarget;
+            // Button press animation
+            btn.style.transform = 'scale(0.85)';
+            btn.style.transition = 'transform 0.15s ease';
             setTimeout(() => {
-                window.location.href = url;
-            }, 400);
+                btn.style.transform = 'scale(1.05)';
+                setTimeout(() => {
+                    window.location.href = url;
+                }, 120);
+            }, 150);
         }
         document.addEventListener('DOMContentLoaded', () => { initScreen(); document.getElementById('mainInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); } }); });
         </script>
     {% endif %}
 
-    <!-- Nav Transition Overlay -->
-    <div class="nav-transition-overlay" id="navTransition">
-        <div class="nav-transition-spinner"></div>
-    </div>
-
-    <style>
-        .nav-transition-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(123, 97, 255, 0.1);
-            backdrop-filter: blur(2px);
-            z-index: 9999;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .nav-transition-overlay.show {
-            display: flex;
-            opacity: 1;
-        }
-        .nav-transition-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(123, 97, 255, 0.2);
-            border-top-color: #7B61FF;
-            border-radius: 50%;
-            animation: nav-spin 0.8s linear infinite;
-        }
-        @keyframes nav-spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
 
 </body>
 </html>
