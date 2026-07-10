@@ -404,6 +404,7 @@ def admin_panel():
                 ads=Ad.query.all(),
                 library_items=library_items,
                 categories=categories,
+                library_ads=LibraryAd.query.order_by(LibraryAd.created_at.desc()).all(),
                 users_count=User.query.count(),
                 site_settings=SiteSetting.query.first(),
                 csrf_token=generate_csrf_token()
