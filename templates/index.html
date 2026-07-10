@@ -249,13 +249,17 @@
 
         <!-- ===== BOTTOM NAVIGATION BAR ===== -->
         <nav class="bottom-nav-bar">
+            <a href="/library" class="nav-item" onclick="handleNavClick(event, '/library')">
+                <i class="bi bi-collection"></i>
+                <span class="nav-label">المكتبة</span>
+            </a>
             <a href="/" class="nav-item active" onclick="handleNavClick(event, '/')">
                 <i class="bi bi-house-door-fill"></i>
                 <span class="nav-label">الرئيسية</span>
             </a>
-            <a href="/library" class="nav-item" onclick="handleNavClick(event, '/library')">
-                <i class="bi bi-collection"></i>
-                <span class="nav-label">المكتبة</span>
+            <a href="/about" class="nav-item" onclick="handleNavClick(event, '/about')">
+                <i class="bi bi-info-circle"></i>
+                <span class="nav-label">حول</span>
             </a>
         </nav>
 
