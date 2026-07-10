@@ -7,7 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+        button, a { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
         body {
             font-family: 'Tajawal', sans-serif;
             background: #F0F0F5;
@@ -20,55 +21,10 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Floating Header */
-        .floating-header {
-            position: fixed;
-            top: 12px;
-            left: 12px;
-            right: 12px;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 6px 12px;
-            max-width: 700px;
-            margin: 0 auto;
-            border-radius: 24px;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            gap: 8px;
-        }
-        .header-left, .header-right { display: flex; align-items: center; gap: 6px; }
-        .header-center {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 18px;
-            font-weight: 900;
-            color: #1F2937;
-            letter-spacing: 2px;
-            white-space: nowrap;
-        }
-        .header-btn {
-            width: 34px;
-            height: 34px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: #6B7280;
-            text-decoration: none;
-        }
-        .header-btn:active { transform: scale(0.9); }
-        .header-btn i { font-size: 16px; }
-        .header-btn.special { background: rgba(123, 97, 255, 0.08); color: #7B61FF; border-color: rgba(123,97,255,0.1); }
         .credits-badge {
             background: rgba(123, 97, 255, 0.08);
             padding: 4px 14px;
@@ -546,25 +502,6 @@
             font-weight: 700;
             backdrop-filter: blur(10px);
         }
-        .ad-close-x {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.4);
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s;
-        }
-        .ad-close-x:hover { background: rgba(239, 68, 68, 0.8); transform: rotate(90deg); }
 
         /* ===== BOTTOM NAV ===== */
         .bottom-nav-bar {
@@ -668,16 +605,6 @@
     </style>
 </head>
 <body>
-    <!-- Floating Header -->
-    <header class="floating-header">
-        <div class="header-left">
-            <div class="header-btn special" onclick="history.back()"><i class="bi bi-arrow-right"></i></div>
-        </div>
-        <div class="header-center">UFOQ</div>
-        <div class="header-right">
-            <span class="credits-badge" id="creditsBadge"><i class="bi bi-stars"></i> 0 نقاط</span>
-        </div>
-    </header>
 
     <div class="main-content">
         <!-- Hero Card -->
@@ -772,9 +699,9 @@
         تم النسخ بنجاح!
     </div>
 
-    <!-- Ad Popup -->
-    <div class="ad-overlay" id="adOverlay" onclick="closeAdOnBackdrop(event)">
-        <div class="ad-box" onclick="event.stopPropagation()">
+    <!-- Ad Popup - Mandatory, cannot be skipped -->
+    <div class="ad-overlay" id="adOverlay">
+        <div class="ad-box">
             <div id="adImageContainer">
                 {% if active_ad and active_ad.image_url %}
                 <img src="{{ active_ad.image_url }}" alt="Ad" class="ad-image" id="adImage">
@@ -793,7 +720,6 @@
                 </a>
             </div>
             <div class="ad-timer" id="adTimer">5</div>
-            <button class="ad-close-x" onclick="skipAd()">✕</button>
         </div>
     </div>
 
@@ -810,6 +736,35 @@
     </nav>
 
     <script>
+        // Prevent all copy/cut/paste/select events globally - only allow via copy button
+        document.addEventListener('copy', function(e) {
+            // Only allow if triggered by our copy button
+            if (!e.target.closest('.copy-btn')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, true);
+        document.addEventListener('cut', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }, true);
+        document.addEventListener('selectstart', function(e) {
+            // Only allow on copy buttons
+            if (!e.target.closest('.copy-btn')) {
+                e.preventDefault();
+                return false;
+            }
+        }, true);
+        document.addEventListener('contextmenu', function(e) {
+            // Prevent long-press context menu on mobile
+            if (!e.target.closest('.copy-btn')) {
+                e.preventDefault();
+                return false;
+            }
+        }, true);
+
         // Library data from server
         const libraryItems = {{ library_items|tojson|default('[]') }};
         const activeAd = {{ active_ad|tojson|default('null') }};
@@ -960,17 +915,12 @@
             }
         }
 
+        // skipAd is only called by the timer - ad is mandatory
         function skipAd() {
             closeAdPopup();
             if (pendingCopyText) {
                 doCopy(pendingCopyText);
                 pendingCopyText = null;
-            }
-        }
-
-        function closeAdOnBackdrop(event) {
-            if (event.target === event.currentTarget) {
-                skipAd();
             }
         }
 
@@ -1021,7 +971,7 @@
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 if (activeInlineCard !== null) closeInlinePrompt(activeInlineCard);
-                if (document.getElementById('adOverlay').classList.contains('show')) skipAd();
+                // Ad cannot be skipped with Escape - it's mandatory
             }
         });
 
