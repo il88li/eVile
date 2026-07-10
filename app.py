@@ -232,6 +232,10 @@ def library():
 def sign():
     return render_template('sign.html', csrf_token=generate_csrf_token())
 
+@app.route('/about')
+def about():
+    return render_template('about.html', current_year=datetime.utcnow().year)
+
 # ============================================================
 # AUTHENTICATION API
 # ============================================================
