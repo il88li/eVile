@@ -18,62 +18,6 @@
             position: relative;
         }
 
-        /* ===== ANIMATED BACKGROUND ===== */
-        .bg-animation {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 0;
-            overflow: hidden;
-        }
-        .bg-blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.4;
-            animation: blob-float 20s ease-in-out infinite;
-        }
-        .bg-blob:nth-child(1) {
-            width: 400px; height: 400px;
-            background: linear-gradient(135deg, #7C3AED, #A78BFA);
-            top: -100px; right: -100px;
-            animation-delay: 0s;
-        }
-        .bg-blob:nth-child(2) {
-            width: 300px; height: 300px;
-            background: linear-gradient(135deg, #8B5CF6, #C4B5FD);
-            bottom: 10%; left: -80px;
-            animation-delay: -7s;
-            animation-duration: 25s;
-        }
-        .bg-blob:nth-child(3) {
-            width: 250px; height: 250px;
-            background: linear-gradient(135deg, #A78BFA, #DDD6FE);
-            top: 40%; right: -60px;
-            animation-delay: -14s;
-            animation-duration: 18s;
-        }
-        @keyframes blob-float {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -30px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
-
-        /* Floating shapes */
-        .floating-shape {
-            position: fixed;
-            pointer-events: none;
-            z-index: 1;
-            opacity: 0.15;
-            animation: shape-drift 15s ease-in-out infinite;
-        }
-        .floating-shape:nth-child(1) { top: 15%; left: 5%; font-size: 40px; animation-delay: 0s; }
-        .floating-shape:nth-child(2) { top: 60%; right: 8%; font-size: 30px; animation-delay: -5s; }
-        .floating-shape:nth-child(3) { bottom: 20%; left: 10%; font-size: 25px; animation-delay: -10s; }
-        @keyframes shape-drift {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(10deg); }
-        }
-
         /* Floating Header */
         .floating-header {
             position: fixed;
@@ -92,11 +36,6 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.9);
             gap: 8px;
-            animation: header-slide 0.6s ease-out;
-        }
-        @keyframes header-slide {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
         }
         .header-left, .header-right { display: flex; align-items: center; gap: 6px; }
         .header-center {
@@ -135,11 +74,6 @@
             font-weight: 600;
             border: 1px solid rgba(123,97,255,0.1);
             cursor: pointer;
-            animation: pulse-badge 2s infinite;
-        }
-        @keyframes pulse-badge {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(123, 97, 255, 0.4); }
-            50% { box-shadow: 0 0 0 8px rgba(123, 97, 255, 0); }
         }
 
         /* Main Content */
@@ -165,15 +99,6 @@
             padding: 0 30px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3);
-            animation: hero-appear 0.8s ease-out, float-card 6s ease-in-out infinite;
-        }
-        @keyframes hero-appear {
-            from { transform: translateX(-50px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes float-card {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-4px); }
         }
         .hero-card::before {
             content: '';
@@ -184,11 +109,6 @@
             height: 300px;
             background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
             border-radius: 50%;
-            animation: pulse-glow 4s ease-in-out infinite;
-        }
-        @keyframes pulse-glow {
-            0%, 100% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.1); }
         }
         .hero-content { flex: 1; text-align: right; padding-left: 20px; position: relative; z-index: 2; }
         .hero-content h1 { font-size: 1.8rem; font-weight: 900; margin-bottom: 6px; color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
@@ -208,11 +128,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             margin-top: 12px;
             border: 2px solid rgba(255,255,255,0.5);
-            animation: btn-pop 0.6s ease-out 0.4s both;
-        }
-        @keyframes btn-pop {
-            from { transform: scale(0); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
         }
         .hero-telegram-btn:hover {
             transform: translateY(-2px) scale(1.05);
@@ -221,11 +136,7 @@
             color: #0099e6;
         }
         .hero-telegram-btn i { font-size: 18px; }
-        .hero-image-wrapper { flex-shrink: 0; position: relative; z-index: 2; animation: image-spin 1s ease-out; }
-        @keyframes image-spin {
-            from { transform: rotate(-180deg) scale(0); opacity: 0; }
-            to { transform: rotate(0) scale(1); opacity: 1; }
-        }
+        .hero-image-wrapper { flex-shrink: 0; position: relative; z-index: 2; }
         .hero-image {
             width: 100px;
             height: 100px;
@@ -247,7 +158,6 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 2px 8px rgba(251, 191, 36, 0.5);
-            animation: pulse-badge 2s infinite;
         }
 
         /* Intro Card */
@@ -259,11 +169,6 @@
             text-align: center;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
             border: 1px solid rgba(124, 58, 237, 0.08);
-            animation: card-slide-up 0.7s ease-out 0.2s both;
-        }
-        @keyframes card-slide-up {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
         }
         .intro-badge {
             display: inline-block;
@@ -272,12 +177,6 @@
             border-radius: 50px;
             margin-bottom: 14px;
             border: 1px solid rgba(124, 58, 237, 0.15);
-            animation: badge-shake 0.5s ease-out 0.8s both;
-        }
-        @keyframes badge-shake {
-            0% { transform: scale(0) rotate(-10deg); }
-            50% { transform: scale(1.1) rotate(5deg); }
-            100% { transform: scale(1) rotate(0); }
         }
         .intro-badge span { color: #7C3AED; font-weight: 700; font-size: 0.85rem; }
         .intro-card p { color: #4B5563; font-size: 0.95rem; line-height: 1.9; max-width: 700px; margin: 0 auto; font-weight: 400; }
@@ -297,7 +196,6 @@
             box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
             margin-top: 14px;
             border: none;
-            animation: btn-pop 0.6s ease-out 0.6s both;
         }
         .intro-telegram-btn:hover {
             transform: translateY(-2px) scale(1.05);
@@ -316,11 +214,6 @@
             box-shadow: 0 4px 20px rgba(124, 58, 237, 0.25);
             border-radius: 16px;
             margin-bottom: 20px;
-            animation: slide-in-right 0.5s ease-out 0.3s both;
-        }
-        @keyframes slide-in-right {
-            from { transform: translateX(-30px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
         }
         .categories-wrapper {
             display: flex;
@@ -368,11 +261,6 @@
             margin-bottom: 24px;
             font-weight: 800;
             color: #1F2937;
-            animation: fade-in 0.6s ease-out 0.5s both;
-        }
-        @keyframes fade-in {
-            from { opacity: 0; }
-            to { opacity: 1; }
         }
         .gallery-title span { color: #7C3AED; }
         .gallery-grid {
@@ -389,17 +277,6 @@
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-            animation: card-appear 0.5s ease-out both;
-        }
-        .prompt-card:nth-child(1) { animation-delay: 0.1s; }
-        .prompt-card:nth-child(2) { animation-delay: 0.2s; }
-        .prompt-card:nth-child(3) { animation-delay: 0.3s; }
-        .prompt-card:nth-child(4) { animation-delay: 0.4s; }
-        .prompt-card:nth-child(5) { animation-delay: 0.5s; }
-        .prompt-card:nth-child(6) { animation-delay: 0.6s; }
-        @keyframes card-appear {
-            from { transform: translateY(40px) scale(0.9); opacity: 0; }
-            to { transform: translateY(0) scale(1); opacity: 1; }
         }
         .prompt-card:hover {
             transform: translateY(-6px) scale(1.02);
@@ -494,7 +371,7 @@
             transform: scale(1.08);
         }
 
-        /* Inline Prompt Overlay */
+        /* Inline Prompt Overlay - Simple toggle, no X, no copy button */
         .inline-prompt-overlay {
             position: absolute;
             inset: 0;
@@ -518,37 +395,13 @@
         .prompt-card:has(.inline-prompt-overlay.show) .image-wrapper img {
             filter: blur(6px) brightness(0.5);
         }
-        .inline-prompt-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
         .inline-prompt-title {
             color: white;
             font-weight: 800;
             font-size: 1rem;
             text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-        }
-        .inline-prompt-close {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: none;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            font-family: 'Tajawal', sans-serif;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
-        }
-        .inline-prompt-close:hover {
-            background: rgba(239, 68, 68, 0.7);
-            transform: rotate(90deg);
+            margin-bottom: 12px;
+            text-align: center;
         }
         .inline-prompt-box {
             flex: 1;
@@ -568,36 +421,12 @@
             font-family: 'Tajawal', sans-serif;
             text-shadow: 0 1px 4px rgba(0,0,0,0.5);
         }
-        .inline-copy-btn {
-            width: 100%;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #7C3AED;
-            border: none;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-family: 'Tajawal', sans-serif;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        .inline-copy-btn:hover {
-            transform: translateY(-2px);
-            background: white;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        }
 
         /* Empty State */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
             color: #6B7280;
-            animation: fade-in 0.5s ease-out;
         }
         .empty-state i { font-size: 64px; color: #D1D5DB; margin-bottom: 16px; display: block; }
         .empty-state h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 8px; color: #9CA3AF; }
@@ -640,13 +469,8 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            animation: ad-fade-in 0.3s ease;
         }
         .ad-overlay.show { display: flex; }
-        @keyframes ad-fade-in {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
         .ad-box {
             background: white;
             border-radius: 24px;
@@ -654,12 +478,7 @@
             width: 100%;
             overflow: hidden;
             box-shadow: 0 25px 50px rgba(124, 58, 237, 0.25);
-            animation: ad-pop-up 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
-        }
-        @keyframes ad-pop-up {
-            from { transform: scale(0.5) translateY(50px); opacity: 0; }
-            to { transform: scale(1) translateY(0); opacity: 1; }
         }
         .ad-image {
             width: 100%;
@@ -746,7 +565,7 @@
         }
         .ad-close-x:hover { background: rgba(239, 68, 68, 0.8); transform: rotate(90deg); }
 
-        /* ===== NEW BOTTOM NAV - Long Horizontal ===== */
+        /* ===== BOTTOM NAV ===== */
         .bottom-nav-bar {
             position: fixed;
             bottom: 12px;
@@ -768,11 +587,6 @@
                 inset 0 1px 0 rgba(255,255,255,0.8);
             max-width: 500px;
             width: auto;
-            animation: nav-slide-up 0.5s ease-out 0.3s both;
-        }
-        @keyframes nav-slide-up {
-            from { transform: translateX(-50%) translateY(100px); opacity: 0; }
-            to { transform: translateX(-50%) translateY(0); opacity: 1; }
         }
         .nav-item {
             display: flex;
@@ -818,28 +632,33 @@
             opacity: 1;
         }
 
-        /* Scroll indicator */
-        .scroll-indicator {
+        /* Nav transition effect */
+        .nav-transition-overlay {
             position: fixed;
-            top: 50%;
-            right: 8px;
-            transform: translateY(-50%);
-            z-index: 50;
+            inset: 0;
+            background: rgba(123, 97, 255, 0.1);
+            backdrop-filter: blur(2px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .nav-transition-overlay.show {
             display: flex;
-            flex-direction: column;
-            gap: 6px;
+            opacity: 1;
         }
-        .scroll-dot {
-            width: 6px;
-            height: 6px;
+        .nav-transition-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(123, 97, 255, 0.2);
+            border-top-color: #7B61FF;
             border-radius: 50%;
-            background: rgba(123, 97, 255, 0.2);
-            transition: all 0.3s;
+            animation: nav-spin 0.8s linear infinite;
         }
-        .scroll-dot.active {
-            background: #7B61FF;
-            height: 20px;
-            border-radius: 3px;
+        @keyframes nav-spin {
+            to { transform: rotate(360deg); }
         }
 
         @media (max-width: 768px) {
@@ -860,18 +679,6 @@
     </style>
 </head>
 <body>
-    <!-- Animated Background -->
-    <div class="bg-animation">
-        <div class="bg-blob"></div>
-        <div class="bg-blob"></div>
-        <div class="bg-blob"></div>
-    </div>
-
-    <!-- Floating Shapes -->
-    <div class="floating-shape">✨</div>
-    <div class="floating-shape">🚀</div>
-    <div class="floating-shape">💡</div>
-
     <!-- Floating Header -->
     <header class="floating-header">
         <div class="header-left">
@@ -939,19 +746,13 @@
                 {% if library_items and library_items|length > 0 %}
                     {% for item in library_items %}
                     <div class="prompt-card" id="card-{{ item.id }}" data-category="{{ item.category }}">
-                        <div class="inline-prompt-overlay" id="inline-{{ item.id }}">
-                            <div class="inline-prompt-header">
-                                <span class="inline-prompt-title">{{ item.title }}</span>
-                                <button class="inline-prompt-close" onclick="closeInlinePrompt({{ item.id }})">✕</button>
-                            </div>
+                        <div class="inline-prompt-overlay" id="inline-{{ item.id }}" onclick="toggleInlinePrompt({{ item.id }})">
+                            <div class="inline-prompt-title">{{ item.title }}</div>
                             <div class="inline-prompt-box">
                                 <p class="inline-prompt-text">{{ item.prompt_text }}</p>
                             </div>
-                            <button class="inline-copy-btn" onclick="copyInlinePrompt({{ item.id }})">
-                                <i class="bi bi-files"></i> نسخ البرومبت
-                            </button>
                         </div>
-                        <div class="image-wrapper" onclick="showInlinePrompt({{ item.id }})">
+                        <div class="image-wrapper" onclick="toggleInlinePrompt({{ item.id }})">
                             <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300/7C3AED/FFFFFF?text={{ item.title|urlencode }}'">
                             <div class="image-overlay"></div>
                             <div class="image-title">{{ item.title }}</div>
@@ -960,7 +761,7 @@
                             <button class="copy-btn" onclick="handleCopy(event, '{{ item.prompt_text|replace("'", "\'") }}')">
                                 <i class="bi bi-files"></i> نسخ
                             </button>
-                            <button class="eye-btn" onclick="showInlinePrompt({{ item.id }})">
+                            <button class="eye-btn" onclick="handleEyeClick(event, {{ item.id }})">
                                 <i class="bi bi-eye"></i>
                             </button>
                         </div>
@@ -1008,13 +809,18 @@
         </div>
     </div>
 
-    <!-- ===== NEW BOTTOM NAV ===== -->
+    <!-- Nav Transition Overlay -->
+    <div class="nav-transition-overlay" id="navTransition">
+        <div class="nav-transition-spinner"></div>
+    </div>
+
+    <!-- Bottom Nav -->
     <nav class="bottom-nav-bar">
-        <a href="/" class="nav-item">
+        <a href="/" class="nav-item" onclick="handleNavClick(event, '/')">
             <i class="bi bi-house-door"></i>
             <span class="nav-label">الرئيسية</span>
         </a>
-        <a href="/library" class="nav-item active">
+        <a href="/library" class="nav-item active" onclick="handleNavClick(event, '/library')">
             <i class="bi bi-collection-fill"></i>
             <span class="nav-label">المكتبة</span>
         </a>
@@ -1067,13 +873,22 @@
             }
         }
 
-        // Show inline prompt
-        function showInlinePrompt(id) {
+        // Toggle inline prompt - click image or eye to show/hide, click overlay to hide
+        function toggleInlinePrompt(id) {
             const overlay = document.getElementById(`inline-${id}`);
             if (!overlay) return;
-            if (activeInlineCard && activeInlineCard !== id) {
+
+            // If clicking the same card that's already open, close it
+            if (activeInlineCard === id) {
+                closeInlinePrompt(id);
+                return;
+            }
+
+            // Close any other open card first
+            if (activeInlineCard !== null && activeInlineCard !== id) {
                 closeInlinePrompt(activeInlineCard);
             }
+
             activeInlineCard = id;
             document.querySelectorAll('.prompt-card').forEach(card => {
                 if (card.id !== `card-${id}`) {
@@ -1091,6 +906,11 @@
             document.querySelectorAll('.prompt-card').forEach(card => {
                 card.classList.remove('blurred');
             });
+        }
+
+        function handleEyeClick(event, id) {
+            event.stopPropagation();
+            toggleInlinePrompt(id);
         }
 
         // ===== AD SYSTEM =====
@@ -1155,18 +975,6 @@
             }
         }
 
-        function copyInlinePrompt(id) {
-            const item = libraryItems.find(i => i.id === id);
-            if (item) {
-                if (activeAd) {
-                    pendingCopyText = item.prompt_text;
-                    showAdPopup();
-                } else {
-                    doCopy(item.prompt_text);
-                }
-            }
-        }
-
         function doCopy(text) {
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(text).then(showToast).catch(() => fallbackCopy(text));
@@ -1193,9 +1001,19 @@
             setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
+        // Smooth navigation with transition effect
+        function handleNavClick(event, url) {
+            event.preventDefault();
+            const overlay = document.getElementById('navTransition');
+            overlay.classList.add('show');
+            setTimeout(() => {
+                window.location.href = url;
+            }, 400);
+        }
+
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                if (activeInlineCard) closeInlinePrompt(activeInlineCard);
+                if (activeInlineCard !== null) closeInlinePrompt(activeInlineCard);
                 if (document.getElementById('adOverlay').classList.contains('show')) skipAd();
             }
         });
