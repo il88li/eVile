@@ -25,6 +25,8 @@
         .btn { padding: 10px 20px; background: rgba(243, 244, 246, 0.8); border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 40px; color: #6B7280; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
         .btn-primary { background: #7B61FF; border-color: #7B61FF; color: #fff; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.2); }
         .btn-danger { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #dc2626; }
+        .btn-success { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.2); color: #16a34a; }
+        .btn-warning { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); color: #d97706; }
         .btn:active { transform: scale(0.96); }
         .btn-login { width: 100%; padding: 14px; font-size: 16px; }
         .flash { padding: 12px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 14px; color: #dc2626; margin-bottom: 24px; text-align: center; font-size: 14px; }
@@ -47,6 +49,14 @@
         .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
         .modal.active { display: flex; }
         .modal-content { padding: 20px; max-width: 500px; width: 100%; }
+        .library-item { padding: 12px; margin-bottom: 10px; }
+        .library-item-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(123,97,255,0.1); }
+        .library-item-category { display: inline-block; padding: 2px 10px; background: rgba(123,97,255,0.08); border-radius: 20px; font-size: 11px; color: #7B61FF; margin-top: 4px; }
+        .category-tag { display: inline-block; padding: 4px 12px; background: rgba(123,97,255,0.08); border-radius: 20px; font-size: 12px; color: #7B61FF; margin: 2px; border: 1px solid rgba(123,97,255,0.15); }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: rgba(123,97,255,0.05); border: 1px solid rgba(123,97,255,0.1); border-radius: 14px; padding: 16px; text-align: center; }
+        .stat-number { font-size: 28px; font-weight: 900; color: #7B61FF; }
+        .stat-label { font-size: 12px; color: #6B7280; margin-top: 4px; }
         @media (max-width: 600px) { .bottom-nav { padding: 6px; gap: 6px; border-radius: 12px; } .bottom-nav-btn { width: 38px; height: 38px; font-size: 16px; } }
     </style>
 </head>
@@ -55,6 +65,7 @@
         {% if session.get('logged_in') %}
             <div style="height: 20px;"></div>
 
+            <!-- Patterns Tab -->
             <div id="tab-patterns" class="tab-content active glass-card">
                 <div class="section-title"><i class="bi bi-plus-circle" style="color:#7B61FF;"></i> إضافة نمط جديد</div>
                 <form method="POST" action="/admin/pattern/add">
@@ -79,13 +90,114 @@
                             </div>
                         </div>
                         <div class="card-actions" style="margin-top: 8px;">
-                            <button class="btn btn-danger" onclick="if(confirm('حذف النمط؟')) location.href='/admin/pattern/{{ pat.id }}/delete'"><i class="bi bi-trash3"></i> حذف</button>
+                            <form method="POST" action="/admin/pattern/{{ pat.id }}/delete" style="display:inline;" onsubmit="return confirm('حذف النمط؟')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i> حذف</button>
+                            </form>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
             </div>
 
+            <!-- Categories Tab (NEW - Full Admin Control) -->
+            <div id="tab-categories" class="tab-content glass-card">
+                <div class="section-title"><i class="bi bi-tags" style="color:#7B61FF;"></i> إدارة التصنيفات</div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ categories|length }}</div>
+                        <div class="stat-label">عدد التصنيفات</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ library_items|length }}</div>
+                        <div class="stat-label">عدد البرومبتات</div>
+                    </div>
+                </div>
+
+                <form method="POST" action="/admin/category/add">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <div class="form-grid">
+                        <div class="form-group"><label>معرف التصنيف (بالإنجليزية)</label><input type="text" name="name" required placeholder="مثال: images, writing, coding"></div>
+                        <div class="form-group"><label>اسم العرض (بالعربية)</label><input type="text" name="display_name" required placeholder="مثال: توليد صور"></div>
+                        <div class="form-group"><label>الأيقونة (Bootstrap Icon)</label><input type="text" name="icon" value="bi-tag" placeholder="مثال: bi-image, bi-code"></div>
+                        <div class="form-group"><label>الترتيب</label><input type="number" name="sort_order" value="0" min="0"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> إضافة تصنيف</button>
+                </form>
+
+                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-grid-3x3-gap" style="color:#7B61FF;"></i> التصنيفات الحالية</div>
+                <div class="categories-list">
+                    {% for cat in categories %}
+                    <div class="pattern-card glass-card">
+                        <div class="pattern-header">
+                            <div style="width:40px;height:40px;border-radius:8px;background:rgba(123,97,255,0.1);display:flex;align-items:center;justify-content:center;">
+                                <i class="bi {{ cat.icon }}" style="color:#7B61FF;font-size:18px;"></i>
+                            </div>
+                            <div style="flex:1;">
+                                <div class="pattern-name">{{ cat.display_name }}</div>
+                                <div class="pattern-meta">معرف: {{ cat.name }} | ترتيب: {{ cat.sort_order }}</div>
+                            </div>
+                        </div>
+                        <div class="card-actions" style="margin-top: 8px;">
+                            <form method="POST" action="/admin/category/{{ cat.id }}/delete" style="display:inline;" onsubmit="return confirm('حذف التصنيف؟ سيتم نقل البرومبتات إلى "عام"')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i> حذف</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p style="text-align:center; color:#6B7280; padding: 20px;">لا توجد تصنيفات بعد</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Library Tab -->
+            <div id="tab-library" class="tab-content glass-card">
+                <div class="section-title"><i class="bi bi-collection" style="color:#7B61FF;"></i> إضافة برومبت للمكتبة</div>
+                <form method="POST" action="/admin/library/add">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <div class="form-grid">
+                        <div class="form-group"><label>عنوان البرومبت</label><input type="text" name="title" required placeholder="مثال: مدينة سايبر بانك"></div>
+                        <div class="form-group"><label>التصنيف</label>
+                            <select name="category" required>
+                                {% for cat in categories %}
+                                <option value="{{ cat.name }}">{{ cat.display_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group"><label>رابط صورة المعاينة</label><input type="url" name="image_url" required placeholder="https://example.com/image.png"></div>
+                        <div class="form-group" style="grid-column: 1 / -1;"><label>نص البرومبت</label><textarea name="prompt_text" required rows="5" placeholder="اكتب البرومبت الكامل هنا..."></textarea></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> إضافة للمكتبة</button>
+                </form>
+
+                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-grid-3x3-gap" style="color:#7B61FF;"></i> برومبتات المكتبة</div>
+                <div class="library-list">
+                    {% for item in library_items %}
+                    <div class="library-item glass-card">
+                        <div class="pattern-header">
+                            <img src="{{ item.image_url }}" class="library-item-img" alt="{{ item.title }}">
+                            <div style="flex:1;">
+                                <div class="pattern-name">{{ item.title }}</div>
+                                <span class="library-item-category">{{ item.category }}</span>
+                                <div class="pattern-meta" style="font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px; margin-top:4px;">{{ item.prompt_text[:80] }}...</div>
+                            </div>
+                        </div>
+                        <div class="card-actions" style="margin-top: 8px;">
+                            <form method="POST" action="/admin/library/{{ item.id }}/delete" style="display:inline;" onsubmit="return confirm('حذف البرومبت من المكتبة؟')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i> حذف</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p style="text-align:center; color:#6B7280; padding: 20px;">لا توجد برومبتات في المكتبة بعد</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Notifications Tab -->
             <div id="tab-notifications" class="tab-content glass-card">
                 <div class="section-title"><i class="bi bi-send" style="color:#7B61FF;"></i> إرسال إشعار جديد</div>
                 <form method="POST" action="/admin/notification/add">
@@ -107,6 +219,7 @@
                 {% endfor %}
             </div>
 
+            <!-- Credits Tab -->
             <div id="tab-credits" class="tab-content glass-card">
                 <div class="section-title"><i class="bi bi-coin" style="color:#7B61FF;"></i> شحن نقاط المستخدمين</div>
                 <div style="max-width: 400px;">
@@ -117,10 +230,13 @@
                 <div id="rechargeResult" style="margin-top: 15px; font-size: 13px; display: none;"></div>
             </div>
 
+            <!-- Site Control Tab - FIXED -->
             <div id="tab-site-control" class="tab-content glass-card">
                 <div class="section-title"><i class="bi bi-power" style="color:#7B61FF;"></i> التحكم في نشاط الموقع</div>
                 <div style="text-align: center; max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 20px;">
-                    <div id="siteStatusIcon" style="font-size: 80px; color: {{ '#16a34a' if site_settings and site_settings.status == 'on' else '#ef4444' }};">
+                    <div id="siteStatusIcon" style="font-size: 80px; cursor: pointer; transition: all 0.3s;"
+                         onclick="toggleSiteStatus()"
+                         data-status="{{ site_settings.status if site_settings else 'on' }}">
                         <i class="bi {{ 'bi-toggle-on' if site_settings and site_settings.status == 'on' else 'bi-toggle-off' }}"></i>
                     </div>
                     <div style="width: 100%;">
@@ -148,6 +264,8 @@
 
             <div class="bottom-nav" id="bottomNav">
                 <button class="bottom-nav-btn active" data-tab="patterns"><i class="bi bi-grid"></i></button>
+                <button class="bottom-nav-btn" data-tab="categories"><i class="bi bi-tags"></i></button>
+                <button class="bottom-nav-btn" data-tab="library"><i class="bi bi-collection"></i></button>
                 <button class="bottom-nav-btn" data-tab="notifications"><i class="bi bi-bell"></i></button>
                 <button class="bottom-nav-btn" data-tab="credits"><i class="bi bi-coin"></i></button>
                 <button class="bottom-nav-btn" data-tab="site-control"><i class="bi bi-power"></i></button>
@@ -179,6 +297,7 @@
     </div>
 
     <script>
+        // Tab switching
         document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const tabId = btn.getAttribute('data-tab');
@@ -189,6 +308,7 @@
             });
         });
 
+        // Recharge credits
         async function rechargeCredits() {
             const username = document.getElementById('rechargeUsername').value.trim();
             const amount = parseInt(document.getElementById('rechargeAmount').value);
@@ -207,7 +327,7 @@
                 const res = await fetch('/api/admin/update_credits', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({username, amount})
+                    body: JSON.stringify({username, amount, csrf_token: '{{ csrf_token }}'})
                 });
                 const data = await res.json();
                 if(data.success) {
@@ -224,16 +344,33 @@
             }
         }
 
-        async function saveSiteSettings() {
+        // FIXED: Site status toggle with proper state tracking
+        let currentSiteStatus = '{{ site_settings.status if site_settings else "on" }}';
+
+        function toggleSiteStatus() {
             const icon = document.getElementById('siteStatusIcon');
             const label = document.getElementById('siteStatusLabel');
-            const messageInput = document.getElementById('offlineMessageInput');
-            const btn = document.querySelector('#tab-site-control .btn-primary');
 
-            let newStatus = 'on';
-            if (icon.querySelector('i').classList.contains('bi-toggle-on')) {
-                newStatus = 'off';
+            // Toggle the local state
+            currentSiteStatus = currentSiteStatus === 'on' ? 'off' : 'on';
+
+            // Update UI immediately
+            if (currentSiteStatus === 'off') {
+                icon.style.color = '#ef4444';
+                icon.innerHTML = '<i class="bi bi-toggle-off"></i>';
+                label.style.color = '#ef4444';
+                label.textContent = 'متوقف';
+            } else {
+                icon.style.color = '#16a34a';
+                icon.innerHTML = '<i class="bi bi-toggle-on"></i>';
+                label.style.color = '#16a34a';
+                label.textContent = 'مفعل';
             }
+        }
+
+        async function saveSiteSettings() {
+            const btn = document.querySelector('#tab-site-control .btn-primary');
+            const messageInput = document.getElementById('offlineMessageInput');
 
             btn.disabled = true;
             btn.innerHTML = 'جاري الحفظ...';
@@ -243,28 +380,17 @@
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        status: newStatus,
+                        status: currentSiteStatus,
                         offline_message: messageInput.value,
                         csrf_token: '{{ csrf_token }}'
                     })
                 });
                 const data = await res.json();
-                
+
                 if (data.success) {
-                    if (newStatus === 'off') {
-                        icon.style.color = '#ef4444';
-                        icon.innerHTML = '<i class="bi bi-toggle-off"></i>';
-                        label.style.color = '#ef4444';
-                        label.textContent = 'متوقف';
-                    } else {
-                        icon.style.color = '#16a34a';
-                        icon.innerHTML = '<i class="bi bi-toggle-on"></i>';
-                        label.style.color = '#16a34a';
-                        label.textContent = 'مفعل';
-                    }
                     alert('تم حفظ الإعدادات بنجاح!');
                 } else {
-                    alert('حدث خطأ أثناء الحفظ: ' + data.message);
+                    alert('حدث خطأ أثناء الحفظ: ' + (data.message || 'خطأ غير معروف'));
                 }
             } catch(err) {
                 alert('خطأ في الاتصال بالخادم.');
