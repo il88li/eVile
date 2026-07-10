@@ -199,7 +199,7 @@
         .intro-card p { color: #4B5563; font-size: 0.95rem; line-height: 1.9; max-width: 700px; margin: 0 auto; font-weight: 400; }
         .intro-card p .highlight { color: #7C3AED; font-weight: 700; }
 
-        /* Categories Bar */
+        /* Categories Bar - DYNAMIC FROM ADMIN */
         .categories-section {
             position: sticky;
             top: 0;
@@ -621,16 +621,15 @@
             </p>
         </div>
 
-        <!-- Categories Bar -->
+        <!-- Categories Bar - DYNAMIC FROM ADMIN -->
         <div class="categories-section" id="categoriesBar">
             <div class="categories-wrapper" id="categories">
                 <button class="category-btn active" data-category="all">الكل</button>
-                <button class="category-btn" data-category="images">توليد صور</button>
-                <button class="category-btn" data-category="writing">كتابة محتوى</button>
-                <button class="category-btn" data-category="coding">برمجة</button>
-                <button class="category-btn" data-category="design">تصميم UI</button>
-                <button class="category-btn" data-category="analysis">تحليل بيانات</button>
-                <button class="category-btn" data-category="creative">إبداعي</button>
+                {% if categories %}
+                    {% for cat in categories %}
+                    <button class="category-btn" data-category="{{ cat.name }}">{{ cat.display_name }}</button>
+                    {% endfor %}
+                {% endif %}
             </div>
         </div>
 
@@ -642,7 +641,7 @@
             <div class="gallery-grid" id="gallery">
                 {% if library_items and library_items|length > 0 %}
                     {% for item in library_items %}
-                    <div class="prompt-card" id="card-{{ item.id }}">
+                    <div class="prompt-card" id="card-{{ item.id }}" data-category="{{ item.category }}">
                         <div class="inline-prompt-overlay" id="inline-{{ item.id }}">
                             <div class="inline-prompt-header">
                                 <span class="inline-prompt-title">{{ item.title }}</span>
@@ -744,12 +743,9 @@
             let visibleCount = 0;
 
             cards.forEach(card => {
-                const itemId = parseInt(card.id.replace('card-', ''));
-                const item = libraryItems.find(i => i.id === itemId);
+                const cardCategory = card.dataset.category;
 
-                if (!item) return;
-
-                if (activeCategory === 'all' || item.category === activeCategory) {
+                if (activeCategory === 'all' || cardCategory === activeCategory) {
                     card.style.display = 'block';
                     visibleCount++;
                 } else {
