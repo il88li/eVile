@@ -426,25 +426,114 @@
 
             // FIXED: No double credit deduction - credits deducted server-side only
             async function handleSendWelcome() {
-                if (isStreaming) { stopStreaming(); return; } if (isProcessing) return;
+                if (isStreaming) { stopStreaming(); return; }
+                if (isProcessing) return;
                 if (!currentPatternId) { showToastNotification('يرجى اختيار نمط أولاً.'); return; }
-                const input = document.getElementById('mainInput'); const msg = input.value.trim(); if (!msg) return;
-                isProcessing = true; abortController = new AbortController(); isStreaming = true; updateSendButton(true);
+                const input = document.getElementById('mainInput');
+                const msg = input.value.trim();
+                if (!msg) return;
+
+                isProcessing = true;
+                abortController = new AbortController();
+                isStreaming = true;
+                updateSendButton(true);
+                showLoadingPrompt();
+
                 try {
-                    const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pattern_id: currentPatternId, message: msg }), signal: abortController.signal });
-                    if (response.status === 402) { openNoCreditsModal(); throw new Error('no_credits'); }
-                    if (!isStreaming) { throw new Error('Stream cancelled'); } showLoadingPrompt();
-                    const reader = response.body.getReader(); const decoder = new TextDecoder(); let fullText = '';
-                    while (true) { const { done, value } = await reader.read(); if (done) break; fullText += decoder.decode(value, { stream: true }); }
-                    if (fullText) {
-                        // Update credits from server response (deducted server-side only)
-                        const badge = document.getElementById('creditsBadge'); let credits = parseInt(badge.textContent.match(/\d+/)?.[0] || 0);
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ pattern_id: currentPatternId, message: msg }),
+                        signal: abortController.signal
+                    });
+
+                    // Handle HTTP errors first (before trying to read stream)
+                    if (response.status === 401) {
+                        updatePromptResult('⚠️ جلسة منتهية، يرجى تسجيل الدخول مرة أخرى.');
+                        setTimeout(() => window.location.href = '/sign', 2000);
+                        return;
+                    }
+                    if (response.status === 402) {
+                        openNoCreditsModal();
+                        return;
+                    }
+                    if (response.status === 503) {
+                        const errData = await response.json().catch(() => ({}));
+                        updatePromptResult('⚠️ ' + (errData.error || 'الخدمة غير متاحة حالياً'));
+                        return;
+                    }
+                    if (response.status >= 500) {
+                        const errData = await response.json().catch(() => ({}));
+                        updatePromptResult('⚠️ ' + (errData.error || 'خطأ في الخادم، تم إرجاع النقطة'));
+                        // Refresh credits since server returned them
+                        await refreshUserInfo();
+                        return;
+                    }
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        updatePromptResult('⚠️ ' + (errData.error || 'خطأ غير متوقع'));
+                        return;
+                    }
+
+                    if (!isStreaming) { throw new Error('Stream cancelled'); }
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let fullText = '';
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        const chunk = decoder.decode(value, { stream: true });
+                        // Check if the chunk is a JSON error (happens when stream fails mid-way)
+                        if (chunk.trim().startsWith('{"error"')) {
+                            try {
+                                const err = JSON.parse(chunk);
+                                updatePromptResult('⚠️ ' + err.error);
+                                await refreshUserInfo();
+                                return;
+                            } catch {}
+                        }
+                        fullText += chunk;
+                    }
+
+                    if (fullText && fullText.trim()) {
+                        // Deduct credit locally since stream succeeded
+                        const badge = document.getElementById('creditsBadge');
+                        let credits = parseInt(badge.textContent.match(/\d+/)?.[0] || 0);
                         if (credits > 0) { credits--; updateCreditsBadge(credits); }
-                        updatePromptResult(fullText); document.getElementById('mainInput').value = '';
-                    } else { updatePromptResult('لم يتم استلام رد من الخادم.'); }
+                        updatePromptResult(fullText);
+                        document.getElementById('mainInput').value = '';
+                    } else {
+                        updatePromptResult('لم يتم استلام رد من الخادم.');
+                        await refreshUserInfo(); // Might have gotten credit back
+                    }
                 } catch (err) {
-                    if (err.message !== 'no_credits' && err.name !== 'AbortError' && err.message !== 'Stream cancelled') { updatePromptResult('خطأ في الاتصال بالخادم.'); }
-                } finally { isStreaming = false; isProcessing = false; abortController = null; updateSendButton(false); }
+                    if (err.name === 'AbortError' || err.message === 'Stream cancelled') {
+                        // User stopped, do nothing
+                    } else {
+                        updatePromptResult('⚠️ خطأ في الاتصال بالخادم، تحقق من اتصالك.');
+                        await refreshUserInfo();
+                    }
+                } finally {
+                    isStreaming = false;
+                    isProcessing = false;
+                    abortController = null;
+                    updateSendButton(false);
+                }
+            }
+
+            async function refreshUserInfo() {
+                try {
+                    const res = await fetch('/api/user_info');
+                    const data = await res.json();
+                    if (data && data.credits !== undefined) {
+                        userData.credits = data.credits;
+                        updateCreditsBadge(data.credits);
+                    }
+                } catch (e) {
+                    console.log('Failed to refresh user info');
+                }
             }
 
             /* --- الإعدادات والإشعارات --- */
