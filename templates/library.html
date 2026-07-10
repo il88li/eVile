@@ -311,73 +311,7 @@
             transform: scale(1.03);
             box-shadow: 0 6px 18px rgba(124, 58, 237, 0.35);
         }
-        .eye-btn {
-            width: 40px;
-            height: 40px;
-            background: #F3F4F6;
-            border: 1.5px solid #E5E7EB;
-            color: #6B7280;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        .eye-btn:hover {
-            background: #EDE9FE;
-            color: #7C3AED;
-            border-color: #C4B5FD;
-            transform: scale(1.08);
-        }
 
-        /* Inline Prompt Overlay - INSIDE image-wrapper */
-        .inline-prompt-overlay {
-            position: absolute;
-            inset: 0;
-            z-index: 20;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            opacity: 0;
-            visibility: hidden;
-            transform: scale(0.95);
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 20px;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(8px);
-        }
-        .inline-prompt-overlay.show {
-            opacity: 1;
-            visibility: visible;
-            transform: scale(1);
-        }
-        /* When overlay is shown, hide image title and overlay */
-        .image-wrapper:has(.inline-prompt-overlay.show) .image-title,
-        .image-wrapper:has(.inline-prompt-overlay.show) .image-overlay {
-            opacity: 0;
-        }
-        .inline-prompt-box {
-            flex: 1;
-            overflow-y: auto;
-            margin-bottom: 12px;
-        }
-        .inline-prompt-text {
-            color: white;
-            font-size: 0.9rem;
-            line-height: 1.8;
-            white-space: pre-wrap;
-            font-family: 'Tajawal', sans-serif;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
-        }
 
         /* Empty State */
         .empty-state {
@@ -541,11 +475,14 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-decoration: none;
             position: relative;
             white-space: nowrap;
             overflow: hidden;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
+        .nav-item:focus { outline: none; }
+        .nav-item:active { transform: scale(0.95); }
         .nav-item i { font-size: 18px; transition: all 0.3s; }
         .nav-item:hover {
             color: #7B61FF;
@@ -662,22 +599,14 @@
                 {% if library_items and library_items|length > 0 %}
                     {% for item in library_items %}
                     <div class="prompt-card" id="card-{{ item.id }}" data-category="{{ item.category }}">
-                        <div class="image-wrapper" onclick="toggleInlinePrompt({{ item.id }})" id="wrapper-{{ item.id }}">
+                        <div class="image-wrapper">
                             <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300/7C3AED/FFFFFF?text={{ item.title|urlencode }}'">
                             <div class="image-overlay"></div>
                             <div class="image-title">{{ item.title }}</div>
-                            <div class="inline-prompt-overlay" id="inline-{{ item.id }}">
-                                <div class="inline-prompt-box">
-                                    <p class="inline-prompt-text">{{ item.prompt_text }}</p>
-                                </div>
-                            </div>
                         </div>
                         <div class="card-actions">
                             <button class="copy-btn" data-prompt="{{ item.prompt_text }}" onclick="handleCopyFromData(event)">
-                                <i class="bi bi-files"></i> نسخ
-                            </button>
-                            <button class="eye-btn" onclick="handleEyeClick(event, {{ item.id }})">
-                                <i class="bi bi-eye"></i>
+                                <i class="bi bi-files"></i> نسخ البرومبت
                             </button>
                         </div>
                     </div>
@@ -725,14 +654,14 @@
 
     <!-- Bottom Nav -->
     <nav class="bottom-nav-bar">
-        <a href="/" class="nav-item" onclick="handleNavClick(event, '/')">
+        <button type="button" class="nav-item" onclick="handleNavClick(event, '/')">
             <i class="bi bi-house-door"></i>
             <span class="nav-label">الرئيسية</span>
-        </a>
-        <a href="/library" class="nav-item active" onclick="handleNavClick(event, '/library')">
+        </button>
+        <button type="button" class="nav-item active" onclick="handleNavClick(event, '/library')">
             <i class="bi bi-collection-fill"></i>
             <span class="nav-label">المكتبة</span>
-        </a>
+        </button>
     </nav>
 
     <script>
@@ -769,7 +698,6 @@
         const libraryItems = {{ library_items|tojson|default('[]') }};
         const activeAd = {{ active_ad|tojson|default('null') }};
         let activeCategory = 'all';
-        let activeInlineCard = null;
         let adTimerInterval = null;
         let pendingCopyText = null;
 
@@ -811,48 +739,7 @@
             }
         }
 
-        // Toggle inline prompt
-        function toggleInlinePrompt(id) {
-            const overlay = document.getElementById(`inline-${id}`);
-            if (!overlay) return;
-
-            // If this card is already open, close it
-            if (activeInlineCard === id) {
-                closeInlinePrompt(id);
-                return;
-            }
-
-            // Close any other open card first
-            if (activeInlineCard !== null) {
-                closeInlinePrompt(activeInlineCard);
-            }
-
-            // Open this card
-            activeInlineCard = id;
-            overlay.classList.add('show');
-        }
-
-        function closeInlinePrompt(id) {
-            const overlay = document.getElementById(`inline-${id}`);
-            if (!overlay) return;
-            overlay.classList.remove('show');
-            activeInlineCard = null;
-        }
-
-        function handleEyeClick(event, id) {
-            event.stopPropagation();
-            toggleInlinePrompt(id);
-        }
-
-        // Close prompt when clicking outside any card
-        document.addEventListener('click', function(e) {
-            if (activeInlineCard !== null) {
-                const card = document.getElementById(`card-${activeInlineCard}`);
-                if (card && !card.contains(e.target)) {
-                    closeInlinePrompt(activeInlineCard);
-                }
-            }
-        });
+        // Preview feature removed - only copy button available
 
         // ===== AD SYSTEM =====
         function handleCopy(event, text) {
@@ -953,6 +840,8 @@
         // Navigation with sliding indicator animation
         function handleNavClick(event, url) {
             event.preventDefault();
+            event.stopPropagation();
+
             const btn = event.currentTarget;
             const allBtns = document.querySelectorAll('.bottom-nav-bar .nav-item');
 
@@ -962,18 +851,12 @@
             // Add active to clicked (triggers the sliding ::before animation)
             btn.classList.add('active');
 
-            // Navigate after animation
-            setTimeout(() => {
-                window.location.href = url;
-            }, 250);
+            // Navigate immediately - no delay for better responsiveness
+            window.location.href = url;
         }
 
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                if (activeInlineCard !== null) closeInlinePrompt(activeInlineCard);
-                // Ad cannot be skipped with Escape - it's mandatory
-            }
-        });
+        // Escape key handler removed - no inline preview to close
+        // Ad cannot be skipped with Escape - it's mandatory
 
         function updateCreditsBadge() {
             const userData = {{ user_data|tojson|default('null') }};
