@@ -17,10 +17,19 @@ class Pattern(db.Model):
     image_url = db.Column(db.String(500), nullable=False)
     prompt = db.Column(db.Text, nullable=False)
 
+class Category(db.Model):
+    """التصنيفات الديناميكية التي يتحكم فيها الأدمن"""
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    display_name = db.Column(db.String(100), nullable=False)
+    icon = db.Column(db.String(50), default='bi-tag')
+    sort_order = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 class PromptLibrary(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
-    category = db.Column(db.String(50), nullable=False, default='images')
+    category = db.Column(db.String(50), nullable=False, default='general')
     image_url = db.Column(db.String(500), nullable=False)
     prompt_text = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
