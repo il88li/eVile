@@ -363,33 +363,38 @@ def api_notifications():
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_panel():
-    if request.method == 'POST' and request.form.get('password') == Config.ADMIN_PASSWORD:
-        session['logged_in'] = True
-        return redirect(url_for('admin_panel'))
-    if session.get('logged_in'):
-        # جلب التصنيفات للأدمن - معالجة خطأ الجدول غير الموجود
-        categories = []
-        library_items = []
-        try:
-            categories = Category.query.order_by(Category.sort_order).all()
-        except Exception as e:
-            logger.warning(f"Categories table not available yet: {e}")
-        try:
-            library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
-        except Exception as e:
-            logger.warning(f"PromptLibrary table not available yet: {e}")
+    try:
+        if request.method == 'POST' and request.form.get('password') == Config.ADMIN_PASSWORD:
+            session['logged_in'] = True
+            return redirect(url_for('admin_panel'))
+        if session.get('logged_in'):
+            # جلب التصنيفات للأدمن - معالجة خطأ الجدول غير الموجود
+            categories = []
+            library_items = []
+            try:
+                categories = Category.query.order_by(Category.sort_order).all()
+            except Exception as e:
+                logger.warning(f"Categories table not available yet: {e}")
+            try:
+                library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
+            except Exception as e:
+                logger.warning(f"PromptLibrary table not available yet: {e}")
 
-        return render_template('admin.html',
-            patterns=Pattern.query.all(),
-            notifications=Notification.query.all(),
-            ads=Ad.query.all(),
-            library_items=library_items,
-            categories=categories,
-            users_count=User.query.count(),
-            site_settings=SiteSetting.query.first(),
-            csrf_token=generate_csrf_token()
-        )
-    return render_template('admin.html')
+            return render_template('admin.html',
+                patterns=Pattern.query.all(),
+                notifications=Notification.query.all(),
+                ads=Ad.query.all(),
+                library_items=library_items,
+                categories=categories,
+                users_count=User.query.count(),
+                site_settings=SiteSetting.query.first(),
+                csrf_token=generate_csrf_token()
+            )
+        return render_template('admin.html')
+    except Exception as e:
+        logger.error(f"Admin panel error: {e}")
+        logger.error(traceback.format_exc())
+        return f"Error: {str(e)}", 500
 
 @app.route('/admin/logout')
 def logout():
@@ -595,8 +600,44 @@ def get_site_status():
     })
 
 # Auto-create all tables on startup (no migration needed)
+# If tables exist with old schema, they will be dropped and recreated
 with app.app_context():
     try:
+        from sqlalchemy import inspect, text
+        inspector = inspect(db.engine)
+
+        # Check if category table exists but missing display_name column
+        category_cols = []
+        try:
+            category_cols = [col['name'] for col in inspector.get_columns('category')]
+        except Exception:
+            pass  # Table doesn't exist yet
+
+        # Check if prompt_library table exists
+        library_cols = []
+        try:
+            library_cols = [col['name'] for col in inspector.get_columns('prompt_library')]
+        except Exception:
+            pass
+
+        # If category table exists but missing display_name, drop and recreate
+        needs_recreate = False
+        if category_cols and 'display_name' not in category_cols:
+            logger.warning("⚠️ Category table has old schema. Dropping and recreating...")
+            needs_recreate = True
+
+        if needs_recreate:
+            # Drop tables that need updating (order matters for FK constraints)
+            try:
+                db.session.execute(text("DROP TABLE IF EXISTS prompt_library CASCADE"))
+                db.session.execute(text("DROP TABLE IF EXISTS category CASCADE"))
+                db.session.commit()
+                logger.info("✅ Old tables dropped.")
+            except Exception as e:
+                logger.warning(f"⚠️ Could not drop old tables: {e}")
+                db.session.rollback()
+
+        # Create all tables with current schema
         db.create_all()
         logger.info("✅ All database tables created/verified.")
 
