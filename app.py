@@ -61,26 +61,34 @@ def ensure_db_initialized():
     if not _db_initialized:
         with threading.Lock():
             if not _db_initialized:
-                db.create_all()
-                if not SiteSetting.query.first():
-                    db.session.add(SiteSetting())
-                    db.session.commit()
-                # Initialize default categories if none exist
-                if not Category.query.first():
-                    default_categories = [
-                        Category(name='images', display_name='توليد صور', sort_order=1),
-                        Category(name='writing', display_name='كتابة محتوى', sort_order=2),
-                        Category(name='coding', display_name='برمجة', sort_order=3),
-                        Category(name='design', display_name='تصميم UI', sort_order=4),
-                        Category(name='analysis', display_name='تحليل بيانات', sort_order=5),
-                        Category(name='creative', display_name='إبداعي', sort_order=6),
-                    ]
-                    for cat in default_categories:
-                        db.session.add(cat)
-                    db.session.commit()
-                    logger.info("✅ Default categories initialized.")
-                _db_initialized = True
-                logger.info("✅ Database initialized successfully.")
+                try:
+                    db.create_all()
+                    if not SiteSetting.query.first():
+                        db.session.add(SiteSetting())
+                        db.session.commit()
+                    # Initialize default categories if table exists and none exist
+                    try:
+                        if not Category.query.first():
+                            default_categories = [
+                                Category(name='images', display_name='توليد صور', sort_order=1),
+                                Category(name='writing', display_name='كتابة محتوى', sort_order=2),
+                                Category(name='coding', display_name='برمجة', sort_order=3),
+                                Category(name='design', display_name='تصميم UI', sort_order=4),
+                                Category(name='analysis', display_name='تحليل بيانات', sort_order=5),
+                                Category(name='creative', display_name='إبداعي', sort_order=6),
+                            ]
+                            for cat in default_categories:
+                                db.session.add(cat)
+                            db.session.commit()
+                            logger.info("✅ Default categories initialized.")
+                    except Exception as e:
+                        logger.warning(f"⚠️ Categories table not ready yet: {e}")
+                        db.session.rollback()
+                    _db_initialized = True
+                    logger.info("✅ Database initialized successfully.")
+                except Exception as e:
+                    logger.error(f"❌ Database initialization error: {e}")
+                    db.session.rollback()
 
 # ============================================================
 # PUBLIC ROUTES
@@ -146,27 +154,35 @@ def library():
                 'last_daily_gift': user.last_daily_gift.isoformat() if user.last_daily_gift else None
             }
 
-    # جلب التصنيفات الديناميكية من الأدمن
-    categories = Category.query.order_by(Category.sort_order).all()
-    categories_data = [
-        {
-            'name': c.name,
-            'display_name': c.display_name,
-            'icon': c.icon
-        } for c in categories
-    ]
+    # جلب التصنيفات الديناميكية من الأدمن - معالجة خطأ الجدول غير الموجود
+    categories_data = []
+    try:
+        categories = Category.query.order_by(Category.sort_order).all()
+        categories_data = [
+            {
+                'name': c.name,
+                'display_name': c.display_name,
+                'icon': c.icon
+            } for c in categories
+        ]
+    except Exception as e:
+        logger.warning(f"Categories table not available yet: {e}")
 
-    # جلب البرومبتات
-    library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
-    library_data = [
-        {
-            'id': item.id,
-            'title': item.title,
-            'category': item.category,
-            'image_url': item.image_url,
-            'prompt_text': item.prompt_text
-        } for item in library_items
-    ]
+    # جلب البرومبتات - معالجة خطأ الجدول غير الموجود
+    library_data = []
+    try:
+        library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
+        library_data = [
+            {
+                'id': item.id,
+                'title': item.title,
+                'category': item.category,
+                'image_url': item.image_url,
+                'prompt_text': item.prompt_text
+            } for item in library_items
+        ]
+    except Exception as e:
+        logger.warning(f"PromptLibrary table not available yet: {e}")
 
     return render_template('library.html',
                          categories=categories_data,
@@ -351,13 +367,23 @@ def admin_panel():
         session['logged_in'] = True
         return redirect(url_for('admin_panel'))
     if session.get('logged_in'):
-        # جلب التصنيفات للأدمن
-        categories = Category.query.order_by(Category.sort_order).all()
+        # جلب التصنيفات للأدمن - معالجة خطأ الجدول غير الموجود
+        categories = []
+        library_items = []
+        try:
+            categories = Category.query.order_by(Category.sort_order).all()
+        except Exception as e:
+            logger.warning(f"Categories table not available yet: {e}")
+        try:
+            library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
+        except Exception as e:
+            logger.warning(f"PromptLibrary table not available yet: {e}")
+
         return render_template('admin.html',
             patterns=Pattern.query.all(),
             notifications=Notification.query.all(),
             ads=Ad.query.all(),
-            library_items=PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all(),
+            library_items=library_items,
             categories=categories,
             users_count=User.query.count(),
             site_settings=SiteSetting.query.first(),
@@ -403,22 +429,28 @@ def delete_pattern(pattern_id):
 def add_category():
     if not validate_csrf_token(request.form.get('csrf_token')):
         return "CSRF Error", 400
-    name = request.form.get('name', '').strip().lower().replace(' ', '_')
-    display_name = request.form.get('display_name', '').strip()
-    icon = request.form.get('icon', 'bi-tag').strip()
-    sort_order = int(request.form.get('sort_order', 0))
 
-    if not name or not display_name:
-        flash('اسم التصنيف واسم العرض مطلوبان', 'error')
-        return redirect(url_for('admin_panel'))
+    try:
+        name = request.form.get('name', '').strip().lower().replace(' ', '_')
+        display_name = request.form.get('display_name', '').strip()
+        icon = request.form.get('icon', 'bi-tag').strip()
+        sort_order = int(request.form.get('sort_order', 0))
 
-    if Category.query.filter_by(name=name).first():
-        flash('التصنيف موجود مسبقاً', 'error')
-        return redirect(url_for('admin_panel'))
+        if not name or not display_name:
+            flash('اسم التصنيف واسم العرض مطلوبان', 'error')
+            return redirect(url_for('admin_panel'))
 
-    cat = Category(name=name, display_name=display_name, icon=icon, sort_order=sort_order)
-    db.session.add(cat); db.session.commit()
-    flash('تمت إضافة التصنيف', 'success')
+        if Category.query.filter_by(name=name).first():
+            flash('التصنيف موجود مسبقاً', 'error')
+            return redirect(url_for('admin_panel'))
+
+        cat = Category(name=name, display_name=display_name, icon=icon, sort_order=sort_order)
+        db.session.add(cat); db.session.commit()
+        flash('تمت إضافة التصنيف', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding category: {e}")
+        flash('خطأ في قاعدة البيانات - تأكد من تشغيل migrations', 'error')
     return redirect(url_for('admin_panel'))
 
 @app.route('/admin/category/<int:category_id>/delete', methods=['POST'])
@@ -426,11 +458,16 @@ def add_category():
 def delete_category(category_id):
     if not validate_csrf_token(request.form.get('csrf_token')):
         return "CSRF Error", 400
-    cat = Category.query.get_or_404(category_id)
-    # Update prompts with this category to 'general'
-    PromptLibrary.query.filter_by(category=cat.name).update({'category': 'general'})
-    db.session.delete(cat); db.session.commit()
-    flash('تم حذف التصنيف', 'success')
+    try:
+        cat = Category.query.get_or_404(category_id)
+        # Update prompts with this category to 'general'
+        PromptLibrary.query.filter_by(category=cat.name).update({'category': 'general'})
+        db.session.delete(cat); db.session.commit()
+        flash('تم حذف التصنيف', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting category: {e}")
+        flash('خطأ في حذف التصنيف', 'error')
     return redirect(url_for('admin_panel'))
 
 @app.route('/admin/category/<int:category_id>/update', methods=['POST'])
@@ -453,14 +490,19 @@ def update_category(category_id):
 def add_library_item():
     if not validate_csrf_token(request.form.get('csrf_token')):
         return "CSRF Error", 400
-    item = PromptLibrary(
-        title=request.form.get('title'),
-        category=request.form.get('category', 'general'),
-        image_url=request.form.get('image_url'),
-        prompt_text=request.form.get('prompt_text')
-    )
-    db.session.add(item); db.session.commit()
-    flash('تمت إضافة البرومبت للمكتبة', 'success')
+    try:
+        item = PromptLibrary(
+            title=request.form.get('title'),
+            category=request.form.get('category', 'general'),
+            image_url=request.form.get('image_url'),
+            prompt_text=request.form.get('prompt_text')
+        )
+        db.session.add(item); db.session.commit()
+        flash('تمت إضافة البرومبت للمكتبة', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding library item: {e}")
+        flash('خطأ في قاعدة البيانات - تأكد من تشغيل migrations', 'error')
     return redirect(url_for('admin_panel'))
 
 @app.route('/admin/library/<int:item_id>/delete', methods=['POST'])
@@ -551,6 +593,40 @@ def get_site_status():
         'status': s.status if s else 'on',
         'offline_message': s.offline_message if s else 'الموقع تحت الصيانة حالياً.'
     })
+
+# Auto-create all tables on startup (no migration needed)
+with app.app_context():
+    try:
+        db.create_all()
+        logger.info("✅ All database tables created/verified.")
+
+        # Initialize site settings if not exists
+        if not SiteSetting.query.first():
+            db.session.add(SiteSetting())
+            db.session.commit()
+            logger.info("✅ Site settings initialized.")
+
+        # Initialize default categories if none exist
+        try:
+            if not Category.query.first():
+                default_categories = [
+                    Category(name='images', display_name='توليد صور', sort_order=1),
+                    Category(name='writing', display_name='كتابة محتوى', sort_order=2),
+                    Category(name='coding', display_name='برمجة', sort_order=3),
+                    Category(name='design', display_name='تصميم UI', sort_order=4),
+                    Category(name='analysis', display_name='تحليل بيانات', sort_order=5),
+                    Category(name='creative', display_name='إبداعي', sort_order=6),
+                ]
+                for cat in default_categories:
+                    db.session.add(cat)
+                db.session.commit()
+                logger.info("✅ Default categories initialized.")
+        except Exception as e:
+            logger.warning(f"⚠️ Could not initialize categories: {e}")
+            db.session.rollback()
+
+    except Exception as e:
+        logger.error(f"❌ Error creating tables: {e}")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
