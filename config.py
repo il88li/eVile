@@ -10,11 +10,8 @@ class Config:
     if not SECRET_KEY:
         raise ValueError("SECRET_KEY environment variable is required!")
 
-    # كلمة مرور المسؤول - يجب تعيينها عبر متغيرات البيئة
-    ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
-    if not ADMIN_PASSWORD:
-        logger.warning("⚠️ ADMIN_PASSWORD not set! Using fallback - CHANGE THIS IN PRODUCTION!")
-        ADMIN_PASSWORD = 'CHANGE_ME_IMMEDIATELY_2026'
+    # كلمة مرور المسؤول - سهلة للتذكر
+    ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
 
     OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
     if not OPENROUTER_API_KEY:
