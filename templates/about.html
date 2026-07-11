@@ -9,128 +9,222 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         :root {
-            --glass-fill: rgba(255,255,255,0.5);
-            --glass-fill-strong: rgba(255,255,255,0.68);
-            --glass-edge-hi: rgba(255,255,255,0.95);
-            --glass-edge-lo: rgba(255,255,255,0.35);
-            --glass-blur: 28px;
-            --glass-shadow: 0 24px 60px -16px rgba(76, 60, 140, 0.20);
-            --accent: #2563EB;
-            --accent-2: #3B82F6;
+            --bg: #F9F5F0;
+            --glass: #F4991A;
+            --btn: #A1BC98;
+            --glass-light: rgba(244, 153, 26, 0.1);
+            --glass-border: rgba(244, 153, 26, 0.2);
+            --glass-border-hi: rgba(244, 153, 26, 0.3);
+            --text: #2D2A26;
+            --text-dim: #6B6560;
+            --text-faint: #9A9590;
+            --white: #FFFFFF;
         }
         body {
             font-family: 'Tajawal', sans-serif;
-            background: linear-gradient(160deg, #f2f4f8 0%, #dbeafe 100%);
-            color: #1F2937;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
             min-height: 100dvh;
             position: relative;
+            overflow-x: hidden;
         }
 
-        /* ===== Header (matches site pattern) ===== */
+        /* ===== FLOATING HEADER ===== */
         .floating-header {
             position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100;
             display: flex; align-items: center; justify-content: space-between;
-            padding: 6px 12px; max-width: 700px; margin: 0 auto; border-radius: 24px;
-            background: var(--glass-fill); backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-            -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-            border: 1px solid var(--glass-edge-lo); border-top-color: var(--glass-edge-hi);
-            box-shadow: 0 8px 28px -10px rgba(76, 60, 140, 0.18), inset 0 1px 1px rgba(255,255,255,0.85);
-            gap: 8px;
+            padding: 8px 16px; max-width: 700px; margin: 0 auto; border-radius: 20px;
+            background: rgba(249, 245, 240, 0.92);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            border: 1px solid var(--glass-border);
         }
         .header-left, .header-right { display: flex; align-items: center; gap: 6px; }
-        .header-center { position: absolute; left: 50%; transform: translateX(-50%); font-size: 18px; font-weight: 900; color: #1F2937; letter-spacing: 2px; white-space: nowrap; }
-        .header-btn { width: 34px; height: 34px; border-radius: 12px; background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(10px); border: 1px solid var(--glass-edge-lo); border-top-color: var(--glass-edge-hi); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: #6B7280; text-decoration: none; }
-        .header-btn:active { transform: scale(0.9); }
+        .header-center {
+            position: absolute; left: 50%; transform: translateX(-50%);
+            font-size: 18px; font-weight: 900; color: var(--text); letter-spacing: 4px;
+        }
+        .header-btn {
+            width: 36px; height: 36px; border-radius: 12px;
+            background: rgba(244, 153, 26, 0.08); border: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; color: var(--text-dim); text-decoration: none;
+        }
+        .header-btn:active { transform: scale(0.92); }
         .header-btn i { font-size: 16px; }
-        .header-btn.special { background: rgba(37, 99, 235, 0.1); color: #2563EB; border-color: rgba(37,99,235,0.15); }
+        .header-btn.special { background: rgba(161, 188, 152, 0.15); color: var(--btn); border-color: rgba(161, 188, 152, 0.25); }
 
-        /* ===== Layout ===== */
-        .main-container { width: 100%; max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; padding: 80px 16px 110px 16px; gap: 14px; }
+        /* ===== MAIN CONTAINER ===== */
+        .main-container {
+            width: 100%; max-width: 640px; margin: 0 auto;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 90px 16px 110px 16px; gap: 14px;
+        }
 
-        /* ===== Hero card ===== */
+        /* ===== GLASS CARD ===== */
+        .glass-card {
+            width: 100%;
+            background: var(--glass-light);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px; padding: 24px;
+            position: relative; overflow: hidden;
+        }
+        .glass-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--glass-border-hi), transparent);
+        }
+
+        /* ===== HERO ===== */
         .about-hero {
-            width: 100%; background: var(--glass-fill-strong);
-            backdrop-filter: blur(var(--glass-blur)) saturate(180%); -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-            border: 1px solid var(--glass-edge-lo); border-top-color: var(--glass-edge-hi);
-            border-radius: 28px; padding: 34px 24px; text-align: center;
-            box-shadow: var(--glass-shadow), inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 1px rgba(255,255,255,0.15);
+            composes: glass-card;
+            padding: 32px 24px; text-align: center;
             display: flex; flex-direction: column; align-items: center; gap: 12px;
         }
-        .about-hero-icon { width: 74px; height: 74px; border-radius: 22px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(37,99,235,0.35); }
-        .about-hero-icon i { font-size: 32px; color: #fff; }
-        .about-hero h1 { font-size: 24px; font-weight: 900; letter-spacing: 1px; }
-        .about-hero p { font-size: 14px; color: #6B7280; line-height: 1.7; max-width: 420px; }
-        .about-hero-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 4px; }
+        .about-hero-icon {
+            width: 70px; height: 70px; border-radius: 20px;
+            background: var(--glass);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .about-hero-icon i { font-size: 30px; color: #fff; }
+        .about-hero h1 { font-size: 24px; font-weight: 900; letter-spacing: 1px; color: var(--text); }
+        .about-hero p {
+            font-size: 14px; color: var(--text-dim); line-height: 1.7; max-width: 420px;
+        }
+        .about-hero-tags {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 4px;
+        }
         .about-tag {
-            font-size: 11px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.5px;
-            background: rgba(37,99,235,0.55); backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.4); border-top-color: rgba(255,255,255,0.7);
-            padding: 6px 16px; border-radius: 30px;
+            font-size: 11px; font-weight: 700; color: var(--white);
+            text-transform: uppercase; letter-spacing: 0.5px;
+            background: var(--glass); padding: 6px 16px; border-radius: 30px;
         }
 
-        /* ===== Section card (shared, raw glass) ===== */
-        .about-card {
-            width: 100%; background: var(--glass-fill-strong);
-            backdrop-filter: blur(var(--glass-blur)) saturate(180%); -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-            border: 1px solid var(--glass-edge-lo); border-top-color: var(--glass-edge-hi);
-            border-radius: 28px; padding: 22px;
-            box-shadow: var(--glass-shadow), inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 1px rgba(255,255,255,0.15);
+        /* ===== SECTION CARD ===== */
+        .about-card-title {
+            font-size: 15px; font-weight: 700;
+            display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+            color: var(--text);
         }
-        .about-card-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-        .about-card-title i { color: #2563EB; font-size: 17px; }
-        .glass-divider { border: none; border-top: 2px dotted rgba(37,99,235,0.25); margin: 12px 0; }
+        .about-card-title i { color: var(--glass); font-size: 17px; }
+        .glass-divider {
+            border: none; border-top: 2px dotted var(--glass-border);
+            margin: 12px 0;
+        }
+        .story-text {
+            font-size: 14px; color: var(--text-dim); line-height: 1.9;
+        }
+        .story-text .highlight { color: var(--glass); font-weight: 800; }
 
-        .story-text { font-size: 14px; color: #4B5563; line-height: 1.9; }
-        .story-text .highlight { color: #2563EB; font-weight: 800; }
-
-        /* ===== Features checklist (glass pill rows) ===== */
+        /* ===== CHECKLIST ===== */
         .checklist { display: flex; flex-direction: column; gap: 10px; }
         .check-row {
             display: flex; align-items: center; gap: 12px;
-            background: rgba(255,255,255,0.4); backdrop-filter: blur(6px);
-            border: 1px solid rgba(255,255,255,0.5); border-radius: 16px; padding: 12px 14px;
+            background: rgba(255,255,255,0.5);
+            border: 1px solid var(--glass-border); border-radius: 16px; padding: 12px 14px;
         }
-        .check-icon { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-2)); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(37,99,235,0.35); }
+        .check-icon {
+            flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
+            background: var(--glass);
+            display: flex; align-items: center; justify-content: center;
+        }
         .check-icon i { color: #fff; font-size: 13px; }
-        .check-text strong { display: block; font-size: 13px; font-weight: 700; color: #1F2937; }
-        .check-text span { font-size: 12px; color: #6B7280; line-height: 1.5; }
+        .check-text strong {
+            display: block; font-size: 13px; font-weight: 700; color: var(--text);
+        }
+        .check-text span {
+            font-size: 12px; color: var(--text-dim); line-height: 1.5;
+        }
 
-        /* ===== Steps (how it works) ===== */
+        /* ===== STEPS ===== */
         .steps-list { display: flex; flex-direction: column; gap: 0; }
-        .step-row { display: flex; align-items: flex-start; gap: 14px; padding: 12px 0; position: relative; }
-        .step-row:not(:last-child)::after { content: ''; position: absolute; right: 17px; top: 42px; bottom: -4px; width: 2px; background: rgba(37,99,235,0.15); }
-        .step-num { flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #1D4ED8, #3B82F6); color: #fff; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; z-index: 1; }
-        .step-body h4 { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
-        .step-body p { font-size: 12px; color: #6B7280; line-height: 1.6; }
+        .step-row {
+            display: flex; align-items: flex-start; gap: 14px;
+            padding: 12px 0; position: relative;
+        }
+        .step-row:not(:last-child)::after {
+            content: ''; position: absolute; right: 17px; top: 42px; bottom: -4px;
+            width: 2px; background: var(--glass-border);
+        }
+        .step-num {
+            flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%;
+            background: var(--glass); color: #fff;
+            font-size: 14px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1;
+        }
+        .step-body h4 {
+            font-size: 13px; font-weight: 700; margin-bottom: 2px; color: var(--text);
+        }
+        .step-body p {
+            font-size: 12px; color: var(--text-dim); line-height: 1.6;
+        }
 
-        /* ===== Contact / socials ===== */
+        /* ===== CONTACT ===== */
         .contact-list { display: flex; flex-direction: column; gap: 10px; }
-        .contact-link { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.5); border: 1px solid rgba(0,0,0,0.03); border-radius: 16px; padding: 12px 14px; text-decoration: none; color: #1F2937; transition: 0.2s; }
+        .contact-link {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(255,255,255,0.5);
+            border: 1px solid var(--glass-border); border-radius: 16px;
+            padding: 12px 14px; text-decoration: none; color: var(--text);
+            transition: all 0.2s;
+        }
         .contact-link:active { transform: scale(0.98); }
-        .contact-link-icon { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; flex-shrink: 0; }
+        .contact-link-icon {
+            width: 38px; height: 38px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; color: #fff; flex-shrink: 0;
+        }
         .contact-link-icon.telegram { background: #0088cc; }
         .contact-link-icon.instagram { background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
         .contact-link-icon.whatsapp { background: #25D366; }
         .contact-link-text { display: flex; flex-direction: column; gap: 1px; flex: 1; }
         .contact-link-text strong { font-size: 13px; font-weight: 700; }
-        .contact-link-text span { font-size: 11px; color: #6B7280; }
-        .contact-link .bi-chevron-left { color: #9CA3AF; font-size: 14px; }
+        .contact-link-text span { font-size: 11px; color: var(--text-dim); }
+        .contact-link .bi-chevron-left { color: var(--text-faint); font-size: 14px; }
 
-        .version-footer { font-size: 12px; color: #9CA3AF; text-align: center; padding: 4px 0 0 0; }
+        .version-footer {
+            font-size: 12px; color: var(--text-faint);
+            text-align: center; padding: 4px 0 0 0;
+        }
 
-        /* ===== Bottom nav (matches site pattern) ===== */
-        .bottom-nav-bar { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; align-items: center; gap: 4px; padding: 6px 10px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 50px; box-shadow: 0 8px 32px rgba(37, 99, 235, 0.15), 0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255,255,255,0.8); max-width: 500px; width: auto; }
-        .nav-item { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; border-radius: 40px; background: transparent; border: none; color: #9CA3AF; font-family: 'Tajawal', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-decoration: none; position: relative; white-space: nowrap; }
-        .nav-item i { font-size: 18px; transition: all 0.3s; }
-        .nav-item:hover { color: #2563EB; background: rgba(37, 99, 235, 0.08); }
-        .nav-item.active { background: linear-gradient(135deg, #1D4ED8, #3B82F6); color: white; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35), 0 0 0 2px rgba(37, 99, 235, 0.15); transform: scale(1.05); }
+        /* ===== BOTTOM NAV ===== */
+        .bottom-nav-bar {
+            position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; display: flex; align-items: center; gap: 4px;
+            padding: 6px 10px; background: rgba(249, 245, 240, 0.92);
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border); border-radius: 50px;
+            box-shadow: 0 8px 32px rgba(244, 153, 26, 0.1);
+            max-width: 500px; width: auto;
+        }
+        .nav-item {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 8px 16px; border-radius: 40px; background: transparent;
+            border: none; color: var(--text-faint); font-family: 'Tajawal', sans-serif;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s ease; text-decoration: none;
+            position: relative; white-space: nowrap;
+        }
+        .nav-item i { font-size: 18px; transition: all 0.2s; }
+        .nav-item:hover { color: var(--glass); background: rgba(244, 153, 26, 0.06); }
+        .nav-item:active { transform: scale(0.9); }
+        .nav-item.active {
+            background: var(--glass); color: var(--white);
+            box-shadow: 0 4px 15px rgba(244, 153, 26, 0.3);
+            transform: scale(1.05);
+        }
         .nav-item.active i { transform: scale(1.1); }
-        .nav-label { max-width: 0; overflow: hidden; transition: max-width 0.3s ease, opacity 0.3s ease; opacity: 0; }
+        .nav-label {
+            max-width: 0; overflow: hidden;
+            transition: max-width 0.2s ease, opacity 0.2s ease; opacity: 0;
+        }
         .nav-item.active .nav-label { max-width: 80px; opacity: 1; }
 
         @media (max-width: 600px) {
-            .about-hero, .about-card { padding: 18px 16px; border-radius: 20px; }
+            .about-hero, .glass-card { padding: 18px 16px; border-radius: 20px; }
             .bottom-nav-bar { padding: 5px 8px; border-radius: 40px; }
             .nav-item { padding: 6px 12px; font-size: 12px; }
             .nav-item i { font-size: 16px; }
@@ -149,9 +243,7 @@
     </header>
 
     <div class="main-container">
-
-        <!-- Hero -->
-        <div class="about-hero">
+        <div class="glass-card about-hero">
             <div class="about-hero-icon"><i class="bi bi-stars"></i></div>
             <h1>UFOQ</h1>
             <p>مساعدك الذكي لصناعة محتوى وبرومبتات احترافية خلال ثوانٍ، بدون خبرة سابقة في هندسة الأوامر</p>
@@ -162,16 +254,14 @@
             </div>
         </div>
 
-        <!-- Story -->
-        <div class="about-card">
+        <div class="glass-card">
             <div class="about-card-title"><i class="bi bi-heart"></i> قصتنا</div>
             <p class="story-text">
-                ولدت منصة <span class="highlight">UFOQ</span> من رحم المعاناة مع تعلّم هندسة الأوامر (Prompt Engineering)، لتختصر عليك سنوات من التجربة والخطأ. بدل أن تبحث عن الصياغة المثالية، اختر النمط الذي يناسبك واكتب فكرتك بكلماتك الخاصة، وسيتولى UFOQ تحويلها إلى محتوى احترافي جاهز للاستخدام مباشرة.
+                ولدت منصة <span class="highlight">UFOQ</span> من رحم المعاناة مع تعلّم هندسة الأوامر (Prompt Engineering)، لتختصر عليك سنوات من التجربة والخطأ.
             </p>
         </div>
 
-        <!-- Features -->
-        <div class="about-card">
+        <div class="glass-card">
             <div class="about-card-title"><i class="bi bi-grid"></i> ماذا نقدّم لك</div>
             <hr class="glass-divider">
             <div class="checklist">
@@ -194,43 +284,29 @@
             </div>
         </div>
 
-        <!-- How it works -->
-        <div class="about-card">
+        <div class="glass-card">
             <div class="about-card-title"><i class="bi bi-signpost-split"></i> كيف يعمل UFOQ</div>
             <div class="steps-list">
                 <div class="step-row">
                     <div class="step-num">1</div>
-                    <div class="step-body">
-                        <h4>اختر نمطاً</h4>
-                        <p>تصفّح الأنماط المتاحة واختر ما يناسب فكرتك</p>
-                    </div>
+                    <div class="step-body"><h4>اختر نمطاً</h4><p>تصفّح الأنماط المتاحة واختر ما يناسب فكرتك</p></div>
                 </div>
                 <div class="step-row">
                     <div class="step-num">2</div>
-                    <div class="step-body">
-                        <h4>اكتب فكرتك</h4>
-                        <p>صف ما تريده بجملة بسيطة بكلماتك الخاصة</p>
-                    </div>
+                    <div class="step-body"><h4>اكتب فكرتك</h4><p>صف ما تريده بجملة بسيطة بكلماتك الخاصة</p></div>
                 </div>
                 <div class="step-row">
                     <div class="step-num">3</div>
-                    <div class="step-body">
-                        <h4>اضغط إنشاء</h4>
-                        <p>سيقوم UFOQ بتوليد المحتوى المطلوب خلال ثوانٍ</p>
-                    </div>
+                    <div class="step-body"><h4>اضغط إنشاء</h4><p>سيقوم UFOQ بتوليد المحتوى المطلوب خلال ثوانٍ</p></div>
                 </div>
                 <div class="step-row">
                     <div class="step-num">4</div>
-                    <div class="step-body">
-                        <h4>انسخ واستخدم</h4>
-                        <p>انسخ النتيجة مباشرة واستخدمها أينما تريد</p>
-                    </div>
+                    <div class="step-body"><h4>انسخ واستخدم</h4><p>انسخ النتيجة مباشرة واستخدمها أينما تريد</p></div>
                 </div>
             </div>
         </div>
 
-        <!-- Channels -->
-        <div class="about-card">
+        <div class="glass-card">
             <div class="about-card-title"><i class="bi bi-telegram"></i> قنواتنا</div>
             <div class="contact-list">
                 <a href="https://t.me/Evile_Prompts" target="_blank" class="contact-link">
@@ -246,8 +322,7 @@
             </div>
         </div>
 
-        <!-- Contact -->
-        <div class="about-card">
+        <div class="glass-card">
             <div class="about-card-title"><i class="bi bi-chat-dots"></i> تواصل معنا</div>
             <div class="contact-list">
                 <a href="https://www.instagram.com/bla6c7" target="_blank" class="contact-link">
@@ -266,20 +341,29 @@
         <div class="version-footer">UFOQ · الإصدار 1.0 · {{ current_year|default('2026') }}</div>
     </div>
 
-    <!-- Bottom nav -->
     <nav class="bottom-nav-bar">
-        <a href="/library" class="nav-item">
-            <i class="bi bi-collection"></i>
-            <span class="nav-label">المكتبة</span>
+        <a href="/library" class="nav-item" onclick="handleNavClick(event, '/library')">
+            <i class="bi bi-collection"></i><span class="nav-label">المكتبة</span>
         </a>
-        <a href="/" class="nav-item">
-            <i class="bi bi-house-door"></i>
-            <span class="nav-label">الرئيسية</span>
+        <a href="/" class="nav-item" onclick="handleNavClick(event, '/')">
+            <i class="bi bi-house-door"></i><span class="nav-label">الرئيسية</span>
         </a>
-        <a href="/about" class="nav-item active">
-            <i class="bi bi-info-circle-fill"></i>
-            <span class="nav-label">حول</span>
+        <a href="/about" class="nav-item active" onclick="handleNavClick(event, '/about')">
+            <i class="bi bi-info-circle-fill"></i><span class="nav-label">حول</span>
         </a>
     </nav>
+
+    <script>
+        function handleNavClick(event, url) {
+            event.preventDefault();
+            const btn = event.currentTarget;
+            btn.style.transform = 'scale(0.85)';
+            btn.style.transition = 'transform 0.15s ease';
+            setTimeout(() => {
+                btn.style.transform = 'scale(1.05)';
+                setTimeout(() => { window.location.href = url; }, 120);
+            }, 150);
+        }
+    </script>
 </body>
 </html>
