@@ -22,7 +22,7 @@ import threading
 from models import db, User, Pattern, Category, PromptLibrary, LibraryAd, Notification, Ad, SiteSetting, PageVisit, AdView
 from config import Config
 
-app = Flask(__name__, template_folder='.')
+app = Flask(__name__, template_folder=os.path.dirname(os.path.abspath(__file__)))
 app.config.from_object(Config)
 app.config.update(
     SESSION_SQLALCHEMY=db,
