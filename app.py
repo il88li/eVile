@@ -14,6 +14,7 @@ from flask_caching import Cache
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
+from flask_session import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import text
 import threading
@@ -21,10 +22,18 @@ import threading
 from models import db, User, Pattern, Category, PromptLibrary, LibraryAd, Notification, Ad, SiteSetting, PageVisit, AdView
 from config import Config
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='.')
 app.config.from_object(Config)
+app.config.update(
+    SESSION_SQLALCHEMY=db,
+    PERMANENT_SESSION_LIFETIME=2592000  # 30 days
+)
 
 db.init_app(app)
+
+# Initialize Flask-Session with SQLAlchemy backend for persistent sessions
+session_manager = Session()
+session_manager.init_app(app)
 migrate = Migrate(app, db)
 cache = Cache(app)
 limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day", "50 per hour"], storage_uri=app.config['RATELIMIT_STORAGE_URI'])
