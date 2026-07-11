@@ -28,26 +28,28 @@ class Config:
 
     REDIS_URL = os.getenv('REDIS_URL')
 
+    # ============================================================
+    # SESSION CONFIGURATION - SQLite backed for persistence
+    # ============================================================
+    # Use Flask-Session with SQLAlchemy backend for persistent sessions
+    SESSION_TYPE = 'sqlalchemy'
+    SESSION_SQLALCHEMY_TABLE = 'flask_sessions'
+    SESSION_PERMANENT = True
+    SESSION_USE_SIGNER = True
+    SESSION_KEY_PREFIX = 'ufoq_session:'
+    PERMANENT_SESSION_LIFETIME = 2592000  # 30 days in seconds
+
     if REDIS_URL:
         CACHE_TYPE = 'RedisCache'
         CACHE_REDIS_URL = REDIS_URL
         CACHE_DEFAULT_TIMEOUT = 300
-        SESSION_TYPE = 'redis'
-        SESSION_REDIS = REDIS_URL
-        SESSION_PERMANENT = False
-        SESSION_USE_SIGNER = True
-        SESSION_KEY_PREFIX = 'ufoq_session:'
         RATELIMIT_ENABLED = True
         RATELIMIT_STORAGE_URI = REDIS_URL
         RATELIMIT_STRATEGY = 'fixed-window'
-        logger.info("✅ Redis configured successfully.")
+        logger.info("✅ Redis configured successfully for cache/limiter.")
     else:
         CACHE_TYPE = 'SimpleCache'
         CACHE_DEFAULT_TIMEOUT = 300
-        SESSION_TYPE = 'filesystem'
-        SESSION_PERMANENT = False
-        SESSION_USE_SIGNER = True
-        SESSION_KEY_PREFIX = 'ufoq_session:'
         RATELIMIT_ENABLED = True
         RATELIMIT_STORAGE_URI = 'memory://'
         RATELIMIT_STRATEGY = 'fixed-window'
