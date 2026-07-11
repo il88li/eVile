@@ -15,28 +15,28 @@
             --glass-edge-lo: rgba(255,255,255,0.35);
             --glass-blur: 30px;
             --glass-shadow: 0 24px 60px -16px rgba(76, 60, 140, 0.22);
-            --accent: #7B61FF;
-            --accent-2: #8B5CF6;
+            --accent: #2563EB;
+            --accent-2: #3B82F6;
         }
         body {
             font-family: 'Tajawal', sans-serif;
-            background: linear-gradient(160deg, #f2f4f8 0%, #e1dbf5 100%);
+            background: linear-gradient(160deg, #f2f4f8 0%, #dbeafe 100%);
             color: #1F2937;
             overflow: hidden;
             touch-action: manipulation;
             height: 100vh; height: 100dvh;
             position: relative;
         }
-        .offline-container { width: 100%; height: 100vh; height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; background: linear-gradient(160deg, #f2f4f8 0%, #e1dbf5 100%); color: #1F2937; }
-        .offline-icon { font-size: 64px; color: #7B61FF; margin-bottom: 20px; animation: pulse 2s infinite; }
+        .offline-container { width: 100%; height: 100vh; height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; background: linear-gradient(160deg, #f2f4f8 0%, #dbeafe 100%); color: #1F2937; }
+        .offline-icon { font-size: 64px; color: #2563EB; margin-bottom: 20px; animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
         .offline-title { font-size: 28px; font-weight: 800; margin-bottom: 10px; color: #1F2937; }
         .offline-message { font-size: 16px; color: #6B7280; max-width: 400px; line-height: 1.6; margin-bottom: 20px; }
-        .offline-input { padding: 10px 14px; border: 1px solid rgba(123,97,255,0.1); border-radius: 12px; background: rgba(255,255,255,0.9); outline: none; width: 100%; max-width: 300px; text-align: center; margin-bottom: 20px; color: #1F2937; }
-        .offline-input:focus { border-color: #7B61FF; }
-        .offline-btn { padding: 10px 20px; background: #7B61FF; color: #fff; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.3); }
+        .offline-input { padding: 10px 14px; border: 1px solid rgba(37,99,235,0.1); border-radius: 12px; background: rgba(255,255,255,0.9); outline: none; width: 100%; max-width: 300px; text-align: center; margin-bottom: 20px; color: #1F2937; }
+        .offline-input:focus { border-color: #2563EB; }
+        .offline-btn { padding: 10px 20px; background: #2563EB; color: #fff; border: none; border-radius: 30px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
         .offline-socials { display: flex; gap: 15px; font-size: 28px; }
-        .offline-socials a { color: #6B7280; transition: all 0.2s; background: rgba(255,255,255,0.6); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(123,97,255,0.1); text-decoration: none; }
+        .offline-socials a { color: #6B7280; transition: all 0.2s; background: rgba(255,255,255,0.6); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(37,99,235,0.1); text-decoration: none; }
         .offline-socials a:active { transform: scale(0.9); }
 
         .main-container { width: 100%; height: 100vh; height: 100dvh; display: flex; flex-direction: column; align-items: center; padding: 80px 16px 100px 16px; position: relative; gap: 14px; overflow-y: auto; }
@@ -57,11 +57,11 @@
         .header-btn { width: 34px; height: 34px; border-radius: 12px; background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(10px); border: 1px solid var(--glass-edge-lo); border-top-color: var(--glass-edge-hi); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: #6B7280; text-decoration: none; }
         .header-btn:active { transform: scale(0.9); }
         .header-btn i { font-size: 16px; }
-        .header-btn.special { background: rgba(123, 97, 255, 0.1); color: #7B61FF; border-color: rgba(123,97,255,0.15); }
+        .header-btn.special { background: rgba(37, 99, 235, 0.1); color: #2563EB; border-color: rgba(37,99,235,0.15); }
         .header-btn.telegram { color: #0088cc; }
         .header-btn.instagram { color: #e4405f; }
         .active-users-dot { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #6B7280; font-weight: 600; background: rgba(255,255,255,0.6); padding: 4px 10px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.9); white-space: nowrap; }
-        .active-users-dot i { font-size: 13px; color: #7B61FF; }
+        .active-users-dot i { font-size: 13px; color: #2563EB; }
 
         .input-card {
             width: 100%; max-width: 600px;
@@ -76,20 +76,20 @@
         }
         .input-header { display: flex; justify-content: space-between; align-items: center; }
         .input-label { font-size: 16px; font-weight: 700; color: #1F2937; display: flex; align-items: center; gap: 6px; }
-        .input-label i { color: #7B61FF; }
-        .credits-badge { background: rgba(123, 97, 255, 0.1); backdrop-filter: blur(8px); padding: 4px 14px; border-radius: 30px; font-size: 13px; color: #7B61FF; font-weight: 600; border: 1px solid rgba(123,97,255,0.15); cursor: pointer; transition: 0.2s; }
+        .input-label i { color: #2563EB; }
+        .credits-badge { background: rgba(37, 99, 235, 0.1); backdrop-filter: blur(8px); padding: 4px 14px; border-radius: 30px; font-size: 13px; color: #2563EB; font-weight: 600; border: 1px solid rgba(37,99,235,0.15); cursor: pointer; transition: 0.2s; }
         .credits-badge:active { transform: scale(0.95); }
         .textarea-wrapper { background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.5); border-radius: 16px; padding: 0 18px; height: 52px; min-height: 52px; max-height: 52px; display: flex; align-items: center; }
         .message-input { width: 100%; background: transparent; border: none; font-family: 'Tajawal', sans-serif; font-size: 15px; outline: none; color: #1F2937; height: 100%; resize: none; overflow-y: auto; text-align: right; padding: 0; line-height: 1.5; display: flex; align-items: center; }
         .message-input::placeholder { color: #9CA3AF; }
-        .main-btn { width: 80%; max-width: 300px; height: 44px; margin: 0 auto; display: block; background: linear-gradient(135deg, var(--accent), var(--accent-2)); border: none; border-radius: 30px; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.2s; box-shadow: 0 8px 24px rgba(123, 97, 255, 0.35); display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .main-btn { width: 80%; max-width: 300px; height: 44px; margin: 0 auto; display: block; background: linear-gradient(135deg, var(--accent), var(--accent-2)); border: none; border-radius: 30px; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.2s; box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35); display: flex; align-items: center; justify-content: center; gap: 8px; }
         .main-btn:active { transform: scale(0.96); }
         .main-btn.stop-btn { background: #ef4444; box-shadow: none; }
         .prompt-result-wrapper { padding: 16px 20px; display: flex; flex-direction: column; min-height: 100px; max-height: 120px; overflow-y: auto; border-radius: 16px; background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.45); }
         .prompt-result-text { font-size: 14px; color: #1F2937; line-height: 1.6; width: 100%; background: transparent; border: none; resize: none; outline: none; font-family: 'Tajawal', sans-serif; height: 100%; text-align: center; }
         .prompt-result-text::placeholder { color: #9CA3AF; }
         .copy-wrapper { display: flex; justify-content: flex-end; margin-top: -4px; }
-        .copy-btn { background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(123,97,255,0.1); border-radius: 30px; padding: 6px 14px; font-size: 12px; color: #6B7280; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: 0.2s; }
+        .copy-btn { background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(37,99,235,0.1); border-radius: 30px; padding: 6px 14px; font-size: 12px; color: #6B7280; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: 0.2s; }
         .copy-btn:active { transform: scale(0.9); }
         .copy-btn.success { background: rgba(34, 197, 94, 0.1); color: #16a34a; border-color: rgba(34, 197, 94, 0.2); }
 
@@ -111,11 +111,11 @@
         .scroll-btn i { font-size: 14px; }
         .single-pattern-container { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 140px; background: rgba(255, 255, 255, 0.28); backdrop-filter: blur(8px); padding: 8px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.4); transition: all 0.3s ease; }
         .single-pattern-img { max-width: 100%; max-height: 200px; border-radius: 12px; object-fit: contain; }
-        .patterns-strip-container { width: 100%; background: #F5F3FF; border: 1px solid rgba(123, 97, 255, 0.12); border-radius: 16px; padding: 6px 8px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; align-items: center; }
+        .patterns-strip-container { width: 100%; background: #F5F3FF; border: 1px solid rgba(37, 99, 235, 0.12); border-radius: 16px; padding: 6px 8px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; align-items: center; }
         .patterns-strip-container::-webkit-scrollbar { display: none; }
         .strip-btn { flex-shrink: 0; padding: 8px 16px; border-radius: 12px; background: transparent; border: none; color: #6B7280; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; min-width: 50px; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
         .strip-btn:active { transform: scale(0.95); }
-        .strip-btn.active { background: #7B61FF; color: #ffffff; box-shadow: 0 4px 12px rgba(123, 97, 255, 0.3); }
+        .strip-btn.active { background: #2563EB; color: #ffffff; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
 
         /* ===== BOTTOM NAVIGATION BAR ===== */
         .bottom-nav-bar {
@@ -134,7 +134,7 @@
             border: 1px solid rgba(255, 255, 255, 0.9);
             border-radius: 50px;
             box-shadow: 
-                0 8px 32px rgba(123, 97, 255, 0.15),
+                0 8px 32px rgba(37, 99, 235, 0.15),
                 0 2px 8px rgba(0, 0, 0, 0.05),
                 inset 0 1px 0 rgba(255,255,255,0.8);
             max-width: 500px;
@@ -163,8 +163,8 @@
         }
         .nav-item i { font-size: 23px; transition: all 0.12s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .nav-item:hover {
-            color: #7B61FF;
-            background: rgba(123, 97, 255, 0.08);
+            color: #2563EB;
+            background: rgba(37, 99, 235, 0.08);
         }
         .nav-item:active { transform: scale(0.9); transition: all 0.05s ease; }
         .nav-item {
@@ -175,7 +175,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, #7C3AED, #8B5CF6);
+            background: linear-gradient(135deg, #1D4ED8, #3B82F6);
             border-radius: 40px;
             opacity: 0;
             transform: scale(0.8);
@@ -190,8 +190,8 @@
             background: transparent;
             color: white;
             box-shadow: 
-                0 4px 15px rgba(123, 97, 255, 0.35),
-                0 0 0 2px rgba(123, 97, 255, 0.15);
+                0 4px 15px rgba(37, 99, 235, 0.35),
+                0 0 0 2px rgba(37, 99, 235, 0.15);
             transform: scale(1.05);
         }
         .nav-item.active i { transform: scale(1.1); }
@@ -332,7 +332,7 @@
         <div class="bottom-sheet-overlay" id="settingsSheet" onclick="closeSheetOnBackdrop(event, 'settingsSheet')">
             <div class="bottom-sheet" onclick="event.stopPropagation()">
                 <div class="sheet-header">
-                    <div class="sheet-title"><i class="bi bi-gear-wide-connected" style="color: #7B61FF;"></i> إعدادات الحساب</div>
+                    <div class="sheet-title"><i class="bi bi-gear-wide-connected" style="color: #2563EB;"></i> إعدادات الحساب</div>
                     <button class="sheet-close" onclick="closeSheet('settingsSheet')"><i class="bi bi-x-lg"></i></button>
                 </div>
                 <div id="settingsContent">
@@ -350,14 +350,14 @@
                             <button class="btn-copy" onclick="copyField('settingsPassword')"><i class="bi bi-files"></i></button>
                         </div>
                     </div>
-                    <div style="font-size: 12px; color: #6B7280; text-align: center; margin: 10px 0; border-top: 1px solid rgba(123,97,255,0.1); padding-top: 12px;">
-                        <i class="bi bi-gift-fill" style="color: #7B61FF;"></i> نقاطك: <strong id="settingsCreditsDisplay" style="color: #1F2937;">0</strong>
+                    <div style="font-size: 12px; color: #6B7280; text-align: center; margin: 10px 0; border-top: 1px solid rgba(37,99,235,0.1); padding-top: 12px;">
+                        <i class="bi bi-gift-fill" style="color: #2563EB;"></i> نقاطك: <strong id="settingsCreditsDisplay" style="color: #1F2937;">0</strong>
                     </div>
-                    <button class="btn-save-settings" onclick="updateSettings()" style="background: #7B61FF; color: #fff; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.3);"><i class="bi bi-check-lg"></i> تحديث بياناتي</button>
-                    <div style="margin-top: 15px; border-top: 1px solid rgba(123,97,255,0.1); padding-top: 15px; display: flex; justify-content: center; gap: 15px; font-size: 20px;">
-                        <a href="https://t.me/Evile_Prompts" target="_blank" style="color: #7B61FF;"><i class="bi bi-telegram"></i></a>
-                        <a href="https://www.instagram.com/bla6c7" target="_blank" style="color: #7B61FF;"><i class="bi bi-instagram"></i></a>
-                        <a href="https://wa.me/967730577358" target="_blank" style="color: #7B61FF;"><i class="bi bi-whatsapp"></i></a>
+                    <button class="btn-save-settings" onclick="updateSettings()" style="background: #2563EB; color: #fff; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);"><i class="bi bi-check-lg"></i> تحديث بياناتي</button>
+                    <div style="margin-top: 15px; border-top: 1px solid rgba(37,99,235,0.1); padding-top: 15px; display: flex; justify-content: center; gap: 15px; font-size: 20px;">
+                        <a href="https://t.me/Evile_Prompts" target="_blank" style="color: #2563EB;"><i class="bi bi-telegram"></i></a>
+                        <a href="https://www.instagram.com/bla6c7" target="_blank" style="color: #2563EB;"><i class="bi bi-instagram"></i></a>
+                        <a href="https://wa.me/967730577358" target="_blank" style="color: #2563EB;"><i class="bi bi-whatsapp"></i></a>
                     </div>
                 </div>
             </div>
@@ -365,26 +365,26 @@
 
         <div class="credits-modal-overlay" id="creditsModal" onclick="closeCreditsModalOnBackdrop(event)">
             <div class="credits-modal-box" onclick="event.stopPropagation()">
-                <div style="background: rgba(255,255,255,0.8); border-radius: 20px; padding: 20px; border: 1px solid rgba(123,97,255,0.1); text-align: center;">
+                <div style="background: rgba(255,255,255,0.8); border-radius: 20px; padding: 20px; border: 1px solid rgba(37,99,235,0.1); text-align: center;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <div style="font-weight: 700; font-size: 16px; color: #1F2937;"><i class="bi bi-gift-fill" style="color: #7B61FF; margin-left: 6px;"></i> هدية يومية</div>
+                        <div style="font-weight: 700; font-size: 16px; color: #1F2937;"><i class="bi bi-gift-fill" style="color: #2563EB; margin-left: 6px;"></i> هدية يومية</div>
                         <span style="font-size: 12px; color: #6B7280;">+ 3 نقاط</span>
                     </div>
-                    <button id="dailyGiftBtn" onclick="claimDailyGift()" style="width: 100%; padding: 10px; border: none; border-radius: 30px; background: #7B61FF; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.3);"><i class="bi bi-stars"></i> الحصول</button>
+                    <button id="dailyGiftBtn" onclick="claimDailyGift()" style="width: 100%; padding: 10px; border: none; border-radius: 30px; background: #2563EB; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);"><i class="bi bi-stars"></i> الحصول</button>
                     <div id="dailyGiftStatus" style="margin-top: 8px; font-size: 12px; color: #6B7280; display: none;">تم استلام الهدية اليوم!</div>
                 </div>
-                <div style="background: rgba(255,255,255,0.8); border-radius: 20px; padding: 20px; border: 1px solid rgba(123,97,255,0.1);">
-                    <div style="font-weight: 700; font-size: 16px; color: #1F2937; margin-bottom: 12px; text-align: center;"><i class="bi bi-arrow-left-right" style="color: #7B61FF; margin-left: 6px;"></i> تحويل النقاط</div>
+                <div style="background: rgba(255,255,255,0.8); border-radius: 20px; padding: 20px; border: 1px solid rgba(37,99,235,0.1);">
+                    <div style="font-weight: 700; font-size: 16px; color: #1F2937; margin-bottom: 12px; text-align: center;"><i class="bi bi-arrow-left-right" style="color: #2563EB; margin-left: 6px;"></i> تحويل النقاط</div>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <input type="text" id="transferTarget" placeholder="اسم المستخدم" style="padding: 10px 14px; border: 1px solid rgba(123,97,255,0.1); border-radius: 12px; background: rgba(255,255,255,0.9); font-family: inherit; outline: none; width: 100%; color: #1F2937;">
+                        <input type="text" id="transferTarget" placeholder="اسم المستخدم" style="padding: 10px 14px; border: 1px solid rgba(37,99,235,0.1); border-radius: 12px; background: rgba(255,255,255,0.9); font-family: inherit; outline: none; width: 100%; color: #1F2937;">
                         <div style="display: flex; gap: 10px;">
-                            <input type="number" id="transferAmount" placeholder="عدد النقاط" min="1" value="1" style="padding: 10px 14px; border: 1px solid rgba(123,97,255,0.1); border-radius: 12px; background: rgba(255,255,255,0.9); font-family: inherit; outline: none; width: 50%; color: #1F2937;">
-                            <button onclick="transferCredits()" style="flex: 1; padding: 10px; border: none; border-radius: 30px; background: #7B61FF; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.3);"><i class="bi bi-send"></i> إرسال</button>
+                            <input type="number" id="transferAmount" placeholder="عدد النقاط" min="1" value="1" style="padding: 10px 14px; border: 1px solid rgba(37,99,235,0.1); border-radius: 12px; background: rgba(255,255,255,0.9); font-family: inherit; outline: none; width: 50%; color: #1F2937;">
+                            <button onclick="transferCredits()" style="flex: 1; padding: 10px; border: none; border-radius: 30px; background: #2563EB; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);"><i class="bi bi-send"></i> إرسال</button>
                         </div>
                     </div>
                     <div id="transferStatus" style="margin-top: 10px; font-size: 12px; text-align: center; display: none;"></div>
                 </div>
-                <button onclick="closeCreditsModal()" style="background: transparent; border: 1px solid rgba(123,97,255,0.1); color: #6B7280; font-size: 13px; cursor: pointer; padding: 5px; border-radius: 30px; margin-top: 5px;"><i class="bi bi-x-lg"></i> إغلاق</button>
+                <button onclick="closeCreditsModal()" style="background: transparent; border: 1px solid rgba(37,99,235,0.1); color: #6B7280; font-size: 13px; cursor: pointer; padding: 5px; border-radius: 30px; margin-top: 5px;"><i class="bi bi-x-lg"></i> إغلاق</button>
             </div>
         </div>
 
@@ -395,9 +395,9 @@
                 <p style="font-size: 14px; color: #6B7280; line-height: 1.6; margin-bottom: 25px;">لقد استنفذت جميع نقاطك المجانية. للحصول على المزيد من التوليدات ومواصلة الإبداع، يرجى التواصل معنا.</p>
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
                     <a href="https://wa.me/967730577358" target="_blank" style="display: block; width: 100%; padding: 12px; border-radius: 14px; color: #fff; font-weight: 700; text-decoration: none; background: #25d366; text-align: center;">واتساب</a>
-                    <a href="https://t.me/OlIiIl7" target="_blank" style="display: block; width: 100%; padding: 12px; border-radius: 14px; color: #fff; font-weight: 700; text-decoration: none; background: #7B61FF; text-align: center;">تلجرام</a>
+                    <a href="https://t.me/OlIiIl7" target="_blank" style="display: block; width: 100%; padding: 12px; border-radius: 14px; color: #fff; font-weight: 700; text-decoration: none; background: #2563EB; text-align: center;">تلجرام</a>
                 </div>
-                <button onclick="closeNoCreditsModal()" style="background: transparent; border: 1px solid rgba(123,97,255,0.1); color: #6B7280; padding: 8px 16px; border-radius: 30px; font-weight: 600; cursor: pointer; width: 100%;">إغلاق</button>
+                <button onclick="closeNoCreditsModal()" style="background: transparent; border: 1px solid rgba(37,99,235,0.1); color: #6B7280; padding: 8px 16px; border-radius: 30px; font-weight: 600; cursor: pointer; width: 100%;">إغلاق</button>
             </div>
         </div>
 
@@ -405,23 +405,23 @@
             .bottom-sheet-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.25); backdrop-filter: blur(8px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
             .bottom-sheet-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
             @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-            .bottom-sheet { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.95); border-radius: 28px; padding: 28px; animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); overflow-y: auto; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(123, 97, 255, 0.15), inset 0 1px 0 rgba(255,255,255,0.8); max-width: 520px; width: 100%; max-height: 85vh; }
+            .bottom-sheet { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.95); border-radius: 28px; padding: 28px; animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); overflow-y: auto; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(37, 99, 235, 0.15), inset 0 1px 0 rgba(255,255,255,0.8); max-width: 520px; width: 100%; max-height: 85vh; }
             @keyframes scaleIn { from { transform: scale(0.85) translateY(-20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
-            .sheet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid rgba(123,97,255,0.12); }
+            .sheet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid rgba(37,99,235,0.12); }
             .sheet-title { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 10px; color: #1F2937; }
-            .sheet-close { width: 36px; height: 36px; border-radius: 50%; background: rgba(123,97,255,0.08); border: 1px solid rgba(123,97,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; color: #7B61FF; font-size: 18px; transition: all 0.2s; }
-            .sheet-close:hover { background: rgba(123,97,255,0.15); transform: rotate(90deg); }
+            .sheet-close { width: 36px; height: 36px; border-radius: 50%; background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; color: #2563EB; font-size: 18px; transition: all 0.2s; }
+            .sheet-close:hover { background: rgba(37,99,235,0.15); transform: rotate(90deg); }
             .sheet-close:active { transform: scale(0.88); }
             .settings-group { margin-bottom: 18px; }
             .settings-group label { font-size: 13px; font-weight: 700; color: #4B5563; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
             .settings-row { display: flex; gap: 10px; }
-            .settings-row input { flex: 1; padding: 12px 14px; background: rgba(243,244,246,0.9); border: 1.5px solid rgba(123,97,255,0.08); border-radius: 14px; font-family: 'Tajawal', sans-serif; color: #1F2937; outline: none; transition: all 0.2s; font-size: 14px; }
-            .settings-row input:focus { border-color: #7B61FF; background: rgba(243,244,246,0.95); box-shadow: 0 0 0 3px rgba(123,97,255,0.1); }
-            .btn-copy { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, rgba(123,97,255,0.08), rgba(123,97,255,0.04)); border: 1.5px solid rgba(123,97,255,0.12); color: #7B61FF; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 16px; flex-shrink: 0; }
-            .btn-copy:hover { background: rgba(123,97,255,0.15); }
+            .settings-row input { flex: 1; padding: 12px 14px; background: rgba(243,244,246,0.9); border: 1.5px solid rgba(37,99,235,0.08); border-radius: 14px; font-family: 'Tajawal', sans-serif; color: #1F2937; outline: none; transition: all 0.2s; font-size: 14px; }
+            .settings-row input:focus { border-color: #2563EB; background: rgba(243,244,246,0.95); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+            .btn-copy { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, rgba(37,99,235,0.08), rgba(37,99,235,0.04)); border: 1.5px solid rgba(37,99,235,0.12); color: #2563EB; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 16px; flex-shrink: 0; }
+            .btn-copy:hover { background: rgba(37,99,235,0.15); }
             .btn-copy:active { transform: scale(0.9); }
-            .btn-save-settings { width: 100%; padding: 14px; background: linear-gradient(135deg, #7B61FF, #8B5CF6); border: none; border-radius: 14px; color: #fff; font-weight: 700; cursor: pointer; margin-top: 12px; box-shadow: 0 8px 20px rgba(123, 97, 255, 0.3); transition: all 0.2s; font-size: 15px; }
-            .btn-save-settings:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(123, 97, 255, 0.4); }
+            .btn-save-settings { width: 100%; padding: 14px; background: linear-gradient(135deg, #2563EB, #3B82F6); border: none; border-radius: 14px; color: #fff; font-weight: 700; cursor: pointer; margin-top: 12px; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3); transition: all 0.2s; font-size: 15px; }
+            .btn-save-settings:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(37, 99, 235, 0.4); }
             .btn-save-settings:active { transform: scale(0.96); }
 
             .credits-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(4px); z-index: 10000; display: none; justify-content: center; align-items: center; }
@@ -433,7 +433,7 @@
             .credits-modal-box .credits-btns { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
             .credits-modal-box .credits-btns a { display: block; width: 100%; padding: 12px; border-radius: 14px; color: #fff; font-weight: 700; text-decoration: none; transition: all 0.2s; }
             .credits-modal-box .credits-btns a:active { transform: scale(0.96); }
-            .credits-modal-box .credits-close { background: transparent; border: 1px solid rgba(123,97,255,0.1); color: #6B7280; padding: 8px 16px; border-radius: 30px; font-weight: 600; cursor: pointer; }
+            .credits-modal-box .credits-close { background: transparent; border: 1px solid rgba(37,99,235,0.1); color: #6B7280; padding: 8px 16px; border-radius: 30px; font-weight: 600; cursor: pointer; }
         </style>
 
         <script>
@@ -460,7 +460,7 @@
                 if (!userData) return;
                 const lastGift = userData.last_daily_gift; const today = new Date().toISOString().split('T')[0];
                 if (lastGift === today) { btn.style.background = '#9CA3AF'; btn.style.cursor = 'default'; btn.innerHTML = '<i class="bi bi-check-circle"></i> تم الاستلام'; btn.disabled = true; statusMsg.style.display = 'block'; } 
-                else { btn.style.background = '#7B61FF'; btn.style.cursor = 'pointer'; btn.innerHTML = '<i class="bi bi-stars"></i> الحصول'; btn.disabled = false; statusMsg.style.display = 'none'; }
+                else { btn.style.background = '#2563EB'; btn.style.cursor = 'pointer'; btn.innerHTML = '<i class="bi bi-stars"></i> الحصول'; btn.disabled = false; statusMsg.style.display = 'none'; }
             }
             function showToastNotification(message, duration = 10000) { const toast = document.createElement('div'); toast.className = 'toast-notification'; toast.innerText = message; document.body.appendChild(toast); setTimeout(() => { toast.remove(); }, duration); }
 
