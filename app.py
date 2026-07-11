@@ -153,7 +153,6 @@ def index():
                          site_status='on')
 
 @app.route('/library')
-@cache.cached(timeout=60, query_string=True)
 def library():
     """صفحة مكتبة البرومبتات - تصنيفات ديناميكية من الأدمن"""
     site = SiteSetting.query.first()
