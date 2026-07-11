@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>UFOQ - مكتبة البرومبتات</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <title>UFOQ - الصفحة الرئيسية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -29,321 +29,205 @@
             font-family: 'Tajawal', sans-serif;
             background: var(--bg);
             color: var(--text);
-            min-height: 100vh;
-            min-height: 100dvh;
-            overflow-x: hidden;
+            overflow: hidden;
+            touch-action: manipulation;
+            height: 100vh; height: 100dvh;
             position: relative;
-            -webkit-font-smoothing: antialiased;
         }
 
-        /* ===== FLOATING HEADER ===== */
+        .offline-container {
+            width: 100%; height: 100vh; height: 100dvh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 20px; background: var(--bg); color: var(--text);
+        }
+        .offline-icon { font-size: 64px; color: var(--glass); margin-bottom: 20px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
+        .offline-title { font-size: 28px; font-weight: 800; margin-bottom: 10px; color: var(--text); }
+        .offline-message { font-size: 16px; color: var(--text-dim); max-width: 400px; line-height: 1.6; margin-bottom: 20px; }
+        .offline-input {
+            padding: 10px 14px; border: 1px solid var(--glass-border); border-radius: 12px;
+            background: var(--white); outline: none; width: 100%; max-width: 300px;
+            text-align: center; margin-bottom: 20px; color: var(--text); font-family: 'Tajawal', sans-serif;
+        }
+        .offline-input:focus { border-color: var(--glass); }
+        .offline-btn {
+            padding: 10px 20px; background: var(--btn); color: var(--white); border: none;
+            border-radius: 30px; font-weight: bold; cursor: pointer; font-family: 'Tajawal', sans-serif;
+        }
+        .offline-socials { display: flex; gap: 15px; font-size: 28px; margin-top: 20px; }
+        .offline-socials a {
+            color: var(--text-dim); transition: all 0.2s; background: var(--white);
+            width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            border: 1px solid var(--stone-border); text-decoration: none;
+        }
+        .offline-socials a:active { transform: scale(0.9); }
+
+        .main-container {
+            width: 100%; height: 100vh; height: 100dvh;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 80px 16px 110px 16px; position: relative; gap: 14px; overflow-y: auto;
+        }
         .floating-header {
             position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100;
             display: flex; align-items: center; justify-content: space-between;
-            padding: 8px 16px; max-width: 700px; margin: 0 auto; border-radius: 20px;
+            padding: 6px 12px; max-width: 700px; margin: 0 auto; border-radius: 24px;
             background: rgba(246, 244, 241, 0.92);
             backdrop-filter: blur(20px) saturate(140%);
             -webkit-backdrop-filter: blur(20px) saturate(140%);
             border: 1px solid var(--stone-border);
+            gap: 8px;
         }
+        .header-left, .header-right { display: flex; align-items: center; gap: 6px; }
         .header-center {
             position: absolute; left: 50%; transform: translateX(-50%);
-            font-size: 18px; font-weight: 900; color: var(--text); letter-spacing: 4px;
+            font-size: 18px; font-weight: 900; color: var(--text); letter-spacing: 2px; white-space: nowrap;
         }
         .header-btn {
-            width: 36px; height: 36px; border-radius: 12px;
+            width: 34px; height: 34px; border-radius: 12px;
             background: var(--stone-light); border: 1px solid var(--stone-border);
             display: flex; align-items: center; justify-content: center; cursor: pointer;
-            transition: all 0.2s; color: var(--text-dim); text-decoration: none; font-size: 16px;
+            transition: all 0.2s; color: var(--text-dim); text-decoration: none;
         }
-        .header-btn:hover { background: rgba(249, 92, 75, 0.1); color: var(--coral); }
-        .header-btn:active { transform: scale(0.92); }
+        .header-btn:active { transform: scale(0.9); }
+        .header-btn i { font-size: 16px; }
+        .header-btn.special { background: rgba(249, 92, 75, 0.1); color: var(--coral); border-color: rgba(249, 92, 75, 0.2); }
+        .members-count {
+            display: flex; align-items: center; gap: 4px; font-size: 11px;
+            color: var(--text-dim); font-weight: 600; background: var(--stone-light);
+            padding: 4px 10px; border-radius: 30px; border: 1px solid var(--stone-border); white-space: nowrap;
+        }
+        .members-count i { font-size: 13px; color: var(--coral); }
+
+        .input-card {
+            width: 100%; max-width: 600px;
+            background: var(--stone-light);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            border: 1px solid var(--stone-border);
+            border-radius: 26px; padding: 16px 20px;
+            flex-shrink: 0; display: flex; flex-direction: column; gap: 12px;
+        }
+        .input-header { display: flex; justify-content: space-between; align-items: center; }
+        .input-label {
+            font-size: 16px; font-weight: 700; color: var(--text);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .input-label i { color: var(--glass); }
         .credits-badge {
-            background: rgba(249, 92, 75, 0.1); padding: 6px 14px;
-            border-radius: 30px; font-size: 12px; color: var(--coral);
+            background: rgba(249, 92, 75, 0.1); padding: 4px 14px;
+            border-radius: 30px; font-size: 13px; color: var(--coral);
             font-weight: 600; border: 1px solid rgba(249, 92, 75, 0.2);
             cursor: pointer; transition: all 0.2s;
         }
-        .credits-badge:hover { background: rgba(249, 92, 75, 0.2); }
-
-        /* ===== MAIN CONTENT ===== */
-        .main-content {
-            position: relative; z-index: 10;
-            padding: 90px 16px 140px 16px;
-            max-width: 1400px; margin: 0 auto;
+        .credits-badge:active { transform: scale(0.95); }
+        .textarea-wrapper {
+            background: rgba(255, 255, 255, 0.7); border: 1px solid var(--stone-border);
+            border-radius: 16px; padding: 0 18px; height: 52px; min-height: 52px; max-height: 52px;
+            display: flex; align-items: center;
         }
-
-        /* ===== GLASS CARD ===== */
-        .glass-card {
-            background: var(--glass-light);
-            backdrop-filter: blur(20px) saturate(140%);
-            -webkit-backdrop-filter: blur(20px) saturate(140%);
-            border: 1px solid var(--stone-border);
-            border-radius: 24px;
-            position: relative;
-            overflow: hidden;
+        .message-input {
+            width: 100%; background: transparent; border: none;
+            font-family: 'Tajawal', sans-serif; font-size: 15px;
+            outline: none; color: var(--text); height: 100%; resize: none;
+            overflow-y: auto; text-align: right; padding: 0; line-height: 1.5;
+            display: flex; align-items: center;
         }
-        .glass-card::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+        .message-input::placeholder { color: var(--text-faint); }
+        .main-btn {
+            width: 80%; max-width: 300px; height: 44px; margin: 0 auto; display: block;
+            background: var(--btn); border: none; border-radius: 30px;
+            color: var(--white); font-weight: 700; font-size: 15px; cursor: pointer;
+            transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-family: 'Tajawal', sans-serif;
         }
-
-        /* ===== HERO CARD ===== */
-        .hero-card {
-            composes: glass-card;
-            padding: 28px; margin-bottom: 20px;
-            display: flex; align-items: center; justify-content: space-between; gap: 20px;
-        }
-        .hero-content { flex: 1; text-align: right; position: relative; z-index: 2; }
-        .hero-content h1 {
-            font-size: 1.7rem; font-weight: 900; margin-bottom: 8px; color: var(--text);
-        }
-        .hero-content p {
-            font-size: 0.88rem; line-height: 1.7; color: var(--text-dim); max-width: 400px;
-        }
-        .hero-telegram-btn {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: var(--glass); color: var(--white);
-            padding: 10px 22px; border-radius: 50px; text-decoration: none;
-            font-weight: 700; font-size: 0.85rem; transition: all 0.2s;
-            margin-top: 14px; border: none;
-        }
-        .hero-telegram-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-        .hero-telegram-btn:active { transform: scale(0.96); }
-        .hero-image-wrapper { flex-shrink: 0; position: relative; z-index: 2; }
-        .hero-image {
-            width: 85px; height: 85px; border-radius: 50%; overflow: hidden;
-            border: 2px solid var(--stone-border);
-        }
-        .hero-image img { width: 100%; height: 100%; object-fit: cover; }
-        .hero-badge {
-            position: absolute; top: -2px; right: -2px;
-            width: 26px; height: 26px;
-            background: linear-gradient(135deg, #FBBF24, #F59E0B);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 12px;
-        }
-
-        /* ===== INTRO CARD ===== */
-        .intro-card {
-            composes: glass-card;
-            padding: 22px; text-align: center; margin-bottom: 20px;
-        }
-        .intro-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 6px 16px; background: rgba(249, 92, 75, 0.08);
-            border-radius: 50px; margin-bottom: 12px;
-            border: 1px solid var(--stone-border);
-            font-size: 0.8rem; color: var(--coral); font-weight: 600;
-        }
-        .intro-card p {
-            color: var(--text-dim); font-size: 0.88rem; line-height: 1.8;
-            max-width: 600px; margin: 0 auto;
-        }
-        .intro-card .highlight { color: var(--coral); font-weight: 700; }
-        .intro-telegram-btn {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: var(--btn); color: var(--white);
-            padding: 10px 22px; border-radius: 50px; text-decoration: none;
-            font-weight: 700; font-size: 0.85rem; transition: all 0.2s;
-            margin-top: 14px; border: none;
-        }
-        .intro-telegram-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-
-        /* ===== CATEGORIES BAR ===== */
-        .categories-section {
-            position: sticky; top: 70px; z-index: 50;
-            background: rgba(246, 244, 241, 0.9);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            padding: 10px 0; margin-bottom: 20px; border-radius: 16px;
+        .main-btn:active { transform: scale(0.96); }
+        .main-btn.stop-btn { background: #dc2626; }
+        .prompt-result-wrapper {
+            padding: 16px 20px; display: flex; flex-direction: column;
+            min-height: 100px; max-height: 120px; overflow-y: auto;
+            border-radius: 16px; background: rgba(255, 255, 255, 0.5);
             border: 1px solid var(--stone-border);
         }
-        .categories-wrapper {
-            display: flex; gap: 8px; overflow-x: auto;
-            padding: 4px 12px; scrollbar-width: none;
+        .prompt-result-text {
+            font-size: 14px; color: var(--text); line-height: 1.6; width: 100%;
+            background: transparent; border: none; resize: none; outline: none;
+            font-family: 'Tajawal', sans-serif; height: 100%; text-align: center;
         }
-        .categories-wrapper::-webkit-scrollbar { display: none; }
-        .category-btn {
-            flex-shrink: 0; padding: 8px 20px; border-radius: 50px;
-            border: 1px solid var(--stone-border);
-            background: rgba(249, 92, 75, 0.04);
-            color: var(--text-dim); font-family: 'Tajawal', sans-serif;
-            font-weight: 600; font-size: 0.8rem; cursor: pointer;
-            transition: all 0.2s; white-space: nowrap;
-        }
-        .category-btn:hover {
-            background: rgba(249, 92, 75, 0.1); color: var(--text);
-            border-color: rgba(249, 92, 75, 0.2);
-        }
-        .category-btn.active {
-            background: var(--glass); color: var(--white);
-            border-color: var(--glass); font-weight: 700;
-        }
-
-        /* ===== GALLERY ===== */
-        .gallery-section { padding: 0 0 30px 0; }
-        .gallery-title {
-            text-align: center; font-size: 1.3rem;
-            margin-bottom: 24px; font-weight: 900; color: var(--text);
-        }
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        /* ===== PROMPT CARD ===== */
-        .prompt-card {
-            background: var(--glass-light);
-            backdrop-filter: blur(20px) saturate(140%);
-            -webkit-backdrop-filter: blur(20px) saturate(140%);
-            border-radius: 20px; overflow: hidden;
-            border: 1px solid var(--stone-border);
-            position: relative;
-            transition: all 0.25s ease;
-            cursor: pointer;
-            opacity: 1; transform: none;
-        }
-        .prompt-card::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
-        }
-        .prompt-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(249, 92, 75, 0.2);
-            background: rgba(249, 92, 75, 0.12);
-        }
-        .prompt-card .image-wrapper {
-            position: relative; overflow: hidden;
-            width: 100%; aspect-ratio: 4/3;
-            background: linear-gradient(135deg, #EDE8E0, #E5DED4);
-        }
-        .prompt-card .image-wrapper img {
-            width: 100%; height: 100%; object-fit: cover; display: block;
-            transition: transform 0.4s ease;
-        }
-        .prompt-card:hover .image-wrapper img { transform: scale(1.05); }
-        .prompt-card .image-overlay {
-            position: absolute; inset: 0;
-            background: linear-gradient(to top, rgba(45,42,38,0.75) 0%, rgba(45,42,38,0.2) 50%, transparent 100%);
-            pointer-events: none;
-        }
-        .prompt-card .image-title {
-            position: absolute; bottom: 14px; right: 14px;
-            color: var(--white); font-weight: 800; font-size: 1rem;
-            pointer-events: none; z-index: 2;
-        }
-        .prompt-card .card-actions {
-            padding: 14px; display: flex; gap: 10px; align-items: center;
-        }
+        .prompt-result-text::placeholder { color: var(--text-faint); }
+        .copy-wrapper { display: flex; justify-content: flex-end; margin-top: -4px; }
         .copy-btn {
-            flex: 1; padding: 10px 14px;
-            background: var(--btn); color: var(--white);
-            border: none; border-radius: 12px;
-            font-weight: 700; cursor: pointer;
-            transition: all 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            font-size: 0.85rem; font-family: 'Tajawal', sans-serif;
+            background: rgba(255, 255, 255, 0.6); border: 1px solid var(--stone-border);
+            border-radius: 30px; padding: 6px 14px; font-size: 12px;
+            color: var(--text-dim); cursor: pointer; display: flex;
+            align-items: center; gap: 4px; transition: all 0.2s;
+            font-family: 'Tajawal', sans-serif;
         }
-        .copy-btn:hover { opacity: 0.9; transform: scale(1.02); }
-        .copy-btn:active { transform: scale(0.96); }
-        .copy-btn.copied {
-            background: var(--coral);
-        }
-        .card-category-tag {
-            position: absolute; top: 10px; left: 10px;
-            padding: 4px 10px;
-            background: rgba(0, 0, 0, 0.35);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px; font-size: 0.7rem;
-            color: var(--white); font-weight: 600;
-            z-index: 3; text-transform: uppercase; letter-spacing: 0.5px;
-        }
+        .copy-btn:active { transform: scale(0.9); }
+        .copy-btn.success { background: rgba(249, 92, 75, 0.1); color: var(--coral); border-color: rgba(249, 92, 75, 0.2); }
 
-        /* ===== EMPTY STATE ===== */
-        .empty-state {
-            text-align: center; padding: 80px 20px;
-            color: var(--text-faint); grid-column: 1 / -1;
+        .patterns-card {
+            width: 100%; max-width: 600px;
+            background: var(--stone-light);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            border: 1px solid var(--stone-border);
+            border-radius: 26px; padding: 16px 20px; flex-shrink: 0;
+            display: flex; flex-direction: column; gap: 16px;
         }
-        .empty-state i {
-            font-size: 56px; margin-bottom: 16px; display: block; opacity: 0.3; color: var(--coral);
+        .patterns-guidance-strip {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(249, 92, 75, 0.06); border: 1px solid var(--stone-border);
+            border-radius: 30px; padding: 4px 14px;
         }
-        .empty-state h3 {
-            font-size: 1.1rem; font-weight: 800; margin-bottom: 6px; color: var(--text-dim);
+        .patterns-instruction {
+            font-size: 12px; color: var(--coral); font-weight: 500;
+            display: flex; align-items: center; gap: 4px;
         }
-        .empty-state p { font-size: 0.85rem; }
-
-        /* ===== TOAST ===== */
-        .toast {
-            position: fixed; bottom: 100px; left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--glass); color: var(--white);
-            padding: 12px 24px; border-radius: 50px;
-            font-weight: 700; z-index: 2000; opacity: 0;
-            transition: all 0.3s ease;
-            display: flex; align-items: center; gap: 8px;
-            font-family: 'Tajawal', sans-serif; font-size: 0.9rem;
+        .scroll-arrows { display: flex; gap: 6px; }
+        .scroll-btn {
+            width: 24px; height: 24px; border-radius: 50%;
+            background: rgba(249, 92, 75, 0.08); border: 1px solid var(--stone-border);
+            color: var(--coral); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; opacity: 0.5; pointer-events: none;
         }
-        .toast.show {
-            opacity: 1; transform: translateX(-50%) translateY(0);
-        }
-
-        /* ===== AD POPUP ===== */
-        .ad-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(12px); z-index: 5000;
-            display: none; align-items: center; justify-content: center; padding: 20px;
-        }
-        .ad-overlay.show { display: flex; }
-        .ad-box {
-            background: var(--glass-light);
-            backdrop-filter: blur(30px);
-            border-radius: 24px; max-width: 400px; width: 100%;
-            overflow: hidden; border: 1px solid var(--stone-border);
-            position: relative;
-        }
-        .ad-image {
-            width: 100%; height: 180px; object-fit: cover; display: block;
-        }
-        .ad-no-image {
-            width: 100%; height: 140px;
-            background: linear-gradient(135deg, #EDE8E0, #E5DED4);
+        .scroll-btn.visible { opacity: 1; pointer-events: auto; }
+        .scroll-btn:active { transform: scale(0.9); }
+        .scroll-btn i { font-size: 14px; }
+        .single-pattern-container {
             display: flex; align-items: center; justify-content: center;
-            color: var(--text-faint); font-size: 40px;
+            width: 100%; min-height: 140px; background: rgba(255, 255, 255, 0.4);
+            padding: 8px; border-radius: 18px; border: 1px solid var(--stone-border);
+            transition: all 0.3s ease;
         }
-        .ad-content { padding: 24px; text-align: center; }
-        .ad-title {
-            font-size: 1.2rem; font-weight: 900; color: var(--text); margin-bottom: 8px;
+        .single-pattern-img { max-width: 100%; max-height: 200px; border-radius: 12px; object-fit: contain; }
+        .patterns-strip-container {
+            width: 100%; background: rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--stone-border); border-radius: 16px;
+            padding: 6px 8px; display: flex; gap: 8px; overflow-x: auto;
+            scrollbar-width: none; align-items: center;
         }
-        .ad-text {
-            font-size: 0.9rem; color: var(--text-dim); line-height: 1.7; margin-bottom: 20px;
+        .patterns-strip-container::-webkit-scrollbar { display: none; }
+        .strip-btn {
+            flex-shrink: 0; padding: 8px 16px; border-radius: 12px;
+            background: transparent; border: none; color: var(--text-dim);
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s ease; min-width: 50px;
+            display: flex; align-items: center; justify-content: center;
+            white-space: nowrap; font-family: 'Tajawal', sans-serif;
         }
-        .ad-btn {
-            display: inline-flex; align-items: center; gap: 8px;
+        .strip-btn:active { transform: scale(0.95); }
+        .strip-btn.active {
             background: var(--glass); color: var(--white);
-            padding: 12px 28px; border-radius: 50px;
-            text-decoration: none; font-weight: 700;
-            font-size: 0.9rem; transition: all 0.2s;
-            border: none; cursor: pointer; font-family: 'Tajawal', sans-serif;
-        }
-        .ad-btn:hover { opacity: 0.9; }
-        .ad-timer {
-            position: absolute; top: 12px; left: 12px;
-            background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(10px);
-            color: var(--white); padding: 6px 14px;
-            border-radius: 20px; font-size: 13px; font-weight: 700;
+            box-shadow: 0 4px 12px rgba(249, 92, 75, 0.3);
         }
 
-        /* ===== BOTTOM NAV ===== */
         .bottom-nav-bar {
-            position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
             z-index: 1000; display: flex; align-items: center; gap: 6px;
-            padding: 10px 18px; background: rgba(246, 244, 241, 0.92);
-            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            padding: 8px 16px; background: rgba(246, 244, 241, 0.92);
+            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
             border: 1px solid var(--stone-border); border-radius: 50px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.03);
             max-width: 600px; width: auto;
         }
         .nav-item {
@@ -351,317 +235,660 @@
             padding: 10px 20px; border-radius: 40px; background: transparent;
             border: none; color: var(--text-faint); font-family: 'Tajawal', sans-serif;
             font-size: 13px; font-weight: 600; cursor: pointer;
-            transition: all 0.2s ease; position: relative;
-            white-space: nowrap; text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-decoration: none; position: relative; white-space: nowrap;
+            touch-action: manipulation; -webkit-tap-highlight-color: transparent;
         }
-        .nav-item:hover { color: var(--text-dim); background: rgba(249, 92, 75, 0.06); }
-        .nav-item:active { transform: scale(0.92); }
+        .nav-item i { font-size: 23px; transition: all 0.2s; }
+        .nav-item:hover { color: var(--coral); background: rgba(249, 92, 75, 0.06); }
+        .nav-item:active { transform: scale(0.9); transition: all 0.05s ease; }
+        .nav-item::before {
+            content: ''; position: absolute; inset: 0;
+            background: var(--glass); border-radius: 40px;
+            opacity: 0; transform: scale(0.8);
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: -1;
+        }
+        .nav-item.active::before { opacity: 1; transform: scale(1); }
         .nav-item.active {
-            background: var(--glass); color: var(--white);
-            border: 1px solid var(--glass);
+            background: transparent; color: var(--white);
+            box-shadow: 0 4px 15px rgba(249, 92, 75, 0.35), 0 0 0 2px rgba(249, 92, 75, 0.15);
+            transform: scale(1.05);
         }
-        .nav-item i { font-size: 20px; transition: all 0.2s; }
+        .nav-item.active i { transform: scale(1.1); }
         .nav-label {
             max-width: 0; overflow: hidden;
             transition: max-width 0.2s ease, opacity 0.2s ease; opacity: 0;
         }
         .nav-item.active .nav-label { max-width: 80px; opacity: 1; }
 
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .main-content { padding: 100px 32px 160px 32px; max-width: 1200px; }
-            .hero-card { padding: 32px; }
-            .hero-content h1 { font-size: 2rem; }
-            .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
-            .hero-image { width: 100px; height: 100px; }
+        /* Bottom Sheet & Modal Styles */
+        .bottom-sheet-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.25); backdrop-filter: blur(8px);
+            z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;
         }
-        @media (min-width: 1025px) {
-            .main-content { padding: 110px 60px 180px 60px; max-width: 1400px; }
-            .hero-card { padding: 36px 48px; }
-            .hero-content h1 { font-size: 2.2rem; }
-            .hero-content p { font-size: 0.92rem; max-width: 450px; }
-            .hero-image { width: 110px; height: 110px; }
-            .gallery-grid { grid-template-columns: repeat(3, 1fr); gap: 28px; }
-            .gallery-title { font-size: 1.6rem; }
-            .category-btn { padding: 10px 24px; font-size: 0.85rem; }
-            .bottom-nav-bar { max-width: 600px; padding: 10px 20px; }
-            .nav-item { padding: 12px 20px; font-size: 14px; }
+        .bottom-sheet-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .bottom-sheet {
+            background: rgba(246, 244, 241, 0.98);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            border: 1px solid var(--stone-border); border-radius: 28px;
+            padding: 28px; animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow-y: auto; display: flex; flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            max-width: 520px; width: 100%; max-height: 85vh;
         }
-        @media (max-width: 768px) {
-            .hero-card { flex-direction: column-reverse; text-align: center; padding: 22px 18px; gap: 16px; }
-            .hero-content { text-align: center; }
-            .hero-content h1 { font-size: 1.4rem; }
-            .hero-content p { font-size: 0.82rem; }
-            .hero-image { width: 75px; height: 75px; }
-            .gallery-grid { grid-template-columns: 1fr; gap: 16px; }
-            .intro-card { padding: 18px; }
-            .bottom-nav-bar { padding: 6px 12px; max-width: 95vw; }
+        @keyframes scaleIn {
+            from { transform: scale(0.85) translateY(-20px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .sheet-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; padding-bottom: 14px;
+            border-bottom: 1px solid var(--stone-border);
+        }
+        .sheet-title {
+            font-size: 18px; font-weight: 800; display: flex;
+            align-items: center; gap: 10px; color: var(--text);
+        }
+        .sheet-close {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: var(--stone-light); border: 1px solid var(--stone-border);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text-dim); font-size: 18px; transition: all 0.2s;
+        }
+        .sheet-close:hover { background: rgba(249, 92, 75, 0.1); color: var(--coral); transform: rotate(90deg); }
+        .sheet-close:active { transform: scale(0.88); }
+        .settings-group { margin-bottom: 18px; }
+        .settings-group label {
+            font-size: 13px; font-weight: 700; color: var(--text-dim);
+            display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .settings-row { display: flex; gap: 10px; }
+        .settings-row input {
+            flex: 1; padding: 12px 14px; background: rgba(255, 255, 255, 0.8);
+            border: 1.5px solid var(--stone-border); border-radius: 14px;
+            font-family: 'Tajawal', sans-serif; color: var(--text); outline: none;
+            transition: all 0.2s; font-size: 14px;
+        }
+        .settings-row input:focus {
+            border-color: var(--coral); background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 0 3px rgba(249, 92, 75, 0.1);
+        }
+        .btn-copy {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: var(--stone-light); border: 1.5px solid var(--stone-border);
+            color: var(--coral); cursor: pointer; display: flex;
+            align-items: center; justify-content: center; transition: all 0.2s;
+            font-size: 16px; flex-shrink: 0;
+        }
+        .btn-copy:hover { background: rgba(249, 92, 75, 0.1); }
+        .btn-copy:active { transform: scale(0.9); }
+        .btn-save-settings {
+            width: 100%; padding: 14px; background: var(--btn); border: none;
+            border-radius: 14px; color: var(--white); font-weight: 700; cursor: pointer;
+            margin-top: 12px; box-shadow: 0 8px 20px rgba(249, 92, 75, 0.25);
+            transition: all 0.2s; font-size: 15px; font-family: 'Tajawal', sans-serif;
+        }
+        .btn-save-settings:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(249, 92, 75, 0.35); }
+        .btn-save-settings:active { transform: scale(0.96); }
+
+        .credits-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(4px);
+            z-index: 10000; display: none; justify-content: center; align-items: center;
+        }
+        .credits-modal-overlay.active { display: flex; }
+        .credits-modal-box {
+            background: rgba(246, 244, 241, 0.98); backdrop-filter: blur(16px);
+            border: 1px solid var(--stone-border); border-radius: 24px;
+            padding: 25px; max-width: 480px; width: 90%; text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            display: flex; flex-direction: column; gap: 20px;
+        }
+        .credits-modal-box input {
+            padding: 10px 14px; border: 1px solid var(--stone-border); border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9); font-family: 'Tajawal', sans-serif;
+            outline: none; width: 100%; color: var(--text);
+        }
+        .credits-modal-box input:focus { border-color: var(--coral); }
+        .credits-modal-box button {
+            padding: 10px; border: none; border-radius: 30px;
+            background: var(--btn); color: var(--white); font-weight: 700;
+            font-size: 14px; cursor: pointer; transition: all 0.2s;
+            font-family: 'Tajawal', sans-serif;
+        }
+        .credits-modal-box button:hover { opacity: 0.9; }
+
+        /* Notifications Sheet Specific */
+        .notification-item {
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--stone-border);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+        .notification-item:hover {
+            border-color: rgba(249, 92, 75, 0.2);
+            transform: translateX(-4px);
+        }
+        .notification-item .notif-title {
+            font-size: 14px; font-weight: 800; color: var(--text);
+            display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+        }
+        .notification-item .notif-title i { color: var(--coral); font-size: 16px; }
+        .notification-item .notif-text {
+            font-size: 13px; color: var(--text-dim); line-height: 1.6;
+        }
+        .notification-item .notif-date {
+            font-size: 11px; color: var(--text-faint); margin-top: 8px;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .empty-notifications {
+            text-align: center; padding: 40px 20px;
+            color: var(--text-faint);
+        }
+        .empty-notifications i { font-size: 48px; margin-bottom: 12px; display: block; opacity: 0.3; color: var(--coral); }
+
+        @media (min-width: 768px) {
+            .main-container { max-width: 900px; margin: 0 auto; padding: 80px 40px 160px 40px; }
+            .input-card { padding: 28px 32px; margin-bottom: 20px; }
+            .main-btn { width: 100%; max-width: 280px; height: 50px; font-size: 16px; font-weight: 800; }
+            .prompt-result-wrapper { min-height: 160px; max-height: 320px; padding: 20px 24px; }
+            .patterns-card { padding: 24px 28px; }
+            .bottom-nav-bar { bottom: 20px; padding: 10px 20px; max-width: 600px; }
+            .nav-item { padding: 10px 20px; font-size: 14px; }
+            .nav-item i { font-size: 24px; }
+        }
+        @media (max-width: 600px) {
+            .input-card, .patterns-card { padding: 14px 16px; max-width: 100%; border-radius: 20px; }
+            .prompt-result-wrapper { min-height: 80px; max-height: 80px; padding: 12px; }
+            .main-btn { width: 90%; height: 40px; font-size: 14px; }
+            .strip-btn { font-size: 12px; padding: 6px 12px; }
+            .single-pattern-container { min-height: 100px; }
+            .bottom-nav-bar { padding: 6px 12px; border-radius: 40px; max-width: 95vw; }
             .nav-item { padding: 6px 14px; font-size: 12px; }
-            .nav-item i { font-size: 18px; }
-            .ad-box { max-width: 340px; }
+            .nav-item i { font-size: 20px; }
         }
     </style>
 </head>
 <body>
-    <header class="floating-header">
-        <div style="display:flex;align-items:center;gap:8px;">
-            <div class="header-btn" onclick="history.back()"><i class="bi bi-arrow-right"></i></div>
-            <div class="header-btn" onclick="window.location.href='/'"><i class="bi bi-gift"></i></div>
-        </div>
-        <div class="header-center">UFOQ</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-            <span class="credits-badge" id="creditsBadge"><i class="bi bi-stars"></i> 0 نقاط</span>
-        </div>
-    </header>
-
-    <div class="main-content">
-        <div class="glass-card hero-card">
-            <div class="hero-content">
-                <h1>مكتبة UFOQ</h1>
-                <p>قناة تساعدك على تعلم مهارات توجيه الذكاء الاصطناعي عبر الآلاف من البرومبتات المنشورة</p>
-                <a href="https://t.me/aipromptsAl" target="_blank" class="hero-telegram-btn">
-                    <i class="bi bi-telegram"></i> قناة المكتبة
-                </a>
+    {% if site_status == 'off' %}
+        <div class="offline-container">
+            <div class="offline-icon"><i class="bi bi-tools"></i></div>
+            <h1 class="offline-title">الموقع متوقف مؤقتاً</h1>
+            <p class="offline-message">{{ offline_message }}</p>
+            <input type="password" class="offline-input" id="maintenancePass" placeholder="كلمة مرور المدير للمعاينة">
+            <button class="offline-btn" onclick="checkMaintenancePass()">معاينة الموقع</button>
+            <div class="offline-socials">
+                <a href="https://t.me/Evile_Prompts" target="_blank"><i class="bi bi-telegram"></i></a>
+                <a href="https://www.instagram.com/bla6c7" target="_blank"><i class="bi bi-instagram"></i></a>
+                <a href="https://wa.me/967730577358" target="_blank"><i class="bi bi-whatsapp"></i></a>
             </div>
-            <div class="hero-image-wrapper">
-                <div class="hero-image">
-                    <img src="https://i.ibb.co/C3vSdDw8/x.jpg" alt="UFOQ">
+        </div>
+    {% else %}
+        <header class="floating-header">
+            <div class="header-left">
+                <div class="header-btn special" onclick="openSettingsSheet()"><i class="bi bi-gear"></i></div>
+                <div class="header-btn" onclick="openNotificationsSheet()"><i class="bi bi-bell"></i></div>
+            </div>
+            <div class="header-center">UFOQ</div>
+            <div class="header-right">
+                <a href="https://www.instagram.com/bla6c7" target="_blank" class="header-btn"><i class="bi bi-instagram"></i></a>
+                <a href="https://t.me/Evile_Prompts" target="_blank" class="header-btn"><i class="bi bi-telegram"></i></a>
+                <div class="members-count" id="membersCount">
+                    <i class="bi bi-people-fill"></i>
+                    <span>0</span>
                 </div>
-                <div class="hero-badge"><i class="bi bi-star-fill" style="color: white;"></i></div>
+                
+            </div>
+        </header>
+
+        <div class="main-container">
+            <div class="input-card">
+                <div class="input-header">
+                    <span class="input-label"><i class="bi bi-pencil"></i> اصنع محتواك الان</span>
+                    <span class="credits-badge" id="creditsBadge" onclick="openCreditsModal()"><i class="bi bi-stars"></i> 0 نقاط</span>
+                </div>
+                <div class="textarea-wrapper">
+                    <textarea class="message-input" id="mainInput" placeholder="اكتب ماتريد لـ كاتب إعلانات..." rows="1"></textarea>
+                </div>
+                <button class="main-btn" id="mainSendBtn" onclick="handleSendWelcome()"><i class="bi bi-stars"></i> إنشاء</button>
+                <div class="prompt-result-wrapper">
+                    <textarea class="prompt-result-text" id="promptResultText" readonly placeholder="سيظهر هنا المحتوى المُنشأ بعد الضغط على إنشاء"></textarea>
+                </div>
+                <div class="copy-wrapper">
+                    <button class="copy-btn" onclick="copyGeneratedPrompt()"><i class="bi bi-files"></i> نسخ النص</button>
+                </div>
+            </div>
+
+            <div class="patterns-card">
+                <div class="patterns-guidance-strip">
+                    <span class="patterns-instruction"><i class="bi bi-info-circle"></i> اختر أحد الأنماط من الأزرار أدناه</span>
+                    <div class="scroll-arrows">
+                        <button class="scroll-btn" id="scrollLeftBtn" onclick="scrollPatterns(-60)"><i class="bi bi-chevron-right"></i></button>
+                        <button class="scroll-btn" id="scrollRightBtn" onclick="scrollPatterns(60)"><i class="bi bi-chevron-left"></i></button>
+                    </div>
+                </div>
+                <div class="single-pattern-container" id="selectedPatternContainer">
+                    <img src="" alt="صورة النمط" class="single-pattern-img" id="selectedPatternImg" style="display: none;">
+                    <span style="color:var(--text-faint); font-size: 14px;" id="noPatternMsg">اختر نمطاً لعرض صورته هنا</span>
+                </div>
+                <div class="patterns-strip-container" id="patternsStrip"></div>
             </div>
         </div>
 
-        <div class="glass-card intro-card">
-            <div class="intro-badge"><i class="bi bi-stars"></i><span>عن المنصة</span></div>
-            <p>ولدت منصة <span class="highlight">UFOQ</span> من رحم المعاناة لتختصر عليكم سنوات من تعلم مهارات التوجيه</p>
-            <a href="https://t.me/Evile_Prompts" target="_blank" class="intro-telegram-btn">
-                <i class="bi bi-telegram"></i> قناة الموقع الرسمية
+        <nav class="bottom-nav-bar">
+            <a href="/library" class="nav-item" onclick="handleNavClick(event, '/library')">
+                <i class="bi bi-collection"></i>
+                <span class="nav-label">المكتبة</span>
             </a>
-        </div>
+            <a href="/" class="nav-item active" onclick="handleNavClick(event, '/')">
+                <i class="bi bi-house-door-fill"></i>
+                <span class="nav-label">الرئيسية</span>
+            </a>
+            <a href="/about" class="nav-item" onclick="handleNavClick(event, '/about')">
+                <i class="bi bi-info-circle"></i>
+                <span class="nav-label">حول</span>
+            </a>
+        </nav>
 
-        <div class="categories-section" id="categoriesBar">
-            <div class="categories-wrapper" id="categories">
-                <button class="category-btn active" data-category="all">الكل</button>
-                {% if categories %}
-                    {% for cat in categories %}
-                    <button class="category-btn" data-category="{{ cat.name }}">{{ cat.display_name }}</button>
-                    {% endfor %}
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="gallery-section">
-            <h2 class="gallery-title">معاينات البرومبتات</h2>
-            <div class="gallery-grid" id="gallery">
-                {% if library_items and library_items|length > 0 %}
-                    {% for item in library_items %}
-                    <div class="prompt-card" id="card-{{ item.id }}" data-category="{{ item.category }}">
-                        <div class="image-wrapper">
-                            <span class="card-category-tag">{{ item.category }}</span>
-                            <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy" onerror="this.style.display='none';this.parentElement.innerHTML+='<div style=display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-faint)><i class=bi bi-image style=font-size:40px></i></div>'">
-                            <div class="image-overlay"></div>
-                            <div class="image-title">{{ item.title }}</div>
-                        </div>
-                        <div class="card-actions">
-                            <button class="copy-btn" data-prompt="{{ item.prompt_text }}" onclick="handleCopyFromData(event)">
-                                <i class="bi bi-files"></i> نسخ البرومبت
-                            </button>
+        <!-- Settings Sheet -->
+        <div class="bottom-sheet-overlay" id="settingsSheet" onclick="closeSheetOnBackdrop(event, 'settingsSheet')">
+            <div class="bottom-sheet" onclick="event.stopPropagation()">
+                <div class="sheet-header">
+                    <div class="sheet-title"><i class="bi bi-gear-wide-connected" style="color: var(--coral);"></i> إعدادات الحساب</div>
+                    <button class="sheet-close" onclick="closeSheet('settingsSheet')"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div id="settingsContent">
+                    <div class="settings-group">
+                        <label>اسم المستخدم الحالي</label>
+                        <div class="settings-row">
+                            <input type="text" id="settingsUsername" value="" readonly style="color: var(--text); background: rgba(255,255,255,0.8);">
+                            <button class="btn-copy" onclick="copyField('settingsUsername')"><i class="bi bi-files"></i></button>
                         </div>
                     </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="empty-state">
-                        <i class="bi bi-collection"></i>
-                        <h3>المكتبة فارغة حالياً</h3>
-                        <p>سيتم إضافة برومبتات جديدة قريباً من قبل الإدارة</p>
+                    <div class="settings-group">
+                        <label>كلمة المرور الحالية</label>
+                        <div class="settings-row">
+                            <input type="text" id="settingsPassword" value="" readonly style="color: var(--text); background: rgba(255,255,255,0.8);">
+                            <button class="btn-copy" onclick="copyField('settingsPassword')"><i class="bi bi-files"></i></button>
+                        </div>
                     </div>
-                {% endif %}
+                    <div style="font-size: 12px; color: var(--text-dim); text-align: center; margin: 10px 0; border-top: 1px solid var(--stone-border); padding-top: 12px;">
+                        <i class="bi bi-gift-fill" style="color: var(--coral);"></i> نقاطك: <strong id="settingsCreditsDisplay" style="color: var(--text);">0</strong>
+                    </div>
+                    <button class="btn-save-settings" onclick="updateSettings()"><i class="bi bi-check-lg"></i> تحديث بياناتي</button>
+                    <div style="margin-top: 15px; border-top: 1px solid var(--stone-border); padding-top: 15px; display: flex; justify-content: center; gap: 15px; font-size: 20px;">
+                        <a href="https://t.me/Evile_Prompts" target="_blank" style="color: var(--coral);"><i class="bi bi-telegram"></i></a>
+                        <a href="https://www.instagram.com/bla6c7" target="_blank" style="color: var(--coral);"><i class="bi bi-instagram"></i></a>
+                        <a href="https://wa.me/967730577358" target="_blank" style="color: var(--coral);"><i class="bi bi-whatsapp"></i></a>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="toast" id="toast"><i class="bi bi-check-lg"></i> تم النسخ بنجاح!</div>
-
-    <div class="ad-overlay" id="adOverlay">
-        <div class="ad-box">
-            <div id="adImageContainer">
-                {% if active_ad and active_ad.image_url %}
-                <img src="{{ active_ad.image_url }}" alt="Ad" class="ad-image" id="adImage">
-                {% else %}
-                <div class="ad-no-image" id="adNoImage"><i class="bi bi-megaphone-fill"></i></div>
-                {% endif %}
+        <!-- Notifications Sheet -->
+        <div class="bottom-sheet-overlay" id="notificationsSheet" onclick="closeSheetOnBackdrop(event, 'notificationsSheet')">
+            <div class="bottom-sheet" onclick="event.stopPropagation()">
+                <div class="sheet-header">
+                    <div class="sheet-title"><i class="bi bi-bell-fill" style="color: var(--coral);"></i> الإشعارات</div>
+                    <button class="sheet-close" onclick="closeSheet('notificationsSheet')"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div id="notificationsContent">
+                    <div class="empty-notifications">
+                        <i class="bi bi-bell-slash"></i>
+                        <p>لا توجد إشعارات جديدة</p>
+                    </div>
+                </div>
             </div>
-            <div class="ad-content">
-                <div class="ad-title" id="adTitle">{{ active_ad.title if active_ad else 'إعلان' }}</div>
-                <div class="ad-text" id="adText">{{ active_ad.text if active_ad else '...' }}</div>
-                <a href="{{ active_ad.button_link if active_ad else '#' }}" target="_blank" class="ad-btn" id="adBtn">
-                    <i class="bi bi-box-arrow-up-right"></i>
-                    <span id="adBtnText">{{ active_ad.button_text if active_ad else 'زيارة' }}</span>
-                </a>
-            </div>
-            <div class="ad-timer" id="adTimer">5</div>
         </div>
-    </div>
 
-    <nav class="bottom-nav-bar">
-        <button type="button" class="nav-item active" onclick="handleNavClick(event, '/library')">
-            <i class="bi bi-collection-fill"></i><span class="nav-label">المكتبة</span>
-        </button>
-        <button type="button" class="nav-item" onclick="handleNavClick(event, '/')">
-            <i class="bi bi-house-door"></i><span class="nav-label">الرئيسية</span>
-        </button>
-        <button type="button" class="nav-item" onclick="handleNavClick(event, '/about')">
-            <i class="bi bi-info-circle"></i><span class="nav-label">حول</span>
-        </button>
-    </nav>
+        <div class="credits-modal-overlay" id="creditsModal" onclick="closeCreditsModalOnBackdrop(event)">
+            <div class="credits-modal-box" onclick="event.stopPropagation()">
+                <div style="background: rgba(255,255,255,0.8); border-radius: 20px; padding: 20px; border: 1px solid var(--stone-border); text-align: center;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div style="font-weight: 700; font-size: 16px; color: var(--text);"><i class="bi bi-gift-fill" style="color: var(--coral); margin-left: 6px;"></i> هدية يومية</div>
+                        <span style="font-size: 12px; color: var(--text-dim);">+ 3 نقاط</span>
+                    </div>
+                    <button id="dailyGiftBtn" onclick="claimDailyGift()" style="width: 100%; padding: 10px; border: none; border-radius: 30px; background: var(--btn); color: var(--white); font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; font-family: 'Tajawal', sans-serif;"><i class="bi bi-stars"></i> الحصول</button>
+                    <div id="dailyGiftStatus" style="margin-top: 8px; font-size: 12px; color: var(--text-dim); display: none;">تم استلام الهدية اليوم!</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.8); border-radius: 20px; padding: 20px; border: 1px solid var(--stone-border);">
+                    <div style="font-weight: 700; font-size: 16px; color: var(--text); margin-bottom: 12px; text-align: center;"><i class="bi bi-arrow-left-right" style="color: var(--coral); margin-left: 6px;"></i> تحويل النقاط</div>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <input type="text" id="transferTarget" placeholder="اسم المستخدم">
+                        <div style="display: flex; gap: 10px;">
+                            <input type="number" id="transferAmount" placeholder="عدد النقاط" min="1" value="1" style="width: 50%;">
+                            <button onclick="transferCredits()" style="flex: 1; padding: 10px; border: none; border-radius: 30px; background: var(--btn); color: var(--white); font-weight: 700; font-size: 14px; cursor: pointer; font-family: 'Tajawal', sans-serif;"><i class="bi bi-send"></i> إرسال</button>
+                        </div>
+                    </div>
+                    <div id="transferStatus" style="margin-top: 10px; font-size: 12px; text-align: center; display: none;"></div>
+                </div>
+                <button onclick="closeCreditsModal()" style="background: transparent; border: 1px solid var(--stone-border); color: var(--text-dim); font-size: 13px; cursor: pointer; padding: 5px; border-radius: 30px; margin-top: 5px; font-family: 'Tajawal', sans-serif;"><i class="bi bi-x-lg"></i> إغلاق</button>
+            </div>
+        </div>
 
-    <script>
-        const libraryItems = {{ library_items|tojson|default('[]') }};
-        const activeAd = {{ active_ad|tojson|default('null') }};
-        let activeCategory = 'all';
-        let adTimerInterval = null;
-        let pendingCopyText = null;
+        <div class="credits-modal-overlay" id="noCreditsModal" onclick="closeNoCreditsModalOnBackdrop(event)">
+            <div class="credits-modal-box" style="max-width: 380px;" onclick="event.stopPropagation()">
+                <i class="bi bi-exclamation-triangle-fill" style="font-size: 50px; color: var(--coral); margin-bottom: 15px; display: block;"></i>
+                <h2 style="font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 10px;">بلغت حدك المسموح</h2>
+                <p style="font-size: 14px; color: var(--text-dim); line-height: 1.6; margin-bottom: 25px;">لقد استنفذت جميع نقاطك المجانية. للحصول على المزيد من التوليدات ومواصلة الإبداع، يرجى التواصل معنا.</p>
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                    <a href="https://wa.me/967730577358" target="_blank" style="display: block; width: 100%; padding: 12px; border-radius: 14px; color: var(--white); font-weight: 700; text-decoration: none; background: var(--btn); text-align: center;">واتساب</a>
+                    <a href="https://t.me/OlIiIl7" target="_blank" style="display: block; width: 100%; padding: 12px; border-radius: 14px; color: var(--white); font-weight: 700; text-decoration: none; background: var(--coral); text-align: center;">تلجرام</a>
+                </div>
+                <button onclick="closeNoCreditsModal()" style="background: transparent; border: 1px solid var(--stone-border); color: var(--text-dim); padding: 8px 16px; border-radius: 30px; font-weight: 600; cursor: pointer; width: 100%; font-family: 'Tajawal', sans-serif;">إغلاق</button>
+            </div>
+        </div>
 
-        function setupCategories() {
-            const buttons = document.querySelectorAll('.category-btn');
-            buttons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    buttons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    activeCategory = btn.dataset.category;
-                    filterGallery();
+        <script>
+            const patterns = {{ patterns|tojson }};
+            let userId = {{ user_id|tojson }};
+            const latestNotification = {{ latest_notification|tojson }};
+            const latestAd = {{ latest_ad|tojson }};
+            let userData = {{ user_data|tojson }};
+            let currentPatternId = null;
+            let isProcessing = false;
+            let isStreaming = false;
+            let abortController = null;
+
+            function initScreen() {
+                if (!userId) { window.location.href = '/sign'; return; }
+                if (!userData || !userData.username) { window.location.href = '/sign'; return; }
+                renderPatternsStrip(); updateCreditsBadge(userData.credits); updateDailyGiftState(); updateSettingsDisplay();
+                fetchMembersCount();
+                fetchNotifications();
+            }
+
+            async function fetchMembersCount() {
+                try {
+                    const res = await fetch('/api/users_count');
+                    const data = await res.json();
+                    if (data && data.count !== undefined) {
+                        document.querySelector('#membersCount span').textContent = data.count.toLocaleString('ar-SA');
+                    }
+                } catch (e) { console.log('Failed to fetch members count'); }
+            }
+
+            async function fetchNotifications() {
+                try {
+                    const res = await fetch('/api/notifications');
+                    const data = await res.json();
+                    const container = document.getElementById('notificationsContent');
+                    if (data && data.length > 0) {
+                        container.innerHTML = data.map(n => `
+                            <div class="notification-item">
+                                <div class="notif-title"><i class="bi bi-bell-fill"></i> ${n.title}</div>
+                                <div class="notif-text">${n.text}</div>
+                                <div class="notif-date"><i class="bi bi-clock"></i> ${new Date(n.created_at).toLocaleDateString('ar-SA')}</div>
+                            </div>
+                        `).join('');
+                    }
+                } catch (e) { console.log('Failed to fetch notifications'); }
+            }
+
+            function updateCreditsBadge(credits) { document.getElementById('creditsBadge').innerHTML = `<i class="bi bi-stars"></i> ${credits} نقاط`; document.getElementById('settingsCreditsDisplay').textContent = credits; }
+            function updateSettingsDisplay() { document.getElementById('settingsUsername').value = userData.username || ''; }
+            function updateDailyGiftState() {
+                const btn = document.getElementById('dailyGiftBtn'); const statusMsg = document.getElementById('dailyGiftStatus');
+                if (!userData) return;
+                const lastGift = userData.last_daily_gift; const today = new Date().toISOString().split('T')[0];
+                if (lastGift === today) { btn.style.background = 'var(--text-faint)'; btn.style.cursor = 'default'; btn.innerHTML = '<i class="bi bi-check-circle"></i> تم الاستلام'; btn.disabled = true; statusMsg.style.display = 'block'; }
+                else { btn.style.background = 'var(--btn)'; btn.style.cursor = 'pointer'; btn.innerHTML = '<i class="bi bi-stars"></i> الحصول'; btn.disabled = false; statusMsg.style.display = 'none'; }
+            }
+            function showToastNotification(message, duration = 10000) {
+                const toast = document.createElement('div');
+                toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--glass);color:#fff;padding:12px 24px;border-radius:50px;font-weight:700;z-index:2000;box-shadow:0 8px 30px rgba(249,92,75,0.3);font-family:Tajawal,sans-serif;';
+                toast.innerText = message; document.body.appendChild(toast);
+                setTimeout(() => { toast.remove(); }, duration);
+            }
+
+            function renderPatternsStrip() {
+                const container = document.getElementById('patternsStrip');
+                if (!patterns || patterns.length === 0) { container.innerHTML = '<div style="color:var(--text-faint); padding: 6px; font-size:13px; font-weight:600;">لا توجد أنماط</div>'; return; }
+                container.innerHTML = '';
+                patterns.forEach(p => {
+                    const btn = document.createElement('button');
+                    btn.className = 'strip-btn' + (p.id === currentPatternId ? ' active' : '');
+                    btn.setAttribute('data-id', p.id);
+                    btn.onclick = function() { selectPatternStrip(p.id); };
+                    btn.textContent = p.name;
+                    container.appendChild(btn);
+                });
+                if (!currentPatternId || !patterns.some(p => p.id === currentPatternId)) { selectPatternStrip(patterns[0].id); }
+                else { updateStripScrollButtons(); }
+            }
+
+            function selectPatternStrip(patternId) {
+                currentPatternId = patternId;
+                const p = patterns.find(p => p.id === patternId);
+                if (p) {
+                    const img = document.getElementById('selectedPatternImg');
+                    img.src = p.image_url; img.style.display = 'block';
+                    document.getElementById('noPatternMsg').style.display = 'none';
+                }
+                renderPatternsStrip();
+            }
+
+            function updateStripScrollButtons() {
+                const container = document.getElementById('patternsStrip');
+                const leftBtn = document.getElementById('scrollLeftBtn');
+                const rightBtn = document.getElementById('scrollRightBtn');
+                if (!container || !leftBtn || !rightBtn) return;
+                const isOverflowing = container.scrollWidth > container.clientWidth;
+                if (isOverflowing) {
+                    leftBtn.classList.add('visible'); rightBtn.classList.add('visible');
+                    const isAtStart = container.scrollLeft <= 0;
+                    const isAtEnd = container.scrollLeft >= (container.scrollWidth - container.clientWidth - 5);
+                    leftBtn.style.opacity = isAtStart ? '0.5' : '1'; leftBtn.style.pointerEvents = isAtStart ? 'none' : 'auto';
+                    rightBtn.style.opacity = isAtEnd ? '0.5' : '1'; rightBtn.style.pointerEvents = isAtEnd ? 'none' : 'auto';
+                } else { leftBtn.classList.remove('visible'); rightBtn.classList.remove('visible'); }
+            }
+            function scrollPatterns(amount) { const container = document.getElementById('patternsStrip'); if (!container) return; container.scrollLeft += amount; }
+            document.addEventListener('DOMContentLoaded', () => {
+                const container = document.getElementById('patternsStrip');
+                if (container) { container.addEventListener('scroll', updateStripScrollButtons); window.addEventListener('resize', updateStripScrollButtons); }
+            });
+
+            function updateSendButton(isStreamingActive) {
+                const btn = document.getElementById('mainSendBtn');
+                if (!btn) return;
+                if (isStreamingActive) { btn.classList.add('stop-btn'); btn.innerHTML = '<i class="bi bi-stop-circle"></i> إيقاف'; }
+                else { btn.classList.remove('stop-btn'); btn.innerHTML = '<i class="bi bi-stars"></i> إنشاء'; }
+            }
+            function showLoadingPrompt() { document.getElementById('promptResultText').value = 'جاري التوليد...'; }
+            function updatePromptResult(text) { document.getElementById('promptResultText').value = text; }
+            function copyGeneratedPrompt() {
+                const text = document.getElementById('promptResultText').value; if (!text) return;
+                navigator.clipboard.writeText(text).then(() => {
+                    const btn = document.querySelector('.copy-btn'); const original = btn.innerHTML;
+                    btn.classList.add('success'); btn.innerHTML = '<i class="bi bi-check-lg"></i> تم النسخ';
+                    setTimeout(() => { btn.classList.remove('success'); btn.innerHTML = original; }, 2000);
+                }).catch(() => { alert('فشل نسخ النص'); });
+            }
+            function stopStreaming() { if (abortController) { abortController.abort(); abortController = null; isStreaming = false; isProcessing = false; updateSendButton(false); } }
+
+            async function handleSendWelcome() {
+                if (isStreaming) { stopStreaming(); return; }
+                if (isProcessing) return;
+                if (!currentPatternId) { showToastNotification('يرجى اختيار نمط أولاً.'); return; }
+                const input = document.getElementById('mainInput');
+                const msg = input.value.trim();
+                if (!msg) return;
+
+                isProcessing = true;
+                abortController = new AbortController();
+                isStreaming = true;
+                updateSendButton(true);
+                showLoadingPrompt();
+
+                try {
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ pattern_id: currentPatternId, message: msg }),
+                        signal: abortController.signal
+                    });
+
+                    if (response.status === 401) {
+                        updatePromptResult('⚠️ جلسة منتهية، يرجى تسجيل الدخول مرة أخرى.');
+                        setTimeout(() => window.location.href = '/sign', 2000); return;
+                    }
+                    if (response.status === 402) { openNoCreditsModal(); return; }
+                    if (response.status === 503) {
+                        const errData = await response.json().catch(() => ({}));
+                        updatePromptResult('⚠️ ' + (errData.error || 'الخدمة غير متاحة حالياً')); return;
+                    }
+                    if (response.status >= 500) {
+                        const errData = await response.json().catch(() => ({}));
+                        updatePromptResult('⚠️ ' + (errData.error || 'خطأ في الخادم، تم إرجاع النقطة'));
+                        await refreshUserInfo(); return;
+                    }
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        updatePromptResult('⚠️ ' + (errData.error || 'خطأ غير متوقع')); return;
+                    }
+
+                    if (!isStreaming) { throw new Error('Stream cancelled'); }
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let fullText = '';
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        const chunk = decoder.decode(value, { stream: true });
+                        if (chunk.trim().startsWith('{"error"')) {
+                            try { const err = JSON.parse(chunk); updatePromptResult('⚠️ ' + err.error); await refreshUserInfo(); return; } catch {}
+                        }
+                        fullText += chunk;
+                    }
+
+                    if (fullText && fullText.trim()) {
+                        const badge = document.getElementById('creditsBadge');
+                        let credits = parseInt(badge.textContent.match(/\d+/)?.[0] || 0);
+                        if (credits > 0) { credits--; updateCreditsBadge(credits); }
+                        updatePromptResult(fullText);
+                        document.getElementById('mainInput').value = '';
+                    } else {
+                        updatePromptResult('لم يتم استلام رد من الخادم.');
+                        await refreshUserInfo();
+                    }
+                } catch (err) {
+                    if (err.name === 'AbortError' || err.message === 'Stream cancelled') {}
+                    else { updatePromptResult('⚠️ خطأ في الاتصال بالخادم، تحقق من اتصالك.'); await refreshUserInfo(); }
+                } finally {
+                    isStreaming = false; isProcessing = false; abortController = null; updateSendButton(false);
+                }
+            }
+
+            async function refreshUserInfo() {
+                try {
+                    const res = await fetch('/api/user_info');
+                    const data = await res.json();
+                    if (data && data.credits !== undefined) {
+                        userData.credits = data.credits; updateCreditsBadge(data.credits);
+                    }
+                } catch (e) { console.log('Failed to refresh user info'); }
+            }
+
+            function openSettingsSheet() {
+                document.getElementById('settingsUsername').value = userData.username || '';
+                document.getElementById('settingsPassword').value = '';
+                document.getElementById('settingsSheet').classList.add('active');
+            }
+            function openNotificationsSheet() {
+                document.getElementById('notificationsSheet').classList.add('active');
+            }
+            function copyField(id) {
+                const input = document.getElementById(id);
+                if(!input.value) return;
+                navigator.clipboard.writeText(input.value).then(() => { showToastNotification('تم نسخ القيمة'); });
+            }
+            async function updateSettings() {
+                const username = document.getElementById('settingsUsername').value.trim();
+                const password = document.getElementById('settingsPassword').value.trim();
+                if(!username || !password) { showToastNotification('يرجى ملء جميع الحقول'); return; }
+                try {
+                    const res = await fetch('/api/update_user', {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({username, password})
+                    });
+                    const data = await res.json();
+                    if(data.success) { showToastNotification('تم تحديث البيانات بنجاح'); userData.username = username; closeSheet('settingsSheet'); }
+                    else { showToastNotification(data.message); }
+                } catch(err) { showToastNotification('خطأ في الاتصال'); }
+            }
+            function closeSheet(id) { document.getElementById(id).classList.remove('active'); }
+            function closeSheetOnBackdrop(e, id) { if (e.target === e.currentTarget) closeSheet(id); }
+
+            function openCreditsModal() { updateDailyGiftState(); document.getElementById('creditsModal').classList.add('active'); }
+            function closeCreditsModal() { document.getElementById('creditsModal').classList.remove('active'); }
+            function closeCreditsModalOnBackdrop(e) { if (e.target === e.currentTarget) closeCreditsModal(); }
+            async function claimDailyGift() {
+                const btn = document.getElementById('dailyGiftBtn'); if (btn.disabled) return;
+                btn.disabled = true; btn.innerHTML = 'جاري التحميل...';
+                try {
+                    const res = await fetch('/api/claim_daily_gift', { method: 'POST' });
+                    const data = await res.json();
+                    if(data.success) {
+                        showToastNotification('🎉 ' + data.message);
+                        userData.credits = data.credits; updateCreditsBadge(data.credits);
+                        userData.last_daily_gift = new Date().toISOString().split('T')[0];
+                        updateDailyGiftState();
+                    } else { showToastNotification(data.message); btn.disabled = false; btn.innerHTML = '<i class="bi bi-stars"></i> الحصول'; }
+                } catch (err) { showToastNotification('خطأ في الاتصال بالخادم'); btn.disabled = false; btn.innerHTML = '<i class="bi bi-stars"></i> الحصول'; }
+            }
+            async function transferCredits() {
+                const usernameInput = document.getElementById('transferTarget');
+                const amountInput = document.getElementById('transferAmount');
+                const statusMsg = document.getElementById('transferStatus');
+                const target = usernameInput.value.trim(); const amount = parseInt(amountInput.value);
+                if (!target || amount <= 0) { statusMsg.style.display = 'block'; statusMsg.style.color = '#dc2626'; statusMsg.textContent = 'يرجى ملء البيانات بشكل صحيح'; return; }
+                statusMsg.style.display = 'block'; statusMsg.style.color = 'var(--text-dim)'; statusMsg.textContent = 'جاري التحويل...';
+                try {
+                    const res = await fetch('/api/transfer_credits', {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({username: target, amount: amount})
+                    });
+                    const data = await res.json();
+                    if(data.success) {
+                        statusMsg.style.color = 'var(--btn)'; statusMsg.textContent = data.message;
+                        userData.credits = data.credits; updateCreditsBadge(data.credits);
+                        usernameInput.value = ''; amountInput.value = '1';
+                        setTimeout(() => { statusMsg.style.display = 'none'; }, 3000);
+                    } else { statusMsg.style.color = '#dc2626'; statusMsg.textContent = data.message; }
+                } catch (err) { statusMsg.style.color = '#dc2626'; statusMsg.textContent = 'خطأ في الاتصال بالخادم'; }
+            }
+            function openNoCreditsModal() { document.getElementById('noCreditsModal').classList.add('active'); }
+            function closeNoCreditsModal() { document.getElementById('noCreditsModal').classList.remove('active'); }
+            function closeNoCreditsModalOnBackdrop(e) { if (e.target === e.currentTarget) closeNoCreditsModal(); }
+            function checkMaintenancePass() {
+                const pass = document.getElementById('maintenancePass').value;
+                if (pass === 'EVILE_PROMPTS_2007') { document.cookie = "maintenance_bypass=true; path=/"; location.reload(); }
+                else { alert('كلمة المرور غير صحيحة.'); }
+            }
+            function handleNavClick(event, url) {
+                event.preventDefault();
+                const btn = event.currentTarget;
+                btn.style.transform = 'scale(0.85)';
+                btn.style.transition = 'transform 0.15s ease';
+                setTimeout(() => {
+                    btn.style.transform = 'scale(1.05)';
+                    setTimeout(() => { window.location.href = url; }, 120);
+                }, 150);
+            }
+            document.addEventListener('DOMContentLoaded', () => {
+                initScreen();
+                document.getElementById('mainInput').addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); }
                 });
             });
-        }
-
-        function filterGallery() {
-            const cards = document.querySelectorAll('.prompt-card');
-            const emptyState = document.querySelector('.empty-state');
-            let visibleCount = 0;
-            cards.forEach(card => {
-                const cardCategory = card.dataset.category;
-                if (activeCategory === 'all' || cardCategory === activeCategory) {
-                    card.style.display = 'block'; visibleCount++;
-                } else { card.style.display = 'none'; }
-            });
-            if (emptyState) {
-                if (visibleCount === 0 && cards.length > 0) {
-                    emptyState.style.display = 'block';
-                    emptyState.querySelector('h3').textContent = 'لا توجد برومبتات في هذا التصنيف';
-                } else { emptyState.style.display = 'none'; }
-            }
-        }
-
-        function handleCopyFromData(event) {
-            event.stopPropagation();
-            const btn = event.currentTarget;
-            const text = btn.getAttribute('data-prompt');
-            if (!text) return;
-            if (activeAd && activeAd.id) {
-                pendingCopyText = text;
-                showAdPopup();
-            } else { doCopy(text, btn); }
-        }
-
-        function showAdPopup() {
-            const overlay = document.getElementById('adOverlay');
-            const timerEl = document.getElementById('adTimer');
-            const btnText = document.getElementById('adBtnText');
-            overlay.classList.add('show');
-            let seconds = activeAd && activeAd.duration_seconds ? activeAd.duration_seconds : 5;
-            timerEl.textContent = seconds;
-            btnText.textContent = `${activeAd && activeAd.button_text ? activeAd.button_text : 'زيارة'} (${seconds})`;
-            adTimerInterval = setInterval(() => {
-                seconds--;
-                timerEl.textContent = seconds;
-                btnText.textContent = `${activeAd && activeAd.button_text ? activeAd.button_text : 'زيارة'} (${seconds})`;
-                if (seconds <= 0) {
-                    clearInterval(adTimerInterval);
-                    timerEl.style.display = 'none';
-                    btnText.textContent = activeAd && activeAd.button_text ? activeAd.button_text : 'زيارة';
-                    closeAdPopup();
-                    trackAdView(activeAd && activeAd.duration_seconds ? activeAd.duration_seconds : 5);
-                    if (pendingCopyText) {
-                        const btn = document.querySelector(`[data-prompt="${pendingCopyText.replace(/"/g, '\"')}"]`);
-                        doCopy(pendingCopyText, btn); pendingCopyText = null;
-                    }
-                }
-            }, 1000);
-        }
-
-        function trackAdView(seconds) {
-            try {
-                fetch('/api/track_ad_view', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ad_id: activeAd && activeAd.id ? activeAd.id : null, seconds })
-                }).catch(() => {});
-            } catch (e) {}
-        }
-
-        function closeAdPopup() {
-            document.getElementById('adOverlay').classList.remove('show');
-            if (adTimerInterval) { clearInterval(adTimerInterval); adTimerInterval = null; }
-        }
-
-        function doCopy(text, btnElement) {
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(text).then(() => {
-                    showToast();
-                    if (btnElement) markButtonCopied(btnElement);
-                }).catch(() => fallbackCopy(text, btnElement));
-            } else { fallbackCopy(text, btnElement); }
-        }
-
-        function fallbackCopy(text, btnElement) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed'; textarea.style.opacity = '0';
-            document.body.appendChild(textarea); textarea.select();
-            document.execCommand('copy'); document.body.removeChild(textarea);
-            showToast();
-            if (btnElement) markButtonCopied(btnElement);
-        }
-
-        function markButtonCopied(btn) {
-            const originalHTML = btn.innerHTML;
-            btn.classList.add('copied');
-            btn.innerHTML = '<i class="bi bi-check-lg"></i> تم النسخ!';
-            setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = originalHTML; }, 2000);
-        }
-
-        function showToast() {
-            const toast = document.getElementById('toast');
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2500);
-        }
-
-        function handleNavClick(event, url) {
-            event.preventDefault(); event.stopPropagation();
-            const btn = event.currentTarget;
-            const allBtns = document.querySelectorAll('.bottom-nav-bar .nav-item');
-            allBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            setTimeout(() => { window.location.href = url; }, 100);
-        }
-
-        function updateCreditsBadge() {
-            const userData = {{ user_data|tojson|default('null') }};
-            if (userData && userData.credits !== undefined) {
-                document.getElementById('creditsBadge').innerHTML = `<i class="bi bi-stars"></i> ${userData.credits} نقاط`;
-            }
-        }
-
-        function checkAuth() {
-            const userId = {{ user_id|tojson|default('null') }};
-            if (!userId) { window.location.href = '/sign'; return false; }
-            return true;
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            if (!checkAuth()) return;
-            setupCategories();
-            updateCreditsBadge();
-        });
-    </script>
+        </script>
+    {% endif %}
 </body>
 </html>
