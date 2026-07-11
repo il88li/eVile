@@ -8,22 +8,39 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --paper: #F6F4F1;
+            --stone: #E4DED2;
+            --coral: #F95C4B;
+            --black: #000000;
+            --bg: var(--paper);
+            --glass: var(--coral);
+            --btn: var(--coral);
+            --glass-light: rgba(249, 92, 75, 0.08);
+            --glass-border: rgba(249, 92, 75, 0.18);
+            --text: var(--black);
+            --text-dim: #5A5652;
+            --text-faint: #8A8580;
+            --white: #FFFFFF;
+            --stone-light: rgba(228, 222, 210, 0.5);
+            --stone-border: rgba(228, 222, 210, 0.8);
+        }
         body { font-family: 'Tajawal', sans-serif; background: linear-gradient(160deg, #f2f4f8 0%, #e1dbf5 100%); min-height: 100vh; padding-bottom: 110px; color: #1F2937; display: flex; align-items: center; justify-content: center; }
-        .glass-card, .modal-content, .pattern-card, .notification-item, .login-card, .bottom-nav { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.95); box-shadow: 0 8px 32px rgba(123, 97, 255, 0.04); border-radius: 18px; }
+        .glass-card, .modal-content, .pattern-card, .notification-item, .login-card, .bottom-nav { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.95); box-shadow: 0 8px 32px rgba(249, 92, 75, 0.04); border-radius: 18px; }
         .admin-container { max-width: 1200px; width: 100%; margin: 0 auto; padding: 20px; }
         .login-wrapper { max-width: 420px; margin: 0 auto; width: 100%; }
         .login-card { padding: 40px 32px; text-align: center; }
-        .login-icon { width: 64px; height: 64px; background: rgba(123, 97, 255, 0.08); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; border: 1px solid rgba(123,97,255,0.15); }
-        .login-icon i { font-size: 36px; color: #7B61FF; }
+        .login-icon { width: 64px; height: 64px; background: rgba(249, 92, 75, 0.08); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; border: 1px solid rgba(249,92,75,0.15); }
+        .login-icon i { font-size: 36px; color: #F95C4B; }
         .login-title { font-size: 28px; font-weight: 800; color: #1F2937; margin-bottom: 8px; }
         .login-subtitle { color: #6B7280; font-size: 14px; }
         .form-group { margin-bottom: 24px; text-align: right; }
         label { display: block; margin-bottom: 8px; color: #6B7280; font-weight: 500; font-size: 14px; }
-        input, textarea, select { width: 100%; padding: 12px 16px; background: rgba(243, 244, 246, 0.8); border: 1px solid rgba(123,97,255,0.1); border-radius: 12px; color: #1F2937; font-family: 'Tajawal', sans-serif; font-size: 14px; outline: none; }
-        input:focus, textarea:focus { border-color: #7B61FF; background: #ffffff; }
+        input, textarea, select { width: 100%; padding: 12px 16px; background: rgba(243, 244, 246, 0.8); border: 1px solid rgba(249,92,75,0.1); border-radius: 12px; color: #1F2937; font-family: 'Tajawal', sans-serif; font-size: 14px; outline: none; }
+        input:focus, textarea:focus { border-color: #F95C4B; background: #ffffff; }
         textarea { min-height: 80px; resize: vertical; }
         .btn { padding: 10px 20px; background: rgba(243, 244, 246, 0.8); border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 40px; color: #6B7280; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-primary { background: #7B61FF; border-color: #7B61FF; color: #fff; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.2); }
+        .btn-primary { background: #F95C4B; border-color: #F95C4B; color: #fff; box-shadow: 0 4px 15px rgba(249, 92, 75, 0.2); }
         .btn-danger { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #dc2626; }
         .btn-success { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.2); color: #16a34a; }
         .btn-warning { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); color: #d97706; }
@@ -31,18 +48,18 @@
         .btn-login { width: 100%; padding: 14px; font-size: 16px; }
         .flash { padding: 12px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 14px; color: #dc2626; margin-bottom: 24px; text-align: center; font-size: 14px; }
         .flash.success { background: rgba(34,197,94,0.05); border-color: rgba(34,197,94,0.1); color: #16a34a; }
-        .bottom-nav { position: fixed; bottom: 16px; left: 20px; right: 20px; z-index: 999; display: flex; justify-content: center; align-items: center; padding: 10px 16px; background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.95); border-radius: 20px; max-width: 780px; margin: 0 auto; overflow-x: auto; gap: 10px; flex-wrap: nowrap; scrollbar-width: none; box-shadow: 0 8px 32px rgba(123, 97, 255, 0.03); }
+        .bottom-nav { position: fixed; bottom: 16px; left: 20px; right: 20px; z-index: 999; display: flex; justify-content: center; align-items: center; padding: 10px 16px; background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.95); border-radius: 20px; max-width: 800px; margin: 0 auto; overflow-x: auto; gap: 10px; flex-wrap: nowrap; scrollbar-width: none; box-shadow: 0 8px 32px rgba(249, 92, 75, 0.03); }
         .bottom-nav::-webkit-scrollbar { display: none; }
         .bottom-nav-btn { flex-shrink: 0; width: 48px; height: 48px; border-radius: 14px; background: rgba(243, 244, 246, 0.8); border: 1px solid rgba(255, 255, 255, 0.9); color: #6B7280; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
-        .bottom-nav-btn.active { background: #7B61FF; border-color: #7B61FF; color: #fff; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.2); }
+        .bottom-nav-btn.active { background: #F95C4B; border-color: #F95C4B; color: #fff; box-shadow: 0 4px 15px rgba(249, 92, 75, 0.2); }
         .bottom-nav-btn:active { transform: scale(0.85); }
         .tab-content { display: none; padding: 20px; margin-top: 10px; }
         .tab-content.active { display: block; }
-        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-right: 12px; border-right: 3px solid rgba(123,97,255,0.2); display: flex; align-items: center; gap: 8px; color: #1F2937; }
+        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-right: 12px; border-right: 3px solid rgba(249,92,75,0.2); display: flex; align-items: center; gap: 8px; color: #1F2937; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
         .pattern-card { padding: 12px; margin-bottom: 10px; }
         .pattern-header { display: flex; align-items: center; gap: 10px; }
-        .pattern-img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(123,97,255,0.1); }
+        .pattern-img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(249,92,75,0.1); }
         .pattern-name { font-weight: 700; color: #1F2937; font-size: 14px; }
         .pattern-meta { font-size: 11px; color: #6B7280; }
         .card-actions { display: flex; gap: 8px; }
@@ -50,12 +67,12 @@
         .modal.active { display: flex; }
         .modal-content { padding: 20px; max-width: 500px; width: 100%; }
         .library-item { padding: 12px; margin-bottom: 10px; }
-        .library-item-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(123,97,255,0.1); }
-        .library-item-category { display: inline-block; padding: 2px 10px; background: rgba(123,97,255,0.08); border-radius: 20px; font-size: 11px; color: #7B61FF; margin-top: 4px; }
-        .category-tag { display: inline-block; padding: 4px 12px; background: rgba(123,97,255,0.08); border-radius: 20px; font-size: 12px; color: #7B61FF; margin: 2px; border: 1px solid rgba(123,97,255,0.15); }
+        .library-item-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(249,92,75,0.1); }
+        .library-item-category { display: inline-block; padding: 2px 10px; background: rgba(249,92,75,0.08); border-radius: 20px; font-size: 11px; color: #F95C4B; margin-top: 4px; }
+        .category-tag { display: inline-block; padding: 4px 12px; background: rgba(249,92,75,0.08); border-radius: 20px; font-size: 12px; color: #F95C4B; margin: 2px; border: 1px solid rgba(249,92,75,0.15); }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
-        .stat-card { background: rgba(123,97,255,0.05); border: 1px solid rgba(123,97,255,0.1); border-radius: 14px; padding: 16px; text-align: center; }
-        .stat-number { font-size: 28px; font-weight: 900; color: #7B61FF; }
+        .stat-card { background: rgba(249,92,75,0.05); border: 1px solid rgba(249,92,75,0.1); border-radius: 14px; padding: 16px; text-align: center; }
+        .stat-number { font-size: 28px; font-weight: 900; color: #F95C4B; }
         .stat-label { font-size: 12px; color: #6B7280; margin-top: 4px; }
         .ad-card { padding: 14px; margin-bottom: 10px; }
         .ad-status { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
@@ -68,7 +85,7 @@
     <div class="admin-container">
         {% if session.get('logged_in') %}
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="font-size: 24px; font-weight: 900; color: #1F2937;"><i class="bi bi-shield-lock" style="color: #7B61FF;"></i> لوحة التحكم</h2>
+                <h2 style="font-size: 24px; font-weight: 900; color: #1F2937;"><i class="bi bi-shield-lock" style="color: #F95C4B;"></i> لوحة التحكم</h2>
                 <a href="/admin/logout" class="btn btn-danger" style="background: linear-gradient(135deg, #EF4444, #F87171); padding: 10px 20px; text-decoration: none; border-radius: 12px; display: flex; align-items: center; gap: 8px; font-weight: 700;">
                     <i class="bi bi-box-arrow-left"></i> تسجيل الخروج
                 </a>
@@ -76,7 +93,7 @@
 
             <!-- Patterns Tab -->
             <div id="tab-patterns" class="tab-content active glass-card">
-                <div class="section-title"><i class="bi bi-plus-circle" style="color:#7B61FF;"></i> إضافة نمط جديد</div>
+                <div class="section-title"><i class="bi bi-plus-circle" style="color:#F95C4B;"></i> إضافة نمط جديد</div>
                 <form method="POST" action="/admin/pattern/add">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <div class="form-grid">
@@ -87,7 +104,7 @@
                     <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> إضافة نمط</button>
                 </form>
 
-                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-list-ul" style="color:#7B61FF;"></i> قائمة الأنماط</div>
+                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-list-ul" style="color:#F95C4B;"></i> قائمة الأنماط</div>
                 <div class="patterns-list">
                     {% for pat in patterns %}
                     <div class="pattern-card glass-card">
@@ -111,7 +128,7 @@
 
             <!-- Categories Tab -->
             <div id="tab-categories" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-tags" style="color:#7B61FF;"></i> إدارة التصنيفات</div>
+                <div class="section-title"><i class="bi bi-tags" style="color:#F95C4B;"></i> إدارة التصنيفات</div>
 
                 <div class="stats-grid">
                     <div class="stat-card">
@@ -135,13 +152,13 @@
                     <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> إضافة تصنيف</button>
                 </form>
 
-                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-grid-3x3-gap" style="color:#7B61FF;"></i> التصنيفات الحالية</div>
+                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-grid-3x3-gap" style="color:#F95C4B;"></i> التصنيفات الحالية</div>
                 <div class="categories-list">
                     {% for cat in categories %}
                     <div class="pattern-card glass-card">
                         <div class="pattern-header">
-                            <div style="width:40px;height:40px;border-radius:8px;background:rgba(123,97,255,0.1);display:flex;align-items:center;justify-content:center;">
-                                <i class="bi {{ cat.icon }}" style="color:#7B61FF;font-size:18px;"></i>
+                            <div style="width:40px;height:40px;border-radius:8px;background:rgba(249,92,75,0.1);display:flex;align-items:center;justify-content:center;">
+                                <i class="bi {{ cat.icon }}" style="color:#F95C4B;font-size:18px;"></i>
                             </div>
                             <div style="flex:1;">
                                 <div class="pattern-name">{{ cat.display_name }}</div>
@@ -163,7 +180,7 @@
 
             <!-- Library Tab -->
             <div id="tab-library" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-collection" style="color:#7B61FF;"></i> إضافة برومبت للمكتبة</div>
+                <div class="section-title"><i class="bi bi-collection" style="color:#F95C4B;"></i> إضافة برومبت للمكتبة</div>
                 <form method="POST" action="/admin/library/add">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <div class="form-grid">
@@ -181,7 +198,7 @@
                     <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> إضافة للمكتبة</button>
                 </form>
 
-                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-grid-3x3-gap" style="color:#7B61FF;"></i> برومبتات المكتبة</div>
+                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-grid-3x3-gap" style="color:#F95C4B;"></i> برومبتات المكتبة</div>
                 <div class="library-list">
                     {% for item in library_items %}
                     <div class="library-item glass-card">
@@ -208,7 +225,7 @@
 
             <!-- Library Ads Tab -->
             <div id="tab-library-ads" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-badge-ad" style="color:#7B61FF;"></i> إعلانات المكتبة</div>
+                <div class="section-title"><i class="bi bi-badge-ad" style="color:#F95C4B;"></i> إعلانات المكتبة</div>
 
                 <form method="POST" action="/admin/library_ad/add">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -227,7 +244,7 @@
                     <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> إضافة إعلان</button>
                 </form>
 
-                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-list-ul" style="color:#7B61FF;"></i> الإعلانات الحالية</div>
+                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-list-ul" style="color:#F95C4B;"></i> الإعلانات الحالية</div>
                 <div class="ads-list">
                     {% for ad in library_ads %}
                     <div class="ad-card glass-card">
@@ -257,7 +274,7 @@
 
             <!-- Notifications Tab -->
             <div id="tab-notifications" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-send" style="color:#7B61FF;"></i> إرسال إشعار جديد</div>
+                <div class="section-title"><i class="bi bi-send" style="color:#F95C4B;"></i> إرسال إشعار جديد</div>
                 <form method="POST" action="/admin/notification/add">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <div class="form-group"><label>العنوان</label><input type="text" name="title" required></div>
@@ -265,10 +282,10 @@
                     <div class="form-group"><label>مدة الظهور (ساعات)</label><input type="number" name="duration_hours" value="1" min="1" step="1"></div>
                     <button type="submit" class="btn btn-primary"><i class="bi bi-bell"></i> إرسال الإشعار</button>
                 </form>
-                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-clock-history" style="color:#7B61FF;"></i> الإشعارات المرسلة</div>
+                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-clock-history" style="color:#F95C4B;"></i> الإشعارات المرسلة</div>
                 {% for notif in notifications %}
                 <div class="notification-item glass-card">
-                    <div class="notification-title"><i class="bi bi-bell" style="color:#7B61FF;"></i> {{ notif.title }} <span style="font-size: 10px; color:#6B7280;">({{ notif.created_at }})</span></div>
+                    <div class="notification-title"><i class="bi bi-bell" style="color:#F95C4B;"></i> {{ notif.title }} <span style="font-size: 10px; color:#6B7280;">({{ notif.created_at }})</span></div>
                     <div class="notification-text" style="color: #6B7280;">{{ notif.text }}</div>
                     <div class="notification-meta" style="font-size: 10px; color:#9CA3AF; margin-top:5px;">المدة: {{ notif.duration_hours }} ساعة</div>
                 </div>
@@ -279,7 +296,7 @@
 
             <!-- Credits Tab -->
             <div id="tab-credits" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-coin" style="color:#7B61FF;"></i> شحن نقاط المستخدمين</div>
+                <div class="section-title"><i class="bi bi-coin" style="color:#F95C4B;"></i> شحن نقاط المستخدمين</div>
                 <div style="max-width: 400px;">
                     <div class="form-group"><label>اسم المستخدم</label><input type="text" id="rechargeUsername" placeholder="أدخل اسم المستخدم"></div>
                     <div class="form-group"><label>عدد النقاط</label><input type="number" id="rechargeAmount" value="10" min="1"></div>
@@ -290,7 +307,7 @@
 
             <!-- Statistics Tab -->
             <div id="tab-stats" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-bar-chart-line" style="color:#7B61FF;"></i> إحصائيات الموقع</div>
+                <div class="section-title"><i class="bi bi-bar-chart-line" style="color:#F95C4B;"></i> إحصائيات الموقع</div>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-number">{{ users_count }}</div>
@@ -321,7 +338,7 @@
 
             <!-- Site Control Tab -->
             <div id="tab-site-control" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-power" style="color:#7B61FF;"></i> التحكم في نشاط الموقع</div>
+                <div class="section-title"><i class="bi bi-power" style="color:#F95C4B;"></i> التحكم في نشاط الموقع</div>
                 <div style="text-align: center; max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 20px;">
                     <div id="siteStatusIcon" style="font-size: 80px; cursor: pointer; transition: all 0.3s;"
                          onclick="toggleSiteStatus()"
@@ -340,10 +357,10 @@
                             <textarea id="offlineMessageInput" rows="4" style="width: 100%;">{{ site_settings.offline_message if site_settings else 'الموقع تحت الصيانة حالياً، نعتذر عن الإزعاج.' }}</textarea>
                         </div>
                     </div>
-                    <div style="display: flex; gap: 15px; margin-top: 5px; font-size: 24px; color: #7B61FF;">
-                        <a href="https://t.me/Evile_Prompts" target="_blank" style="color: #7B61FF; transition: 0.2s;"><i class="bi bi-telegram"></i></a>
-                        <a href="https://www.instagram.com/bla6c7" target="_blank" style="color: #7B61FF; transition: 0.2s;"><i class="bi bi-instagram"></i></a>
-                        <a href="https://wa.me/967730577358" target="_blank" style="color: #7B61FF; transition: 0.2s;"><i class="bi bi-whatsapp"></i></a>
+                    <div style="display: flex; gap: 15px; margin-top: 5px; font-size: 24px; color: #F95C4B;">
+                        <a href="https://t.me/Evile_Prompts" target="_blank" style="color: #F95C4B; transition: 0.2s;"><i class="bi bi-telegram"></i></a>
+                        <a href="https://www.instagram.com/bla6c7" target="_blank" style="color: #F95C4B; transition: 0.2s;"><i class="bi bi-instagram"></i></a>
+                        <a href="https://wa.me/967730577358" target="_blank" style="color: #F95C4B; transition: 0.2s;"><i class="bi bi-whatsapp"></i></a>
                     </div>
                     <button class="btn btn-primary" onclick="saveSiteSettings()" style="width: 100%; padding: 14px; justify-content: center;">
                         <i class="bi bi-floppy"></i> حفظ الإعدادات
@@ -370,7 +387,7 @@
                     <div class="login-subtitle">UFOQ Admin Panel</div>
                     <form method="POST" action="/admin">
                         <div class="form-group">
-                            <label><i class="bi bi-key" style="color:#7B61FF;"></i> كلمة المرور</label>
+                            <label><i class="bi bi-key" style="color:#F95C4B;"></i> كلمة المرور</label>
                             <input type="password" name="password" required placeholder="••••••••">
                         </div>
                         <button type="submit" class="btn btn-login btn-primary">دخول</button>
