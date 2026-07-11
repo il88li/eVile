@@ -167,6 +167,33 @@
             opacity: 1;
         }
 
+        @media (min-width: 768px) {
+            .main-container { max-width: 900px; margin: 0 auto; padding: 80px 40px 160px 40px; }
+            .input-card { padding: 28px 32px; margin-bottom: 20px; }
+            .input-label { font-size: 16px; margin-bottom: 14px; }
+            .input-textarea { font-size: 16px; min-height: 140px; padding: 16px; }
+            .main-btn { width: 100%; max-width: 280px; height: 50px; font-size: 16px; font-weight: 800; margin: 0 auto; display: block; }
+            .prompt-result-wrapper { min-height: 160px; max-height: 320px; padding: 20px 24px; }
+            .patterns-card { padding: 24px 28px; }
+            .patterns-guidance-strip { padding: 8px 12px; font-size: 14px; }
+            .strip-btn { padding: 10px 18px; font-size: 14px; height: 38px; }
+            .single-pattern-container { min-height: 160px; transition: all 0.3s ease; }
+            .single-pattern-container:hover { transform: translateY(-8px); }
+            .bottom-nav-bar { bottom: 20px; left: 50%; transform: translateX(-50%); max-width: 520px; padding: 8px 12px; }
+            .nav-item { padding: 10px 20px; font-size: 14px; }
+            .nav-item i { font-size: 24px; }
+        }
+        @media (min-width: 1024px) {
+            .main-container { max-width: 1000px; padding: 100px 60px 180px 60px; }
+            .input-card { padding: 32px 40px; }
+            .input-label { font-size: 17px; }
+            .input-textarea { font-size: 17px; min-height: 160px; }
+            .main-btn { max-width: 320px; height: 56px; font-size: 17px; }
+            .prompt-result-wrapper { min-height: 200px; max-height: 400px; padding: 24px 28px; }
+            .patterns-card { padding: 28px 32px; }
+            .patterns-list { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+            .single-pattern-container { min-height: 180px; }
+        }
         @media (max-width: 600px) {
             .input-card, .patterns-card { padding: 14px 16px; max-width: 100%; border-radius: 20px; }
             .prompt-result-wrapper { min-height: 80px; max-height: 80px; padding: 12px; }
@@ -336,21 +363,27 @@
         </div>
 
         <style>
-            .bottom-sheet-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: flex-end; justify-content: center; }
-            .bottom-sheet-overlay.active { display: flex; }
-            .bottom-sheet { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 25px 25px 0 0; padding: 20px; animation: slideUp 0.4s ease; overflow-y: auto; display: flex; flex-direction: column; box-shadow: 0 -10px 40px rgba(123, 97, 255, 0.03); }
-            @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-            .sheet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(123,97,255,0.1); }
-            .sheet-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; color: #1F2937; }
-            .sheet-close { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.6); border: 1px solid rgba(123,97,255,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; color: #6B7280; }
-            .settings-group { margin-bottom: 16px; }
-            .settings-group label { font-size: 13px; font-weight: 700; color: #6B7280; display: block; margin-bottom: 6px; }
+            .bottom-sheet-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.25); backdrop-filter: blur(8px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+            .bottom-sheet-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+            .bottom-sheet { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.95); border-radius: 28px; padding: 28px; animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); overflow-y: auto; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(123, 97, 255, 0.15), inset 0 1px 0 rgba(255,255,255,0.8); max-width: 520px; width: 100%; max-height: 85vh; }
+            @keyframes scaleIn { from { transform: scale(0.85) translateY(-20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+            .sheet-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid rgba(123,97,255,0.12); }
+            .sheet-title { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 10px; color: #1F2937; }
+            .sheet-close { width: 36px; height: 36px; border-radius: 50%; background: rgba(123,97,255,0.08); border: 1px solid rgba(123,97,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; color: #7B61FF; font-size: 18px; transition: all 0.2s; }
+            .sheet-close:hover { background: rgba(123,97,255,0.15); transform: rotate(90deg); }
+            .sheet-close:active { transform: scale(0.88); }
+            .settings-group { margin-bottom: 18px; }
+            .settings-group label { font-size: 13px; font-weight: 700; color: #4B5563; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
             .settings-row { display: flex; gap: 10px; }
-            .settings-row input { flex: 1; padding: 10px 12px; background: rgba(243,244,246,0.8); border: 1px solid rgba(123,97,255,0.1); border-radius: 12px; font-family: 'Tajawal', sans-serif; color: #1F2937; outline: none; }
-            .settings-row input:focus { border-color: #7B61FF; }
-            .btn-copy { width: 40px; height: 40px; border-radius: 12px; background: rgba(123,97,255,0.08); border: none; color: #7B61FF; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+            .settings-row input { flex: 1; padding: 12px 14px; background: rgba(243,244,246,0.9); border: 1.5px solid rgba(123,97,255,0.08); border-radius: 14px; font-family: 'Tajawal', sans-serif; color: #1F2937; outline: none; transition: all 0.2s; font-size: 14px; }
+            .settings-row input:focus { border-color: #7B61FF; background: rgba(243,244,246,0.95); box-shadow: 0 0 0 3px rgba(123,97,255,0.1); }
+            .btn-copy { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, rgba(123,97,255,0.08), rgba(123,97,255,0.04)); border: 1.5px solid rgba(123,97,255,0.12); color: #7B61FF; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 16px; flex-shrink: 0; }
+            .btn-copy:hover { background: rgba(123,97,255,0.15); }
             .btn-copy:active { transform: scale(0.9); }
-            .btn-save-settings { width: 100%; padding: 12px; background: #7B61FF; border: none; border-radius: 14px; color: #fff; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 4px 15px rgba(123, 97, 255, 0.2); }
+            .btn-save-settings { width: 100%; padding: 14px; background: linear-gradient(135deg, #7B61FF, #8B5CF6); border: none; border-radius: 14px; color: #fff; font-weight: 700; cursor: pointer; margin-top: 12px; box-shadow: 0 8px 20px rgba(123, 97, 255, 0.3); transition: all 0.2s; font-size: 15px; }
+            .btn-save-settings:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(123, 97, 255, 0.4); }
+            .btn-save-settings:active { transform: scale(0.96); }
 
             .credits-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.15); backdrop-filter: blur(4px); z-index: 10000; display: none; justify-content: center; align-items: center; }
             .credits-modal-overlay.active { display: flex; }
