@@ -881,6 +881,12 @@ def toggle_library_ad(ad_id):
 
 
 
+
+@app.route('/api/users_count')
+@cache.cached(timeout=60)
+def users_count_api():
+    return jsonify({'count': User.query.count()})
+
 @app.route('/health')
 def health_check():
     return jsonify({'status': 'ok', 'timestamp': datetime.utcnow().isoformat()})
