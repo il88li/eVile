@@ -8,10 +8,21 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #F9F5F0;
+            --glass: #F4991A;
+            --btn: #A1BC98;
+            --glass-light: rgba(244, 153, 26, 0.1);
+            --glass-border: rgba(244, 153, 26, 0.2);
+            --text: #2D2A26;
+            --text-dim: #6B6560;
+            --text-faint: #9A9590;
+            --white: #FFFFFF;
+        }
         body {
             font-family: 'Tajawal', sans-serif;
-            background: linear-gradient(160deg, #f2f4f8 0%, #dbeafe 100%);
-            color: #1F2937;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
             min-height: 100dvh;
             display: flex;
@@ -22,56 +33,22 @@
             padding: 20px;
         }
 
-        /* Floating soft orbs */
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.5;
-            animation: orbFloat 18s ease-in-out infinite;
-        }
-        .orb-1 { width: 350px; height: 350px; background: #2563EB; top: -15%; left: -10%; animation-delay: 0s; }
-        .orb-2 { width: 280px; height: 280px; background: #dbeafe; bottom: -10%; right: -5%; animation-delay: -6s; }
-        .orb-3 { width: 200px; height: 200px; background: rgba(37, 99, 235, 0.3); top: 50%; left: 55%; animation-delay: -12s; }
-        @keyframes orbFloat {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -20px) scale(1.08); }
-            66% { transform: translate(-20px, 25px) scale(0.95); }
-        }
-
-        /* Particles */
-        .particle-field { position: absolute; inset: 0; pointer-events: none; }
-        .particle {
-            position: absolute;
-            width: 2px; height: 2px;
-            background: rgba(37, 99, 235, 0.25);
-            border-radius: 50%;
-            animation: particleRise linear infinite;
-        }
-        @keyframes particleRise {
-            0% { transform: translateY(100vh) scale(0); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
-        }
-
-        /* Main Card */
         .auth-card {
             display: flex;
             width: 100%;
             max-width: 900px;
             min-height: 520px;
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.9);
+            background: rgba(249, 245, 240, 0.7);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            border: 1px solid var(--glass-border);
             border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 10px 40px rgba(37, 99, 235, 0.03);
+            box-shadow: 0 10px 40px rgba(244, 153, 26, 0.08);
             position: relative;
             z-index: 1;
         }
 
-        /* Visual Side */
         .card-visual {
             flex: 1;
             position: relative;
@@ -80,26 +57,15 @@
             justify-content: center;
             padding: 36px;
             overflow: hidden;
-            background: linear-gradient(160deg, rgba(37,99,235,0.06) 0%, rgba(225,219,245,0.3) 100%);
-        }
-        .visual-bg {
-            position: absolute;
-            inset: 0;
-        }
-        .visual-bg::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%237B61FF' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            background: linear-gradient(160deg, rgba(244,153,26,0.06) 0%, rgba(161,188,152,0.1) 100%);
         }
         .visual-content {
             position: relative;
             z-index: 1;
             text-align: center;
-            color: #1F2937;
+            color: var(--text);
         }
 
-        /* Animated Logo */
         .logo-ring {
             position: relative;
             width: 100px; height: 100px;
@@ -108,30 +74,30 @@
         .logo-core {
             position: absolute;
             inset: 16px;
-            background: #2563EB;
+            background: var(--glass);
             border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
+            box-shadow: 0 8px 20px rgba(244, 153, 26, 0.2);
             animation: corePulse 3s ease-in-out infinite;
             z-index: 2;
         }
         .logo-core i { font-size: 32px; color: white; }
         @keyframes corePulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 8px 20px rgba(37,99,235,0.2); }
-            50% { transform: scale(1.05); box-shadow: 0 12px 30px rgba(37,99,235,0.3); }
+            0%, 100% { transform: scale(1); box-shadow: 0 8px 20px rgba(244,153,26,0.2); }
+            50% { transform: scale(1.05); box-shadow: 0 12px 30px rgba(244,153,26,0.3); }
         }
         .ring {
             position: absolute;
-            border: 2px solid rgba(37,99,235,0.2);
+            border: 2px solid rgba(244, 153, 26, 0.15);
             border-radius: 50%;
             inset: 0;
             animation: ringExpand 3s ease-out infinite;
         }
         .ring-1 { animation-delay: 0s; }
-        .ring-2 { animation-delay: 1s; border-color: rgba(37,99,235,0.12); }
-        .ring-3 { animation-delay: 2s; border-color: rgba(37,99,235,0.08); }
+        .ring-2 { animation-delay: 1s; border-color: rgba(244, 153, 26, 0.1); }
+        .ring-3 { animation-delay: 2s; border-color: rgba(244, 153, 26, 0.08); }
         @keyframes ringExpand {
             0% { transform: scale(0.8); opacity: 1; }
             100% { transform: scale(1.4); opacity: 0; }
@@ -142,16 +108,15 @@
             font-weight: 900;
             letter-spacing: 2px;
             margin-bottom: 4px;
-            color: #1F2937;
+            color: var(--text);
         }
         .visual-subtitle {
             font-size: 13px;
-            color: #6B7280;
+            color: var(--text-dim);
             margin-bottom: 24px;
             font-weight: 500;
         }
 
-        /* Feature List */
         .feature-list {
             display: flex;
             flex-direction: column;
@@ -163,9 +128,9 @@
             align-items: center;
             gap: 10px;
             padding: 9px 14px;
-            background: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.5);
             border-radius: 12px;
-            border: 1px solid rgba(37,99,235,0.08);
+            border: 1px solid var(--glass-border);
             transition: all 0.2s ease;
             animation: slideInLeft 0.5s ease-out backwards;
         }
@@ -174,31 +139,30 @@
         .feature-row:nth-child(3) { animation-delay: 0.3s; }
         .feature-row:nth-child(4) { animation-delay: 0.4s; }
         .feature-row:hover {
-            background: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.8);
             transform: translateX(-4px);
-            border-color: rgba(37,99,235,0.15);
+            border-color: var(--glass-border);
         }
         .feature-row span {
             font-size: 12px;
             font-weight: 600;
-            color: #6B7280;
+            color: var(--text-dim);
         }
         .feature-icon {
             width: 28px; height: 28px;
             min-width: 28px;
-            background: rgba(37, 99, 235, 0.08);
+            background: rgba(244, 153, 26, 0.08);
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .feature-icon i { font-size: 14px; color: #2563EB; }
+        .feature-icon i { font-size: 14px; color: var(--glass); }
         @keyframes slideInLeft {
             from { opacity: 0; transform: translateX(20px); }
             to { opacity: 1; transform: translateX(0); }
         }
 
-        /* Form Side */
         .card-form {
             flex: 1;
             padding: 40px 36px;
@@ -214,16 +178,15 @@
         .form-header h1 {
             font-size: 22px;
             font-weight: 800;
-            color: #1F2937;
+            color: var(--text);
             margin-bottom: 6px;
         }
         .form-header p {
             font-size: 13px;
-            color: #6B7280;
+            color: var(--text-dim);
             font-weight: 400;
         }
 
-        /* Inputs */
         .input-wrap {
             margin-bottom: 16px;
             position: relative;
@@ -234,27 +197,28 @@
             gap: 6px;
             font-size: 11px;
             font-weight: 700;
-            color: #6B7280;
+            color: var(--text-dim);
             margin-bottom: 6px;
         }
-        .input-wrap label i { font-size: 14px; color: #2563EB; }
+        .input-wrap label i { font-size: 14px; color: var(--glass); }
         .input-wrap input {
             width: 100%;
             padding: 12px 14px;
             padding-left: 40px;
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(37, 99, 235, 0.1);
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--glass-border);
             border-radius: 12px;
             font-family: 'Tajawal', sans-serif;
             font-size: 14px;
-            color: #1F2937;
+            color: var(--text);
             outline: none;
             transition: all 0.2s ease;
         }
-        .input-wrap input::placeholder { color: #9CA3AF; }
+        .input-wrap input::placeholder { color: var(--text-faint); }
         .input-wrap input:focus {
-            border-color: #2563EB;
-            background: #ffffff;
+            border-color: var(--glass);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 0 3px rgba(244, 153, 26, 0.1);
         }
         .toggle-pass {
             position: absolute;
@@ -264,21 +228,20 @@
             border: none;
             cursor: pointer;
             padding: 4px;
-            color: #9CA3AF;
+            color: var(--text-faint);
             transition: color 0.2s;
         }
-        .toggle-pass:hover { color: #6B7280; }
+        .toggle-pass:hover { color: var(--text-dim); }
         .toggle-pass i { font-size: 16px; }
 
-        /* Submit Button */
         .submit-btn {
             width: 100%;
             padding: 12px;
             margin-top: 4px;
-            background: #2563EB;
+            background: var(--btn);
             border: none;
             border-radius: 12px;
-            color: #fff;
+            color: var(--white);
             font-family: 'Tajawal', sans-serif;
             font-size: 15px;
             font-weight: 700;
@@ -290,7 +253,6 @@
             position: relative;
             overflow: hidden;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
         }
         .submit-btn:active { transform: scale(0.96); }
         .submit-btn.loading .btn-text,
@@ -309,17 +271,16 @@
         .btn-arrow { font-size: 15px; transition: transform 0.2s ease; }
         .submit-btn:hover .btn-arrow { transform: translateX(-3px); }
 
-        /* Footer */
         .form-footer {
             text-align: center;
             margin-top: 18px;
             font-size: 12px;
-            color: #6B7280;
+            color: var(--text-dim);
         }
         .switch-btn {
             background: none;
             border: none;
-            color: #2563EB;
+            color: var(--glass);
             font-family: 'Tajawal', sans-serif;
             font-size: 12px;
             font-weight: 700;
@@ -334,23 +295,22 @@
             bottom: -2px;
             left: 0; right: 0;
             height: 1px;
-            background: #2563EB;
+            background: var(--glass);
             transform: scaleX(0);
             transition: transform 0.3s ease;
             transform-origin: right;
         }
         .switch-btn:hover::after { transform: scaleX(1); }
-        .switch-btn:hover { color: #5b3fd9; }
+        .switch-btn:hover { color: var(--glass); }
 
-        /* Error Toast */
         .error-toast {
             position: absolute;
             bottom: 16px;
             left: 50%;
             transform: translateX(-50%) translateY(20px);
-            background: rgba(239, 68, 68, 0.08);
-            border: 1px solid rgba(239, 68, 68, 0.15);
-            color: #ef4444;
+            background: rgba(220, 38, 38, 0.08);
+            border: 1px solid rgba(220, 38, 38, 0.15);
+            color: #dc2626;
             padding: 10px 16px;
             border-radius: 12px;
             font-size: 12px;
@@ -369,10 +329,8 @@
         }
         .error-toast i { font-size: 16px; flex-shrink: 0; }
 
-        /* Mode Transition */
         .form-fade { opacity: 0; pointer-events: none; }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .auth-card {
                 flex-direction: column;
@@ -408,16 +366,8 @@
     </style>
 </head>
 <body>
-    <!-- Floating soft orbs -->
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-    <div class="particle-field" id="particles"></div>
-
     <div class="auth-card">
-        <!-- Right Side: Visual / Brand -->
         <div class="card-visual">
-            <div class="visual-bg"></div>
             <div class="visual-content">
                 <div class="logo-ring">
                     <div class="logo-core"><i class="bi bi-magic"></i></div>
@@ -449,7 +399,6 @@
             </div>
         </div>
 
-        <!-- Left Side: Form -->
         <div class="card-form">
             <div class="form-header">
                 <h1 id="formTitle">تسجيل الدخول</h1>
@@ -490,18 +439,6 @@
     </div>
 
     <script>
-        // Generate particles
-        const particleContainer = document.getElementById('particles');
-        for (let i = 0; i < 25; i++) {
-            const p = document.createElement('div');
-            p.className = 'particle';
-            p.style.left = Math.random() * 100 + '%';
-            p.style.animationDuration = (Math.random() * 15 + 10) + 's';
-            p.style.animationDelay = (Math.random() * 15) + 's';
-            p.style.width = p.style.height = (Math.random() * 3 + 1) + 'px';
-            particleContainer.appendChild(p);
-        }
-
         let isLogin = true;
 
         function toggleMode() {
@@ -517,7 +454,6 @@
 
             setTimeout(() => {
                 isLogin = !isLogin;
-
                 if (isLogin) {
                     title.textContent = 'تسجيل الدخول';
                     desc.textContent = 'أهلاً بعودتك! سجل دخولك للمتابعة';
@@ -533,7 +469,6 @@
                     switchBtn.textContent = 'سجل دخولك';
                     document.getElementById('password').setAttribute('autocomplete', 'new-password');
                 }
-
                 form.classList.remove('form-fade');
             }, 300);
         }
