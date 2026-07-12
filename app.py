@@ -36,7 +36,12 @@ session_manager = Session()
 session_manager.init_app(app)
 migrate = Migrate(app, db)
 cache = Cache(app)
-limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day", "50 per hour"], storage_uri=app.config['RATELIMIT_STORAGE_URI'])
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[],
+    storage_uri=app.config['RATELIMIT_STORAGE_URI']
+)
 Talisman(app, force_https=False, content_security_policy={
     'default-src': ["'self'"],
     'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
