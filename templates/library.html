@@ -27,7 +27,6 @@
             min-height: 100dvh;
             overflow-x: hidden;
         }
-        /* Floating Header */
         .floating-header {
             position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100;
             display: flex; align-items: center; justify-content: space-between;
@@ -52,13 +51,10 @@
         .header-btn:hover { background:var(--primary-dim); color:var(--primary); border-color:var(--primary); }
         .header-btn i { font-size:18px; }
 
-        /* Main content */
         .main-content {
             padding: 90px 16px 140px 16px;
             max-width: 1400px; margin:0 auto;
         }
-
-        /* Glass cards */
         .glass-card {
             background: var(--bg-card);
             backdrop-filter: blur(20px) saturate(140%);
@@ -69,8 +65,6 @@
             margin-bottom: 24px;
             box-shadow: var(--shadow);
         }
-
-        /* Hero section */
         .hero {
             text-align: center;
             padding: 32px 20px;
@@ -88,8 +82,6 @@
             background:var(--primary-dim); border:1px solid var(--glass-border);
             padding:6px 18px; border-radius:50px; font-size:0.85rem; color:var(--primary);
         }
-
-        /* Search & Filter */
         .search-bar {
             display: flex; gap:12px; flex-wrap:wrap; align-items:center;
             margin-bottom:20px;
@@ -103,7 +95,6 @@
         }
         .search-bar input:focus { border-color:var(--primary); background:rgba(255,255,255,0.08); }
         .search-bar input::placeholder { color:var(--text-faint); }
-
         .categories-scroll {
             display: flex; gap:8px; overflow-x:auto; padding:4px 0; scrollbar-width:none;
         }
@@ -120,15 +111,11 @@
             background:var(--primary); color:#0b0e1a; border-color:var(--primary);
             font-weight:700;
         }
-
-        /* Gallery grid */
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 24px;
         }
-
-        /* Prompt card */
         .prompt-card {
             background: var(--bg-card);
             backdrop-filter: blur(20px);
@@ -171,6 +158,14 @@
             border:1px solid rgba(255,255,255,0.1);
             z-index:3;
         }
+        .prompt-card .card-publisher {
+            position:absolute; bottom:14px; left:14px;
+            background:rgba(0,0,0,0.5); backdrop-filter:blur(10px);
+            padding:4px 12px; border-radius:20px;
+            font-size:0.7rem; font-weight:600; color:var(--text-dim);
+            border:1px solid rgba(255,255,255,0.1);
+            z-index:3;
+        }
         .prompt-card .card-actions {
             padding:16px;
             display:flex; gap:10px; align-items:center;
@@ -199,15 +194,11 @@
         .like-btn:hover { border-color:var(--primary); color:var(--primary); }
         .like-btn.liked { background:rgba(239,68,68,0.15); border-color:#ef4444; color:#ef4444; }
         .like-btn i { font-size:1.1rem; }
-
-        /* Empty state */
         .empty-state {
             text-align:center; padding:60px 20px; grid-column:1/-1;
             color:var(--text-faint);
         }
         .empty-state i { font-size:56px; display:block; margin-bottom:12px; opacity:0.3; }
-
-        /* Toast */
         .toast {
             position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(100px);
             background:var(--bg-card); backdrop-filter:blur(20px);
@@ -218,8 +209,6 @@
             font-family:'Tajawal',sans-serif;
         }
         .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-
-        /* Ad overlay */
         .ad-overlay {
             position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(12px);
             z-index:5000; display:none; align-items:center; justify-content:center; padding:20px;
@@ -254,8 +243,6 @@
             color:#fff; padding:6px 14px; border-radius:20px;
             font-size:13px; font-weight:700;
         }
-
-        /* Bottom nav */
         .bottom-nav-bar {
             position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
             z-index:1000; display:flex; align-items:center; gap:6px;
@@ -294,7 +281,6 @@
     </style>
 </head>
 <body>
-    <!-- Floating Header -->
     <header class="floating-header">
         <div style="display:flex;align-items:center;gap:8px;">
             <a href="/settings" class="header-btn" title="الإعدادات"><i class="bi bi-gear"></i></a>
@@ -311,14 +297,12 @@
     </header>
 
     <div class="main-content">
-        <!-- Hero -->
         <div class="glass-card hero">
             <h1>مرحباً بك في <span>UFOQ</span></h1>
             <p>مكتبة ضخمة من البرومبتات الجاهزة للاستخدام – اختر، انسخ، وابدأ الإبداع فوراً.</p>
             <div class="hero-badge"><i class="bi bi-stars"></i> أكثر من {{ library_items|length }} برومبت</div>
         </div>
 
-        <!-- Search & Filter -->
         <div class="glass-card">
             <div class="search-bar">
                 <input type="text" id="searchInput" placeholder="ابحث في البرومبتات (العنوان أو الكلمات المفتاحية)" oninput="filterPrompts()">
@@ -331,12 +315,14 @@
             </div>
         </div>
 
-        <!-- Gallery -->
         <div class="gallery-grid" id="galleryGrid">
             {% for item in library_items %}
             <div class="prompt-card" data-category="{{ item.category }}" data-title="{{ item.title|lower }}" data-keywords="{{ item.prompt_text|lower }}">
                 <div class="image-wrapper">
                     <span class="card-category">{{ item.category }}</span>
+                    {% if item.publisher %}
+                    <span class="card-publisher"><i class="bi bi-person"></i> {{ item.publisher }}</span>
+                    {% endif %}
                     <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy" onerror="this.style.display='none';this.parentElement.innerHTML+='<div style=display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-faint)><i class=bi bi-image style=font-size:40px></i></div>'">
                     <div class="image-overlay"></div>
                     <div class="image-title">{{ item.title }}</div>
@@ -355,10 +341,8 @@
         </div>
     </div>
 
-    <!-- Toast -->
     <div class="toast" id="toast"><i class="bi bi-check-lg"></i> تم النسخ!</div>
 
-    <!-- Ad Overlay -->
     <div class="ad-overlay" id="adOverlay">
         <div class="ad-box">
             <div id="adImageContainer">
@@ -373,7 +357,6 @@
         </div>
     </div>
 
-    <!-- Bottom Nav -->
     <nav class="bottom-nav-bar">
         <a href="/" class="nav-item active"><i class="bi bi-house-door-fill"></i><span class="nav-label">الرئيسية</span></a>
         <a href="/about" class="nav-item"><i class="bi bi-info-circle"></i><span class="nav-label">حول</span></a>
@@ -381,7 +364,7 @@
     </nav>
 
     <script>
-        // ---------- Like system (cookies) ----------
+        // ---------- Like system ----------
         function getLikes() {
             try {
                 const data = document.cookie.split('; ').find(row => row.startsWith('ufoq_likes='));
@@ -419,15 +402,11 @@
             document.querySelectorAll('.like-btn').forEach(btn => {
                 const id = btn.dataset.id;
                 const span = btn.querySelector('.like-count');
-                // حفظ عدد الإعجابات محلياً، يمكننا تعيين قيمة افتراضية 0
-                // لكننا سنعرض العدد المخزن في الكوكيز (أو نضيفه من قاعدة البيانات لاحقاً)
                 if (likes[id]) {
                     btn.classList.add('liked');
                     btn.querySelector('i').className = 'bi bi-heart-fill';
-                    span.textContent = (parseInt(span.textContent) || 0) + 1; // في الحقيقة يجب تخزين العدد الكلي
+                    span.textContent = (parseInt(span.textContent) || 0) + 1;
                 }
-                // للتبسيط، سنجعل العدد هو عدد مرات الإعجاب المخزنة محلياً فقط
-                // يمكن تحسينه لاستخدام قاعدة بيانات لاحقاً
             });
         }
 
@@ -440,10 +419,6 @@
             const text = btn.dataset.prompt;
             if (!text) return;
 
-            // التحقق من وجود إعلان نشط
-            const adOverlay = document.getElementById('adOverlay');
-            // نتحقق من وجود إعلان نشط من الخادم (سنمرره من خلال متغير)
-            // سنستخدم متغير عام activeAd من后端
             const activeAd = {{ active_ad|tojson|default('null') }};
             if (activeAd && activeAd.id) {
                 pendingCopyText = text;
@@ -467,7 +442,6 @@
             btnLink.href = ad.button_link || '#';
             btnText.textContent = ad.button_text || 'زيارة';
 
-            // صورة
             if (ad.image_url) {
                 imgContainer.innerHTML = `<img src="${ad.image_url}" alt="Ad" class="ad-image">`;
             } else {
@@ -488,7 +462,6 @@
                     timerEl.style.display = 'none';
                     btnText.textContent = ad.button_text || 'زيارة';
                     closeAdPopup();
-                    // تنفيذ النسخ بعد انتهاء الإعلان
                     if (pendingCopyText) {
                         const btn = document.querySelector(`[data-prompt="${pendingCopyText.replace(/"/g, '\\"')}"]`);
                         doCopy(pendingCopyText, btn);
@@ -538,7 +511,7 @@
             setTimeout(() => t.classList.remove('show'), 2500);
         }
 
-        // ---------- Filtering & Search ----------
+        // ---------- Filtering ----------
         function filterPrompts() {
             const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
             const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || 'all';
@@ -557,7 +530,6 @@
                     card.style.display = 'none';
                 }
             });
-            // إظهار رسالة إذا لم يكن هناك نتائج
             const empty = document.querySelector('.empty-state');
             if (empty) {
                 if (visible === 0 && cards.length > 0) {
@@ -569,7 +541,6 @@
             }
         }
 
-        // Category buttons
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
@@ -578,7 +549,6 @@
             });
         });
 
-        // Init likes on load
         document.addEventListener('DOMContentLoaded', initLikes);
     </script>
 </body>
