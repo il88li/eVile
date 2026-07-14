@@ -15,6 +15,7 @@ from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
 from flask_session import Session
 from sqlalchemy.exc import SQLAlchemyError, OperationalError
+from sqlalchemy import text
 
 from models import db, User, Category, PromptLibrary, LibraryAd, SiteSetting
 from config import Config
@@ -88,21 +89,65 @@ def wait_for_db(max_retries=5, delay=2):
                 return False
     return False
 
-# ---------- Error handlers ----------
+# ===== معالجات الأخطاء =====
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('error.html', error_code=404, message="الصفحة غير موجودة"), 404
+    try:
+        return render_template('error.html', error_code=404, message="الصفحة غير موجودة"), 404
+    except:
+        return """
+        <!DOCTYPE html>
+        <html dir="rtl">
+        <head><meta charset="UTF-8"><title>404 - غير موجود</title>
+        <style>body{font-family:Tajawal,sans-serif;background:#0b0e1a;color:#f8fafc;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px;margin:0;}
+        .card{background:rgba(20,30,48,0.6);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:40px;max-width:500px;width:100%;}
+        h1{font-size:48px;color:#38bdf8;margin:0 0 10px;}
+        p{color:#94a3b8;font-size:18px;}
+        a{display:inline-block;margin-top:16px;padding:12px 28px;background:#38bdf8;color:#0b0e1a;border-radius:14px;text-decoration:none;font-weight:700;}</style>
+        </head>
+        <body><div class="card"><h1>404</h1><p>الصفحة غير موجودة</p><a href="/">العودة للرئيسية</a></div></body>
+        </html>
+        """, 404
 
 @app.errorhandler(500)
 def internal_server_error(e):
     logger.error(f"Internal Server Error: {e}")
-    # حاول عرض صفحة خطأ ودية
-    return render_template('error.html', error_code=500, message="حدث خطأ داخلي في الخادم، يرجى المحاولة لاحقاً."), 500
+    try:
+        return render_template('error.html', error_code=500, message="حدث خطأ داخلي في الخادم، يرجى المحاولة لاحقاً."), 500
+    except:
+        return """
+        <!DOCTYPE html>
+        <html dir="rtl">
+        <head><meta charset="UTF-8"><title>500 - خطأ داخلي</title>
+        <style>body{font-family:Tajawal,sans-serif;background:#0b0e1a;color:#f8fafc;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px;margin:0;}
+        .card{background:rgba(20,30,48,0.6);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:40px;max-width:500px;width:100%;}
+        h1{font-size:48px;color:#38bdf8;margin:0 0 10px;}
+        p{color:#94a3b8;font-size:18px;}
+        a{display:inline-block;margin-top:16px;padding:12px 28px;background:#38bdf8;color:#0b0e1a;border-radius:14px;text-decoration:none;font-weight:700;}</style>
+        </head>
+        <body><div class="card"><h1>500</h1><p>حدث خطأ داخلي، يرجى المحاولة لاحقاً.</p><a href="/">العودة للرئيسية</a></div></body>
+        </html>
+        """, 500
 
 @app.errorhandler(Exception)
 def handle_exception(e):
     logger.error(f"Unhandled Exception: {e}")
-    return render_template('error.html', error_code=500, message="حدث خطأ غير متوقع."), 500
+    try:
+        return render_template('error.html', error_code=500, message="حدث خطأ غير متوقع."), 500
+    except:
+        return """
+        <!DOCTYPE html>
+        <html dir="rtl">
+        <head><meta charset="UTF-8"><title>500 - خطأ</title>
+        <style>body{font-family:Tajawal,sans-serif;background:#0b0e1a;color:#f8fafc;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px;margin:0;}
+        .card{background:rgba(20,30,48,0.6);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:40px;max-width:500px;width:100%;}
+        h1{font-size:48px;color:#38bdf8;margin:0 0 10px;}
+        p{color:#94a3b8;font-size:18px;}
+        a{display:inline-block;margin-top:16px;padding:12px 28px;background:#38bdf8;color:#0b0e1a;border-radius:14px;text-decoration:none;font-weight:700;}</style>
+        </head>
+        <body><div class="card"><h1>500</h1><p>حدث خطأ غير متوقع.</p><a href="/">العودة للرئيسية</a></div></body>
+        </html>
+        """, 500
 
 # ---------- Database initialization ----------
 _db_initialized = False
@@ -113,7 +158,19 @@ def ensure_db_initialized():
         # حاول الاتصال بقاعدة البيانات
         if not wait_for_db():
             # إذا فشل الاتصال، اعرض صفحة صيانة
-            return render_template('error.html', error_code=503, message="تعذر الاتصال بقاعدة البيانات، يرجى المحاولة لاحقاً."), 503
+            return """
+            <!DOCTYPE html>
+            <html dir="rtl">
+            <head><meta charset="UTF-8"><title>503 - الخدمة غير متاحة</title>
+            <style>body{font-family:Tajawal,sans-serif;background:#0b0e1a;color:#f8fafc;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px;margin:0;}
+            .card{background:rgba(20,30,48,0.6);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:40px;max-width:500px;width:100%;}
+            h1{font-size:48px;color:#38bdf8;margin:0 0 10px;}
+            p{color:#94a3b8;font-size:18px;}
+            a{display:inline-block;margin-top:16px;padding:12px 28px;background:#38bdf8;color:#0b0e1a;border-radius:14px;text-decoration:none;font-weight:700;}</style>
+            </head>
+            <body><div class="card"><h1>503</h1><p>تعذر الاتصال بقاعدة البيانات، يرجى المحاولة لاحقاً.</p><a href="/">المحاولة مرة أخرى</a></div></body>
+            </html>
+            """, 503
         
         try:
             db.create_all()
@@ -137,7 +194,19 @@ def ensure_db_initialized():
         except Exception as e:
             logger.error(f"❌ DB init error: {e}")
             db.session.rollback()
-            return render_template('error.html', error_code=500, message="خطأ في تهيئة قاعدة البيانات."), 500
+            return """
+            <!DOCTYPE html>
+            <html dir="rtl">
+            <head><meta charset="UTF-8"><title>500 - خطأ في التهيئة</title>
+            <style>body{font-family:Tajawal,sans-serif;background:#0b0e1a;color:#f8fafc;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px;margin:0;}
+            .card{background:rgba(20,30,48,0.6);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:40px;max-width:500px;width:100%;}
+            h1{font-size:48px;color:#38bdf8;margin:0 0 10px;}
+            p{color:#94a3b8;font-size:18px;}
+            a{display:inline-block;margin-top:16px;padding:12px 28px;background:#38bdf8;color:#0b0e1a;border-radius:14px;text-decoration:none;font-weight:700;}</style>
+            </head>
+            <body><div class="card"><h1>500</h1><p>خطأ في تهيئة قاعدة البيانات.</p><a href="/">المحاولة مرة أخرى</a></div></body>
+            </html>
+            """, 500
 
 # ---------- Public routes ----------
 @app.route('/')
@@ -265,9 +334,222 @@ def upload_image():
         logger.error(f"Image upload error: {e}")
         return jsonify({'success': False, 'message': 'خطأ في رفع الصورة'}), 500
 
-# ... باقي المسارات (admin, categories, library, ads, settings) مع نفس نمط معالجة الأخطاء ...
+# ---------- Admin panel ----------
+@app.route('/admin', methods=['GET', 'POST'])
+def admin_panel():
+    if request.method == 'POST' and request.form.get('password') == Config.ADMIN_PASSWORD:
+        session['logged_in'] = True
+        return redirect(url_for('admin_panel'))
 
-# ---------- Health ----------
+    if session.get('logged_in'):
+        try:
+            categories = Category.query.order_by(Category.sort_order).all()
+            library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
+            library_ads = LibraryAd.query.order_by(LibraryAd.created_at.desc()).all()
+            users = User.query.all()
+            site_settings = SiteSetting.query.first()
+            return render_template('admin.html',
+                                   categories=categories,
+                                   library_items=library_items,
+                                   library_ads=library_ads,
+                                   users=users,
+                                   site_settings=site_settings,
+                                   csrf_token=generate_csrf_token())
+        except Exception as e:
+            logger.error(f"Admin panel error: {e}")
+            return render_template('error.html', error_code=500, message="خطأ في لوحة التحكم"), 500
+    return render_template('admin.html')
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.pop('logged_in', None)
+    return redirect(url_for('admin_panel'))
+
+# ---------- Admin: Categories ----------
+@app.route('/admin/category/add', methods=['POST'])
+@admin_required
+def add_category():
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        name = request.form.get('name', '').strip().lower().replace(' ', '_')
+        display_name = request.form.get('display_name', '').strip()
+        icon = request.form.get('icon', 'bi-tag').strip()
+        sort_order = int(request.form.get('sort_order', 0))
+        if not name or not display_name:
+            flash('اسم التصنيف واسم العرض مطلوبان', 'error')
+            return redirect(url_for('admin_panel'))
+        if Category.query.filter_by(name=name).first():
+            flash('التصنيف موجود مسبقاً', 'error')
+            return redirect(url_for('admin_panel'))
+        cat = Category(name=name, display_name=display_name, icon=icon, sort_order=sort_order)
+        db.session.add(cat)
+        db.session.commit()
+        flash('تمت إضافة التصنيف', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding category: {e}")
+        flash('خطأ في إضافة التصنيف', 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/category/<int:category_id>/delete', methods=['POST'])
+@admin_required
+def delete_category(category_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        cat = Category.query.get_or_404(category_id)
+        PromptLibrary.query.filter_by(category=cat.name).update({'category': 'general'})
+        db.session.delete(cat)
+        db.session.commit()
+        flash('تم حذف التصنيف', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting category: {e}")
+        flash('خطأ في حذف التصنيف', 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/category/<int:category_id>/update', methods=['POST'])
+@admin_required
+def update_category(category_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    cat = Category.query.get_or_404(category_id)
+    cat.display_name = request.form.get('display_name', cat.display_name).strip()
+    cat.icon = request.form.get('icon', cat.icon).strip()
+    cat.sort_order = int(request.form.get('sort_order', cat.sort_order))
+    db.session.commit()
+    flash('تم تحديث التصنيف', 'success')
+    return redirect(url_for('admin_panel'))
+
+# ---------- Admin: Library ----------
+@app.route('/admin/library/add', methods=['POST'])
+@admin_required
+def add_library_item():
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        item = PromptLibrary(
+            title=request.form.get('title'),
+            category=request.form.get('category', 'general'),
+            image_url=request.form.get('image_url'),
+            prompt_text=request.form.get('prompt_text'),
+            publisher=request.form.get('publisher', '').strip() or None
+        )
+        db.session.add(item)
+        db.session.commit()
+        flash('تمت إضافة البرومبت', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding library item: {e}")
+        flash('خطأ في إضافة البرومبت', 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/library/<int:item_id>/delete', methods=['POST'])
+@admin_required
+def delete_library_item(item_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    item = PromptLibrary.query.get_or_404(item_id)
+    db.session.delete(item)
+    db.session.commit()
+    flash('تم حذف البرومبت', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/library/<int:item_id>/update', methods=['POST'])
+@admin_required
+def update_library_item(item_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    item = PromptLibrary.query.get_or_404(item_id)
+    item.title = request.form.get('title', item.title)
+    item.category = request.form.get('category', item.category)
+    item.image_url = request.form.get('image_url', item.image_url)
+    item.prompt_text = request.form.get('prompt_text', item.prompt_text)
+    item.publisher = request.form.get('publisher', item.publisher) or None
+    db.session.commit()
+    flash('تم تحديث البرومبت', 'success')
+    return redirect(url_for('admin_panel'))
+
+# ---------- Admin: Library Ads ----------
+@app.route('/admin/library_ad/add', methods=['POST'])
+@admin_required
+def add_library_ad():
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        ad = LibraryAd(
+            title=request.form.get('title'),
+            text=request.form.get('text'),
+            image_url=request.form.get('image_url') or None,
+            button_text=request.form.get('button_text'),
+            button_link=request.form.get('button_link'),
+            duration_seconds=int(request.form.get('duration_seconds', 5)),
+            is_active=request.form.get('is_active') == 'on'
+        )
+        db.session.add(ad)
+        db.session.commit()
+        flash('تمت إضافة الإعلان', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding library ad: {e}")
+        flash('خطأ في إضافة الإعلان', 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/library_ad/<int:ad_id>/delete', methods=['POST'])
+@admin_required
+def delete_library_ad(ad_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        ad = LibraryAd.query.get_or_404(ad_id)
+        db.session.delete(ad)
+        db.session.commit()
+        flash('تم حذف الإعلان', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting library ad: {e}")
+        flash('خطأ في حذف الإعلان', 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/library_ad/<int:ad_id>/toggle', methods=['POST'])
+@admin_required
+def toggle_library_ad(ad_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        ad = LibraryAd.query.get_or_404(ad_id)
+        ad.is_active = not ad.is_active
+        db.session.commit()
+        flash('تم تغيير حالة الإعلان', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error toggling library ad: {e}")
+        flash('خطأ في تغيير حالة الإعلان', 'error')
+    return redirect(url_for('admin_panel'))
+
+# ---------- Admin: Site Settings ----------
+@app.route('/api/admin/update_site_settings', methods=['POST'])
+@admin_required
+def update_site_settings():
+    if not validate_csrf_token(request.json.get('csrf_token')):
+        return jsonify({'error': 'CSRF Error'}), 400
+    s = SiteSetting.query.first()
+    s.status = request.json.get('status', 'on')
+    s.offline_message = request.json.get('offline_message', 'الموقع تحت الصيانة حالياً.')
+    db.session.commit()
+    return jsonify({'success': True})
+
+@app.route('/api/admin/get_site_status')
+@admin_required
+def get_site_status():
+    s = SiteSetting.query.first()
+    return jsonify({
+        'status': s.status if s else 'on',
+        'offline_message': s.offline_message if s else 'الموقع تحت الصيانة حالياً.'
+    })
+
+# ---------- Health check ----------
 @app.route('/health')
 def health_check():
     return jsonify({'status': 'ok', 'timestamp': datetime.utcnow().isoformat()})
