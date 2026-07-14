@@ -73,7 +73,6 @@ def admin_required(f):
 
 # ---------- Database connection with retry ----------
 def wait_for_db(max_retries=5, delay=2):
-    """محاولة الاتصال بقاعدة البيانات مع إعادة المحاولة."""
     for attempt in range(max_retries):
         try:
             with db.engine.connect() as conn:
@@ -89,7 +88,7 @@ def wait_for_db(max_retries=5, delay=2):
                 return False
     return False
 
-# ===== معالجات الأخطاء =====
+# ===== Error handlers =====
 @app.errorhandler(404)
 def page_not_found(e):
     try:
@@ -155,9 +154,7 @@ _db_initialized = False
 def ensure_db_initialized():
     global _db_initialized
     if not _db_initialized:
-        # حاول الاتصال بقاعدة البيانات
         if not wait_for_db():
-            # إذا فشل الاتصال، اعرض صفحة صيانة
             return """
             <!DOCTYPE html>
             <html dir="rtl">
@@ -220,15 +217,32 @@ def index():
         library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
         active_ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
 
+        # تحويل active_ad إلى قاموس
+        ad_dict = None
+        if active_ad:
+            ad_dict = {
+                'id': active_ad.id,
+                'title': active_ad.title,
+                'text': active_ad.text,
+                'image_url': active_ad.image_url,
+                'button_text': active_ad.button_text,
+                'button_link': active_ad.button_link,
+                'duration_seconds': active_ad.duration_seconds,
+                'is_active': active_ad.is_active
+            }
+
         return render_template('index.html',
                                categories=categories,
                                library_items=library_items,
-                               active_ad=active_ad,
+                               active_ad=ad_dict,
                                site_status='on',
                                user_id=session.get('user_id'))
     except Exception as e:
         logger.error(f"Index error: {e}")
-        return render_template('error.html', error_code=500, message="حدث خطأ أثناء تحميل الصفحة."), 500
+        try:
+            return render_template('error.html', error_code=500, message="حدث خطأ أثناء تحميل الصفحة."), 500
+        except:
+            return "<h1>500</h1><p>حدث خطأ أثناء تحميل الصفحة.</p><a href='/'>العودة</a>", 500
 
 @app.route('/about')
 def about():
@@ -285,7 +299,10 @@ def settings_page():
         return render_template('settings.html', user=user, csrf_token=generate_csrf_token())
     except Exception as e:
         logger.error(f"Settings page error: {e}")
-        return render_template('error.html', error_code=500, message="حدث خطأ أثناء تحميل الإعدادات."), 500
+        try:
+            return render_template('error.html', error_code=500, message="حدث خطأ أثناء تحميل الإعدادات."), 500
+        except:
+            return "<h1>500</h1><p>حدث خطأ أثناء تحميل الإعدادات.</p><a href='/'>العودة</a>", 500
 
 @app.route('/api/settings', methods=['POST'])
 @login_required
@@ -357,7 +374,10 @@ def admin_panel():
                                    csrf_token=generate_csrf_token())
         except Exception as e:
             logger.error(f"Admin panel error: {e}")
-            return render_template('error.html', error_code=500, message="خطأ في لوحة التحكم"), 500
+            try:
+                return render_template('error.html', error_code=500, message="خطأ في لوحة التحكم"), 500
+            except:
+                return "<h1>500</h1><p>خطأ في لوحة التحكم</p><a href='/'>العودة</a>", 500
     return render_template('admin.html')
 
 @app.route('/admin/logout')
