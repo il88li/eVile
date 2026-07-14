@@ -1,13 +1,11 @@
 import os
 import logging
 import bcrypt
-import requests
-import json
-import traceback
 import secrets
+import base64
 from datetime import datetime
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, Response
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_caching import Cache
@@ -16,32 +14,18 @@ from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
 from flask_session import Session
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import text
-import threading
+from werkzeug.utils import secure_filename
 
-from models import db, User, Pattern, Category, PromptLibrary, LibraryAd, Notification, Ad, SiteSetting, PageVisit, AdView
+from models import db, User, Category, PromptLibrary, LibraryAd, SiteSetting
 from config import Config
 
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
 app.config.from_object(Config)
-app.config.update(
-    SESSION_SQLALCHEMY=db,
-    PERMANENT_SESSION_LIFETIME=2592000  # 30 days
-)
 
 db.init_app(app)
-
-# Initialize Flask-Session with SQLAlchemy backend for persistent sessions
-session_manager = Session()
-session_manager.init_app(app)
 migrate = Migrate(app, db)
 cache = Cache(app)
-limiter = Limiter(
-    get_remote_address,
-    app=app,
-    default_limits=[],
-    storage_uri=app.config['RATELIMIT_STORAGE_URI']
-)
+limiter = Limiter(get_remote_address, app=app, default_limits=[], storage_uri=app.config['RATELIMIT_STORAGE_URI'])
 Talisman(app, force_https=False, content_security_policy={
     'default-src': ["'self'"],
     'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
@@ -54,564 +38,236 @@ Talisman(app, force_https=False, content_security_policy={
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def hash_password(password): return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-def check_password(password, hashed): return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+# ---------- Helper functions ----------
+def hash_password(password):
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def check_password(password, hashed):
+    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+
 def generate_csrf_token():
     if 'csrf_token' not in session:
         session['csrf_token'] = secrets.token_urlsafe(32)
     return session['csrf_token']
+
 def validate_csrf_token(token):
     return token == session.get('csrf_token')
-def admin_required(f):
+
+def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not session.get('logged_in'): return redirect(url_for('admin_panel'))
+        if not session.get('user_id'):
+            flash('يرجى تسجيل الدخول أولاً', 'error')
+            return redirect(url_for('sign'))
         return f(*args, **kwargs)
     return decorated
 
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('logged_in'):
+            return redirect(url_for('admin_panel'))
+        return f(*args, **kwargs)
+    return decorated
+
+# ---------- Database initialization ----------
 _db_initialized = False
 @app.before_request
 def ensure_db_initialized():
     global _db_initialized
     if not _db_initialized:
-        with threading.Lock():
-            if not _db_initialized:
-                try:
-                    db.create_all()
-                    if not SiteSetting.query.first():
-                        db.session.add(SiteSetting())
-                        db.session.commit()
-                    # Initialize default categories if table exists and none exist
-                    try:
-                        if not Category.query.first():
-                            default_categories = [
-                                Category(name='images', display_name='توليد صور', sort_order=1),
-                                Category(name='writing', display_name='كتابة محتوى', sort_order=2),
-                                Category(name='coding', display_name='برمجة', sort_order=3),
-                                Category(name='design', display_name='تصميم UI', sort_order=4),
-                                Category(name='analysis', display_name='تحليل بيانات', sort_order=5),
-                                Category(name='creative', display_name='إبداعي', sort_order=6),
-                            ]
-                            for cat in default_categories:
-                                db.session.add(cat)
-                            db.session.commit()
-                            logger.info("✅ Default categories initialized.")
-                    except Exception as e:
-                        logger.warning(f"⚠️ Categories table not ready yet: {e}")
-                        db.session.rollback()
-                    _db_initialized = True
-                    logger.info("✅ Database initialized successfully.")
-                except Exception as e:
-                    logger.error(f"❌ Database initialization error: {e}")
-                    db.session.rollback()
-
-@app.before_request
-def track_visit():
-    """يسجّل زيارة يومية للصفحتين الرئيسية والمكتبة فقط، تُستخدم لحساب متوسط الزيارات اليومي في لوحة الإحصائيات"""
-    if request.method == 'GET' and request.endpoint in ('index', 'library'):
         try:
-            today = datetime.utcnow().date()
-            visit = PageVisit.query.filter_by(visit_date=today).first()
-            if visit:
-                visit.count += 1
-            else:
-                visit = PageVisit(visit_date=today, count=1)
-                db.session.add(visit)
-            db.session.commit()
+            db.create_all()
+            if not SiteSetting.query.first():
+                db.session.add(SiteSetting())
+                db.session.commit()
+            # إنشاء تصنيفات افتراضية إن لم توجد
+            if not Category.query.first():
+                defaults = [
+                    Category(name='images', display_name='توليد صور', sort_order=1),
+                    Category(name='writing', display_name='كتابة محتوى', sort_order=2),
+                    Category(name='coding', display_name='برمجة', sort_order=3),
+                    Category(name='design', display_name='تصميم UI', sort_order=4),
+                    Category(name='analysis', display_name='تحليل بيانات', sort_order=5),
+                    Category(name='creative', display_name='إبداعي', sort_order=6),
+                ]
+                for cat in defaults:
+                    db.session.add(cat)
+                db.session.commit()
+            _db_initialized = True
+            logger.info("✅ Database initialized successfully.")
         except Exception as e:
+            logger.error(f"❌ DB init error: {e}")
             db.session.rollback()
-            logger.warning(f"⚠️ Visit tracking error: {e}")
 
-# ============================================================
-# PUBLIC ROUTES
-# ============================================================
-
+# ---------- Public routes ----------
 @app.route('/')
 def index():
+    """الصفحة الرئيسية – تعرض المكتبة مع البحث والتصفية."""
     site = SiteSetting.query.first()
     if site and site.status == 'off':
         return render_template('index.html', site_status='off', offline_message=site.offline_message)
 
-    user_id = session.get('user_id')
-    user_data_dict = None
-    if user_id:
-        user = User.query.get(user_id)
-        if user:
-            user.last_active = datetime.utcnow()
-            db.session.commit()
-            user_data_dict = {
-                'username': user.username,
-                'credits': user.credits,
-                'last_daily_gift': user.last_daily_gift.isoformat() if user.last_daily_gift else None
-            }
+    # جلب التصنيفات
+    categories = Category.query.order_by(Category.sort_order).all()
+    # جلب البرومبتات
+    library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
 
-    patterns = Pattern.query.all()
-    patterns_data = [
-        {
-            'id': p.id,
-            'name': p.name,
-            'image_url': p.image_url,
-            'prompt': p.prompt
-        } for p in patterns
-    ]
-
-    notif = Notification.query.filter_by(show_in_chat=True).order_by(Notification.created_at.desc()).first()
-    ad = Ad.query.order_by(Ad.created_at.desc()).first()
-
-    return render_template('index.html', 
-                         patterns=patterns_data, 
-                         user_id=user_id, 
-                         latest_notification=notif, 
-                         latest_ad=ad, 
-                         user_data=user_data_dict, 
-                         site_status='on')
-
-@app.route('/library')
-def library():
-    """صفحة مكتبة البرومبتات - تصنيفات ديناميكية من الأدمن"""
-    site = SiteSetting.query.first()
-    if site and site.status == 'off':
-        return render_template('index.html', site_status='off', offline_message=site.offline_message)
-
-    user_id = session.get('user_id')
-    user_data_dict = None
-    if user_id:
-        user = User.query.get(user_id)
-        if user:
-            user.last_active = datetime.utcnow()
-            db.session.commit()
-            user_data_dict = {
-                'username': user.username,
-                'credits': user.credits,
-                'last_daily_gift': user.last_daily_gift.isoformat() if user.last_daily_gift else None
-            }
-
-    # جلب التصنيفات الديناميكية من الأدمن - معالجة خطأ الجدول غير الموجود
-    categories_data = []
-    try:
-        categories = Category.query.order_by(Category.sort_order).all()
-        categories_data = [
-            {
-                'name': c.name,
-                'display_name': c.display_name,
-                'icon': c.icon
-            } for c in categories
-        ]
-    except Exception as e:
-        logger.warning(f"Categories table not available yet: {e}")
-
-    # جلب البرومبتات - معالجة خطأ الجدول غير الموجود
-    library_data = []
-    try:
-        library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
-        library_data = [
-            {
-                'id': item.id,
-                'title': item.title,
-                'category': item.category,
-                'image_url': item.image_url,
-                'prompt_text': item.prompt_text
-            } for item in library_items
-        ]
-    except Exception as e:
-        logger.warning(f"PromptLibrary table not available yet: {e}")
-
-    # جلب الإعلان النشط للمكتبة
-    active_ad = None
-    try:
-        active_ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
-        if active_ad:
-            active_ad = {
-                'id': active_ad.id,
-                'title': active_ad.title,
-                'text': active_ad.text,
-                'image_url': active_ad.image_url,
-                'button_text': active_ad.button_text,
-                'button_link': active_ad.button_link,
-                'duration_seconds': active_ad.duration_seconds
-            }
-    except Exception as e:
-        logger.warning(f"LibraryAd table not available yet: {e}")
-
-    return render_template('library.html',
-                         categories=categories_data,
-                         library_items=library_data,
-                         active_ad=active_ad,
-                         user_id=user_id,
-                         user_data=user_data_dict,
-                         site_status='on')
-
-@app.route('/sign')
-def sign():
-    return render_template('sign.html', csrf_token=generate_csrf_token())
+    return render_template('index.html',
+                           categories=categories,
+                           library_items=library_items,
+                           site_status='on',
+                           user_id=session.get('user_id'))
 
 @app.route('/about')
 def about():
     return render_template('about.html', current_year=datetime.utcnow().year)
 
-# ============================================================
-# AUTHENTICATION API
-# ============================================================
+@app.route('/sign', methods=['GET', 'POST'])
+def sign():
+    """صفحة تسجيل الدخول / إنشاء حساب."""
+    if request.method == 'GET':
+        return render_template('sign.html', csrf_token=generate_csrf_token())
 
-@app.route('/api/signup', methods=['POST'])
-@limiter.limit("5 per minute")
-def signup():
+    # POST – معالجة تسجيل الدخول أو التسجيل
     data = request.get_json()
-    if not data.get('username') or not data.get('password'): return jsonify({'success': False, 'message': 'بيانات غير كاملة'}), 400
-    if User.query.filter_by(username=data['username']).first(): return jsonify({'success': False, 'message': 'اسم المستخدم موجود مسبقاً'}), 400
-    try:
-        user = User(username=data['username'], password_hash=hash_password(data['password']))
-        db.session.add(user); db.session.commit()
-        session['user_id'] = user.id
-        return jsonify({'success': True, 'message': 'تم التسجيل', 'credits': user.credits})
-    except SQLAlchemyError as e:
-        db.session.rollback(); logger.error(f"Signup DB error: {e}")
-        return jsonify({'success': False, 'message': 'خطأ في قاعدة البيانات'}), 500
+    if not data:
+        return jsonify({'success': False, 'message': 'بيانات غير صحيحة'}), 400
 
-@app.route('/api/login', methods=['POST'])
-@limiter.limit("10 per minute")
-def login():
-    data = request.get_json()
-    user = User.query.filter_by(username=data.get('username')).first()
-    if user and check_password(data.get('password'), user.password_hash):
-        session['user_id'] = user.id
-        return jsonify({'success': True, 'message': 'تم الدخول', 'credits': user.credits})
-    return jsonify({'success': False, 'message': 'بيانات غير صحيحة'}), 401
+    username = data.get('username', '').strip()
+    password = data.get('password', '').strip()
+    action = data.get('action', 'login')  # 'login' or 'signup'
 
-@app.route('/api/user_info')
-@cache.cached(timeout=30)
-def user_info():
-    user = User.query.get(session.get('user_id'))
-    if not user: return jsonify(None)
-    return jsonify({'username': user.username, 'credits': user.credits, 'last_daily_gift': str(user.last_daily_gift) if user.last_daily_gift else None})
+    if not username or not password:
+        return jsonify({'success': False, 'message': 'يرجى ملء جميع الحقول'}), 400
 
-@app.route('/api/update_user', methods=['POST'])
-def update_user():
-    user = User.query.get(session.get('user_id'))
-    if not user: return jsonify({'success': False, 'message': 'غير مسجل'}), 401
-    data = request.get_json()
-    if user.username != data['username'] and User.query.filter_by(username=data['username']).first():
-        return jsonify({'success': False, 'message': 'الاسم مستخدم'}), 400
-    user.username = data['username']; user.password_hash = hash_password(data['password'])
-    db.session.commit()
-    return jsonify({'success': True, 'message': 'تم التحديث'})
-
-# ============================================================
-# CREDITS API
-# ============================================================
-
-@app.route('/api/claim_daily_gift', methods=['POST'])
-def claim_daily_gift():
-    user = User.query.get(session.get('user_id'))
-    today = datetime.utcnow().date()
-    if user.last_daily_gift == today: return jsonify({'success': False, 'message': 'أخذتها اليوم'}), 400
-    user.credits += 3; user.last_daily_gift = today
-    db.session.commit()
-    return jsonify({'success': True, 'message': 'تم الحصول على 3 نقاط', 'credits': user.credits})
-
-@app.route('/api/transfer_credits', methods=['POST'])
-def transfer_credits():
-    sender = User.query.get(session.get('user_id'))
-    if not sender: return jsonify({'success': False, 'message': 'غير مسجل'}), 401
-    data = request.get_json()
-    receiver = User.query.filter_by(username=data.get('username')).first()
-    amount = int(data.get('amount', 0))
-    if not receiver: return jsonify({'success': False, 'message': 'المستخدم غير موجود'}), 404
-    if receiver.id == sender.id: return jsonify({'success': False, 'message': 'لا يمكنك التحويل لنفسك'}), 400
-    if sender.credits < amount: return jsonify({'success': False, 'message': 'رصيدك غير كافٍ'}), 400
-    sender.credits -= amount; receiver.credits += amount
-    db.session.commit()
-    return jsonify({'success': True, 'message': f'تم تحويل {amount}', 'credits': sender.credits})
-
-# ============================================================
-# CHAT API - FIXED: No double credit deduction
-# ============================================================
-
-@app.route('/api/deduct_credit', methods=['POST'])
-def deduct_credit():
-    """هذا الـ endpoint يُستخدم فقط للتحقق من الرصيد، لا للخصم"""
-    user = User.query.get(session.get('user_id'))
-    if not user: return jsonify({'success': False, 'message': 'غير مسجل'}), 401
-    return jsonify({'success': True, 'credits': user.credits})
-
-@app.route('/api/chat', methods=['POST'])
-@limiter.limit("30 per minute")
-def api_chat():
-    data = request.get_json()
-    pattern_id = data.get('pattern_id')
-    message = data.get('message', '').strip()
-
-    user = User.query.get(session.get('user_id'))
-    if not user:
-        return jsonify({'error': 'غير مسجل'}), 401
-    if user.credits <= 0:
-        return jsonify({'error': 'no_credits'}), 402
-
-    pattern = Pattern.query.get(pattern_id)
-    if not pattern:
-        return jsonify({'error': 'النمط غير موجود'}), 404
-
-    # Check API key
-    api_key = app.config.get("OPENROUTER_API_KEY")
-    if not api_key:
-        logger.error("OPENROUTER_API_KEY is not configured!")
-        return jsonify({'error': 'مفتاح API غير مُهيأ'}), 503
-
-    # خصم النقطة
-    try:
-        user.credits -= 1
+    if action == 'signup':
+        if User.query.filter_by(username=username).first():
+            return jsonify({'success': False, 'message': 'اسم المستخدم موجود مسبقاً'}), 400
+        user = User(username=username, password_hash=hash_password(password))
+        db.session.add(user)
         db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Credit deduction error: {e}")
-        return jsonify({'error': 'خطأ في خصم النقاط'}), 500
+        session['user_id'] = user.id
+        return jsonify({'success': True, 'message': 'تم إنشاء الحساب بنجاح'})
+
+    else:  # login
+        user = User.query.filter_by(username=username).first()
+        if user and check_password(password, user.password_hash):
+            session['user_id'] = user.id
+            return jsonify({'success': True, 'message': 'تم تسجيل الدخول'})
+        return jsonify({'success': False, 'message': 'بيانات غير صحيحة'}), 401
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    flash('تم تسجيل الخروج', 'success')
+    return redirect(url_for('index'))
+
+# ---------- Settings (requires login) ----------
+@app.route('/settings')
+@login_required
+def settings_page():
+    """صفحة إعدادات المستخدم (رفع صورة، برومبت مخصص، كلمات مفتاحية)."""
+    user = User.query.get(session['user_id'])
+    return render_template('settings.html', user=user, csrf_token=generate_csrf_token())
+
+@app.route('/api/settings', methods=['POST'])
+@login_required
+def update_settings():
+    """تحديث إعدادات المستخدم (بدون صورة)."""
+    if not validate_csrf_token(request.json.get('csrf_token')):
+        return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
+
+    user = User.query.get(session['user_id'])
+    data = request.get_json()
+    user.custom_prompt = data.get('custom_prompt', '').strip()
+    user.search_keywords = data.get('search_keywords', '').strip()
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'تم تحديث الإعدادات'})
+
+@app.route('/api/upload_image', methods=['POST'])
+@login_required
+def upload_image():
+    """رفع صورة شخصية (تخزين base64 في قاعدة البيانات)."""
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
+
+    if 'image' not in request.files:
+        return jsonify({'success': False, 'message': 'لا توجد صورة'}), 400
+
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'success': False, 'message': 'لم يتم اختيار ملف'}), 400
 
     try:
-        headers = {
-            'Authorization': f'Bearer {api_key}',
-            'Content-Type': 'application/json',
-            'HTTP-Referer': request.url_root,
-            'X-Title': 'UFOQ'
-        }
-        payload = {
-            'model': 'openrouter/auto',
-            'messages': [
-                {'role': 'system', 'content': pattern.prompt},
-                {'role': 'user', 'content': message}
-            ],
-            'temperature': 0.7,
-            'stream': True
-        }
+        # قراءة الملف وتحويله إلى base64
+        data = file.read()
+        b64 = base64.b64encode(data).decode('utf-8')
+        # تحديد نوع MIME بسيط (يمكن تحسينه)
+        ext = file.filename.split('.')[-1].lower()
+        mime = 'image/jpeg' if ext in ['jpg', 'jpeg'] else 'image/png' if ext == 'png' else 'image/webp'
+        image_data = f"data:{mime};base64,{b64}"
 
-        response = requests.post(
-            app.config["OPENROUTER_URL"],
-            json=payload,
-            headers=headers,
-            stream=True,
-            timeout=30
-        )
-
-        # Check if response is an error (non-2xx status)
-        if response.status_code != 200:
-            error_body = response.text[:500]
-            logger.error(f"OpenRouter returned status {response.status_code}: {error_body}")
-            # Return credit
-            try:
-                user.credits += 1
-                db.session.commit()
-            except:
-                db.session.rollback()
-            return jsonify({'error': f'خطأ في مزود الذكاء الاصطناعي (HTTP {response.status_code})'}), 502
-
-        response.raise_for_status()
-
-        def generate():
-            for chunk in response.iter_lines():
-                if chunk:
-                    decoded = chunk.decode('utf-8')
-                    if decoded.startswith('data: '):
-                        data_str = decoded[6:]
-                        if data_str != '[DONE]':
-                            try:
-                                json_data = json.loads(data_str)
-                                if 'choices' in json_data and len(json_data['choices']) > 0:
-                                    delta = json_data['choices'][0].get('delta', {})
-                                    content = delta.get('content', '')
-                                    if content:
-                                        yield content
-                            except json.JSONDecodeError:
-                                logger.warning(f"Invalid JSON in stream: {data_str[:100]}")
-                            except Exception as e:
-                                logger.error(f"Stream decode error: {e}")
-
-        return Response(generate(), mimetype='text/plain')
-
-    except requests.Timeout:
-        logger.error("OpenRouter API timeout")
-        try:
-            user.credits += 1
-            db.session.commit()
-        except:
-            db.session.rollback()
-        return jsonify({'error': 'انتهى وقت الاتصال بمزود الذكاء الاصطناعي'}), 504
-
-    except requests.RequestException as e:
-        logger.error(f"OpenRouter API Exception: {e}")
-        try:
-            user.credits += 1
-            db.session.commit()
-        except:
-            db.session.rollback()
-        return jsonify({'error': 'خطأ في الاتصال بمزود الذكاء الاصطناعي'}), 502
-
+        user = User.query.get(session['user_id'])
+        user.profile_image = image_data
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'تم رفع الصورة', 'image': image_data})
     except Exception as e:
-        logger.error(f"Unexpected chat error: {e}")
-        logger.error(traceback.format_exc())
-        try:
-            user.credits += 1
-            db.session.commit()
-        except:
-            db.session.rollback()
-        return jsonify({'error': 'خطأ داخلي'}), 500
+        logger.error(f"Image upload error: {e}")
+        return jsonify({'success': False, 'message': 'خطأ في رفع الصورة'}), 500
 
-@app.route('/api/notifications')
-@cache.cached(timeout=120)
-def api_notifications():
-    return jsonify([{'id': n.id, 'title': n.title, 'text': n.text, 'created_at': n.created_at.isoformat()} for n in Notification.query.order_by(Notification.id.desc()).all()])
-
-@app.route('/api/track_ad_view', methods=['POST'])
-def track_ad_view():
-    """يسجّل عدد ثواني مشاهدة الإعلان (يُستدعى عند اكتمال العد التنازلي للإعلان في المكتبة)"""
-    data = request.get_json(silent=True) or {}
-    try:
-        seconds = int(data.get('seconds', 0))
-        ad_id = data.get('ad_id')
-        if seconds > 0:
-            view = AdView(ad_id=ad_id, viewed_seconds=seconds)
-            db.session.add(view)
-            db.session.commit()
-        return jsonify({'success': True})
-    except Exception as e:
-        db.session.rollback()
-        logger.warning(f"⚠️ Ad view tracking error: {e}")
-        return jsonify({'success': False}), 500
-
-# ============================================================
-# ADMIN PANEL
-# ============================================================
-
+# ---------- Admin panel ----------
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_panel():
-    try:
-        if request.method == 'POST' and request.form.get('password') == Config.ADMIN_PASSWORD:
-            session['logged_in'] = True
-            return redirect(url_for('admin_panel'))
-        if session.get('logged_in'):
-            # جلب التصنيفات للأدمن - معالجة خطأ الجدول غير الموجود
-            categories = []
-            library_items = []
-            try:
-                categories = Category.query.order_by(Category.sort_order).all()
-            except Exception as e:
-                logger.warning(f"Categories table not available yet: {e}")
-            try:
-                library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
-            except Exception as e:
-                logger.warning(f"PromptLibrary table not available yet: {e}")
+    if request.method == 'POST' and request.form.get('password') == Config.ADMIN_PASSWORD:
+        session['logged_in'] = True
+        return redirect(url_for('admin_panel'))
 
-            # --- إحصائيات متوسط الزيارات اليومي ---
-            avg_daily_visits = 0
-            try:
-                totals = db.session.query(
-                    db.func.coalesce(db.func.sum(PageVisit.count), 0),
-                    db.func.count(PageVisit.id)
-                ).first()
-                total_visits, days_recorded = totals[0], totals[1]
-                if days_recorded:
-                    avg_daily_visits = round(total_visits / days_recorded, 1)
-            except Exception as e:
-                logger.warning(f"PageVisit stats not available yet: {e}")
-
-            # --- إحصائيات ساعات مشاهدة الإعلان ---
-            ad_currently_exists = False
-            total_ad_hours = 0
-            try:
-                ad_currently_exists = LibraryAd.query.filter_by(is_active=True).first() is not None
-                total_ad_seconds = db.session.query(db.func.coalesce(db.func.sum(AdView.viewed_seconds), 0)).scalar()
-                total_ad_hours = round((total_ad_seconds or 0) / 3600, 2)
-            except Exception as e:
-                logger.warning(f"AdView stats not available yet: {e}")
-
-            # --- استهلاك قاعدة بيانات Postgres ---
-            postgres_size = None
-            try:
-                postgres_size = db.session.execute(
-                    text("SELECT pg_size_pretty(pg_database_size(current_database()))")
-                ).scalar()
-            except Exception as e:
-                logger.warning(f"Postgres size query not available: {e}")
-
-            return render_template('admin.html',
-                patterns=Pattern.query.all(),
-                notifications=Notification.query.all(),
-                ads=Ad.query.all(),
-                library_items=library_items,
-                categories=categories,
-                library_ads=LibraryAd.query.order_by(LibraryAd.created_at.desc()).all(),
-                users_count=User.query.count(),
-                avg_daily_visits=avg_daily_visits,
-                ad_currently_exists=ad_currently_exists,
-                total_ad_hours=total_ad_hours,
-                postgres_size=postgres_size,
-                site_settings=SiteSetting.query.first(),
-                csrf_token=generate_csrf_token()
-            )
-        return render_template('admin.html')
-    except Exception as e:
-        logger.error(f"Admin panel error: {e}")
-        logger.error(traceback.format_exc())
-        return f"Error: {str(e)}", 500
+    if session.get('logged_in'):
+        categories = Category.query.order_by(Category.sort_order).all()
+        library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
+        library_ads = LibraryAd.query.order_by(LibraryAd.created_at.desc()).all()
+        users = User.query.all()
+        site_settings = SiteSetting.query.first()
+        return render_template('admin.html',
+                               categories=categories,
+                               library_items=library_items,
+                               library_ads=library_ads,
+                               users=users,
+                               site_settings=site_settings,
+                               csrf_token=generate_csrf_token())
+    return render_template('admin.html')
 
 @app.route('/admin/logout')
-def logout():
-    session.clear()
+def admin_logout():
+    session.pop('logged_in', None)
     return redirect(url_for('admin_panel'))
 
-# --- Patterns Management ---
-
-@app.route('/admin/pattern/add', methods=['POST'])
-@admin_required
-def add_pattern():
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    p = Pattern(
-        name=request.form.get('name'),
-        image_url=request.form.get('image_url'),
-        prompt=request.form.get('prompt')
-    )
-    db.session.add(p); db.session.commit()
-    flash('تمت إضافة النمط', 'success')
-    return redirect(url_for('admin_panel'))
-
-@app.route('/admin/pattern/<int:pattern_id>/delete', methods=['POST'])
-@admin_required
-def delete_pattern(pattern_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    p = Pattern.query.get_or_404(pattern_id)
-    db.session.delete(p); db.session.commit()
-    flash('تم حذف النمط', 'success')
-    return redirect(url_for('admin_panel'))
-
-# --- Category Management (NEW - Admin Full Control) ---
-
+# ---------- Admin: Categories ----------
 @app.route('/admin/category/add', methods=['POST'])
 @admin_required
 def add_category():
     if not validate_csrf_token(request.form.get('csrf_token')):
         return "CSRF Error", 400
-
     try:
         name = request.form.get('name', '').strip().lower().replace(' ', '_')
         display_name = request.form.get('display_name', '').strip()
         icon = request.form.get('icon', 'bi-tag').strip()
         sort_order = int(request.form.get('sort_order', 0))
-
         if not name or not display_name:
             flash('اسم التصنيف واسم العرض مطلوبان', 'error')
             return redirect(url_for('admin_panel'))
-
         if Category.query.filter_by(name=name).first():
             flash('التصنيف موجود مسبقاً', 'error')
             return redirect(url_for('admin_panel'))
-
         cat = Category(name=name, display_name=display_name, icon=icon, sort_order=sort_order)
-        db.session.add(cat); db.session.commit()
+        db.session.add(cat)
+        db.session.commit()
         flash('تمت إضافة التصنيف', 'success')
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error adding category: {e}")
-        flash('خطأ في قاعدة البيانات - تأكد من تشغيل migrations', 'error')
+        flash('خطأ في إضافة التصنيف', 'error')
     return redirect(url_for('admin_panel'))
 
 @app.route('/admin/category/<int:category_id>/delete', methods=['POST'])
@@ -621,9 +277,10 @@ def delete_category(category_id):
         return "CSRF Error", 400
     try:
         cat = Category.query.get_or_404(category_id)
-        # Update prompts with this category to 'general'
+        # نقل البرومبتات التي تحمل هذا التصنيف إلى 'general'
         PromptLibrary.query.filter_by(category=cat.name).update({'category': 'general'})
-        db.session.delete(cat); db.session.commit()
+        db.session.delete(cat)
+        db.session.commit()
         flash('تم حذف التصنيف', 'success')
     except Exception as e:
         db.session.rollback()
@@ -644,8 +301,7 @@ def update_category(category_id):
     flash('تم تحديث التصنيف', 'success')
     return redirect(url_for('admin_panel'))
 
-# --- Library Management ---
-
+# ---------- Admin: Library ----------
 @app.route('/admin/library/add', methods=['POST'])
 @admin_required
 def add_library_item():
@@ -658,12 +314,13 @@ def add_library_item():
             image_url=request.form.get('image_url'),
             prompt_text=request.form.get('prompt_text')
         )
-        db.session.add(item); db.session.commit()
+        db.session.add(item)
+        db.session.commit()
         flash('تمت إضافة البرومبت للمكتبة', 'success')
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error adding library item: {e}")
-        flash('خطأ في قاعدة البيانات - تأكد من تشغيل migrations', 'error')
+        flash('خطأ في إضافة البرومبت', 'error')
     return redirect(url_for('admin_panel'))
 
 @app.route('/admin/library/<int:item_id>/delete', methods=['POST'])
@@ -672,8 +329,9 @@ def delete_library_item(item_id):
     if not validate_csrf_token(request.form.get('csrf_token')):
         return "CSRF Error", 400
     item = PromptLibrary.query.get_or_404(item_id)
-    db.session.delete(item); db.session.commit()
-    flash('تم حذف البرومبت من المكتبة', 'success')
+    db.session.delete(item)
+    db.session.commit()
+    flash('تم حذف البرومبت', 'success')
     return redirect(url_for('admin_panel'))
 
 @app.route('/admin/library/<int:item_id>/update', methods=['POST'])
@@ -690,155 +348,7 @@ def update_library_item(item_id):
     flash('تم تحديث البرومبت', 'success')
     return redirect(url_for('admin_panel'))
 
-# --- Notifications Management ---
-
-@app.route('/admin/notification/add', methods=['POST'])
-@admin_required
-def add_notification():
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    n = Notification(
-        title=request.form.get('title'),
-        text=request.form.get('text'),
-        duration_hours=request.form.get('duration_hours', 1),
-        show_in_chat=request.form.get('show_in_chat') == 'on'
-    )
-    db.session.add(n); db.session.commit()
-    flash('تم إرسال الإشعار', 'success')
-    return redirect(url_for('admin_panel'))
-
-@app.route('/admin/notification/<int:notification_id>/delete', methods=['POST'])
-@admin_required
-def delete_notification(notification_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    n = Notification.query.get_or_404(notification_id)
-    db.session.delete(n); db.session.commit()
-    flash('تم حذف الإشعار', 'success')
-    return redirect(url_for('admin_panel'))
-
-# --- Credits Management ---
-
-@app.route('/api/admin/update_credits', methods=['POST'])
-@admin_required
-def update_credits():
-    if not validate_csrf_token(request.json.get('csrf_token')):
-        return jsonify({'error': 'CSRF Error'}), 400
-    data = request.get_json()
-    user = User.query.filter_by(username=data.get('username')).first()
-    if not user:
-        return jsonify({'success': False, 'message': 'المستخدم غير موجود'}), 404
-    amount = int(data.get('amount', 0))
-    user.credits += amount
-    db.session.commit()
-    return jsonify({'success': True, 'message': f'تم شحن {amount} نقطة للمستخدم {user.username}', 'credits': user.credits})
-
-# --- Site Settings ---
-
-@app.route('/api/admin/update_site_settings', methods=['POST'])
-@admin_required
-def update_site_settings():
-    if not validate_csrf_token(request.json.get('csrf_token')):
-        return jsonify({'error': 'CSRF Error'}), 400
-    s = SiteSetting.query.first()
-    s.status = request.json.get('status')
-    s.offline_message = request.json.get('offline_message')
-    db.session.commit()
-    return jsonify({'success': True})
-
-@app.route('/api/admin/get_site_status')
-@admin_required
-def get_site_status():
-    s = SiteSetting.query.first()
-    return jsonify({
-        'status': s.status if s else 'on',
-        'offline_message': s.offline_message if s else 'الموقع تحت الصيانة حالياً.'
-    })
-
-# Auto-create all tables on startup (no migration needed)
-# If tables exist with old schema, they will be dropped and recreated
-with app.app_context():
-    try:
-        from sqlalchemy import inspect, text
-        inspector = inspect(db.engine)
-
-        # Check if category table exists but missing display_name column
-        category_cols = []
-        try:
-            category_cols = [col['name'] for col in inspector.get_columns('category')]
-        except Exception:
-            pass  # Table doesn't exist yet
-
-        # Check if prompt_library table exists
-        library_cols = []
-        try:
-            library_cols = [col['name'] for col in inspector.get_columns('prompt_library')]
-        except Exception:
-            pass
-
-        # Check if library_ad table exists
-        ad_cols = []
-        try:
-            ad_cols = [col['name'] for col in inspector.get_columns('library_ad')]
-        except Exception:
-            pass
-
-        # If category table exists but missing display_name, drop and recreate
-        needs_recreate = False
-        if category_cols and 'display_name' not in category_cols:
-            logger.warning("⚠️ Category table has old schema. Dropping and recreating...")
-            needs_recreate = True
-
-        # If library_ad table doesn't exist, we need to create it
-        if not ad_cols:
-            logger.info("ℹ️ LibraryAd table will be created.")
-
-        if needs_recreate:
-            # Drop tables that need updating (order matters for FK constraints)
-            try:
-                db.session.execute(text("DROP TABLE IF EXISTS library_ad CASCADE"))
-                db.session.execute(text("DROP TABLE IF EXISTS prompt_library CASCADE"))
-                db.session.execute(text("DROP TABLE IF EXISTS category CASCADE"))
-                db.session.commit()
-                logger.info("✅ Old tables dropped.")
-            except Exception as e:
-                logger.warning(f"⚠️ Could not drop old tables: {e}")
-                db.session.rollback()
-
-        # Create all tables with current schema
-        db.create_all()
-        logger.info("✅ All database tables created/verified.")
-
-        # Initialize site settings if not exists
-        if not SiteSetting.query.first():
-            db.session.add(SiteSetting())
-            db.session.commit()
-            logger.info("✅ Site settings initialized.")
-
-        # Initialize default categories if none exist
-        try:
-            if not Category.query.first():
-                default_categories = [
-                    Category(name='images', display_name='توليد صور', sort_order=1),
-                    Category(name='writing', display_name='كتابة محتوى', sort_order=2),
-                    Category(name='coding', display_name='برمجة', sort_order=3),
-                    Category(name='design', display_name='تصميم UI', sort_order=4),
-                    Category(name='analysis', display_name='تحليل بيانات', sort_order=5),
-                    Category(name='creative', display_name='إبداعي', sort_order=6),
-                ]
-                for cat in default_categories:
-                    db.session.add(cat)
-                db.session.commit()
-                logger.info("✅ Default categories initialized.")
-        except Exception as e:
-            logger.warning(f"⚠️ Could not initialize categories: {e}")
-            db.session.rollback()
-
-    except Exception as e:
-        logger.error(f"❌ Error creating tables: {e}")
-
-# --- Library Ads Management ---
-
+# ---------- Admin: Library Ads ----------
 @app.route('/admin/library_ad/add', methods=['POST'])
 @admin_required
 def add_library_ad():
@@ -854,7 +364,8 @@ def add_library_ad():
             duration_seconds=int(request.form.get('duration_seconds', 5)),
             is_active=request.form.get('is_active') == 'on'
         )
-        db.session.add(ad); db.session.commit()
+        db.session.add(ad)
+        db.session.commit()
         flash('تمت إضافة الإعلان', 'success')
     except Exception as e:
         db.session.rollback()
@@ -869,7 +380,8 @@ def delete_library_ad(ad_id):
         return "CSRF Error", 400
     try:
         ad = LibraryAd.query.get_or_404(ad_id)
-        db.session.delete(ad); db.session.commit()
+        db.session.delete(ad)
+        db.session.commit()
         flash('تم حذف الإعلان', 'success')
     except Exception as e:
         db.session.rollback()
@@ -893,14 +405,28 @@ def toggle_library_ad(ad_id):
         flash('خطأ في تغيير حالة الإعلان', 'error')
     return redirect(url_for('admin_panel'))
 
+# ---------- Admin: Site Settings ----------
+@app.route('/api/admin/update_site_settings', methods=['POST'])
+@admin_required
+def update_site_settings():
+    if not validate_csrf_token(request.json.get('csrf_token')):
+        return jsonify({'error': 'CSRF Error'}), 400
+    s = SiteSetting.query.first()
+    s.status = request.json.get('status', 'on')
+    s.offline_message = request.json.get('offline_message', 'الموقع تحت الصيانة حالياً.')
+    db.session.commit()
+    return jsonify({'success': True})
 
+@app.route('/api/admin/get_site_status')
+@admin_required
+def get_site_status():
+    s = SiteSetting.query.first()
+    return jsonify({
+        'status': s.status if s else 'on',
+        'offline_message': s.offline_message if s else 'الموقع تحت الصيانة حالياً.'
+    })
 
-
-@app.route('/api/users_count')
-@cache.cached(timeout=60)
-def users_count_api():
-    return jsonify({'count': User.query.count()})
-
+# ---------- Health check ----------
 @app.route('/health')
 def health_check():
     return jsonify({'status': 'ok', 'timestamp': datetime.utcnow().isoformat()})
