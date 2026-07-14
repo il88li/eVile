@@ -2,541 +2,100 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>UFOQ - حول المنصة</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>حول UFOQ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { margin:0; padding:0; box-sizing:border-box; }
         :root {
-            --paper: #F6F4F1;
-            --stone: #E4DED2;
-            --coral: #F95C4B;
-            --black: #000000;
-            --bg: var(--paper);
-            --glass: var(--coral);
-            --btn: var(--coral);
-            --glass-light: rgba(249, 92, 75, 0.08);
-            --glass-border: rgba(249, 92, 75, 0.18);
-            --text: var(--black);
-            --text-dim: #5A5652;
-            --text-faint: #8A8580;
-            --white: #FFFFFF;
-            --stone-light: rgba(228, 222, 210, 0.5);
-            --stone-border: rgba(228, 222, 210, 0.8);
+            --bg: #0b0e1a;
+            --bg-card: rgba(20,30,48,0.6);
+            --glass-border: rgba(255,255,255,0.1);
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --text-faint: #64748b;
+            --primary: #38bdf8;
+            --primary-dim: rgba(56,189,248,0.15);
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
         body {
             font-family: 'Tajawal', sans-serif;
-            background: var(--bg);
+            background: linear-gradient(145deg, #0b0e1a 0%, #111827 100%);
             color: var(--text);
             min-height: 100vh;
-            min-height: 100dvh;
-            position: relative;
-            overflow-x: hidden;
+            padding: 90px 16px 140px 16px;
         }
-
-        /* ===== FLOATING HEADER ===== */
-        .floating-header {
-            position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 8px 16px; max-width: 700px; margin: 0 auto; border-radius: 20px;
-            background: rgba(246, 244, 241, 0.92);
-            backdrop-filter: blur(20px) saturate(140%);
-            -webkit-backdrop-filter: blur(20px) saturate(140%);
-            border: 1px solid var(--stone-border);
-        }
-        .header-left, .header-right { display: flex; align-items: center; gap: 6px; }
-        .header-center {
-            position: absolute; left: 50%; transform: translateX(-50%);
-            font-size: 18px; font-weight: 900; color: var(--text); letter-spacing: 4px;
-        }
-        .header-btn {
-            width: 36px; height: 36px; border-radius: 12px;
-            background: var(--stone-light); border: 1px solid var(--stone-border);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s; color: var(--text-dim); text-decoration: none;
-        }
-        .header-btn:active { transform: scale(0.92); }
-        .header-btn i { font-size: 16px; }
-        .header-btn.special { background: rgba(249, 92, 75, 0.1); color: var(--coral); border-color: rgba(249, 92, 75, 0.2); }
-
-        /* ===== MAIN CONTAINER ===== */
-        .main-container {
-            width: 100%; max-width: 640px; margin: 0 auto;
-            display: flex; flex-direction: column; align-items: center;
-            padding: 90px 16px 110px 16px; gap: 14px;
-        }
-
-        /* ===== GLASS CARD ===== */
+        .container { max-width:800px; margin:0 auto; }
         .glass-card {
-            width: 100%;
-            background: var(--glass-light);
-            backdrop-filter: blur(20px) saturate(140%);
-            -webkit-backdrop-filter: blur(20px) saturate(140%);
-            border: 1px solid var(--stone-border);
-            border-radius: 24px; padding: 24px;
-            position: relative; overflow: hidden;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
         }
-        .glass-card::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+        .card-title {
+            font-size:1.3rem; font-weight:800; margin-bottom:16px;
+            display:flex; align-items:center; gap:10px;
         }
-
-        /* ===== HERO ===== */
-        .about-hero {
-            composes: glass-card;
-            padding: 32px 24px; text-align: center;
-            display: flex; flex-direction: column; align-items: center; gap: 12px;
-        }
-        .about-hero-icon {
-            width: 70px; height: 70px; border-radius: 20px;
-            background: var(--glass);
-            display: flex; align-items: center; justify-content: center;
-        }
-        .about-hero-icon i { font-size: 30px; color: #fff; }
-        .about-hero h1 { font-size: 24px; font-weight: 900; letter-spacing: 1px; color: var(--text); }
-        .about-hero p {
-            font-size: 14px; color: var(--text-dim); line-height: 1.7; max-width: 420px;
-        }
-        .about-hero-tags {
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 4px;
-        }
-        .about-tag {
-            font-size: 11px; font-weight: 700; color: var(--white);
-            text-transform: uppercase; letter-spacing: 0.5px;
-            background: var(--glass); padding: 6px 16px; border-radius: 30px;
-        }
-
-        /* ===== SECTION CARD ===== */
-        .about-card-title {
-            font-size: 15px; font-weight: 700;
-            display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
-            color: var(--text);
-        }
-        .about-card-title i { color: var(--glass); font-size: 17px; }
-        .glass-divider {
-            border: none; border-top: 2px dotted var(--stone-border);
-            margin: 12px 0;
-        }
-        .story-text {
-            font-size: 14px; color: var(--text-dim); line-height: 1.9;
-        }
-        .story-text .highlight { color: var(--glass); font-weight: 800; }
-
-        /* ===== CHECKLIST ===== */
-        .checklist { display: flex; flex-direction: column; gap: 10px; }
-        .check-row {
-            display: flex; align-items: center; gap: 12px;
-            background: rgba(255,255,255,0.5);
-            border: 1px solid var(--stone-border); border-radius: 16px; padding: 12px 14px;
-        }
-        .check-icon {
-            flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
-            background: var(--glass);
-            display: flex; align-items: center; justify-content: center;
-        }
-        .check-icon i { color: #fff; font-size: 13px; }
-        .check-text strong {
-            display: block; font-size: 13px; font-weight: 700; color: var(--text);
-        }
-        .check-text span {
-            font-size: 12px; color: var(--text-dim); line-height: 1.5;
-        }
-
-        /* ===== STEPS ===== */
-        .steps-list { display: flex; flex-direction: column; gap: 0; }
-        .step-row {
-            display: flex; align-items: flex-start; gap: 14px;
-            padding: 12px 0; position: relative;
-        }
-        .step-row:not(:last-child)::after {
-            content: ''; position: absolute; right: 17px; top: 42px; bottom: -4px;
-            width: 2px; background: var(--stone-border);
-        }
-        .step-num {
-            flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%;
-            background: var(--glass); color: #fff;
-            font-size: 14px; font-weight: 800;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 1;
-        }
-        .step-body h4 {
-            font-size: 13px; font-weight: 700; margin-bottom: 2px; color: var(--text);
-        }
-        .step-body p {
-            font-size: 12px; color: var(--text-dim); line-height: 1.6;
-        }
-
-        /* ===== FAQ ACCORDION ===== */
-        .faq-section { margin-top: 4px; }
-        .faq-item {
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid var(--stone-border);
-            border-radius: 16px;
-            margin-bottom: 10px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        .faq-item:hover {
-            border-color: rgba(249, 92, 75, 0.2);
-        }
-        .faq-question {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 16px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            user-select: none;
-        }
-        .faq-question:active {
-            background: rgba(249, 92, 75, 0.04);
-        }
-        .faq-question-text {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex: 1;
-        }
-        .faq-question-text i {
-            color: var(--coral);
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-        .faq-toggle {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: var(--stone-light);
-            border: 1px solid var(--stone-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--coral);
-            font-size: 14px;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            flex-shrink: 0;
-        }
-        .faq-item.open .faq-toggle {
-            transform: rotate(180deg);
-            background: rgba(249, 92, 75, 0.1);
-        }
-        .faq-answer {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), padding 0.35s ease;
-            padding: 0 16px;
-        }
-        .faq-item.open .faq-answer {
-            max-height: 300px;
-            padding: 0 16px 14px 16px;
-        }
-        .faq-answer p {
-            font-size: 13px;
-            color: var(--text-dim);
-            line-height: 1.8;
-            text-align: right;
-        }
-
-        /* ===== CONTACT ===== */
-        .contact-list { display: flex; flex-direction: column; gap: 10px; }
-        .contact-link {
-            display: flex; align-items: center; gap: 12px;
-            background: rgba(255,255,255,0.5);
-            border: 1px solid var(--stone-border); border-radius: 16px;
-            padding: 12px 14px; text-decoration: none; color: var(--text);
-            transition: all 0.2s;
-        }
-        .contact-link:active { transform: scale(0.98); }
-        .contact-link-icon {
-            width: 38px; height: 38px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px; color: #fff; flex-shrink: 0;
-        }
-        .contact-link-icon.telegram { background: #0088cc; }
-        .contact-link-icon.instagram { background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
-        .contact-link-icon.whatsapp { background: #25D366; }
-        .contact-link-text { display: flex; flex-direction: column; gap: 1px; flex: 1; }
-        .contact-link-text strong { font-size: 13px; font-weight: 700; }
-        .contact-link-text span { font-size: 11px; color: var(--text-dim); }
-        .contact-link .bi-chevron-left { color: var(--text-faint); font-size: 14px; }
-
-        .version-footer {
-            font-size: 12px; color: var(--text-faint);
-            text-align: center; padding: 4px 0 0 0;
-        }
-
-        /* ===== BOTTOM NAV ===== */
+        .card-title i { color:var(--primary); }
+        p { line-height:1.8; color:var(--text-dim); }
+        .highlight { color:var(--primary); font-weight:700; }
         .bottom-nav-bar {
-            position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; display: flex; align-items: center; gap: 6px;
-            padding: 8px 16px; background: rgba(246, 244, 241, 0.92);
-            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--stone-border); border-radius: 50px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
-            max-width: 600px; width: auto;
+            position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
+            z-index:1000; display:flex; align-items:center; gap:6px;
+            padding:10px 18px; background:rgba(11,14,26,0.8);
+            backdrop-filter:blur(30px); border:1px solid var(--glass-border);
+            border-radius:50px; box-shadow:var(--shadow);
+            max-width:600px; width:auto;
         }
         .nav-item {
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-            padding: 10px 20px; border-radius: 40px; background: transparent;
-            border: none; color: var(--text-faint); font-family: 'Tajawal', sans-serif;
-            font-size: 13px; font-weight: 600; cursor: pointer;
-            transition: all 0.2s ease; text-decoration: none;
-            position: relative; white-space: nowrap;
+            display:flex; align-items:center; gap:6px;
+            padding:10px 20px; border-radius:40px;
+            background:transparent; border:none; color:var(--text-faint);
+            font-family:'Tajawal',sans-serif; font-size:13px; font-weight:600;
+            cursor:pointer; transition:0.2s; text-decoration:none;
+            white-space:nowrap;
         }
-        .nav-item i { font-size: 18px; transition: all 0.2s; }
-        .nav-item:hover { color: var(--coral); background: rgba(249, 92, 75, 0.06); }
-        .nav-item:active { transform: scale(0.9); }
+        .nav-item:hover { color:var(--text); background:var(--primary-dim); }
         .nav-item.active {
-            background: var(--glass); color: var(--white);
-            box-shadow: 0 4px 15px rgba(249, 92, 75, 0.3);
-            transform: scale(1.05);
+            background:var(--primary); color:#0b0e1a;
+            border:1px solid var(--primary);
         }
-        .nav-item.active i { transform: scale(1.1); }
+        .nav-item i { font-size:20px; }
         .nav-label {
-            max-width: 0; overflow: hidden;
-            transition: max-width 0.2s ease, opacity 0.2s ease; opacity: 0;
+            max-width:0; overflow:hidden; transition:0.2s; opacity:0;
         }
-        .nav-item.active .nav-label { max-width: 80px; opacity: 1; }
-
-        @media (max-width: 600px) {
-            .about-hero, .glass-card { padding: 18px 16px; border-radius: 20px; }
-            .bottom-nav-bar { padding: 6px 12px; border-radius: 40px; max-width: 95vw; }
-            .nav-item { padding: 6px 14px; font-size: 12px; }
-            .nav-item i { font-size: 16px; }
-            .faq-question { padding: 12px 14px; }
-            .faq-question-text { font-size: 12px; }
-            .faq-answer p { font-size: 12px; }
-        }
+        .nav-item.active .nav-label { max-width:80px; opacity:1; }
     </style>
 </head>
 <body>
-    <header class="floating-header">
-        <div class="header-left">
-            <div class="header-btn special" onclick="history.back()"><i class="bi bi-arrow-right"></i></div>
-        </div>
-        <div class="header-center">UFOQ</div>
-        <div class="header-right">
-            <a href="https://t.me/Evile_Prompts" target="_blank" class="header-btn"><i class="bi bi-telegram"></i></a>
-        </div>
-    </header>
-
-    <div class="main-container">
-        <div class="glass-card about-hero">
-            <div class="about-hero-icon"><i class="bi bi-stars"></i></div>
-            <h1>UFOQ</h1>
-            <p>مساعدك الذكي لصناعة محتوى وبرومبتات احترافية خلال ثوانٍ، بدون خبرة سابقة في هندسة الأوامر</p>
-            <div class="about-hero-tags">
-                <span class="about-tag"><i class="bi bi-cpu"></i> ذكاء اصطناعي</span>
-                <span class="about-tag"><i class="bi bi-lightning-charge"></i> نتائج فورية</span>
-                <span class="about-tag"><i class="bi bi-shield-check"></i> سهل الاستخدام</span>
-            </div>
+    <div class="container">
+        <div class="glass-card">
+            <div class="card-title"><i class="bi bi-stars"></i> عن UFOQ</div>
+            <p>UFOQ هي منصة مفتوحة تهدف إلى جمع وتنظيم أفضل البرومبتات (أوامر التوجيه) للذكاء الاصطناعي في مكان واحد. نقدم مكتبة غنية بالبرومبتات المصنفة، مع إمكانية البحث والتصفية، ونسخ البرومبتات بنقرة واحدة.</p>
+            <p style="margin-top:12px;">جميع المحتويات مقدمة من مجتمع المبدعين، ونحن نعمل على تحديث المكتبة باستمرار.</p>
         </div>
 
         <div class="glass-card">
-            <div class="about-card-title"><i class="bi bi-heart"></i> قصتنا</div>
-            <p class="story-text">
-                ولدت منصة <span class="highlight">UFOQ</span> من رحم المعاناة مع تعلّم هندسة الأوامر (Prompt Engineering)، لتختصر عليك سنوات من التجربة والخطأ.
-            </p>
-        </div>
-
-        <div class="glass-card">
-            <div class="about-card-title"><i class="bi bi-grid"></i> ماذا نقدّم لك</div>
-            <hr class="glass-divider">
-            <div class="checklist">
-                <div class="check-row">
-                    <div class="check-icon"><i class="bi bi-check-lg"></i></div>
-                    <div class="check-text"><strong>توليد بالذكاء الاصطناعي</strong><span>حوّل أفكارك إلى محتوى جاهز بضغطة واحدة</span></div>
-                </div>
-                <div class="check-row">
-                    <div class="check-icon"><i class="bi bi-check-lg"></i></div>
-                    <div class="check-text"><strong>أنماط جاهزة</strong><span>مجموعة أنماط متنوعة تناسب مختلف الاستخدامات</span></div>
-                </div>
-                <div class="check-row">
-                    <div class="check-icon"><i class="bi bi-check-lg"></i></div>
-                    <div class="check-text"><strong>مكتبة برومبتات</strong><span>آلاف البرومبتات الجاهزة للاستلهام والنسخ</span></div>
-                </div>
-                <div class="check-row">
-                    <div class="check-icon"><i class="bi bi-check-lg"></i></div>
-                    <div class="check-text"><strong>نقاط ومكافآت يومية</strong><span>احصل على نقاط مجانية يومياً وحوّلها لأصدقائك</span></div>
-                </div>
+            <div class="card-title"><i class="bi bi-people"></i> من نحن</div>
+            <p>فريق UFOQ هو مجموعة من عشاق الذكاء الاصطناعي والتكنولوجيا، نهدف إلى تسهيل الوصول إلى أدوات الإبداع الرقمي للجميع.</p>
+            <p style="margin-top:12px;">للتواصل معنا، يمكنك استخدام قنوات التواصل التالية:</p>
+            <div style="display:flex; gap:12px; margin-top:12px; flex-wrap:wrap;">
+                <a href="https://t.me/Evile_Prompts" target="_blank" style="color:var(--primary); text-decoration:none; display:inline-flex; align-items:center; gap:6px; border:1px solid var(--glass-border); padding:8px 16px; border-radius:50px; background:var(--primary-dim);"><i class="bi bi-telegram"></i> تلجرام</a>
+                <a href="https://www.instagram.com/bla6c7" target="_blank" style="color:var(--primary); text-decoration:none; display:inline-flex; align-items:center; gap:6px; border:1px solid var(--glass-border); padding:8px 16px; border-radius:50px; background:var(--primary-dim);"><i class="bi bi-instagram"></i> إنستغرام</a>
+                <a href="https://wa.me/967730577358" target="_blank" style="color:var(--primary); text-decoration:none; display:inline-flex; align-items:center; gap:6px; border:1px solid var(--glass-border); padding:8px 16px; border-radius:50px; background:var(--primary-dim);"><i class="bi bi-whatsapp"></i> واتساب</a>
             </div>
         </div>
-
-        <div class="glass-card">
-            <div class="about-card-title"><i class="bi bi-signpost-split"></i> كيف يعمل UFOQ</div>
-            <div class="steps-list">
-                <div class="step-row">
-                    <div class="step-num">1</div>
-                    <div class="step-body"><h4>اختر نمطاً</h4><p>تصفّح الأنماط المتاحة واختر ما يناسب فكرتك</p></div>
-                </div>
-                <div class="step-row">
-                    <div class="step-num">2</div>
-                    <div class="step-body"><h4>اكتب فكرتك</h4><p>صف ما تريده بجملة بسيطة بكلماتك الخاصة</p></div>
-                </div>
-                <div class="step-row">
-                    <div class="step-num">3</div>
-                    <div class="step-body"><h4>اضغط إنشاء</h4><p>سيقوم UFOQ بتوليد المحتوى المطلوب خلال ثوانٍ</p></div>
-                </div>
-                <div class="step-row">
-                    <div class="step-num">4</div>
-                    <div class="step-body"><h4>انسخ واستخدم</h4><p>انسخ النتيجة مباشرة واستخدمها أينما تريد</p></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="glass-card">
-            <div class="about-card-title"><i class="bi bi-question-circle"></i> الأسئلة الشائعة</div>
-            <div class="faq-section">
-                <div class="faq-item" data-faq="1">
-                    <div class="faq-question" onclick="toggleFaq(this)">
-                        <div class="faq-question-text"><i class="bi bi-question-lg"></i> ما هو UFOQ وكيف يعمل؟</div>
-                        <div class="faq-toggle"><i class="bi bi-chevron-down"></i></div>
-                    </div>
-                    <div class="faq-answer">
-                        <p>UFOQ هو مساعد ذكي يستخدم أحدث نماذج الذكاء الاصطناعي لمساعدتك في صناعة محتوى احترافي. كل ما عليك فعله هو اختيار نمط مناسب، كتابة فكرتك بجملة بسيطة، والضغط على "إنشاء" لتحصل على نتيجة جاهزة خلال ثوانٍ.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item" data-faq="2">
-                    <div class="faq-question" onclick="toggleFaq(this)">
-                        <div class="faq-question-text"><i class="bi bi-coin"></i> ما هي نظام النقاط وكيف أحصل عليها؟</div>
-                        <div class="faq-toggle"><i class="bi bi-chevron-down"></i></div>
-                    </div>
-                    <div class="faq-answer">
-                        <p>كل مستخدم جديد يحصل على 10 نقاط مجانية. كل عملية توليد تستهلك نقطة واحدة. يمكنك الحصول على 3 نقاط إضافية يومياً كهدية مجانية، كما يمكنك تحويل النقاط لأصدقائك أو التواصل مع الدعم للحصول على المزيد.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item" data-faq="3">
-                    <div class="faq-question" onclick="toggleFaq(this)">
-                        <div class="faq-question-text"><i class="bi bi-images"></i> هل يمكنني استخدام UFOQ لتوليد الصور؟</div>
-                        <div class="faq-toggle"><i class="bi bi-chevron-down"></i></div>
-                    </div>
-                    <div class="faq-answer">
-                        <p>نعم! UFOQ يدعم توليد وصف صوري احترافي (Prompts للصور) عبر أنماط متخصصة في توليد الصور. اختر نمط "توليد صور" من قائمة الأنماط واكتب فكرتك لتحصل على وصف صوري جاهز لأي أداة توليد صور.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item" data-faq="4">
-                    <div class="faq-question" onclick="toggleFaq(this)">
-                        <div class="faq-question-text"><i class="bi bi-shield-check"></i> هل بياناتي آمنة على UFOQ؟</div>
-                        <div class="faq-toggle"><i class="bi bi-chevron-down"></i></div>
-                    </div>
-                    <div class="faq-answer">
-                        <p>بالتأكيد! نحن نستخدم تشفير آمن لحماية بياناتك، ولا نقوم بمشاركة معلوماتك مع أي طرف ثالث. جميع المحادثات والبيانات الشخصية محمية بأعلى معايير الأمان.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item" data-faq="5">
-                    <div class="faq-question" onclick="toggleFaq(this)">
-                        <div class="faq-question-text"><i class="bi bi-phone"></i> هل يعمل UFOQ على الهاتف المحمول؟</div>
-                        <div class="faq-toggle"><i class="bi bi-chevron-down"></i></div>
-                    </div>
-                    <div class="faq-answer">
-                        <p>نعم! تم تصميم UFOQ ليكون متجاوباً بالكامل مع جميع الأجهزة. سواء كنت تستخدم هاتفاً ذكياً أو جهازاً لوحياً أو حاسوباً، ستكون تجربتك سلسة وممتعة.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item" data-faq="6">
-                    <div class="faq-question" onclick="toggleFaq(this)">
-                        <div class="faq-question-text"><i class="bi bi-collection"></i> ما هي مكتبة البرومبتات؟</div>
-                        <div class="faq-toggle"><i class="bi bi-chevron-down"></i></div>
-                    </div>
-                    <div class="faq-answer">
-                        <p>مكتبة البرومبتات هي مجموعة من البرومبتات الجاهزة المصنفة حسب الاستخدام (توليد صور، كتابة، برمجة، تصميم...) يمكنك تصفحها ونسخ أي برومبت يعجبك واستخدامه مباشرة في أدوات الذكاء الاصطناعي المفضلة لديك.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item" data-faq="7">
-                    <div class="faq-question" onclick="toggleFaq(this)">
-                        <div class="faq-question-text"><i class="bi bi-headset"></i> كيف أتواصل مع الدعم الفني؟</div>
-                        <div class="faq-toggle"><i class="bi bi-chevron-down"></i></div>
-                    </div>
-                    <div class="faq-answer">
-                        <p>يمكنك التواصل معنا عبر واتساب أو تلجرام أو إنستغرام. نحن متواجدون للرد على استفساراتكم وحل أي مشكلة تواجهكم في أسرع وقت ممكن.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="glass-card">
-            <div class="about-card-title"><i class="bi bi-telegram"></i> قنواتنا</div>
-            <div class="contact-list">
-                <a href="https://t.me/Evile_Prompts" target="_blank" class="contact-link">
-                    <div class="contact-link-icon telegram"><i class="bi bi-telegram"></i></div>
-                    <div class="contact-link-text"><strong>قناة الموقع الرسمية</strong><span>آخر التحديثات والأخبار</span></div>
-                    <i class="bi bi-chevron-left"></i>
-                </a>
-                <a href="https://t.me/aipromptsAl" target="_blank" class="contact-link">
-                    <div class="contact-link-icon telegram"><i class="bi bi-telegram"></i></div>
-                    <div class="contact-link-text"><strong>قناة المكتبة</strong><span>آلاف البرومبتات الجاهزة للنسخ</span></div>
-                    <i class="bi bi-chevron-left"></i>
-                </a>
-            </div>
-        </div>
-
-        <div class="glass-card">
-            <div class="about-card-title"><i class="bi bi-chat-dots"></i> تواصل معنا</div>
-            <div class="contact-list">
-                <a href="https://www.instagram.com/bla6c7" target="_blank" class="contact-link">
-                    <div class="contact-link-icon instagram"><i class="bi bi-instagram"></i></div>
-                    <div class="contact-link-text"><strong>إنستغرام</strong><span>تابعنا للمزيد</span></div>
-                    <i class="bi bi-chevron-left"></i>
-                </a>
-                <a href="https://wa.me/967730577358" target="_blank" class="contact-link">
-                    <div class="contact-link-icon whatsapp"><i class="bi bi-whatsapp"></i></div>
-                    <div class="contact-link-text"><strong>واتساب</strong><span>تواصل مباشر مع الدعم</span></div>
-                    <i class="bi bi-chevron-left"></i>
-                </a>
-            </div>
-        </div>
-
-        <div class="version-footer">UFOQ · الإصدار 1.0 · {{ current_year|default('2026') }}</div>
     </div>
 
     <nav class="bottom-nav-bar">
-        <a href="/library" class="nav-item" onclick="handleNavClick(event, '/library')">
-            <i class="bi bi-collection"></i><span class="nav-label">المكتبة</span>
-        </a>
-        <a href="/" class="nav-item" onclick="handleNavClick(event, '/')">
-            <i class="bi bi-house-door"></i><span class="nav-label">الرئيسية</span>
-        </a>
-        <a href="/about" class="nav-item active" onclick="handleNavClick(event, '/about')">
-            <i class="bi bi-info-circle-fill"></i><span class="nav-label">حول</span>
-        </a>
+        <a href="/" class="nav-item"><i class="bi bi-house-door"></i><span class="nav-label">الرئيسية</span></a>
+        <a href="/about" class="nav-item active"><i class="bi bi-info-circle-fill"></i><span class="nav-label">حول</span></a>
+        <a href="/settings" class="nav-item"><i class="bi bi-gear"></i><span class="nav-label">الإعدادات</span></a>
     </nav>
-
-    <script>
-        // FAQ Accordion with Auto-Close
-        function toggleFaq(element) {
-            const item = element.closest('.faq-item');
-            const allItems = document.querySelectorAll('.faq-item');
-
-            // Close all other items (auto-close behavior)
-            allItems.forEach(otherItem => {
-                if (otherItem !== item && otherItem.classList.contains('open')) {
-                    otherItem.classList.remove('open');
-                }
-            });
-
-            // Toggle current item
-            item.classList.toggle('open');
-        }
-
-        function handleNavClick(event, url) {
-            event.preventDefault();
-            const btn = event.currentTarget;
-            btn.style.transform = 'scale(0.85)';
-            btn.style.transition = 'transform 0.15s ease';
-            setTimeout(() => {
-                btn.style.transform = 'scale(1.05)';
-                setTimeout(() => { window.location.href = url; }, 120);
-            }, 150);
-        }
-    </script>
 </body>
 </html>
