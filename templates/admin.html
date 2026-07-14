@@ -3,394 +3,261 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - UFOQ</title>
+    <title>لوحة التحكم – UFOQ</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin:0; padding:0; box-sizing:border-box; }
         :root {
-            --paper: #F6F4F1;
-            --stone: #E4DED2;
-            --coral: #F95C4B;
-            --black: #000000;
-            --bg: var(--paper);
-            --glass: var(--coral);
-            --btn: var(--coral);
-            --glass-light: rgba(249, 92, 75, 0.08);
-            --glass-border: rgba(249, 92, 75, 0.18);
-            --text: var(--black);
-            --text-dim: #5A5652;
-            --text-faint: #8A8580;
-            --white: #FFFFFF;
-            --stone-light: rgba(228, 222, 210, 0.5);
-            --stone-border: rgba(228, 222, 210, 0.8);
+            --bg: #0b0e1a;
+            --bg-card: rgba(20,30,48,0.6);
+            --glass-border: rgba(255,255,255,0.1);
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --text-faint: #64748b;
+            --primary: #38bdf8;
+            --primary-dim: rgba(56,189,248,0.15);
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
-        body { font-family: 'Tajawal', sans-serif; background: linear-gradient(160deg, #f2f4f8 0%, #e1dbf5 100%); min-height: 100vh; padding-bottom: 110px; color: #1F2937; display: flex; align-items: center; justify-content: center; }
-        .glass-card, .modal-content, .pattern-card, .notification-item, .login-card, .bottom-nav { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.95); box-shadow: 0 8px 32px rgba(249, 92, 75, 0.04); border-radius: 18px; }
-        .admin-container { max-width: 1200px; width: 100%; margin: 0 auto; padding: 20px; }
-        .login-wrapper { max-width: 420px; margin: 0 auto; width: 100%; }
-        .login-card { padding: 40px 32px; text-align: center; }
-        .login-icon { width: 64px; height: 64px; background: rgba(249, 92, 75, 0.08); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; border: 1px solid rgba(249,92,75,0.15); }
-        .login-icon i { font-size: 36px; color: #F95C4B; }
-        .login-title { font-size: 28px; font-weight: 800; color: #1F2937; margin-bottom: 8px; }
-        .login-subtitle { color: #6B7280; font-size: 14px; }
-        .form-group { margin-bottom: 24px; text-align: right; }
-        label { display: block; margin-bottom: 8px; color: #6B7280; font-weight: 500; font-size: 14px; }
-        input, textarea, select { width: 100%; padding: 12px 16px; background: rgba(243, 244, 246, 0.8); border: 1px solid rgba(249,92,75,0.1); border-radius: 12px; color: #1F2937; font-family: 'Tajawal', sans-serif; font-size: 14px; outline: none; }
-        input:focus, textarea:focus { border-color: #F95C4B; background: #ffffff; }
-        textarea { min-height: 80px; resize: vertical; }
-        .btn { padding: 10px 20px; background: rgba(243, 244, 246, 0.8); border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 40px; color: #6B7280; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-primary { background: #F95C4B; border-color: #F95C4B; color: #fff; box-shadow: 0 4px 15px rgba(249, 92, 75, 0.2); }
-        .btn-danger { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #dc2626; }
-        .btn-success { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.2); color: #16a34a; }
-        .btn-warning { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); color: #d97706; }
-        .btn:active { transform: scale(0.96); }
-        .btn-login { width: 100%; padding: 14px; font-size: 16px; }
-        .flash { padding: 12px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 14px; color: #dc2626; margin-bottom: 24px; text-align: center; font-size: 14px; }
-        .flash.success { background: rgba(34,197,94,0.05); border-color: rgba(34,197,94,0.1); color: #16a34a; }
-        .bottom-nav { position: fixed; bottom: 16px; left: 20px; right: 20px; z-index: 999; display: flex; justify-content: center; align-items: center; padding: 10px 16px; background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.95); border-radius: 20px; max-width: 800px; margin: 0 auto; overflow-x: auto; gap: 10px; flex-wrap: nowrap; scrollbar-width: none; box-shadow: 0 8px 32px rgba(249, 92, 75, 0.03); }
-        .bottom-nav::-webkit-scrollbar { display: none; }
-        .bottom-nav-btn { flex-shrink: 0; width: 48px; height: 48px; border-radius: 14px; background: rgba(243, 244, 246, 0.8); border: 1px solid rgba(255, 255, 255, 0.9); color: #6B7280; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
-        .bottom-nav-btn.active { background: #F95C4B; border-color: #F95C4B; color: #fff; box-shadow: 0 4px 15px rgba(249, 92, 75, 0.2); }
-        .bottom-nav-btn:active { transform: scale(0.85); }
-        .tab-content { display: none; padding: 20px; margin-top: 10px; }
-        .tab-content.active { display: block; }
-        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-right: 12px; border-right: 3px solid rgba(249,92,75,0.2); display: flex; align-items: center; gap: 8px; color: #1F2937; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
-        .pattern-card { padding: 12px; margin-bottom: 10px; }
-        .pattern-header { display: flex; align-items: center; gap: 10px; }
-        .pattern-img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(249,92,75,0.1); }
-        .pattern-name { font-weight: 700; color: #1F2937; font-size: 14px; }
-        .pattern-meta { font-size: 11px; color: #6B7280; }
-        .card-actions { display: flex; gap: 8px; }
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
-        .modal.active { display: flex; }
-        .modal-content { padding: 20px; max-width: 500px; width: 100%; }
-        .library-item { padding: 12px; margin-bottom: 10px; }
-        .library-item-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(249,92,75,0.1); }
-        .library-item-category { display: inline-block; padding: 2px 10px; background: rgba(249,92,75,0.08); border-radius: 20px; font-size: 11px; color: #F95C4B; margin-top: 4px; }
-        .category-tag { display: inline-block; padding: 4px 12px; background: rgba(249,92,75,0.08); border-radius: 20px; font-size: 12px; color: #F95C4B; margin: 2px; border: 1px solid rgba(249,92,75,0.15); }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
-        .stat-card { background: rgba(249,92,75,0.05); border: 1px solid rgba(249,92,75,0.1); border-radius: 14px; padding: 16px; text-align: center; }
-        .stat-number { font-size: 28px; font-weight: 900; color: #F95C4B; }
-        .stat-label { font-size: 12px; color: #6B7280; margin-top: 4px; }
-        .ad-card { padding: 14px; margin-bottom: 10px; }
-        .ad-status { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-        .ad-status.active { background: rgba(34,197,94,0.1); color: #16a34a; }
-        .ad-status.inactive { background: rgba(107,114,128,0.1); color: #6B7280; }
-        @media (max-width: 600px) { .bottom-nav { padding: 8px 12px; gap: 8px; border-radius: 16px; } .bottom-nav-btn { width: 42px; height: 42px; font-size: 18px; } }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(145deg, #0b0e1a 0%, #111827 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width:1200px; margin:0 auto; }
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border:1px solid var(--glass-border);
+            border-radius:24px;
+            padding:24px;
+            margin-bottom:24px;
+            box-shadow:var(--shadow);
+        }
+        .section-title {
+            font-size:1.2rem; font-weight:800; margin-bottom:16px;
+            display:flex; align-items:center; gap:8px;
+        }
+        .section-title i { color:var(--primary); }
+        .form-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:16px; }
+        .form-group { margin-bottom:12px; }
+        .form-group label { display:block; font-size:0.85rem; font-weight:600; color:var(--text-dim); margin-bottom:4px; }
+        .form-group input, .form-group textarea, .form-group select {
+            width:100%; padding:10px 14px;
+            background:rgba(255,255,255,0.05); border:1px solid var(--glass-border);
+            border-radius:12px; color:var(--text); font-family:'Tajawal',sans-serif;
+            font-size:0.9rem; outline:none;
+        }
+        .form-group input:focus, .form-group textarea:focus { border-color:var(--primary); }
+        .btn {
+            padding:10px 20px; border-radius:12px; border:none;
+            font-weight:700; cursor:pointer; transition:0.2s;
+            display:inline-flex; align-items:center; gap:6px;
+            font-family:'Tajawal',sans-serif;
+        }
+        .btn-primary { background:var(--primary); color:#0b0e1a; }
+        .btn-danger { background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.2); }
+        .btn-warning { background:rgba(245,158,11,0.15); color:#fbbf24; border:1px solid rgba(245,158,11,0.2); }
+        .btn:hover { transform:scale(1.02); opacity:0.85; }
+        .item-card {
+            background:rgba(255,255,255,0.03); border:1px solid var(--glass-border);
+            border-radius:16px; padding:16px; margin-bottom:12px;
+            display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+        }
+        .item-card .info { flex:1; }
+        .item-card .info .title { font-weight:700; }
+        .item-card .info .meta { font-size:0.8rem; color:var(--text-dim); }
+        .item-card .actions { display:flex; gap:8px; flex-wrap:wrap; }
+        .bottom-nav-bar {
+            position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
+            z-index:1000; display:flex; align-items:center; gap:6px;
+            padding:10px 18px; background:rgba(11,14,26,0.8);
+            backdrop-filter:blur(30px); border:1px solid var(--glass-border);
+            border-radius:50px; max-width:600px; width:auto;
+        }
+        .nav-item {
+            display:flex; align-items:center; gap:6px;
+            padding:10px 20px; border-radius:40px;
+            background:transparent; border:none; color:var(--text-faint);
+            font-family:'Tajawal',sans-serif; font-size:13px; font-weight:600;
+            cursor:pointer; transition:0.2s; text-decoration:none;
+        }
+        .nav-item:hover { color:var(--text); background:var(--primary-dim); }
+        .nav-item.active { background:var(--primary); color:#0b0e1a; }
+        .nav-item i { font-size:20px; }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
     </style>
 </head>
 <body>
-    <div class="admin-container">
+    <div class="container">
         {% if session.get('logged_in') %}
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2 style="font-size: 24px; font-weight: 900; color: #1F2937;"><i class="bi bi-shield-lock" style="color: #F95C4B;"></i> لوحة التحكم</h2>
-                <a href="/admin/logout" class="btn btn-danger" style="background: linear-gradient(135deg, #EF4444, #F87171); padding: 10px 20px; text-decoration: none; border-radius: 12px; display: flex; align-items: center; gap: 8px; font-weight: 700;">
-                    <i class="bi bi-box-arrow-left"></i> تسجيل الخروج
-                </a>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="font-size:24px; font-weight:900;"><i class="bi bi-shield-lock" style="color:var(--primary);"></i> لوحة التحكم</h2>
+                <a href="/admin/logout" class="btn btn-danger">تسجيل الخروج</a>
             </div>
 
-            <!-- Patterns Tab -->
-            <div id="tab-patterns" class="tab-content active glass-card">
-                <div class="section-title"><i class="bi bi-plus-circle" style="color:#F95C4B;"></i> إضافة نمط جديد</div>
-                <form method="POST" action="/admin/pattern/add">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                    <div class="form-grid">
-                        <div class="form-group"><label>اسم النمط</label><input type="text" name="name" required></div>
-                        <div class="form-group"><label>رابط صورة النمط</label><input type="url" name="image_url" required placeholder="https://example.com/image.png"></div>
-                        <div class="form-group"><label>البرومبت (بدون وصف)</label><textarea name="prompt" required></textarea></div>
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> إضافة نمط</button>
-                </form>
-
-                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-list-ul" style="color:#F95C4B;"></i> قائمة الأنماط</div>
-                <div class="patterns-list">
-                    {% for pat in patterns %}
-                    <div class="pattern-card glass-card">
-                        <div class="pattern-header">
-                            <img src="{{ pat.image_url }}" class="pattern-img" alt="{{ pat.name }}">
-                            <div style="flex:1;">
-                                <div class="pattern-name">{{ pat.name }}</div>
-                                <div class="pattern-meta" style="font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px;">{{ pat.prompt[:80] }}...</div>
-                            </div>
-                        </div>
-                        <div class="card-actions" style="margin-top: 8px;">
-                            <form method="POST" action="/admin/pattern/{{ pat.id }}/delete" style="display:inline;" onsubmit="return confirm('حذف النمط؟')">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i> حذف</button>
-                            </form>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
+            <!-- تبويبات سريعة -->
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
+                <button class="btn btn-primary" onclick="showTab('categories')">التصنيفات</button>
+                <button class="btn btn-primary" onclick="showTab('library')">المكتبة</button>
+                <button class="btn btn-primary" onclick="showTab('ads')">الإعلانات</button>
+                <button class="btn btn-primary" onclick="showTab('users')">المستخدمين</button>
+                <button class="btn btn-primary" onclick="showTab('settings')">إعدادات الموقع</button>
             </div>
 
-            <!-- Categories Tab -->
-            <div id="tab-categories" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-tags" style="color:#F95C4B;"></i> إدارة التصنيفات</div>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number">{{ categories|length }}</div>
-                        <div class="stat-label">عدد التصنيفات</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">{{ library_items|length }}</div>
-                        <div class="stat-label">عدد البرومبتات</div>
-                    </div>
-                </div>
-
-                <form method="POST" action="/admin/category/add">
+            <!-- تبويب التصنيفات -->
+            <div id="tab-categories" class="tab-content active glass-card">
+                <div class="section-title"><i class="bi bi-tags"></i> إدارة التصنيفات</div>
+                <form method="POST" action="/admin/category/add" style="margin-bottom:20px;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <div class="form-grid">
-                        <div class="form-group"><label>معرف التصنيف (بالإنجليزية)</label><input type="text" name="name" required placeholder="مثال: images, writing, coding"></div>
-                        <div class="form-group"><label>اسم العرض (بالعربية)</label><input type="text" name="display_name" required placeholder="مثال: توليد صور"></div>
-                        <div class="form-group"><label>الأيقونة (Bootstrap Icon)</label><input type="text" name="icon" value="bi-tag" placeholder="مثال: bi-image, bi-code"></div>
-                        <div class="form-group"><label>الترتيب</label><input type="number" name="sort_order" value="0" min="0"></div>
+                        <div class="form-group"><label>المعرف (بالإنجليزية)</label><input type="text" name="name" required></div>
+                        <div class="form-group"><label>اسم العرض</label><input type="text" name="display_name" required></div>
+                        <div class="form-group"><label>الأيقونة</label><input type="text" name="icon" value="bi-tag"></div>
+                        <div class="form-group"><label>الترتيب</label><input type="number" name="sort_order" value="0"></div>
                     </div>
                     <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> إضافة تصنيف</button>
                 </form>
 
-                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-grid-3x3-gap" style="color:#F95C4B;"></i> التصنيفات الحالية</div>
-                <div class="categories-list">
+                <div>
                     {% for cat in categories %}
-                    <div class="pattern-card glass-card">
-                        <div class="pattern-header">
-                            <div style="width:40px;height:40px;border-radius:8px;background:rgba(249,92,75,0.1);display:flex;align-items:center;justify-content:center;">
-                                <i class="bi {{ cat.icon }}" style="color:#F95C4B;font-size:18px;"></i>
-                            </div>
-                            <div style="flex:1;">
-                                <div class="pattern-name">{{ cat.display_name }}</div>
-                                <div class="pattern-meta">معرف: {{ cat.name }} | ترتيب: {{ cat.sort_order }}</div>
-                            </div>
+                    <div class="item-card">
+                        <div class="info">
+                            <div class="title">{{ cat.display_name }} <span style="font-weight:400; color:var(--text-dim);">({{ cat.name }})</span></div>
+                            <div class="meta">ترتيب: {{ cat.sort_order }} | أيقونة: {{ cat.icon }}</div>
                         </div>
-                        <div class="card-actions" style="margin-top: 8px;">
-                            <form method="POST" action="/admin/category/{{ cat.id }}/delete" style="display:inline;" onsubmit="return confirm('حذف التصنيف؟ سيتم نقل البرومبتات إلى "عام"')">
+                        <div class="actions">
+                            <form method="POST" action="/admin/category/{{ cat.id }}/delete" onsubmit="return confirm('حذف التصنيف؟')">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i> حذف</button>
+                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i></button>
                             </form>
                         </div>
                     </div>
-                    {% else %}
-                    <p style="text-align:center; color:#6B7280; padding: 20px;">لا توجد تصنيفات بعد</p>
                     {% endfor %}
                 </div>
             </div>
 
-            <!-- Library Tab -->
+            <!-- تبويب المكتبة -->
             <div id="tab-library" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-collection" style="color:#F95C4B;"></i> إضافة برومبت للمكتبة</div>
+                <div class="section-title"><i class="bi bi-collection"></i> إدارة المكتبة</div>
                 <form method="POST" action="/admin/library/add">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <div class="form-grid">
-                        <div class="form-group"><label>عنوان البرومبت</label><input type="text" name="title" required placeholder="مثال: مدينة سايبر بانك"></div>
+                        <div class="form-group"><label>العنوان</label><input type="text" name="title" required></div>
                         <div class="form-group"><label>التصنيف</label>
-                            <select name="category" required>
-                                {% for cat in categories %}
-                                <option value="{{ cat.name }}">{{ cat.display_name }}</option>
-                                {% endfor %}
+                            <select name="category">
+                                {% for cat in categories %}<option value="{{ cat.name }}">{{ cat.display_name }}</option>{% endfor %}
                             </select>
                         </div>
-                        <div class="form-group"><label>رابط صورة المعاينة</label><input type="url" name="image_url" required placeholder="https://example.com/image.png"></div>
-                        <div class="form-group" style="grid-column: 1 / -1;"><label>نص البرومبت</label><textarea name="prompt_text" required rows="5" placeholder="اكتب البرومبت الكامل هنا..."></textarea></div>
+                        <div class="form-group"><label>رابط الصورة</label><input type="url" name="image_url" required></div>
+                        <div class="form-group" style="grid-column:1/-1;"><label>نص البرومبت</label><textarea name="prompt_text" required rows="4"></textarea></div>
                     </div>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> إضافة للمكتبة</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> إضافة برومبت</button>
                 </form>
 
-                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-grid-3x3-gap" style="color:#F95C4B;"></i> برومبتات المكتبة</div>
-                <div class="library-list">
+                <div style="margin-top:24px;">
                     {% for item in library_items %}
-                    <div class="library-item glass-card">
-                        <div class="pattern-header">
-                            <img src="{{ item.image_url }}" class="library-item-img" alt="{{ item.title }}">
-                            <div style="flex:1;">
-                                <div class="pattern-name">{{ item.title }}</div>
-                                <span class="library-item-category">{{ item.category }}</span>
-                                <div class="pattern-meta" style="font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px; margin-top:4px;">{{ item.prompt_text[:80] }}...</div>
-                            </div>
+                    <div class="item-card">
+                        <div class="info">
+                            <div class="title">{{ item.title }}</div>
+                            <div class="meta">تصنيف: {{ item.category }}</div>
                         </div>
-                        <div class="card-actions" style="margin-top: 8px;">
-                            <form method="POST" action="/admin/library/{{ item.id }}/delete" style="display:inline;" onsubmit="return confirm('حذف البرومبت من المكتبة؟')">
+                        <div class="actions">
+                            <form method="POST" action="/admin/library/{{ item.id }}/delete" onsubmit="return confirm('حذف البرومبت؟')">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i> حذف</button>
+                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i></button>
                             </form>
                         </div>
                     </div>
-                    {% else %}
-                    <p style="text-align:center; color:#6B7280; padding: 20px;">لا توجد برومبتات في المكتبة بعد</p>
                     {% endfor %}
                 </div>
             </div>
 
-            <!-- Library Ads Tab -->
-            <div id="tab-library-ads" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-badge-ad" style="color:#F95C4B;"></i> إعلانات المكتبة</div>
-
+            <!-- تبويب الإعلانات -->
+            <div id="tab-ads" class="tab-content glass-card">
+                <div class="section-title"><i class="bi bi-badge-ad"></i> إدارة الإعلانات</div>
                 <form method="POST" action="/admin/library_ad/add">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <div class="form-grid">
-                        <div class="form-group"><label>عنوان الإعلان</label><input type="text" name="title" required placeholder="مثال: عرض خاص"></div>
-                        <div class="form-group"><label>نص الإعلان</label><textarea name="text" required placeholder="محتوى الإعلان..."></textarea></div>
-                        <div class="form-group"><label>رابط صورة الإعلان (اختياري)</label><input type="url" name="image_url" placeholder="https://example.com/ad.png"></div>
-                        <div class="form-group"><label>نص الزر</label><input type="text" name="button_text" required value="زيارة" placeholder="زيارة"></div>
-                        <div class="form-group"><label>رابط الزر</label><input type="url" name="button_link" required placeholder="https://example.com"></div>
-                        <div class="form-group"><label>مدة الظهور (ثواني)</label><input type="number" name="duration_seconds" value="5" min="1" max="60"></div>
-                        <div class="form-group" style="display:flex;align-items:center;gap:8px;">
-                            <input type="checkbox" name="is_active" id="adActive" checked style="width:auto;">
-                            <label for="adActive" style="margin:0;">نشط</label>
-                        </div>
+                        <div class="form-group"><label>العنوان</label><input type="text" name="title" required></div>
+                        <div class="form-group"><label>النص</label><textarea name="text" required></textarea></div>
+                        <div class="form-group"><label>رابط الصورة (اختياري)</label><input type="url" name="image_url"></div>
+                        <div class="form-group"><label>نص الزر</label><input type="text" name="button_text" value="زيارة"></div>
+                        <div class="form-group"><label>رابط الزر</label><input type="url" name="button_link" required></div>
+                        <div class="form-group"><label>المدة (ثانية)</label><input type="number" name="duration_seconds" value="5"></div>
+                        <div class="form-group"><label><input type="checkbox" name="is_active" checked> نشط</label></div>
                     </div>
                     <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> إضافة إعلان</button>
                 </form>
 
-                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-list-ul" style="color:#F95C4B;"></i> الإعلانات الحالية</div>
-                <div class="ads-list">
+                <div style="margin-top:24px;">
                     {% for ad in library_ads %}
-                    <div class="ad-card glass-card">
-                        <div class="pattern-header">
-                            <div style="flex:1;">
-                                <div class="pattern-name">{{ ad.title }}</div>
-                                <div class="pattern-meta">{{ ad.text[:60] }}... | {{ ad.duration_seconds }} ثانية</div>
-                                <span class="ad-status {{ 'active' if ad.is_active else 'inactive' }}">{{ 'نشط' if ad.is_active else 'معطل' }}</span>
-                            </div>
+                    <div class="item-card">
+                        <div class="info">
+                            <div class="title">{{ ad.title }} <span class="meta" style="color:{{ '#4ade80' if ad.is_active else '#f87171' }};">{{ 'نشط' if ad.is_active else 'معطل' }}</span></div>
+                            <div class="meta">{{ ad.duration_seconds }} ثانية</div>
                         </div>
-                        <div class="card-actions" style="margin-top: 8px;">
-                            <form method="POST" action="/admin/library_ad/{{ ad.id }}/toggle" style="display:inline;">
+                        <div class="actions">
+                            <form method="POST" action="/admin/library_ad/{{ ad.id }}/toggle">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-warning"><i class="bi bi-toggle-on"></i> تفعيل/تعطيل</button>
+                                <button type="submit" class="btn btn-warning"><i class="bi bi-toggle-on"></i></button>
                             </form>
-                            <form method="POST" action="/admin/library_ad/{{ ad.id }}/delete" style="display:inline;" onsubmit="return confirm('حذف الإعلان؟')">
+                            <form method="POST" action="/admin/library_ad/{{ ad.id }}/delete" onsubmit="return confirm('حذف الإعلان؟')">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i> حذف</button>
+                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i></button>
                             </form>
                         </div>
                     </div>
-                    {% else %}
-                    <p style="text-align:center; color:#6B7280; padding: 20px;">لا توجد إعلانات بعد</p>
                     {% endfor %}
                 </div>
             </div>
 
-            <!-- Notifications Tab -->
-            <div id="tab-notifications" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-send" style="color:#F95C4B;"></i> إرسال إشعار جديد</div>
-                <form method="POST" action="/admin/notification/add">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                    <div class="form-group"><label>العنوان</label><input type="text" name="title" required></div>
-                    <div class="form-group"><label>النص</label><textarea name="text" required></textarea></div>
-                    <div class="form-group"><label>مدة الظهور (ساعات)</label><input type="number" name="duration_hours" value="1" min="1" step="1"></div>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-bell"></i> إرسال الإشعار</button>
-                </form>
-                <div class="section-title" style="margin-top: 30px;"><i class="bi bi-clock-history" style="color:#F95C4B;"></i> الإشعارات المرسلة</div>
-                {% for notif in notifications %}
-                <div class="notification-item glass-card">
-                    <div class="notification-title"><i class="bi bi-bell" style="color:#F95C4B;"></i> {{ notif.title }} <span style="font-size: 10px; color:#6B7280;">({{ notif.created_at }})</span></div>
-                    <div class="notification-text" style="color: #6B7280;">{{ notif.text }}</div>
-                    <div class="notification-meta" style="font-size: 10px; color:#9CA3AF; margin-top:5px;">المدة: {{ notif.duration_hours }} ساعة</div>
-                </div>
-                {% else %}
-                <p style="text-align:center; color:#6B7280;">لا توجد إشعارات بعد</p>
-                {% endfor %}
-            </div>
-
-            <!-- Credits Tab -->
-            <div id="tab-credits" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-coin" style="color:#F95C4B;"></i> شحن نقاط المستخدمين</div>
-                <div style="max-width: 400px;">
-                    <div class="form-group"><label>اسم المستخدم</label><input type="text" id="rechargeUsername" placeholder="أدخل اسم المستخدم"></div>
-                    <div class="form-group"><label>عدد النقاط</label><input type="number" id="rechargeAmount" value="10" min="1"></div>
-                    <button class="btn btn-primary" onclick="rechargeCredits()"><i class="bi bi-plus-circle"></i> شحن النقاط</button>
-                </div>
-                <div id="rechargeResult" style="margin-top: 15px; font-size: 13px; display: none;"></div>
-            </div>
-
-            <!-- Statistics Tab -->
-            <div id="tab-stats" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-bar-chart-line" style="color:#F95C4B;"></i> إحصائيات الموقع</div>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number">{{ users_count }}</div>
-                        <div class="stat-label">عدد الأعضاء المسجلين</div>
+            <!-- تبويب المستخدمين -->
+            <div id="tab-users" class="tab-content glass-card">
+                <div class="section-title"><i class="bi bi-people"></i> المستخدمين</div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:12px;">
+                    {% for u in users %}
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:12px; padding:12px;">
+                        <strong>{{ u.username }}</strong><br>
+                        <span style="font-size:0.8rem; color:var(--text-dim);">تاريخ التسجيل: {{ u.created_at.strftime('%Y-%m-%d') if u.created_at else '—' }}</span>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-number">{{ avg_daily_visits }}</div>
-                        <div class="stat-label">متوسط الزيارات اليومي</div>
-                    </div>
-                    <div class="stat-card">
-                        {% if ad_currently_exists %}
-                        <div class="stat-number">{{ total_ad_hours }}</div>
-                        <div class="stat-label">ساعة مشاهدة للإعلان</div>
-                        {% else %}
-                        <div class="stat-number" style="font-size: 15px; color: #9CA3AF;"><i class="bi bi-dash-circle"></i></div>
-                        <div class="stat-label">لا يوجد إعلان نشط حالياً</div>
-                        {% endif %}
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" style="font-size: 20px;">{{ postgres_size if postgres_size else '—' }}</div>
-                        <div class="stat-label">استهلاك قاعدة بيانات Postgres</div>
-                    </div>
-                </div>
-                <p style="font-size: 12px; color: #9CA3AF; text-align: center; margin-top: 6px;">
-                    <i class="bi bi-info-circle"></i> تتحدّث الزيارات وساعات مشاهدة الإعلان تلقائياً مع كل زيارة وكل مشاهدة إعلان مكتملة.
-                </p>
-            </div>
-
-            <!-- Site Control Tab -->
-            <div id="tab-site-control" class="tab-content glass-card">
-                <div class="section-title"><i class="bi bi-power" style="color:#F95C4B;"></i> التحكم في نشاط الموقع</div>
-                <div style="text-align: center; max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 20px;">
-                    <div id="siteStatusIcon" style="font-size: 80px; cursor: pointer; transition: all 0.3s;"
-                         onclick="toggleSiteStatus()"
-                         data-status="{{ site_settings.status if site_settings else 'on' }}">
-                        <i class="bi {{ 'bi-toggle-on' if site_settings and site_settings.status == 'on' else 'bi-toggle-off' }}"></i>
-                    </div>
-                    <div style="width: 100%;">
-                        <div style="font-size: 18px; font-weight: 700; margin-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 10px;">
-                            <span>الحالة الحالية:</span>
-                            <span id="siteStatusLabel" style="color: {{ '#16a34a' if site_settings and site_settings.status == 'on' else '#ef4444' }};">
-                                {{ 'مفعل' if site_settings and site_settings.status == 'on' else 'متوقف' }}
-                            </span>
-                        </div>
-                        <div class="form-group" style="text-align: right;">
-                            <label>نص الرسالة عند التوقف</label>
-                            <textarea id="offlineMessageInput" rows="4" style="width: 100%;">{{ site_settings.offline_message if site_settings else 'الموقع تحت الصيانة حالياً، نعتذر عن الإزعاج.' }}</textarea>
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 15px; margin-top: 5px; font-size: 24px; color: #F95C4B;">
-                        <a href="https://t.me/Evile_Prompts" target="_blank" style="color: #F95C4B; transition: 0.2s;"><i class="bi bi-telegram"></i></a>
-                        <a href="https://www.instagram.com/bla6c7" target="_blank" style="color: #F95C4B; transition: 0.2s;"><i class="bi bi-instagram"></i></a>
-                        <a href="https://wa.me/967730577358" target="_blank" style="color: #F95C4B; transition: 0.2s;"><i class="bi bi-whatsapp"></i></a>
-                    </div>
-                    <button class="btn btn-primary" onclick="saveSiteSettings()" style="width: 100%; padding: 14px; justify-content: center;">
-                        <i class="bi bi-floppy"></i> حفظ الإعدادات
-                    </button>
+                    {% endfor %}
                 </div>
             </div>
 
-            <div class="bottom-nav" id="bottomNav">
-                <button class="bottom-nav-btn active" data-tab="patterns"><i class="bi bi-grid"></i></button>
-                <button class="bottom-nav-btn" data-tab="categories"><i class="bi bi-tags"></i></button>
-                <button class="bottom-nav-btn" data-tab="library"><i class="bi bi-collection"></i></button>
-                <button class="bottom-nav-btn" data-tab="library-ads"><i class="bi bi-badge-ad"></i></button>
-                <button class="bottom-nav-btn" data-tab="notifications"><i class="bi bi-bell"></i></button>
-                <button class="bottom-nav-btn" data-tab="credits"><i class="bi bi-coin"></i></button>
-                <button class="bottom-nav-btn" data-tab="stats"><i class="bi bi-bar-chart-line"></i></button>
-                <button class="bottom-nav-btn" data-tab="site-control"><i class="bi bi-power"></i></button>
+            <!-- تبويب إعدادات الموقع -->
+            <div id="tab-settings" class="tab-content glass-card">
+                <div class="section-title"><i class="bi bi-power"></i> إعدادات الموقع</div>
+                <div style="display:flex; flex-direction:column; gap:16px; max-width:400px;">
+                    <div>
+                        <label style="display:block; font-weight:600;">حالة الموقع</label>
+                        <select id="siteStatusSelect">
+                            <option value="on" {% if site_settings and site_settings.status=='on' %}selected{% endif %}>مفعل</option>
+                            <option value="off" {% if site_settings and site_settings.status=='off' %}selected{% endif %}>متوقف</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-weight:600;">رسالة التوقف</label>
+                        <textarea id="offlineMsg" rows="3">{{ site_settings.offline_message if site_settings else 'الموقع تحت الصيانة' }}</textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="saveSiteSettings()"><i class="bi bi-floppy"></i> حفظ</button>
+                </div>
             </div>
 
         {% else %}
-            <div class="login-wrapper">
-                <div class="login-card glass-card">
-                    <div class="login-icon"><i class="bi bi-shield-lock"></i></div>
-                    <div class="login-title">لوحة التحكم</div>
-                    <div class="login-subtitle">UFOQ Admin Panel</div>
+            <!-- صفحة الدخول إلى لوحة التحكم -->
+            <div style="max-width:400px; margin:40px auto; text-align:center;">
+                <div class="glass-card">
+                    <h2 style="margin-bottom:20px;">لوحة التحكم</h2>
                     <form method="POST" action="/admin">
                         <div class="form-group">
-                            <label><i class="bi bi-key" style="color:#F95C4B;"></i> كلمة المرور</label>
-                            <input type="password" name="password" required placeholder="••••••••">
+                            <label>كلمة المرور</label>
+                            <input type="password" name="password" required>
                         </div>
-                        <button type="submit" class="btn btn-login btn-primary">دخول</button>
+                        <button type="submit" class="btn btn-primary" style="width:100%;">دخول</button>
                     </form>
                 </div>
             </div>
@@ -398,99 +265,24 @@
     </div>
 
     <script>
-        // Tab switching
-        document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const tabId = btn.getAttribute('data-tab');
-                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-                document.getElementById(`tab-${tabId}`).classList.add('active');
-                document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-        });
-
-        // Recharge credits
-        async function rechargeCredits() {
-            const username = document.getElementById('rechargeUsername').value.trim();
-            const amount = parseInt(document.getElementById('rechargeAmount').value);
-            const resultDiv = document.getElementById('rechargeResult');
-            resultDiv.style.display = 'block';
-            resultDiv.textContent = 'جاري الشحن...';
-            resultDiv.style.color = '#6B7280';
-
-            if (!username || amount <= 0) {
-                resultDiv.textContent = 'يرجى إدخال اسم مستخدم صحيح وعدد نقاط صحيح.';
-                resultDiv.style.color = '#ef4444';
-                return;
-            }
-
-            try {
-                const res = await fetch('/api/admin/update_credits', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({username, amount, csrf_token: '{{ csrf_token }}'})
-                });
-                const data = await res.json();
-                if(data.success) {
-                    resultDiv.textContent = data.message;
-                    resultDiv.style.color = '#16a34a';
-                    document.getElementById('rechargeUsername').value = '';
-                } else {
-                    resultDiv.textContent = data.message;
-                    resultDiv.style.color = '#ef4444';
-                }
-            } catch(err) {
-                resultDiv.textContent = 'خطأ في الاتصال بالخادم.';
-                resultDiv.style.color = '#ef4444';
-            }
-        }
-
-        let currentSiteStatus = '{{ site_settings.status if site_settings else "on" }}';
-
-        function toggleSiteStatus() {
-            const icon = document.getElementById('siteStatusIcon');
-            const label = document.getElementById('siteStatusLabel');
-            currentSiteStatus = currentSiteStatus === 'on' ? 'off' : 'on';
-            if (currentSiteStatus === 'off') {
-                icon.style.color = '#ef4444';
-                icon.innerHTML = '<i class="bi bi-toggle-off"></i>';
-                label.style.color = '#ef4444';
-                label.textContent = 'متوقف';
-            } else {
-                icon.style.color = '#16a34a';
-                icon.innerHTML = '<i class="bi bi-toggle-on"></i>';
-                label.style.color = '#16a34a';
-                label.textContent = 'مفعل';
-            }
+        function showTab(id) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-'+id).classList.add('active');
         }
 
         async function saveSiteSettings() {
-            const btn = document.querySelector('#tab-site-control .btn-primary');
-            const messageInput = document.getElementById('offlineMessageInput');
-            btn.disabled = true;
-            btn.innerHTML = 'جاري الحفظ...';
+            const status = document.getElementById('siteStatusSelect').value;
+            const msg = document.getElementById('offlineMsg').value;
             try {
                 const res = await fetch('/api/admin/update_site_settings', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        status: currentSiteStatus,
-                        offline_message: messageInput.value,
-                        csrf_token: '{{ csrf_token }}'
-                    })
+                    body: JSON.stringify({ status, offline_message: msg, csrf_token: '{{ csrf_token }}' })
                 });
                 const data = await res.json();
-                if (data.success) {
-                    alert('تم حفظ الإعدادات بنجاح!');
-                } else {
-                    alert('حدث خطأ أثناء الحفظ: ' + (data.message || 'خطأ غير معروف'));
-                }
-            } catch(err) {
-                alert('خطأ في الاتصال بالخادم.');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-floppy"></i> حفظ الإعدادات';
-            }
+                if (data.success) alert('تم حفظ الإعدادات');
+                else alert('خطأ');
+            } catch(e) { alert('خطأ في الاتصال'); }
         }
     </script>
 </body>
