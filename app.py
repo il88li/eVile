@@ -14,7 +14,6 @@ from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
 from flask_session import Session
 from sqlalchemy.exc import SQLAlchemyError
-from werkzeug.utils import secure_filename
 
 from models import db, User, Category, PromptLibrary, LibraryAd, SiteSetting
 from config import Config
@@ -81,7 +80,6 @@ def ensure_db_initialized():
             if not SiteSetting.query.first():
                 db.session.add(SiteSetting())
                 db.session.commit()
-            # إنشاء تصنيفات افتراضية إن لم توجد
             if not Category.query.first():
                 defaults = [
                     Category(name='images', display_name='توليد صور', sort_order=1),
@@ -95,7 +93,7 @@ def ensure_db_initialized():
                     db.session.add(cat)
                 db.session.commit()
             _db_initialized = True
-            logger.info("✅ Database initialized successfully.")
+            logger.info("✅ Database initialized.")
         except Exception as e:
             logger.error(f"❌ DB init error: {e}")
             db.session.rollback()
@@ -103,19 +101,18 @@ def ensure_db_initialized():
 # ---------- Public routes ----------
 @app.route('/')
 def index():
-    """الصفحة الرئيسية – تعرض المكتبة مع البحث والتصفية."""
     site = SiteSetting.query.first()
     if site and site.status == 'off':
         return render_template('index.html', site_status='off', offline_message=site.offline_message)
 
-    # جلب التصنيفات
     categories = Category.query.order_by(Category.sort_order).all()
-    # جلب البرومبتات
     library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
+    active_ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
 
     return render_template('index.html',
                            categories=categories,
                            library_items=library_items,
+                           active_ad=active_ad,
                            site_status='on',
                            user_id=session.get('user_id'))
 
@@ -125,18 +122,16 @@ def about():
 
 @app.route('/sign', methods=['GET', 'POST'])
 def sign():
-    """صفحة تسجيل الدخول / إنشاء حساب."""
     if request.method == 'GET':
         return render_template('sign.html', csrf_token=generate_csrf_token())
 
-    # POST – معالجة تسجيل الدخول أو التسجيل
     data = request.get_json()
     if not data:
         return jsonify({'success': False, 'message': 'بيانات غير صحيحة'}), 400
 
     username = data.get('username', '').strip()
     password = data.get('password', '').strip()
-    action = data.get('action', 'login')  # 'login' or 'signup'
+    action = data.get('action', 'login')
 
     if not username or not password:
         return jsonify({'success': False, 'message': 'يرجى ملء جميع الحقول'}), 400
@@ -148,9 +143,9 @@ def sign():
         db.session.add(user)
         db.session.commit()
         session['user_id'] = user.id
-        return jsonify({'success': True, 'message': 'تم إنشاء الحساب بنجاح'})
+        return jsonify({'success': True, 'message': 'تم إنشاء الحساب'})
 
-    else:  # login
+    else:
         user = User.query.filter_by(username=username).first()
         if user and check_password(password, user.password_hash):
             session['user_id'] = user.id
@@ -163,18 +158,16 @@ def logout():
     flash('تم تسجيل الخروج', 'success')
     return redirect(url_for('index'))
 
-# ---------- Settings (requires login) ----------
+# ---------- Settings ----------
 @app.route('/settings')
 @login_required
 def settings_page():
-    """صفحة إعدادات المستخدم (رفع صورة، برومبت مخصص، كلمات مفتاحية)."""
     user = User.query.get(session['user_id'])
     return render_template('settings.html', user=user, csrf_token=generate_csrf_token())
 
 @app.route('/api/settings', methods=['POST'])
 @login_required
 def update_settings():
-    """تحديث إعدادات المستخدم (بدون صورة)."""
     if not validate_csrf_token(request.json.get('csrf_token')):
         return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
 
@@ -188,7 +181,6 @@ def update_settings():
 @app.route('/api/upload_image', methods=['POST'])
 @login_required
 def upload_image():
-    """رفع صورة شخصية (تخزين base64 في قاعدة البيانات)."""
     if not validate_csrf_token(request.form.get('csrf_token')):
         return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
 
@@ -200,10 +192,8 @@ def upload_image():
         return jsonify({'success': False, 'message': 'لم يتم اختيار ملف'}), 400
 
     try:
-        # قراءة الملف وتحويله إلى base64
         data = file.read()
         b64 = base64.b64encode(data).decode('utf-8')
-        # تحديد نوع MIME بسيط (يمكن تحسينه)
         ext = file.filename.split('.')[-1].lower()
         mime = 'image/jpeg' if ext in ['jpg', 'jpeg'] else 'image/png' if ext == 'png' else 'image/webp'
         image_data = f"data:{mime};base64,{b64}"
@@ -216,7 +206,7 @@ def upload_image():
         logger.error(f"Image upload error: {e}")
         return jsonify({'success': False, 'message': 'خطأ في رفع الصورة'}), 500
 
-# ---------- Admin panel ----------
+# ---------- Admin ----------
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_panel():
     if request.method == 'POST' and request.form.get('password') == Config.ADMIN_PASSWORD:
@@ -277,7 +267,6 @@ def delete_category(category_id):
         return "CSRF Error", 400
     try:
         cat = Category.query.get_or_404(category_id)
-        # نقل البرومبتات التي تحمل هذا التصنيف إلى 'general'
         PromptLibrary.query.filter_by(category=cat.name).update({'category': 'general'})
         db.session.delete(cat)
         db.session.commit()
@@ -286,19 +275,6 @@ def delete_category(category_id):
         db.session.rollback()
         logger.error(f"Error deleting category: {e}")
         flash('خطأ في حذف التصنيف', 'error')
-    return redirect(url_for('admin_panel'))
-
-@app.route('/admin/category/<int:category_id>/update', methods=['POST'])
-@admin_required
-def update_category(category_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    cat = Category.query.get_or_404(category_id)
-    cat.display_name = request.form.get('display_name', cat.display_name).strip()
-    cat.icon = request.form.get('icon', cat.icon).strip()
-    cat.sort_order = int(request.form.get('sort_order', cat.sort_order))
-    db.session.commit()
-    flash('تم تحديث التصنيف', 'success')
     return redirect(url_for('admin_panel'))
 
 # ---------- Admin: Library ----------
@@ -312,11 +288,12 @@ def add_library_item():
             title=request.form.get('title'),
             category=request.form.get('category', 'general'),
             image_url=request.form.get('image_url'),
-            prompt_text=request.form.get('prompt_text')
+            prompt_text=request.form.get('prompt_text'),
+            publisher=request.form.get('publisher', '').strip() or None
         )
         db.session.add(item)
         db.session.commit()
-        flash('تمت إضافة البرومبت للمكتبة', 'success')
+        flash('تمت إضافة البرومبت', 'success')
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error adding library item: {e}")
@@ -344,6 +321,7 @@ def update_library_item(item_id):
     item.category = request.form.get('category', item.category)
     item.image_url = request.form.get('image_url', item.image_url)
     item.prompt_text = request.form.get('prompt_text', item.prompt_text)
+    item.publisher = request.form.get('publisher', item.publisher) or None
     db.session.commit()
     flash('تم تحديث البرومبت', 'success')
     return redirect(url_for('admin_panel'))
@@ -426,7 +404,7 @@ def get_site_status():
         'offline_message': s.offline_message if s else 'الموقع تحت الصيانة حالياً.'
     })
 
-# ---------- Health check ----------
+# ---------- Health ----------
 @app.route('/health')
 def health_check():
     return jsonify({'status': 'ok', 'timestamp': datetime.utcnow().isoformat()})
