@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>الإعدادات – UFOQ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg: #0b0e1a;
+            --bg-card: rgba(20,30,48,0.6);
+            --glass-border: rgba(255,255,255,0.1);
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --text-faint: #64748b;
+            --primary: #38bdf8;
+            --primary-dim: rgba(56,189,248,0.15);
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(145deg, #0b0e1a 0%, #111827 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 90px 16px 140px 16px;
+        }
+        .container { max-width:700px; margin:0 auto; }
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+        }
+        .card-title {
+            font-size:1.3rem; font-weight:800; margin-bottom:20px;
+            display:flex; align-items:center; gap:10px;
+        }
+        .card-title i { color:var(--primary); }
+        .form-group { margin-bottom:18px; }
+        .form-group label {
+            display:block; font-size:0.85rem; font-weight:600;
+            color:var(--text-dim); margin-bottom:6px;
+        }
+        .form-group textarea, .form-group input {
+            width:100%; padding:12px 16px;
+            background:rgba(255,255,255,0.05); border:1px solid var(--glass-border);
+            border-radius:14px; color:var(--text); font-family:'Tajawal',sans-serif;
+            font-size:0.95rem; outline:none; transition:0.3s;
+        }
+        .form-group textarea:focus, .form-group input:focus {
+            border-color:var(--primary); background:rgba(255,255,255,0.08);
+        }
+        .form-group textarea { min-height:100px; resize:vertical; }
+        .file-upload-wrapper {
+            display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+        }
+        .profile-preview {
+            width:80px; height:80px; border-radius:50%;
+            object-fit:cover; border:2px solid var(--glass-border);
+            background:var(--bg-card);
+            position:relative;
+        }
+        .upload-icon {
+            position:relative;
+            display:inline-block;
+            cursor:pointer;
+        }
+        .upload-icon .pencil {
+            position:absolute;
+            bottom:0; right:0;
+            background:var(--primary);
+            border-radius:50%;
+            padding:6px;
+            border:2px solid #0b0e1a;
+            color:#0b0e1a;
+            font-size:14px;
+        }
+        .upload-icon input[type="file"] {
+            display:none;
+        }
+        .btn-primary {
+            padding:12px 28px; background:var(--primary); border:none;
+            border-radius:14px; color:#0b0e1a; font-weight:700;
+            font-size:0.95rem; cursor:pointer; transition:0.2s;
+            display:inline-flex; align-items:center; gap:8px;
+            font-family:'Tajawal',sans-serif;
+        }
+        .btn-primary:hover { opacity:0.85; transform:scale(1.02); }
+        .btn-primary:active { transform:scale(0.96); }
+        .btn-outline {
+            padding:12px 28px; background:transparent; border:1px solid var(--glass-border);
+            border-radius:14px; color:var(--text-dim); font-weight:600;
+            cursor:pointer; transition:0.2s; font-family:'Tajawal',sans-serif;
+        }
+        .btn-outline:hover { background:var(--primary-dim); border-color:var(--primary); color:var(--text); }
+        .info-row {
+            display:flex; align-items:center; justify-content:space-between;
+            padding:12px 0; border-bottom:1px solid var(--glass-border);
+        }
+        .info-row:last-child { border-bottom:none; }
+        .info-row .label { color:var(--text-dim); font-weight:600; }
+        .info-row .value { display:flex; align-items:center; gap:12px; }
+        .info-row .value input {
+            background:transparent; border:none; color:var(--text);
+            font-family:'Tajawal',sans-serif; font-size:0.95rem;
+            outline:none; padding:4px 0;
+        }
+        .info-row .value input:focus { border-bottom:2px solid var(--primary); }
+        .info-row .value .copy-btn {
+            background:transparent; border:none; color:var(--primary);
+            cursor:pointer; font-size:1.1rem;
+        }
+        .info-row .value .copy-btn:hover { opacity:0.7; }
+        .flash-message {
+            padding:12px 16px; border-radius:12px; margin-bottom:16px;
+            font-weight:600; background:var(--primary-dim); color:var(--primary);
+            border:1px solid rgba(56,189,248,0.2);
+        }
+        .flash-message.error { background:rgba(239,68,68,0.1); color:#f87171; border-color:rgba(239,68,68,0.2); }
+        .bottom-nav-bar {
+            position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
+            z-index:1000; display:flex; align-items:center; gap:6px;
+            padding:10px 18px; background:rgba(11,14,26,0.8);
+            backdrop-filter:blur(30px); border:1px solid var(--glass-border);
+            border-radius:50px; box-shadow:var(--shadow);
+            max-width:600px; width:auto;
+        }
+        .nav-item {
+            display:flex; align-items:center; gap:6px;
+            padding:10px 20px; border-radius:40px;
+            background:transparent; border:none; color:var(--text-faint);
+            font-family:'Tajawal',sans-serif; font-size:13px; font-weight:600;
+            cursor:pointer; transition:0.2s; text-decoration:none;
+            white-space:nowrap;
+        }
+        .nav-item:hover { color:var(--text); background:var(--primary-dim); }
+        .nav-item.active {
+            background:var(--primary); color:#0b0e1a;
+            border:1px solid var(--primary);
+        }
+        .nav-item i { font-size:20px; }
+        .nav-label {
+            max-width:0; overflow:hidden; transition:0.2s; opacity:0;
+        }
+        .nav-item.active .nav-label { max-width:80px; opacity:1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- بطاقة الصورة الشخصية مع أيقونة قلم -->
+        <div class="glass-card">
+            <div class="card-title"><i class="bi bi-person-circle"></i> الصورة الشخصية</div>
+            <div class="file-upload-wrapper">
+                <div class="upload-icon">
+                    <img id="profilePreview" src="{{ user.profile_image if user.profile_image else '' }}" class="profile-preview" alt="صورة">
+                    <label for="imageInput" class="pencil"><i class="bi bi-pencil"></i></label>
+                    <input type="file" id="imageInput" accept="image/*" onchange="previewAndUpload(this)">
+                </div>
+                <span style="color:var(--text-dim); font-size:0.9rem;">اضغط على أيقونة القلم لتغيير الصورة</span>
+            </div>
+        </div>
+
+        <!-- بطاقة اسم المستخدم وكلمة المرور -->
+        <div class="glass-card">
+            <div class="card-title"><i class="bi bi-shield-lock"></i> بيانات الحساب</div>
+            <div class="info-row">
+                <span class="label">اسم المستخدم</span>
+                <div class="value">
+                    <input type="text" id="usernameDisplay" value="{{ user.username }}" readonly>
+                    <button class="copy-btn" onclick="copyText('usernameDisplay')"><i class="bi bi-files"></i></button>
+                </div>
+            </div>
+            <div class="info-row">
+                <span class="label">كلمة المرور</span>
+                <div class="value">
+                    <input type="password" id="passwordDisplay" value="••••••••" readonly>
+                    <button class="copy-btn" onclick="togglePasswordVisibility()"><i class="bi bi-eye" id="eyeIcon"></i></button>
+                    <button class="copy-btn" onclick="copyText('passwordDisplay')"><i class="bi bi-files"></i></button>
+                </div>
+            </div>
+            <div style="margin-top:16px;">
+                <button class="btn-primary" onclick="changePassword()"><i class="bi bi-key"></i> تغيير كلمة المرور</button>
+                <input type="password" id="newPassword" placeholder="كلمة المرور الجديدة" style="margin-top:8px; width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:12px; color:var(--text);">
+            </div>
+        </div>
+
+        <!-- بطاقة البرومبت والكلمات المفتاحية -->
+        <div class="glass-card">
+            <div class="card-title"><i class="bi bi-pencil"></i> البرومبت المخصص</div>
+            <div class="form-group">
+                <label>نص البرومبت</label>
+                <textarea id="customPrompt" placeholder="أدخل برومبتك المخصص هنا...">{{ user.custom_prompt or '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label>الكلمات المفتاحية للبحث</label>
+                <input type="text" id="searchKeywords" placeholder="مثال: تصميم, كتابة, صور" value="{{ user.search_keywords or '' }}">
+            </div>
+            <button class="btn-primary" onclick="saveSettings()"><i class="bi bi-check-lg"></i> حفظ الإعدادات</button>
+        </div>
+
+        <div class="glass-card">
+            <div class="card-title"><i class="bi bi-info-circle"></i> معلومات الحساب</div>
+            <p><strong>تاريخ الإنشاء:</strong> {{ user.created_at.strftime('%Y-%m-%d') if user.created_at else '—' }}</p>
+            <a href="/logout" class="btn-outline" style="margin-top:12px; display:inline-block;"><i class="bi bi-box-arrow-left"></i> تسجيل الخروج</a>
+        </div>
+    </div>
+
+    <nav class="bottom-nav-bar">
+        <a href="/" class="nav-item"><i class="bi bi-house-door"></i><span class="nav-label">الرئيسية</span></a>
+        <a href="/about" class="nav-item"><i class="bi bi-info-circle"></i><span class="nav-label">حول</span></a>
+        <a href="/settings" class="nav-item active"><i class="bi bi-gear-fill"></i><span class="nav-label">الإعدادات</span></a>
+    </nav>
+
+    <script>
+        const csrfToken = "{{ csrf_token }}";
+        let passwordVisible = false;
+
+        function previewAndUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('profilePreview').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('csrf_token', csrfToken);
+
+            fetch('/api/upload_image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) alert(data.message || 'خطأ في الرفع');
+            })
+            .catch(() => alert('تعذر الاتصال بالخادم'));
+        }
+
+        function copyText(id) {
+            const input = document.getElementById(id);
+            navigator.clipboard.writeText(input.value).then(() => {
+                alert('تم نسخ القيمة');
+            }).catch(() => {
+                input.select();
+                document.execCommand('copy');
+                alert('تم نسخ القيمة');
+            });
+        }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById('passwordDisplay');
+            const icon = document.getElementById('eyeIcon');
+            if (passwordVisible) {
+                input.type = 'password';
+                icon.className = 'bi bi-eye';
+                passwordVisible = false;
+            } else {
+                input.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+                passwordVisible = true;
+            }
+        }
+
+        function changePassword() {
+            const newPass = document.getElementById('newPassword').value.trim();
+            if (!newPass) { alert('يرجى إدخال كلمة مرور جديدة'); return; }
+            // سيتم تنفيذ التحديث لاحقاً، يمكن إضافة endpoint لتغيير كلمة المرور
+            alert('سيتم تغيير كلمة المرور إلى: ' + newPass);
+            // يمكنك إضافة استدعاء API هنا
+        }
+
+        function saveSettings() {
+            const customPrompt = document.getElementById('customPrompt').value.trim();
+            const searchKeywords = document.getElementById('searchKeywords').value.trim();
+
+            fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    custom_prompt: customPrompt,
+                    search_keywords: searchKeywords,
+                    csrf_token: csrfToken
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) alert('تم حفظ الإعدادات');
+                else alert(data.message || 'خطأ في الحفظ');
+            })
+            .catch(() => alert('تعذر الاتصال بالخادم'));
+        }
+    </script>
+</body>
+</html>
