@@ -13,11 +13,34 @@ class Config:
     ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
 
     DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://user:pass@localhost:5432/db')
+    
+    # تأكد من وجود sslmode=require في رابط قاعدة البيانات
+    if 'postgres' in DATABASE_URL and 'sslmode' not in DATABASE_URL:
+        # أضف sslmode=require إذا لم يكن موجوداً
+        if '?' in DATABASE_URL:
+            DATABASE_URL += '&sslmode=require'
+        else:
+            DATABASE_URL += '?sslmode=require'
+        logger.info("✅ Added sslmode=require to DATABASE_URL")
+    
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_POOL_SIZE = 20
     SQLALCHEMY_MAX_OVERFLOW = 40
     SQLALCHEMY_POOL_PRE_PING = True
+    
+    # خيارات إضافية للمحرك لضبط مهلات الاتصال
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'pool_recycle': 300,
+        'connect_args': {
+            'connect_timeout': 10,
+            'keepalives': 1,
+            'keepalives_idle': 30,
+            'keepalives_interval': 10,
+            'keepalives_count': 5,
+        }
+    }
 
     REDIS_URL = os.getenv('REDIS_URL')
 
