@@ -27,6 +27,9 @@ class Config:
     ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
 
     DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://user:pass@localhost:5432/db')
+    # Render provides postgres:// but SQLAlchemy 2.0 requires postgresql://
+    if DATABASE_URL.startswith('postgres://'):
+        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_POOL_SIZE = 20
