@@ -1,13 +1,10 @@
 import os
-import json
 import logging
-import bcrypt
 import secrets
 import base64
-import requests
-from datetime import datetime, date
+from datetime import datetime
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, Response
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_caching import Cache
@@ -16,11 +13,98 @@ from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
 from flask_session import Session
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import text
+from dotenv import load_dotenv
 
-from models import db, User, Category, PromptLibrary, LibraryAd, SiteSetting, Notification
-from config import Config
+load_dotenv()
+logger = logging.getLogger(__name__)
 
+# ==================== Config ====================
+class Config:
+    SECRET_KEY = os.getenv('SECRET_KEY')
+    if not SECRET_KEY:
+        raise ValueError("SECRET_KEY environment variable is required!")
+
+    ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
+
+    DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://user:pass@localhost:5432/db')
+    SQLALCHEMY_DATABASE_URI = DATABASE_URL
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_POOL_SIZE = 20
+    SQLALCHEMY_MAX_OVERFLOW = 40
+    SQLALCHEMY_POOL_PRE_PING = True
+
+    REDIS_URL = os.getenv('REDIS_URL')
+
+    SESSION_TYPE = 'sqlalchemy'
+    SESSION_SQLALCHEMY_TABLE = 'flask_sessions'
+    SESSION_PERMANENT = True
+    SESSION_USE_SIGNER = True
+    SESSION_KEY_PREFIX = 'ufoq_session:'
+    PERMANENT_SESSION_LIFETIME = 2592000
+
+    if REDIS_URL:
+        CACHE_TYPE = 'RedisCache'
+        CACHE_REDIS_URL = REDIS_URL
+        CACHE_DEFAULT_TIMEOUT = 300
+        RATELIMIT_ENABLED = True
+        RATELIMIT_STORAGE_URI = REDIS_URL
+        RATELIMIT_STRATEGY = 'fixed-window'
+        logger.info("✅ Redis configured.")
+    else:
+        CACHE_TYPE = 'SimpleCache'
+        CACHE_DEFAULT_TIMEOUT = 300
+        RATELIMIT_ENABLED = True
+        RATELIMIT_STORAGE_URI = 'memory://'
+        RATELIMIT_STRATEGY = 'fixed-window'
+        logger.warning("⚠️ REDIS_URL not set. Using in-memory cache/limiter.")
+
+# ==================== Models ====================
+db = SQLAlchemy()
+
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False, unique=True)
+    display_name = db.Column(db.String(100), nullable=False)
+    icon = db.Column(db.String(50), default='bi-tag')
+    sort_order = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class PromptLibrary(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    category = db.Column(db.String(50), nullable=False, default='general')
+    image_url = db.Column(db.String(500), nullable=False)
+    prompt_text = db.Column(db.Text, nullable=False)
+    publisher = db.Column(db.String(80), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class LibraryAd(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    image_url = db.Column(db.String(500), nullable=True)
+    button_text = db.Column(db.String(100), nullable=False)
+    button_link = db.Column(db.String(500), nullable=False)
+    duration_seconds = db.Column(db.Integer, default=5)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class SiteSetting(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    status = db.Column(db.String(10), default='on')
+    offline_message = db.Column(db.Text, default='الموقع تحت الصيانة حالياً.')
+
+class UploadContribution(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    category = db.Column(db.String(50), nullable=False, default='general')
+    image_url = db.Column(db.String(500), nullable=True)
+    prompt_text = db.Column(db.Text, nullable=False)
+    publisher_name = db.Column(db.String(80), nullable=True)
+    status = db.Column(db.String(20), default='pending')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+# ==================== App Factory ====================
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
 app.config.from_object(Config)
 
@@ -41,12 +125,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # ---------- Helper functions ----------
-def hash_password(password):
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-def check_password(password, hashed):
-    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
-
 def generate_csrf_token():
     if 'csrf_token' not in session:
         session['csrf_token'] = secrets.token_urlsafe(32)
@@ -54,15 +132,6 @@ def generate_csrf_token():
 
 def validate_csrf_token(token):
     return token == session.get('csrf_token')
-
-def login_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if not session.get('user_id'):
-            flash('يرجى تسجيل الدخول أولاً', 'error')
-            return redirect(url_for('sign'))
-        return f(*args, **kwargs)
-    return decorated
 
 def admin_required(f):
     @wraps(f)
@@ -72,21 +141,6 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
-# ---------- Auto Migration (for free plans without shell) ----------
-def auto_migrate():
-    try:
-        with app.app_context():
-            db.session.execute(text("ALTER TABLE prompt_library ADD COLUMN IF NOT EXISTS keywords VARCHAR(500)"))
-            db.session.execute(text("ALTER TABLE prompt_library ADD COLUMN IF NOT EXISTS submitted_by VARCHAR(80)"))
-            db.session.execute(text("ALTER TABLE prompt_library ADD COLUMN IF NOT EXISTS is_approved BOOLEAN DEFAULT true"))
-            db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS credits INTEGER DEFAULT 10'))
-            db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS last_daily_gift DATE'))
-            db.session.commit()
-            logger.info("Auto-migration: columns added successfully.")
-    except Exception as e:
-        db.session.rollback()
-        logger.warning(f"Auto-migration warning: {e}")
-
 # ---------- Database initialization ----------
 _db_initialized = False
 @app.before_request
@@ -95,7 +149,6 @@ def ensure_db_initialized():
     if not _db_initialized:
         try:
             db.create_all()
-            auto_migrate()
             if not SiteSetting.query.first():
                 db.session.add(SiteSetting())
                 db.session.commit()
@@ -112,9 +165,9 @@ def ensure_db_initialized():
                     db.session.add(cat)
                 db.session.commit()
             _db_initialized = True
-            logger.info("Database initialized.")
+            logger.info("✅ Database initialized.")
         except Exception as e:
-            logger.error(f"DB init error: {e}")
+            logger.error(f"❌ DB init error: {e}")
             db.session.rollback()
 
 # ---------- Public routes ----------
@@ -125,344 +178,53 @@ def index():
         return render_template('index.html', site_status='off', offline_message=site.offline_message)
 
     categories = Category.query.order_by(Category.sort_order).all()
-    library_items = PromptLibrary.query.filter_by(is_approved=True).order_by(PromptLibrary.created_at.desc()).all()
+    library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
     active_ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
-    latest_notif = Notification.query.order_by(Notification.created_at.desc()).first()
-
-    user_data = None
-    user_id = session.get('user_id')
-    if user_id:
-        user = User.query.get(user_id)
-        if user:
-            user_data = {
-                'username': user.username,
-                'credits': user.credits or 0,
-                'last_daily_gift': user.last_daily_gift.isoformat() if user.last_daily_gift else None
-            }
-
-    patterns = [{'id': c.id, 'name': c.display_name, 'image_url': f'https://placehold.co/400x200/111827/38bdf8?text={c.display_name}'} for c in categories]
 
     return render_template('index.html',
                            categories=categories,
                            library_items=library_items,
                            active_ad=active_ad,
-                           site_status='on',
-                           user_id=user_id,
-                           user_data=user_data,
-                           patterns=patterns,
-                           latest_notification=latest_notif,
-                           latest_ad=active_ad)
+                           site_status='on')
 
-@app.route('/library')
-def library():
-    categories = Category.query.order_by(Category.sort_order).all()
-    library_items = PromptLibrary.query.filter_by(is_approved=True).order_by(PromptLibrary.created_at.desc()).all()
-    active_ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
-    return render_template('library.html',
-                           categories=categories,
-                           library_items=library_items,
-                           active_ad=active_ad,
-                           user_id=session.get('user_id'))
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    if request.method == 'POST':
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'message': 'بيانات غير صحيحة'}), 400
 
-@app.route('/about')
-def about():
-    return render_template('about.html', current_year=datetime.utcnow().year)
+        title = data.get('title', '').strip()
+        category = data.get('category', 'general').strip()
+        prompt_text = data.get('prompt_text', '').strip()
+        image_url = data.get('image_url', '').strip()
+        publisher_name = data.get('publisher_name', '').strip()
+        csrf_token = data.get('csrf_token', '')
 
-@app.route('/sign', methods=['GET', 'POST'])
-def sign():
-    if request.method == 'GET':
-        return render_template('sign.html', csrf_token=generate_csrf_token())
+        if not validate_csrf_token(csrf_token):
+            return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
 
-    data = request.get_json()
-    if not data:
-        return jsonify({'success': False, 'message': 'بيانات غير صحيحة'}), 400
+        if not title or not prompt_text:
+            return jsonify({'success': False, 'message': 'يرجى ملء العنوان ونص البرومبت'}), 400
 
-    username = data.get('username', '').strip()
-    password = data.get('password', '').strip()
-    action = data.get('action', 'login')
-
-    if not username or not password:
-        return jsonify({'success': False, 'message': 'يرجى ملء جميع الحقول'}), 400
-
-    if action == 'signup':
-        if User.query.filter_by(username=username).first():
-            return jsonify({'success': False, 'message': 'اسم المستخدم موجود مسبقاً'}), 400
-        user = User(username=username, password_hash=hash_password(password), credits=10)
-        db.session.add(user)
-        db.session.commit()
-        session['user_id'] = user.id
-        return jsonify({'success': True, 'message': 'تم إنشاء الحساب'})
-
-    else:
-        user = User.query.filter_by(username=username).first()
-        if user and check_password(password, user.password_hash):
-            session['user_id'] = user.id
-            return jsonify({'success': True, 'message': 'تم تسجيل الدخول'})
-        return jsonify({'success': False, 'message': 'بيانات غير صحيحة'}), 401
-
-@app.route('/logout')
-def logout():
-    session.pop('user_id', None)
-    flash('تم تسجيل الخروج', 'success')
-    return redirect(url_for('index'))
-
-# ---------- Settings ----------
-@app.route('/settings')
-@login_required
-def settings_page():
-    user = User.query.get(session['user_id'])
-    return render_template('settings.html', user=user, csrf_token=generate_csrf_token())
-
-@app.route('/api/settings', methods=['POST'])
-@login_required
-def update_settings():
-    if not validate_csrf_token(request.json.get('csrf_token')):
-        return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
-
-    user = User.query.get(session['user_id'])
-    data = request.get_json()
-    user.custom_prompt = data.get('custom_prompt', '').strip()
-    user.search_keywords = data.get('search_keywords', '').strip()
-    db.session.commit()
-    return jsonify({'success': True, 'message': 'تم تحديث الإعدادات'})
-
-@app.route('/api/upload_image', methods=['POST'])
-@login_required
-def upload_image():
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
-
-    if 'image' not in request.files:
-        return jsonify({'success': False, 'message': 'لا توجد صورة'}), 400
-
-    file = request.files['image']
-    if file.filename == '':
-        return jsonify({'success': False, 'message': 'لم يتم اختيار ملف'}), 400
-
-    try:
-        data = file.read()
-        b64 = base64.b64encode(data).decode('utf-8')
-        ext = file.filename.split('.')[-1].lower()
-        mime = 'image/jpeg' if ext in ['jpg', 'jpeg'] else 'image/png' if ext == 'png' else 'image/webp'
-        image_data = f"data:{mime};base64,{b64}"
-
-        user = User.query.get(session['user_id'])
-        user.profile_image = image_data
-        db.session.commit()
-        return jsonify({'success': True, 'message': 'تم رفع الصورة', 'image': image_data})
-    except Exception as e:
-        logger.error(f"Image upload error: {e}")
-        return jsonify({'success': False, 'message': 'خطأ في رفع الصورة'}), 500
-
-# ---------- API: Submit Prompt for Review ----------
-@app.route('/api/submit_prompt', methods=['POST'])
-@login_required
-def submit_prompt():
-    if not validate_csrf_token(request.json.get('csrf_token')):
-        return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
-
-    data = request.get_json()
-    title = data.get('title', '').strip()
-    prompt_text = data.get('prompt_text', '').strip()
-    image_url = data.get('image_url', '').strip() or None
-    keywords = data.get('keywords', '').strip() or None
-
-    if not title or not prompt_text:
-        return jsonify({'success': False, 'message': 'العنوان والبرومبت مطلوبان'}), 400
-
-    user = User.query.get(session['user_id'])
-
-    try:
-        item = PromptLibrary(
-            title=title,
-            category='general',
-            image_url=image_url or 'https://placehold.co/400x300/111827/38bdf8?text=Pending',
-            prompt_text=prompt_text,
-            keywords=keywords,
-            publisher=user.username,
-            submitted_by=user.username,
-            is_approved=False
-        )
-        db.session.add(item)
-        db.session.commit()
-        return jsonify({'success': True, 'message': 'تم الإرسال للمراجعة'})
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Submit prompt error: {e}")
-        return jsonify({'success': False, 'message': 'خطأ في حفظ البيانات'}), 500
-
-# ---------- API: User Info ----------
-@app.route('/api/user_info')
-@login_required
-def user_info():
-    user = User.query.get(session['user_id'])
-    if not user:
-        return jsonify({'success': False}), 404
-    return jsonify({
-        'success': True,
-        'username': user.username,
-        'credits': user.credits or 0,
-        'last_daily_gift': user.last_daily_gift.isoformat() if user.last_daily_gift else None
-    })
-
-@app.route('/api/update_user', methods=['POST'])
-@login_required
-def update_user():
-    data = request.get_json()
-    user = User.query.get(session['user_id'])
-    if not user:
-        return jsonify({'success': False, 'message': 'المستخدم غير موجود'}), 404
-
-    username = data.get('username', '').strip()
-    password = data.get('password', '').strip()
-
-    if not username or not password:
-        return jsonify({'success': False, 'message': 'يرجى ملء جميع الحقول'}), 400
-
-    existing = User.query.filter(User.username == username, User.id != user.id).first()
-    if existing:
-        return jsonify({'success': False, 'message': 'اسم المستخدم مستخدم'}), 400
-
-    user.username = username
-    user.password_hash = hash_password(password)
-    db.session.commit()
-    return jsonify({'success': True, 'message': 'تم التحديث'})
-
-@app.route('/api/claim_daily_gift', methods=['POST'])
-@login_required
-def claim_daily_gift():
-    user = User.query.get(session['user_id'])
-    if not user:
-        return jsonify({'success': False, 'message': 'غير مسموح'}), 401
-
-    today = date.today()
-    if user.last_daily_gift == today:
-        return jsonify({'success': False, 'message': 'لقد استلمت الهدية اليوم'}), 400
-
-    user.credits = (user.credits or 0) + 3
-    user.last_daily_gift = today
-    db.session.commit()
-    return jsonify({'success': True, 'message': 'تم استلام 3 نقاط', 'credits': user.credits})
-
-@app.route('/api/transfer_credits', methods=['POST'])
-@login_required
-def transfer_credits():
-    data = request.get_json()
-    target_username = data.get('username', '').strip()
-    amount = int(data.get('amount', 0))
-
-    if amount <= 0:
-        return jsonify({'success': False, 'message': 'المبلغ غير صالح'}), 400
-
-    sender = User.query.get(session['user_id'])
-    if not sender or (sender.credits or 0) < amount:
-        return jsonify({'success': False, 'message': 'رصيدك غير كافٍ'}), 400
-
-    receiver = User.query.filter_by(username=target_username).first()
-    if not receiver:
-        return jsonify({'success': False, 'message': 'المستخدم غير موجود'}), 404
-    if receiver.id == sender.id:
-        return jsonify({'success': False, 'message': 'لا يمكن التحويل لنفسك'}), 400
-
-    sender.credits = (sender.credits or 0) - amount
-    receiver.credits = (receiver.credits or 0) + amount
-    db.session.commit()
-
-    return jsonify({'success': True, 'message': f'تم تحويل {amount} نقاط', 'credits': sender.credits})
-
-@app.route('/api/users_count')
-def users_count():
-    count = User.query.count()
-    return jsonify({'count': count})
-
-@app.route('/api/notifications')
-def get_notifications():
-    notifs = Notification.query.order_by(Notification.created_at.desc()).limit(20).all()
-    return jsonify([{
-        'id': n.id,
-        'title': n.title,
-        'text': n.text,
-        'created_at': n.created_at.isoformat()
-    } for n in notifs])
-
-# ---------- AI Chat with OpenRouter ----------
-@app.route('/api/chat', methods=['POST'])
-@login_required
-def chat():
-    user = User.query.get(session['user_id'])
-    if not user or (user.credits or 0) <= 0:
-        return jsonify({'error': 'نقاط غير كافية'}), 402
-
-    data = request.get_json()
-    message = data.get('message', '').strip()
-    pattern_id = data.get('pattern_id')
-
-    if not message:
-        return jsonify({'error': 'الرسالة فارغة'}), 400
-
-    pattern = Category.query.get(pattern_id) if pattern_id else None
-    system_prompt = "أنت مساعد إبداعي متخصص في كتابة البرومبتات والمحتوى باللغة العربية."
-    if pattern:
-        system_prompt += f" التصنيف المختار: {pattern.display_name}."
-
-    api_key = app.config.get('OPENROUTER_API_KEY')
-    model = app.config.get('OPENROUTER_MODEL', 'openrouter/auto')
-
-    if not api_key:
-        return jsonify({'error': 'مفتاح API غير مضبوط'}), 503
-
-    def generate():
         try:
-            resp = requests.post(
-                url="https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json",
-                    "HTTP-Referer": "https://evile4.onrender.com",
-                    "X-Title": "UFOQ"
-                },
-                json={
-                    "model": model,
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": message}
-                    ],
-                    "stream": True
-                },
-                stream=True,
-                timeout=60
+            contribution = UploadContribution(
+                title=title,
+                category=category,
+                prompt_text=prompt_text,
+                image_url=image_url or None,
+                publisher_name=publisher_name or None
             )
-
-            if resp.status_code != 200:
-                yield json.dumps({'error': 'فشل الاتصال بـ OpenRouter'})
-                return
-
-            full_text = ""
-            for line in resp.iter_lines():
-                if not line:
-                    continue
-                line = line.decode('utf-8')
-                if line.startswith('data: '):
-                    chunk = line[6:]
-                    if chunk == '[DONE]':
-                        break
-                    try:
-                        data_chunk = json.loads(chunk)
-                        delta = data_chunk.get('choices', [{}])[0].get('delta', {}).get('content', '')
-                        if delta:
-                            full_text += delta
-                            yield delta
-                    except json.JSONDecodeError:
-                        continue
-
-            if full_text.strip():
-                user.credits = max(0, (user.credits or 0) - 1)
-                db.session.commit()
+            db.session.add(contribution)
+            db.session.commit()
+            return jsonify({'success': True, 'message': 'تم استلام مساهمتك بنجاح! سيتم مراجعتها قريباً.'})
         except Exception as e:
-            logger.error(f"Chat error: {e}")
-            yield json.dumps({'error': 'خطأ في الاتصال بالذكاء الاصطناعي'})
+            db.session.rollback()
+            logger.error(f"Upload error: {e}")
+            return jsonify({'success': False, 'message': 'خطأ في حفظ البيانات'}), 500
 
-    return Response(generate(), mimetype='text/plain')
+    categories = Category.query.order_by(Category.sort_order).all()
+    return render_template('upload.html', categories=categories, csrf_token=generate_csrf_token())
 
 # ---------- Admin ----------
 @app.route('/admin', methods=['GET', 'POST'])
@@ -475,14 +237,14 @@ def admin_panel():
         categories = Category.query.order_by(Category.sort_order).all()
         library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
         library_ads = LibraryAd.query.order_by(LibraryAd.created_at.desc()).all()
-        users = User.query.all()
         site_settings = SiteSetting.query.first()
+        contributions = UploadContribution.query.order_by(UploadContribution.created_at.desc()).all()
         return render_template('admin.html',
                                categories=categories,
                                library_items=library_items,
                                library_ads=library_ads,
-                               users=users,
                                site_settings=site_settings,
+                               contributions=contributions,
                                csrf_token=generate_csrf_token())
     return render_template('admin.html')
 
@@ -547,9 +309,7 @@ def add_library_item():
             category=request.form.get('category', 'general'),
             image_url=request.form.get('image_url'),
             prompt_text=request.form.get('prompt_text'),
-            publisher=request.form.get('publisher', '').strip() or None,
-            keywords=request.form.get('keywords', '').strip() or None,
-            is_approved=True
+            publisher=request.form.get('publisher', '').strip() or None
         )
         db.session.add(item)
         db.session.commit()
@@ -582,20 +342,65 @@ def update_library_item(item_id):
     item.image_url = request.form.get('image_url', item.image_url)
     item.prompt_text = request.form.get('prompt_text', item.prompt_text)
     item.publisher = request.form.get('publisher', item.publisher) or None
-    item.keywords = request.form.get('keywords', item.keywords) or None
     db.session.commit()
     flash('تم تحديث البرومبت', 'success')
     return redirect(url_for('admin_panel'))
 
-@app.route('/admin/library/<int:item_id>/approve', methods=['POST'])
+# ---------- Admin: Contributions ----------
+@app.route('/admin/contribution/<int:contrib_id>/approve', methods=['POST'])
 @admin_required
-def approve_library_item(item_id):
+def approve_contribution(contrib_id):
     if not validate_csrf_token(request.form.get('csrf_token')):
         return "CSRF Error", 400
-    item = PromptLibrary.query.get_or_404(item_id)
-    item.is_approved = True
-    db.session.commit()
-    flash('تمت الموافقة على البرومبت', 'success')
+    try:
+        contrib = UploadContribution.query.get_or_404(contrib_id)
+        item = PromptLibrary(
+            title=contrib.title,
+            category=contrib.category,
+            image_url=contrib.image_url or '',
+            prompt_text=contrib.prompt_text,
+            publisher=contrib.publisher_name
+        )
+        db.session.add(item)
+        contrib.status = 'approved'
+        db.session.commit()
+        flash('تمت الموافقة على المساهمة', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error approving contribution: {e}")
+        flash('خطأ', 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/contribution/<int:contrib_id>/reject', methods=['POST'])
+@admin_required
+def reject_contribution(contrib_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        contrib = UploadContribution.query.get_or_404(contrib_id)
+        contrib.status = 'rejected'
+        db.session.commit()
+        flash('تم رفض المساهمة', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error rejecting contribution: {e}")
+        flash('خطأ', 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/contribution/<int:contrib_id>/delete', methods=['POST'])
+@admin_required
+def delete_contribution(contrib_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        contrib = UploadContribution.query.get_or_404(contrib_id)
+        db.session.delete(contrib)
+        db.session.commit()
+        flash('تم حذف المساهمة', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting contribution: {e}")
+        flash('خطأ', 'error')
     return redirect(url_for('admin_panel'))
 
 # ---------- Admin: Library Ads ----------
@@ -653,37 +458,6 @@ def toggle_library_ad(ad_id):
         db.session.rollback()
         logger.error(f"Error toggling library ad: {e}")
         flash('خطأ في تغيير حالة الإعلان', 'error')
-    return redirect(url_for('admin_panel'))
-
-# ---------- Admin: Notifications ----------
-@app.route('/admin/notification/add', methods=['POST'])
-@admin_required
-def add_notification():
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        n = Notification(
-            title=request.form.get('title'),
-            text=request.form.get('text')
-        )
-        db.session.add(n)
-        db.session.commit()
-        flash('تمت إضافة الإشعار', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error adding notification: {e}")
-        flash('خطأ في إضافة الإشعار', 'error')
-    return redirect(url_for('admin_panel'))
-
-@app.route('/admin/notification/<int:nid>/delete', methods=['POST'])
-@admin_required
-def delete_notification(nid):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    n = Notification.query.get_or_404(nid)
-    db.session.delete(n)
-    db.session.commit()
-    flash('تم حذف الإشعار', 'success')
     return redirect(url_for('admin_panel'))
 
 # ---------- Admin: Site Settings ----------
