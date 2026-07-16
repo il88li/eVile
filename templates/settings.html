@@ -9,315 +9,257 @@
     <style>
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
         :root {
-            --bg: #0f0c1d;
-            --bg-card: rgba(30,24,52,0.6);
+            --bg: #0b0e1a;
+            --bg-card: rgba(20,30,48,0.6);
             --glass-border: rgba(255,255,255,0.1);
-            --text: #f7f5ff;
-            --text-dim: #a79fc4;
-            --text-faint: #6f6790;
-            --primary: #ffb454;
-            --primary-dim: rgba(255,180,84,0.15);
-            --danger: #f87171;
-            --success: #4ade80;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --text-faint: #64748b;
+            --primary: #38bdf8;
+            --primary-dim: rgba(56,189,248,0.15);
             --shadow: 0 8px 32px rgba(0,0,0,0.4);
+            --danger: #f87171;
         }
         body {
             font-family: 'Tajawal', sans-serif;
-            background: linear-gradient(145deg, #0f0c1d 0%, #1a1330 100%);
+            background: linear-gradient(145deg, #0b0e1a 0%, #111827 100%);
             color: var(--text);
             min-height: 100vh;
             padding: 90px 16px 140px 16px;
         }
-        .container { max-width:700px; margin:0 auto; }
-        .floating-header {
-            position:fixed; top:12px; left:12px; right:12px; z-index:100;
-            display:flex; align-items:center; justify-content:space-between;
-            padding:8px 16px; max-width:700px; margin:0 auto; border-radius:20px;
-            background:rgba(15,12,29,0.8); backdrop-filter:blur(20px) saturate(140%);
-            -webkit-backdrop-filter:blur(20px) saturate(140%);
-            border:1px solid var(--glass-border);
-        }
-        .header-center { position:absolute; left:50%; transform:translateX(-50%); font-size:20px; font-weight:900; letter-spacing:3px; }
-        .header-btn {
-            width:36px; height:36px; border-radius:12px;
-            background:var(--bg-card); border:1px solid var(--glass-border);
-            display:flex; align-items:center; justify-content:center;
-            cursor:pointer; color:var(--text-dim); transition:0.2s; text-decoration:none;
-        }
-        .header-btn:hover { background:var(--primary-dim); color:var(--primary); border-color:var(--primary); }
-        .header-btn i { font-size:18px; }
+        .container { max-width: 700px; margin: 0 auto; }
         .glass-card {
             background: var(--bg-card);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
             padding: 24px;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             box-shadow: var(--shadow);
         }
         .card-title {
-            font-size:1.1rem; font-weight:800; margin-bottom:6px;
-            display:flex; align-items:center; gap:8px;
+            font-size: 1.2rem; font-weight: 800; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
         }
-        .card-title i { color:var(--primary); }
-        .card-sub { color:var(--text-dim); font-size:0.85rem; margin-bottom:18px; }
-
-        .profile-row { display:flex; align-items:center; gap:16px; }
-        .avatar {
-            width:72px; height:72px; border-radius:50%; object-fit:cover;
-            border:2px solid var(--glass-border); background:rgba(255,255,255,0.05);
-            display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        .card-title i { color: var(--primary); }
+        .form-group { margin-bottom: 18px; }
+        .form-group label {
+            display: block; font-size: 0.85rem; font-weight: 700;
+            color: var(--text-dim); margin-bottom: 8px;
         }
-        .avatar i { font-size:28px; color:var(--text-faint); }
-        .username { font-weight:800; font-size:1.05rem; }
-        .file-btn {
-            display:inline-flex; align-items:center; gap:6px;
-            padding:8px 16px; border-radius:12px; cursor:pointer;
-            background:var(--primary-dim); color:var(--primary);
-            border:1px solid var(--glass-border); font-size:0.85rem; font-weight:700;
-            margin-top:8px;
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 12px 14px;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);
+            border-radius: 14px; color: var(--text); font-family: 'Tajawal', sans-serif;
+            font-size: 0.95rem; outline: none; transition: 0.2s;
         }
-        .file-btn input { display:none; }
-
-        .form-group { margin-bottom:14px; }
-        .form-group label { display:block; font-size:0.85rem; font-weight:700; color:var(--text-dim); margin-bottom:6px; }
-        .form-group input, .form-group textarea, .form-group select {
-            width:100%; padding:11px 14px;
-            background:rgba(255,255,255,0.05); border:1px solid var(--glass-border);
-            border-radius:12px; color:var(--text); font-family:'Tajawal',sans-serif;
-            font-size:0.9rem; outline:none; transition:0.2s;
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: var(--primary); background: rgba(255,255,255,0.08);
         }
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:var(--primary); }
-        .form-group textarea { resize:vertical; min-height:80px; }
-        .upload-preview {
-            width:100%; max-height:180px; border-radius:14px; margin-top:8px;
-            display:none; object-fit:contain; background:rgba(0,0,0,0.2);
-        }
+        .form-group textarea { min-height: 120px; resize: vertical; }
         .btn {
-            padding:11px 22px; border-radius:14px; border:none;
-            font-weight:800; cursor:pointer; transition:0.2s;
-            display:inline-flex; align-items:center; gap:8px;
-            font-family:'Tajawal',sans-serif; font-size:0.9rem;
+            width: 100%; padding: 12px; border: none; border-radius: 14px;
+            font-family: 'Tajawal', sans-serif; font-size: 1rem; font-weight: 700;
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center;
+            justify-content: center; gap: 8px;
         }
-        .btn-primary { background:var(--primary); color:#0f0c1d; }
-        .btn-primary:hover { opacity:0.88; transform:scale(1.02); }
-        .btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
-        .hint { font-size:0.75rem; color:var(--text-faint); margin-top:6px; display:flex; align-items:center; gap:6px; }
-
-        .my-item {
-            display:flex; align-items:center; gap:12px;
-            background:rgba(255,255,255,0.03); border:1px solid var(--glass-border);
-            border-radius:14px; padding:10px 14px; margin-bottom:10px;
+        .btn-primary { background: var(--primary); color: #0b0e1a; }
+        .btn-primary:hover { opacity: 0.85; transform: scale(1.02); }
+        .btn-primary:active { transform: scale(0.96); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .image-preview {
+            width: 100%; max-width: 200px; margin: 0 auto 16px;
+            border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border);
+            display: none;
         }
-        .my-item img { width:48px; height:48px; border-radius:10px; object-fit:cover; flex-shrink:0; }
-        .my-item .info { flex:1; min-width:0; }
-        .my-item .info .t { font-weight:700; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .badge { font-size:0.7rem; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
-        .badge-pending { background:rgba(251,191,36,0.15); color:#fbbf24; }
-        .badge-approved { background:rgba(74,222,128,0.15); color:var(--success); }
-
+        .image-preview img { width: 100%; display: block; }
+        .file-input-wrapper {
+            position: relative; overflow: hidden; display: inline-block; width: 100%;
+        }
+        .file-input-wrapper input[type=file] {
+            position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;
+        }
+        .file-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 12px; border: 2px dashed var(--glass-border);
+            border-radius: 14px; color: var(--text-dim); font-weight: 600;
+            transition: 0.2s;
+        }
+        .file-input-wrapper:hover .file-btn {
+            border-color: var(--primary); color: var(--primary); background: var(--primary-dim);
+        }
         .toast {
-            position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(100px);
-            background:var(--bg-card); backdrop-filter:blur(20px);
-            border:1px solid var(--glass-border); color:var(--text);
-            padding:12px 24px; border-radius:50px; font-weight:700;
-            z-index:2000; opacity:0; transition:0.3s;
-            display:flex; align-items:center; gap:8px; font-size:0.85rem;
+            position: fixed; bottom: 100px; left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-card); backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border); color: var(--text);
+            padding: 12px 24px; border-radius: 50px; font-weight: 700;
+            z-index: 2000; opacity: 0; transition: 0.3s;
+            display: flex; align-items: center; gap: 8px;
+            font-family: 'Tajawal', sans-serif;
         }
-        .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { border-color: rgba(74,222,128,0.3); color: #4ade80; }
+        .toast.error { border-color: rgba(248,113,113,0.3); color: var(--danger); }
+        .hint {
+            font-size: 0.8rem; color: var(--text-faint); margin-top: 10px;
+            display: flex; align-items: center; gap: 6px; justify-content: center;
+        }
         .bottom-nav-bar {
-            position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
-            z-index:1000; display:flex; align-items:center; gap:16px;
+            position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; display: flex; align-items: center; gap: 6px;
+            padding: 10px 18px; background: rgba(11,14,26,0.8);
+            backdrop-filter: blur(30px); border: 1px solid var(--glass-border);
+            border-radius: 50px; box-shadow: var(--shadow);
+            max-width: 600px; width: auto;
         }
-        .nav-circle {
-            width:56px; height:56px; border-radius:50%;
-            display:flex; align-items:center; justify-content:center;
-            background:rgba(15,12,29,0.75); backdrop-filter:blur(24px) saturate(140%);
-            -webkit-backdrop-filter:blur(24px) saturate(140%);
-            border:1px solid var(--glass-border); box-shadow:0 8px 24px rgba(0,0,0,0.45);
-            color:var(--text-faint); text-decoration:none; transition:0.2s;
+        .nav-item {
+            display: flex; align-items: center; gap: 6px;
+            padding: 10px 20px; border-radius: 40px;
+            background: transparent; border: none; color: var(--text-faint);
+            font-family: 'Tajawal', sans-serif; font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: 0.2s; text-decoration: none; white-space: nowrap;
         }
-        .nav-circle:active { transform:scale(0.88); }
-        .nav-circle.active { background:var(--primary); color:#0f0c1d; border-color:var(--primary); }
-        .nav-circle i { font-size:22px; }
-        @media (max-width:600px) { .nav-circle { width:48px; height:48px; } .nav-circle i { font-size:19px; } }
+        .nav-item:hover { color: var(--text); background: var(--primary-dim); }
+        .nav-item.active { background: var(--primary); color: #0b0e1a; border: 1px solid var(--primary); }
+        .nav-item i { font-size: 20px; }
+        .nav-label { max-width: 0; overflow: hidden; transition: 0.2s; opacity: 0; }
+        .nav-item.active .nav-label { max-width: 80px; opacity: 1; }
+        @media (max-width: 600px) {
+            .bottom-nav-bar { padding: 6px 12px; max-width: 95vw; }
+            .nav-item { padding: 6px 14px; font-size: 12px; }
+            .nav-item i { font-size: 18px; }
+        }
     </style>
 </head>
 <body>
-    <header class="floating-header">
-        <div><a href="/" class="header-btn" title="الرئيسية"><i class="bi bi-arrow-right"></i></a></div>
-        <div class="header-center">الإعدادات</div>
-        <div><a href="/logout" class="header-btn" style="color:var(--primary);" title="تسجيل الخروج"><i class="bi bi-box-arrow-left"></i></a></div>
-    </header>
-
     <div class="container">
-        <!-- Profile card -->
+        <!-- Profile -->
         <div class="glass-card">
-            <div class="card-title"><i class="bi bi-person-circle"></i> حسابي</div>
-            <div class="profile-row">
-                <div class="avatar" id="avatarWrap">
-                    {% if user.profile_image %}
-                        <img src="{{ user.profile_image }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
-                    {% else %}
-                        <i class="bi bi-person"></i>
-                    {% endif %}
-                </div>
-                <div>
-                    <div class="username">{{ user.username }}</div>
-                    <label class="file-btn">
-                        <i class="bi bi-camera"></i> تغيير الصورة
-                        <input type="file" id="avatarInput" accept="image/png,image/jpeg,image/webp" onchange="uploadAvatar(event)">
-                    </label>
-                </div>
+            <div class="card-title"><i class="bi bi-person-circle"></i> الملف الشخصي</div>
+            <div class="image-preview" id="imagePreview" style="display: {% if user and user.profile_image %}block{% else %}none{% endif %};">
+                {% if user and user.profile_image %}<img src="{{ user.profile_image }}" alt="Profile">{% endif %}
+            </div>
+            <div class="file-input-wrapper">
+                <div class="file-btn"><i class="bi bi-cloud-upload"></i> <span id="fileLabel">رفع صورة</span></div>
+                <input type="file" id="profileImage" accept="image/*" onchange="handleImageSelect(this)">
+            </div>
+            <div class="form-group" style="margin-top: 16px;">
+                <label>اسم المستخدم</label>
+                <input type="text" value="{{ user.username if user else '' }}" readonly>
             </div>
         </div>
 
-        <!-- Contribute a prompt -->
+        <!-- Submit Prompt -->
         <div class="glass-card">
-            <div class="card-title"><i class="bi bi-cloud-upload"></i> ساهم في المكتبة</div>
-            <div class="card-sub">ارفع صورة وبرومبتها وكلمات مفتاحية ليسهل على الآخرين العثور عليها. برومبتك يظهر في المكتبة بعد مراجعة سريعة من الإدارة.</div>
-
-            <form id="promptForm" onsubmit="submitPrompt(event)">
-                <div class="form-group">
-                    <label>عنوان البرومبت</label>
-                    <input type="text" id="p_title" maxlength="200" required placeholder="مثال: بورتريه سينمائي غامض">
-                </div>
-                <div class="form-group">
-                    <label>التصنيف</label>
-                    <select id="p_category">
-                        {% for cat in categories %}
-                        <option value="{{ cat.name }}">{{ cat.display_name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>رفع صورة</label>
-                    <label class="file-btn" style="width:100%; justify-content:center;">
-                        <i class="bi bi-image"></i> <span id="fileLabel">اختر صورة (JPG, PNG, WEBP – بحد أقصى 4MB)</span>
-                        <input type="file" id="p_image" accept="image/png,image/jpeg,image/webp" required onchange="previewImage(event)">
-                    </label>
-                    <img id="p_preview" class="upload-preview">
-                </div>
-                <div class="form-group">
-                    <label>برومبت الصورة</label>
-                    <textarea id="p_prompt" maxlength="4000" required placeholder="اكتب نص البرومبت هنا..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>كلمات مفتاحية (لتسهيل البحث)</label>
-                    <input type="text" id="p_keywords" maxlength="300" placeholder="مثال: بورتريه، سينمائي، إضاءة درامية">
-                </div>
-                <button type="submit" class="btn btn-primary" id="submitPromptBtn"><i class="bi bi-send"></i> إرسال للمراجعة</button>
-                <div class="hint"><i class="bi bi-shield-check"></i> يتم فحص الصور تلقائياً قبل النشر لحماية المكتبة.</div>
-            </form>
-        </div>
-
-        <!-- My submissions -->
-        {% if my_submissions %}
-        <div class="glass-card">
-            <div class="card-title"><i class="bi bi-collection"></i> برومبتاتي</div>
-            {% for item in my_submissions %}
-            <div class="my-item">
-                <img src="{{ item.image_url }}" alt="">
-                <div class="info">
-                    <div class="t">{{ item.title }}</div>
-                </div>
-                {% if item.is_approved %}
-                    <span class="badge badge-approved"><i class="bi bi-check-circle"></i> منشور</span>
-                {% else %}
-                    <span class="badge badge-pending"><i class="bi bi-hourglass-split"></i> قيد المراجعة</span>
-                {% endif %}
+            <div class="card-title"><i class="bi bi-plus-circle"></i> إرسال برومبت للمكتبة</div>
+            <div class="form-group">
+                <label>عنوان البرومبت</label>
+                <input type="text" id="promptTitle" placeholder="مثال: شعار إسلامي فاخر">
             </div>
-            {% endfor %}
+            <div class="form-group">
+                <label>رابط الصورة (اختياري)</label>
+                <input type="url" id="promptImageUrl" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>برومبت الصورة</label>
+                <textarea id="promptText" placeholder="اكتب البرومبت الكامل هنا..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>كلمات مفتاحية (لتسهيل البحث)</label>
+                <input type="text" id="promptKeywords" placeholder="شعار، إسلامي، ذهبي، فاخر">
+            </div>
+            <button class="btn btn-primary" onclick="submitPrompt()" id="submitBtn">
+                <i class="bi bi-send"></i> إرسال للمراجعة
+            </button>
+            <div class="hint">
+                <i class="bi bi-shield-check"></i>
+                يتم فحص البرومبتات تلقائياً قبل النشر لحماية المكتبة.
+            </div>
         </div>
-        {% endif %}
     </div>
 
-    <div class="toast" id="toast"></div>
+    <div class="toast" id="toast"><i class="bi bi-check-lg"></i> <span id="toastMsg">تم!</span></div>
 
     <nav class="bottom-nav-bar">
-        <a href="/" class="nav-circle" title="الرئيسية"><i class="bi bi-house-door-fill"></i></a>
-        <a href="/about" class="nav-circle" title="حول"><i class="bi bi-info-circle"></i></a>
+        <a href="/" class="nav-item"><i class="bi bi-house-door"></i><span class="nav-label">الرئيسية</span></a>
+        <a href="/library" class="nav-item"><i class="bi bi-collection"></i><span class="nav-label">المكتبة</span></a>
+        <a href="/settings" class="nav-item active"><i class="bi bi-gear-fill"></i><span class="nav-label">الإعدادات</span></a>
     </nav>
 
     <script>
-        const CSRF_TOKEN = "{{ csrf_token }}";
-
-        function showToast(msg, isError) {
+        function showToast(msg, type='success') {
             const t = document.getElementById('toast');
-            t.innerHTML = `<i class="bi ${isError ? 'bi-exclamation-circle' : 'bi-check-lg'}"></i> ${msg}`;
-            t.style.color = isError ? 'var(--danger)' : 'var(--text)';
-            t.classList.add('show');
+            document.getElementById('toastMsg').textContent = msg;
+            t.className = 'toast show ' + type;
             setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        function previewImage(e) {
-            const file = e.target.files[0];
-            const label = document.getElementById('fileLabel');
-            const preview = document.getElementById('p_preview');
-            if (!file) return;
-            if (file.size > 4 * 1024 * 1024) {
-                showToast('حجم الصورة يجب ألا يتجاوز 4 ميجابايت', true);
-                e.target.value = '';
-                preview.style.display = 'none';
-                label.textContent = 'اختر صورة (JPG, PNG, WEBP – بحد أقصى 4MB)';
+        function handleImageSelect(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                document.getElementById('fileLabel').textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.innerHTML = '<img src="' + e.target.result + '">';
+                    preview.style.display = 'block';
+                    uploadImage(file);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function uploadImage(file) {
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('csrf_token', '{{ csrf_token }}');
+            try {
+                const res = await fetch('/api/upload_image', { method: 'POST', body: formData });
+                const data = await res.json();
+                showToast(data.success ? 'تم رفع الصورة' : (data.message || 'فشل الرفع'), data.success ? 'success' : 'error');
+            } catch (e) { showToast('خطأ في الاتصال', 'error'); }
+        }
+
+        async function submitPrompt() {
+            const title = document.getElementById('promptTitle').value.trim();
+            const imageUrl = document.getElementById('promptImageUrl').value.trim();
+            const promptText = document.getElementById('promptText').value.trim();
+            const keywords = document.getElementById('promptKeywords').value.trim();
+            const btn = document.getElementById('submitBtn');
+
+            if (!title || !promptText) {
+                showToast('يرجى ملء العنوان والبرومبت', 'error');
                 return;
             }
-            label.textContent = file.name;
-            const reader = new FileReader();
-            reader.onload = ev => { preview.src = ev.target.result; preview.style.display = 'block'; };
-            reader.readAsDataURL(file);
-        }
-
-        async function uploadAvatar(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            if (file.size > 4 * 1024 * 1024) { showToast('حجم الصورة يجب ألا يتجاوز 4 ميجابايت', true); return; }
-            const fd = new FormData();
-            fd.append('image', file);
-            fd.append('csrf_token', CSRF_TOKEN);
-            try {
-                const res = await fetch('/api/upload_image', { method:'POST', body: fd });
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById('avatarWrap').innerHTML = `<img src="${data.image}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
-                    showToast('تم تحديث الصورة الشخصية');
-                } else { showToast(data.message || 'خطأ في رفع الصورة', true); }
-            } catch (err) { showToast('تعذر الاتصال بالخادم', true); }
-        }
-
-        async function submitPrompt(e) {
-            e.preventDefault();
-            const btn = document.getElementById('submitPromptBtn');
-            const imageInput = document.getElementById('p_image');
-            if (!imageInput.files[0]) { showToast('يرجى اختيار صورة', true); return; }
 
             btn.disabled = true;
             btn.innerHTML = '<i class="bi bi-hourglass-split"></i> جاري الإرسال...';
 
-            const fd = new FormData();
-            fd.append('title', document.getElementById('p_title').value.trim());
-            fd.append('category', document.getElementById('p_category').value);
-            fd.append('prompt_text', document.getElementById('p_prompt').value.trim());
-            fd.append('keywords', document.getElementById('p_keywords').value.trim());
-            fd.append('image', imageInput.files[0]);
-            fd.append('csrf_token', CSRF_TOKEN);
-
             try {
-                const res = await fetch('/api/library/submit', { method:'POST', body: fd });
+                const res = await fetch('/api/submit_prompt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: title,
+                        image_url: imageUrl || null,
+                        prompt_text: promptText,
+                        keywords: keywords || null,
+                        csrf_token: '{{ csrf_token }}'
+                    })
+                });
                 const data = await res.json();
                 if (data.success) {
-                    showToast(data.message || 'تم إرسال البرومبت للمراجعة');
-                    document.getElementById('promptForm').reset();
-                    document.getElementById('p_preview').style.display = 'none';
-                    document.getElementById('fileLabel').textContent = 'اختر صورة (JPG, PNG, WEBP – بحد أقصى 4MB)';
-                    setTimeout(() => location.reload(), 1200);
+                    showToast('تم الإرسال للمراجعة بنجاح!');
+                    document.getElementById('promptTitle').value = '';
+                    document.getElementById('promptImageUrl').value = '';
+                    document.getElementById('promptText').value = '';
+                    document.getElementById('promptKeywords').value = '';
                 } else {
-                    showToast(data.message || 'حدث خطأ', true);
+                    showToast(data.message || 'فشل الإرسال', 'error');
                 }
-            } catch (err) {
-                showToast('تعذر الاتصال بالخادم', true);
+            } catch (e) {
+                showToast('خطأ في الاتصال', 'error');
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="bi bi-send"></i> إرسال للمراجعة';
