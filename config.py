@@ -11,6 +11,8 @@ class Config:
         raise ValueError("SECRET_KEY environment variable is required!")
 
     ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
+    OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY', '')
+    OPENROUTER_MODEL = os.getenv('OPENROUTER_MODEL', 'openrouter/auto')
 
     DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://user:pass@localhost:5432/db')
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
@@ -21,22 +23,12 @@ class Config:
 
     REDIS_URL = os.getenv('REDIS_URL')
 
-    # Session configuration
     SESSION_TYPE = 'sqlalchemy'
     SESSION_SQLALCHEMY_TABLE = 'flask_sessions'
     SESSION_PERMANENT = True
     SESSION_USE_SIGNER = True
     SESSION_KEY_PREFIX = 'ufoq_session:'
-    PERMANENT_SESSION_LIFETIME = 2592000  # 30 days
-
-    # Cookie / transport security
-    SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Lax'
-    SESSION_COOKIE_SECURE = os.getenv('FORCE_HTTPS', 'true').lower() == 'true'
-    REMEMBER_COOKIE_HTTPONLY = True
-
-    # Reject oversized requests outright (uploads etc.) — 6MB ceiling
-    MAX_CONTENT_LENGTH = 6 * 1024 * 1024
+    PERMANENT_SESSION_LIFETIME = 2592000
 
     if REDIS_URL:
         CACHE_TYPE = 'RedisCache'
@@ -45,11 +37,11 @@ class Config:
         RATELIMIT_ENABLED = True
         RATELIMIT_STORAGE_URI = REDIS_URL
         RATELIMIT_STRATEGY = 'fixed-window'
-        logger.info("✅ Redis configured.")
+        logger.info("Redis configured.")
     else:
         CACHE_TYPE = 'SimpleCache'
         CACHE_DEFAULT_TIMEOUT = 300
         RATELIMIT_ENABLED = True
         RATELIMIT_STORAGE_URI = 'memory://'
         RATELIMIT_STRATEGY = 'fixed-window'
-        logger.warning("⚠️ REDIS_URL not set. Using in-memory cache/limiter.")
+        logger.warning("REDIS_URL not set. Using in-memory cache/limiter.")
