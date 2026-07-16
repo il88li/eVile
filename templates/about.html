@@ -9,19 +9,19 @@
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         :root {
-            --bg: #0b0e1a;
-            --bg-card: rgba(20,30,48,0.6);
+            --bg: #0f0c1d;
+            --bg-card: rgba(30,24,52,0.6);
             --glass-border: rgba(255,255,255,0.1);
-            --text: #f8fafc;
-            --text-dim: #94a3b8;
-            --text-faint: #64748b;
-            --primary: #38bdf8;
-            --primary-dim: rgba(56,189,248,0.15);
+            --text: #f7f5ff;
+            --text-dim: #a79fc4;
+            --text-faint: #6f6790;
+            --primary: #ffb454;
+            --primary-dim: rgba(255,180,84,0.15);
             --shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
         body {
             font-family: 'Tajawal', sans-serif;
-            background: linear-gradient(145deg, #0b0e1a 0%, #111827 100%);
+            background: linear-gradient(145deg, #0f0c1d 0%, #1a1330 100%);
             color: var(--text);
             min-height: 100vh;
             padding: 90px 16px 140px 16px;
@@ -44,61 +44,59 @@
         .card-title i { color:var(--primary); }
         p { line-height:1.8; color:var(--text-dim); }
         .highlight { color:var(--primary); font-weight:700; }
+        .floating-header {
+            position:fixed; top:12px; left:12px; right:12px; z-index:100;
+            display:flex; align-items:center; justify-content:space-between;
+            padding:8px 16px; max-width:700px; margin:0 auto; border-radius:20px;
+            background:rgba(15,12,29,0.8); backdrop-filter:blur(20px) saturate(140%);
+            -webkit-backdrop-filter:blur(20px) saturate(140%);
+            border:1px solid var(--glass-border);
+        }
+        .header-center { position:absolute; left:50%; transform:translateX(-50%); font-size:20px; font-weight:900; letter-spacing:3px; }
+        .header-btn {
+            width:36px; height:36px; border-radius:12px;
+            background:var(--bg-card); border:1px solid var(--glass-border);
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; color:var(--text-dim); transition:0.2s; text-decoration:none;
+        }
+        .header-btn:hover { background:var(--primary-dim); color:var(--primary); border-color:var(--primary); }
+        .header-btn i { font-size:18px; }
         .bottom-nav-bar {
-            position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
-            z-index:1000; display:flex; align-items:center; gap:6px;
-            padding:10px 18px; background:rgba(11,14,26,0.8);
-            backdrop-filter:blur(30px); border:1px solid var(--glass-border);
-            border-radius:50px; box-shadow:var(--shadow);
-            max-width:600px; width:auto;
+            position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+            z-index:1000; display:flex; align-items:center; gap:16px;
         }
-        .nav-item {
-            display:flex; align-items:center; gap:6px;
-            padding:10px 20px; border-radius:40px;
-            background:transparent; border:none; color:var(--text-faint);
-            font-family:'Tajawal',sans-serif; font-size:13px; font-weight:600;
-            cursor:pointer; transition:0.2s; text-decoration:none;
-            white-space:nowrap;
+        .nav-circle {
+            width:56px; height:56px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            background:rgba(15,12,29,0.75); backdrop-filter:blur(24px) saturate(140%);
+            -webkit-backdrop-filter:blur(24px) saturate(140%);
+            border:1px solid var(--glass-border); box-shadow:0 8px 24px rgba(0,0,0,0.45);
+            color:var(--text-faint); text-decoration:none; transition:0.2s;
         }
-        .nav-item:hover { color:var(--text); background:var(--primary-dim); }
-        .nav-item.active {
-            background:var(--primary); color:#0b0e1a;
-            border:1px solid var(--primary);
+        .nav-circle:active { transform:scale(0.88); }
+        .nav-circle.active {
+            background:var(--primary); color:#0f0c1d; border-color:var(--primary);
+            box-shadow:0 8px 24px rgba(255,180,84,0.35);
         }
-        .nav-item i { font-size:20px; }
-        .nav-label {
-            max-width:0; overflow:hidden; transition:0.2s; opacity:0;
-        }
-        .nav-item.active .nav-label { max-width:80px; opacity:1; }
-        .feature-grid {
-            display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px;
-            margin-top:12px;
-        }
-        .feature-item {
-            background:rgba(255,255,255,0.03);
-            border:1px solid var(--glass-border);
-            border-radius:16px; padding:16px; text-align:center;
-        }
-        .feature-item i { font-size:28px; color:var(--primary); margin-bottom:8px; display:block; }
-        .feature-item h4 { font-weight:700; margin-bottom:4px; }
-        .feature-item p { font-size:0.85rem; color:var(--text-dim); }
-        .contact-links {
-            display:flex; gap:12px; flex-wrap:wrap; margin-top:12px;
-        }
-        .contact-links a {
-            display:inline-flex; align-items:center; gap:8px;
-            padding:8px 18px; border-radius:50px;
-            border:1px solid var(--glass-border);
-            background:var(--primary-dim);
-            color:var(--primary);
-            text-decoration:none;
-            transition:0.2s;
-            font-weight:600;
-        }
-        .contact-links a:hover { background:var(--primary); color:#0b0e1a; }
+        .nav-circle i { font-size:22px; }
     </style>
 </head>
 <body>
+    <header class="floating-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+            {% if user_id %}
+                <a href="/settings" class="header-btn" title="الإعدادات"><i class="bi bi-gear"></i></a>
+            {% endif %}
+        </div>
+        <div class="header-center">UFOQ</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+            {% if user_id %}
+                <a href="/logout" class="header-btn" style="color:var(--primary);" title="تسجيل الخروج"><i class="bi bi-box-arrow-left"></i></a>
+            {% else %}
+                <a href="/sign" class="header-btn" style="color:var(--primary);" title="تسجيل الدخول"><i class="bi bi-person"></i></a>
+            {% endif %}
+        </div>
+    </header>
     <div class="container">
         <div class="glass-card">
             <div class="card-title"><i class="bi bi-stars"></i> عن UFOQ</div>
@@ -107,47 +105,20 @@
         </div>
 
         <div class="glass-card">
-            <div class="card-title"><i class="bi bi-grid"></i> مزايا المنصة</div>
-            <div class="feature-grid">
-                <div class="feature-item">
-                    <i class="bi bi-collection"></i>
-                    <h4>مكتبة ضخمة</h4>
-                    <p>آلاف البرومبتات المصنفة والمحدثة باستمرار</p>
-                </div>
-                <div class="feature-item">
-                    <i class="bi bi-search"></i>
-                    <h4>بحث متقدم</h4>
-                    <p>فلترة حسب التصنيف والكلمات المفتاحية</p>
-                </div>
-                <div class="feature-item">
-                    <i class="bi bi-files"></i>
-                    <h4>نسخ سريع</h4>
-                    <p>انسخ البرومبتات بنقرة واحدة</p>
-                </div>
-                <div class="feature-item">
-                    <i class="bi bi-person"></i>
-                    <h4>إعدادات شخصية</h4>
-                    <p>صورة شخصية، برومبت مخصص، وكلماتك المفتاحية</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="glass-card">
             <div class="card-title"><i class="bi bi-people"></i> من نحن</div>
             <p>فريق UFOQ هو مجموعة من عشاق الذكاء الاصطناعي والتكنولوجيا، نهدف إلى تسهيل الوصول إلى أدوات الإبداع الرقمي للجميع.</p>
             <p style="margin-top:12px;">للتواصل معنا، يمكنك استخدام قنوات التواصل التالية:</p>
-            <div class="contact-links">
-                <a href="https://t.me/Evile_Prompts" target="_blank"><i class="bi bi-telegram"></i> تلجرام</a>
-                <a href="https://www.instagram.com/bla6c7" target="_blank"><i class="bi bi-instagram"></i> إنستغرام</a>
-                <a href="https://wa.me/967730577358" target="_blank"><i class="bi bi-whatsapp"></i> واتساب</a>
+            <div style="display:flex; gap:12px; margin-top:12px; flex-wrap:wrap;">
+                <a href="https://t.me/Evile_Prompts" target="_blank" style="color:var(--primary); text-decoration:none; display:inline-flex; align-items:center; gap:6px; border:1px solid var(--glass-border); padding:8px 16px; border-radius:50px; background:var(--primary-dim);"><i class="bi bi-telegram"></i> تلجرام</a>
+                <a href="https://www.instagram.com/bla6c7" target="_blank" style="color:var(--primary); text-decoration:none; display:inline-flex; align-items:center; gap:6px; border:1px solid var(--glass-border); padding:8px 16px; border-radius:50px; background:var(--primary-dim);"><i class="bi bi-instagram"></i> إنستغرام</a>
+                <a href="https://wa.me/967730577358" target="_blank" style="color:var(--primary); text-decoration:none; display:inline-flex; align-items:center; gap:6px; border:1px solid var(--glass-border); padding:8px 16px; border-radius:50px; background:var(--primary-dim);"><i class="bi bi-whatsapp"></i> واتساب</a>
             </div>
         </div>
     </div>
 
     <nav class="bottom-nav-bar">
-        <a href="/" class="nav-item"><i class="bi bi-house-door"></i><span class="nav-label">الرئيسية</span></a>
-        <a href="/about" class="nav-item active"><i class="bi bi-info-circle-fill"></i><span class="nav-label">حول</span></a>
-        <a href="/settings" class="nav-item"><i class="bi bi-gear"></i><span class="nav-label">الإعدادات</span></a>
+        <a href="/" class="nav-circle" title="الرئيسية"><i class="bi bi-house-door-fill"></i></a>
+        <a href="/about" class="nav-circle active" title="حول"><i class="bi bi-info-circle-fill"></i></a>
     </nav>
 </body>
 </html>
