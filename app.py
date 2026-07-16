@@ -172,10 +172,22 @@ def index():
     library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
     active_ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
 
+    ad_dict = None
+    if active_ad:
+        ad_dict = {
+            'id': active_ad.id,
+            'title': active_ad.title,
+            'text': active_ad.text,
+            'image_url': active_ad.image_url,
+            'button_text': active_ad.button_text,
+            'button_link': active_ad.button_link,
+            'duration_seconds': active_ad.duration_seconds
+        }
+
     return render_template('index.html',
                            categories=categories,
                            library_items=library_items,
-                           active_ad=active_ad,
+                           active_ad=ad_dict,
                            site_status='on')
 
 @app.route('/upload', methods=['GET', 'POST'])
