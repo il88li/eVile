@@ -76,20 +76,16 @@ def admin_required(f):
 def auto_migrate():
     try:
         with app.app_context():
-            # Add missing columns to prompt_library
             db.session.execute(text("ALTER TABLE prompt_library ADD COLUMN IF NOT EXISTS keywords VARCHAR(500)"))
             db.session.execute(text("ALTER TABLE prompt_library ADD COLUMN IF NOT EXISTS submitted_by VARCHAR(80)"))
             db.session.execute(text("ALTER TABLE prompt_library ADD COLUMN IF NOT EXISTS is_approved BOOLEAN DEFAULT true"))
-            
-            # Add missing columns to user table (quoted because "user" is reserved)
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS credits INTEGER DEFAULT 10'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS last_daily_gift DATE'))
-            
             db.session.commit()
             logger.info("Auto-migration: columns added successfully.")
     except Exception as e:
         db.session.rollback()
-        logger.warning(f"Auto-migration warning (columns may already exist): {e}")
+        logger.warning(f"Auto-migration warning: {e}")
 
 # ---------- Database initialization ----------
 _db_initialized = False
@@ -99,7 +95,7 @@ def ensure_db_initialized():
     if not _db_initialized:
         try:
             db.create_all()
-            auto_migrate()  # Run auto-migration here
+            auto_migrate()
             if not SiteSetting.query.first():
                 db.session.add(SiteSetting())
                 db.session.commit()
@@ -257,6 +253,43 @@ def upload_image():
     except Exception as e:
         logger.error(f"Image upload error: {e}")
         return jsonify({'success': False, 'message': 'خطأ في رفع الصورة'}), 500
+
+# ---------- API: Submit Prompt for Review ----------
+@app.route('/api/submit_prompt', methods=['POST'])
+@login_required
+def submit_prompt():
+    if not validate_csrf_token(request.json.get('csrf_token')):
+        return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
+
+    data = request.get_json()
+    title = data.get('title', '').strip()
+    prompt_text = data.get('prompt_text', '').strip()
+    image_url = data.get('image_url', '').strip() or None
+    keywords = data.get('keywords', '').strip() or None
+
+    if not title or not prompt_text:
+        return jsonify({'success': False, 'message': 'العنوان والبرومبت مطلوبان'}), 400
+
+    user = User.query.get(session['user_id'])
+
+    try:
+        item = PromptLibrary(
+            title=title,
+            category='general',
+            image_url=image_url or 'https://placehold.co/400x300/111827/38bdf8?text=Pending',
+            prompt_text=prompt_text,
+            keywords=keywords,
+            publisher=user.username,
+            submitted_by=user.username,
+            is_approved=False
+        )
+        db.session.add(item)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'تم الإرسال للمراجعة'})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Submit prompt error: {e}")
+        return jsonify({'success': False, 'message': 'خطأ في حفظ البيانات'}), 500
 
 # ---------- API: User Info ----------
 @app.route('/api/user_info')
@@ -552,6 +585,17 @@ def update_library_item(item_id):
     item.keywords = request.form.get('keywords', item.keywords) or None
     db.session.commit()
     flash('تم تحديث البرومبت', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/library/<int:item_id>/approve', methods=['POST'])
+@admin_required
+def approve_library_item(item_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    item = PromptLibrary.query.get_or_404(item_id)
+    item.is_approved = True
+    db.session.commit()
+    flash('تمت الموافقة على البرومبت', 'success')
     return redirect(url_for('admin_panel'))
 
 # ---------- Admin: Library Ads ----------
