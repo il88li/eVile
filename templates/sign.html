@@ -9,19 +9,19 @@
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         :root {
-            --bg: #0b0e1a;
-            --bg-card: rgba(20,30,48,0.6);
+            --bg: #0f0c1d;
+            --bg-card: rgba(30,24,52,0.6);
             --glass-border: rgba(255,255,255,0.1);
-            --text: #f8fafc;
-            --text-dim: #94a3b8;
-            --text-faint: #64748b;
-            --primary: #38bdf8;
-            --primary-dim: rgba(56,189,248,0.15);
+            --text: #f7f5ff;
+            --text-dim: #a79fc4;
+            --text-faint: #6f6790;
+            --primary: #ffb454;
+            --primary-dim: rgba(255,180,84,0.15);
             --shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
         body {
             font-family: 'Tajawal', sans-serif;
-            background: linear-gradient(145deg, #0b0e1a 0%, #111827 100%);
+            background: linear-gradient(145deg, #0f0c1d 0%, #1a1330 100%);
             color: var(--text);
             min-height: 100vh;
             display:flex; align-items:center; justify-content:center;
@@ -39,7 +39,7 @@
         .card-visual {
             flex:1; padding:36px; display:flex; flex-direction:column;
             align-items:center; justify-content:center;
-            background:rgba(56,189,248,0.03);
+            background:rgba(255,180,84,0.03);
             border-left:1px solid var(--glass-border);
         }
         .logo-ring {
@@ -49,21 +49,21 @@
             position:absolute; inset:16px;
             background:var(--primary); border-radius:20px;
             display:flex; align-items:center; justify-content:center;
-            box-shadow:0 8px 20px rgba(56,189,248,0.3);
+            box-shadow:0 8px 20px rgba(255,180,84,0.3);
             animation:corePulse 3s ease-in-out infinite;
         }
-        .logo-core i { font-size:32px; color:#0b0e1a; }
+        .logo-core i { font-size:32px; color:#0f0c1d; }
         @keyframes corePulse {
-            0%,100%{ transform:scale(1); box-shadow:0 8px 20px rgba(56,189,248,0.3); }
-            50%{ transform:scale(1.05); box-shadow:0 12px 30px rgba(56,189,248,0.5); }
+            0%,100%{ transform:scale(1); box-shadow:0 8px 20px rgba(255,180,84,0.3); }
+            50%{ transform:scale(1.05); box-shadow:0 12px 30px rgba(255,180,84,0.5); }
         }
         .ring {
-            position:absolute; border:2px solid rgba(56,189,248,0.15); border-radius:50%;
+            position:absolute; border:2px solid rgba(255,180,84,0.15); border-radius:50%;
             inset:0; animation:ringExpand 3s ease-out infinite;
         }
         .ring-1{ animation-delay:0s; }
-        .ring-2{ animation-delay:1s; border-color:rgba(56,189,248,0.08); }
-        .ring-3{ animation-delay:2s; border-color:rgba(56,189,248,0.05); }
+        .ring-2{ animation-delay:1s; border-color:rgba(255,180,84,0.08); }
+        .ring-3{ animation-delay:2s; border-color:rgba(255,180,84,0.05); }
         @keyframes ringExpand {
             0%{ transform:scale(0.8); opacity:1; }
             100%{ transform:scale(1.4); opacity:0; }
@@ -105,7 +105,7 @@
         .submit-btn {
             width:100%; padding:12px; margin-top:4px;
             background:var(--primary); border:none; border-radius:12px;
-            color:#0b0e1a; font-family:'Tajawal',sans-serif;
+            color:#0f0c1d; font-family:'Tajawal',sans-serif;
             font-size:15px; font-weight:700; cursor:pointer;
             transition:0.2s; display:flex; align-items:center;
             justify-content:center; gap:8px;
@@ -141,6 +141,7 @@
     </style>
 </head>
 <body>
+    <a href="/" style="position:fixed; top:20px; right:20px; width:40px; height:40px; border-radius:12px; background:var(--bg-card); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; color:var(--text-dim); text-decoration:none; z-index:10;"><i class="bi bi-x-lg"></i></a>
     <div class="auth-card">
         <div class="card-visual">
             <div class="logo-ring">
@@ -196,6 +197,7 @@
     </div>
 
     <script>
+        const CSRF_TOKEN = "{{ csrf_token }}";
         let isLogin = true;
 
         function toggleMode() {
@@ -249,7 +251,7 @@
             fetch('/sign', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password, action })
+                body: JSON.stringify({ username, password, action, csrf_token: CSRF_TOKEN })
             })
             .then(res => res.json())
             .then(data => {
