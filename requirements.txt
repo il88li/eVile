@@ -4,7 +4,6 @@ flask-migrate==4.0.7
 flask-caching==2.3.0
 flask-limiter==3.8.0
 flask-talisman==1.1.0
-redis==5.2.1
 psycopg2-binary==2.9.10
 gunicorn==21.2.0
 python-dotenv==1.0.1
