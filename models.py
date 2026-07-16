@@ -10,6 +10,8 @@ class User(db.Model):
     profile_image = db.Column(db.Text, nullable=True)
     custom_prompt = db.Column(db.Text, nullable=True)
     search_keywords = db.Column(db.String(500), nullable=True)
+    credits = db.Column(db.Integer, default=10)
+    last_daily_gift = db.Column(db.Date, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Category(db.Model):
@@ -26,10 +28,10 @@ class PromptLibrary(db.Model):
     category = db.Column(db.String(50), nullable=False, default='general')
     image_url = db.Column(db.String(500), nullable=False)
     prompt_text = db.Column(db.Text, nullable=False)
-    keywords = db.Column(db.String(300), nullable=True)
-    publisher = db.Column(db.String(80), nullable=True)  # اسم الناشر
-    submitted_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
-    is_approved = db.Column(db.Boolean, default=True, nullable=False)
+    keywords = db.Column(db.String(500), nullable=True)
+    publisher = db.Column(db.String(80), nullable=True)
+    submitted_by = db.Column(db.String(80), nullable=True)
+    is_approved = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class LibraryAd(db.Model):
@@ -47,3 +49,9 @@ class SiteSetting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(10), default='on')
     offline_message = db.Column(db.Text, default='الموقع تحت الصيانة حالياً.')
+
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
