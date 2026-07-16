@@ -16,6 +16,7 @@ from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
 from flask_session import Session
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import text
 
 from models import db, User, Category, PromptLibrary, LibraryAd, SiteSetting, Notification
 from config import Config
@@ -71,6 +72,25 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
+# ---------- Auto Migration (for free plans without shell) ----------
+def auto_migrate():
+    try:
+        with app.app_context():
+            # Add missing columns to prompt_library
+            db.session.execute(text("ALTER TABLE prompt_library ADD COLUMN IF NOT EXISTS keywords VARCHAR(500)"))
+            db.session.execute(text("ALTER TABLE prompt_library ADD COLUMN IF NOT EXISTS submitted_by VARCHAR(80)"))
+            db.session.execute(text("ALTER TABLE prompt_library ADD COLUMN IF NOT EXISTS is_approved BOOLEAN DEFAULT true"))
+            
+            # Add missing columns to user table (quoted because "user" is reserved)
+            db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS credits INTEGER DEFAULT 10'))
+            db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS last_daily_gift DATE'))
+            
+            db.session.commit()
+            logger.info("Auto-migration: columns added successfully.")
+    except Exception as e:
+        db.session.rollback()
+        logger.warning(f"Auto-migration warning (columns may already exist): {e}")
+
 # ---------- Database initialization ----------
 _db_initialized = False
 @app.before_request
@@ -79,6 +99,7 @@ def ensure_db_initialized():
     if not _db_initialized:
         try:
             db.create_all()
+            auto_migrate()  # Run auto-migration here
             if not SiteSetting.query.first():
                 db.session.add(SiteSetting())
                 db.session.commit()
