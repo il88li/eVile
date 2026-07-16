@@ -7,304 +7,321 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
         :root {
-            --bg: #0b0e1a;
-            --bg-card: rgba(20,30,48,0.6);
+            --bg: #0f0c1d;
+            --bg-card: rgba(30,24,52,0.6);
             --glass-border: rgba(255,255,255,0.1);
-            --text: #f8fafc;
-            --text-dim: #94a3b8;
-            --text-faint: #64748b;
-            --primary: #38bdf8;
-            --primary-dim: rgba(56,189,248,0.15);
+            --text: #f7f5ff;
+            --text-dim: #a79fc4;
+            --text-faint: #6f6790;
+            --primary: #ffb454;
+            --primary-dim: rgba(255,180,84,0.15);
+            --danger: #f87171;
+            --success: #4ade80;
             --shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
         body {
             font-family: 'Tajawal', sans-serif;
-            background: linear-gradient(145deg, #0b0e1a 0%, #111827 100%);
+            background: linear-gradient(145deg, #0f0c1d 0%, #1a1330 100%);
             color: var(--text);
             min-height: 100vh;
             padding: 90px 16px 140px 16px;
         }
         .container { max-width:700px; margin:0 auto; }
+        .floating-header {
+            position:fixed; top:12px; left:12px; right:12px; z-index:100;
+            display:flex; align-items:center; justify-content:space-between;
+            padding:8px 16px; max-width:700px; margin:0 auto; border-radius:20px;
+            background:rgba(15,12,29,0.8); backdrop-filter:blur(20px) saturate(140%);
+            -webkit-backdrop-filter:blur(20px) saturate(140%);
+            border:1px solid var(--glass-border);
+        }
+        .header-center { position:absolute; left:50%; transform:translateX(-50%); font-size:20px; font-weight:900; letter-spacing:3px; }
+        .header-btn {
+            width:36px; height:36px; border-radius:12px;
+            background:var(--bg-card); border:1px solid var(--glass-border);
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; color:var(--text-dim); transition:0.2s; text-decoration:none;
+        }
+        .header-btn:hover { background:var(--primary-dim); color:var(--primary); border-color:var(--primary); }
+        .header-btn i { font-size:18px; }
         .glass-card {
             background: var(--bg-card);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
-            padding: 28px;
-            margin-bottom: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
             box-shadow: var(--shadow);
         }
         .card-title {
-            font-size:1.3rem; font-weight:800; margin-bottom:20px;
-            display:flex; align-items:center; gap:10px;
+            font-size:1.1rem; font-weight:800; margin-bottom:6px;
+            display:flex; align-items:center; gap:8px;
         }
         .card-title i { color:var(--primary); }
-        .form-group { margin-bottom:18px; }
-        .form-group label {
-            display:block; font-size:0.85rem; font-weight:600;
-            color:var(--text-dim); margin-bottom:6px;
+        .card-sub { color:var(--text-dim); font-size:0.85rem; margin-bottom:18px; }
+
+        .profile-row { display:flex; align-items:center; gap:16px; }
+        .avatar {
+            width:72px; height:72px; border-radius:50%; object-fit:cover;
+            border:2px solid var(--glass-border); background:rgba(255,255,255,0.05);
+            display:flex; align-items:center; justify-content:center; flex-shrink:0;
         }
-        .form-group textarea, .form-group input {
-            width:100%; padding:12px 16px;
+        .avatar i { font-size:28px; color:var(--text-faint); }
+        .username { font-weight:800; font-size:1.05rem; }
+        .file-btn {
+            display:inline-flex; align-items:center; gap:6px;
+            padding:8px 16px; border-radius:12px; cursor:pointer;
+            background:var(--primary-dim); color:var(--primary);
+            border:1px solid var(--glass-border); font-size:0.85rem; font-weight:700;
+            margin-top:8px;
+        }
+        .file-btn input { display:none; }
+
+        .form-group { margin-bottom:14px; }
+        .form-group label { display:block; font-size:0.85rem; font-weight:700; color:var(--text-dim); margin-bottom:6px; }
+        .form-group input, .form-group textarea, .form-group select {
+            width:100%; padding:11px 14px;
             background:rgba(255,255,255,0.05); border:1px solid var(--glass-border);
-            border-radius:14px; color:var(--text); font-family:'Tajawal',sans-serif;
-            font-size:0.95rem; outline:none; transition:0.3s;
+            border-radius:12px; color:var(--text); font-family:'Tajawal',sans-serif;
+            font-size:0.9rem; outline:none; transition:0.2s;
         }
-        .form-group textarea:focus, .form-group input:focus {
-            border-color:var(--primary); background:rgba(255,255,255,0.08);
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:var(--primary); }
+        .form-group textarea { resize:vertical; min-height:80px; }
+        .upload-preview {
+            width:100%; max-height:180px; border-radius:14px; margin-top:8px;
+            display:none; object-fit:contain; background:rgba(0,0,0,0.2);
         }
-        .form-group textarea { min-height:100px; resize:vertical; }
-        .file-upload-wrapper {
-            display:flex; align-items:center; gap:16px; flex-wrap:wrap;
-        }
-        .profile-preview {
-            width:80px; height:80px; border-radius:50%;
-            object-fit:cover; border:2px solid var(--glass-border);
-            background:var(--bg-card);
-            position:relative;
-        }
-        .upload-icon {
-            position:relative;
-            display:inline-block;
-            cursor:pointer;
-        }
-        .upload-icon .pencil {
-            position:absolute;
-            bottom:0; right:0;
-            background:var(--primary);
-            border-radius:50%;
-            padding:6px;
-            border:2px solid #0b0e1a;
-            color:#0b0e1a;
-            font-size:14px;
-        }
-        .upload-icon input[type="file"] {
-            display:none;
-        }
-        .btn-primary {
-            padding:12px 28px; background:var(--primary); border:none;
-            border-radius:14px; color:#0b0e1a; font-weight:700;
-            font-size:0.95rem; cursor:pointer; transition:0.2s;
+        .btn {
+            padding:11px 22px; border-radius:14px; border:none;
+            font-weight:800; cursor:pointer; transition:0.2s;
             display:inline-flex; align-items:center; gap:8px;
-            font-family:'Tajawal',sans-serif;
+            font-family:'Tajawal',sans-serif; font-size:0.9rem;
         }
-        .btn-primary:hover { opacity:0.85; transform:scale(1.02); }
-        .btn-primary:active { transform:scale(0.96); }
-        .btn-outline {
-            padding:12px 28px; background:transparent; border:1px solid var(--glass-border);
-            border-radius:14px; color:var(--text-dim); font-weight:600;
-            cursor:pointer; transition:0.2s; font-family:'Tajawal',sans-serif;
+        .btn-primary { background:var(--primary); color:#0f0c1d; }
+        .btn-primary:hover { opacity:0.88; transform:scale(1.02); }
+        .btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+        .hint { font-size:0.75rem; color:var(--text-faint); margin-top:6px; display:flex; align-items:center; gap:6px; }
+
+        .my-item {
+            display:flex; align-items:center; gap:12px;
+            background:rgba(255,255,255,0.03); border:1px solid var(--glass-border);
+            border-radius:14px; padding:10px 14px; margin-bottom:10px;
         }
-        .btn-outline:hover { background:var(--primary-dim); border-color:var(--primary); color:var(--text); }
-        .info-row {
-            display:flex; align-items:center; justify-content:space-between;
-            padding:12px 0; border-bottom:1px solid var(--glass-border);
+        .my-item img { width:48px; height:48px; border-radius:10px; object-fit:cover; flex-shrink:0; }
+        .my-item .info { flex:1; min-width:0; }
+        .my-item .info .t { font-weight:700; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .badge { font-size:0.7rem; font-weight:700; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+        .badge-pending { background:rgba(251,191,36,0.15); color:#fbbf24; }
+        .badge-approved { background:rgba(74,222,128,0.15); color:var(--success); }
+
+        .toast {
+            position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(100px);
+            background:var(--bg-card); backdrop-filter:blur(20px);
+            border:1px solid var(--glass-border); color:var(--text);
+            padding:12px 24px; border-radius:50px; font-weight:700;
+            z-index:2000; opacity:0; transition:0.3s;
+            display:flex; align-items:center; gap:8px; font-size:0.85rem;
         }
-        .info-row:last-child { border-bottom:none; }
-        .info-row .label { color:var(--text-dim); font-weight:600; }
-        .info-row .value { display:flex; align-items:center; gap:12px; }
-        .info-row .value input {
-            background:transparent; border:none; color:var(--text);
-            font-family:'Tajawal',sans-serif; font-size:0.95rem;
-            outline:none; padding:4px 0;
-        }
-        .info-row .value input:focus { border-bottom:2px solid var(--primary); }
-        .info-row .value .copy-btn {
-            background:transparent; border:none; color:var(--primary);
-            cursor:pointer; font-size:1.1rem;
-        }
-        .info-row .value .copy-btn:hover { opacity:0.7; }
-        .flash-message {
-            padding:12px 16px; border-radius:12px; margin-bottom:16px;
-            font-weight:600; background:var(--primary-dim); color:var(--primary);
-            border:1px solid rgba(56,189,248,0.2);
-        }
-        .flash-message.error { background:rgba(239,68,68,0.1); color:#f87171; border-color:rgba(239,68,68,0.2); }
+        .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
         .bottom-nav-bar {
-            position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
-            z-index:1000; display:flex; align-items:center; gap:6px;
-            padding:10px 18px; background:rgba(11,14,26,0.8);
-            backdrop-filter:blur(30px); border:1px solid var(--glass-border);
-            border-radius:50px; box-shadow:var(--shadow);
-            max-width:600px; width:auto;
+            position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+            z-index:1000; display:flex; align-items:center; gap:16px;
         }
-        .nav-item {
-            display:flex; align-items:center; gap:6px;
-            padding:10px 20px; border-radius:40px;
-            background:transparent; border:none; color:var(--text-faint);
-            font-family:'Tajawal',sans-serif; font-size:13px; font-weight:600;
-            cursor:pointer; transition:0.2s; text-decoration:none;
-            white-space:nowrap;
+        .nav-circle {
+            width:56px; height:56px; border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            background:rgba(15,12,29,0.75); backdrop-filter:blur(24px) saturate(140%);
+            -webkit-backdrop-filter:blur(24px) saturate(140%);
+            border:1px solid var(--glass-border); box-shadow:0 8px 24px rgba(0,0,0,0.45);
+            color:var(--text-faint); text-decoration:none; transition:0.2s;
         }
-        .nav-item:hover { color:var(--text); background:var(--primary-dim); }
-        .nav-item.active {
-            background:var(--primary); color:#0b0e1a;
-            border:1px solid var(--primary);
-        }
-        .nav-item i { font-size:20px; }
-        .nav-label {
-            max-width:0; overflow:hidden; transition:0.2s; opacity:0;
-        }
-        .nav-item.active .nav-label { max-width:80px; opacity:1; }
+        .nav-circle:active { transform:scale(0.88); }
+        .nav-circle.active { background:var(--primary); color:#0f0c1d; border-color:var(--primary); }
+        .nav-circle i { font-size:22px; }
+        @media (max-width:600px) { .nav-circle { width:48px; height:48px; } .nav-circle i { font-size:19px; } }
     </style>
 </head>
 <body>
+    <header class="floating-header">
+        <div><a href="/" class="header-btn" title="الرئيسية"><i class="bi bi-arrow-right"></i></a></div>
+        <div class="header-center">الإعدادات</div>
+        <div><a href="/logout" class="header-btn" style="color:var(--primary);" title="تسجيل الخروج"><i class="bi bi-box-arrow-left"></i></a></div>
+    </header>
+
     <div class="container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash-message {{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <!-- بطاقة الصورة الشخصية مع أيقونة قلم -->
+        <!-- Profile card -->
         <div class="glass-card">
-            <div class="card-title"><i class="bi bi-person-circle"></i> الصورة الشخصية</div>
-            <div class="file-upload-wrapper">
-                <div class="upload-icon">
-                    <img id="profilePreview" src="{{ user.profile_image if user.profile_image else '' }}" class="profile-preview" alt="صورة">
-                    <label for="imageInput" class="pencil"><i class="bi bi-pencil"></i></label>
-                    <input type="file" id="imageInput" accept="image/*" onchange="previewAndUpload(this)">
+            <div class="card-title"><i class="bi bi-person-circle"></i> حسابي</div>
+            <div class="profile-row">
+                <div class="avatar" id="avatarWrap">
+                    {% if user.profile_image %}
+                        <img src="{{ user.profile_image }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                    {% else %}
+                        <i class="bi bi-person"></i>
+                    {% endif %}
                 </div>
-                <span style="color:var(--text-dim); font-size:0.9rem;">اضغط على أيقونة القلم لتغيير الصورة</span>
-            </div>
-        </div>
-
-        <!-- بطاقة اسم المستخدم وكلمة المرور -->
-        <div class="glass-card">
-            <div class="card-title"><i class="bi bi-shield-lock"></i> بيانات الحساب</div>
-            <div class="info-row">
-                <span class="label">اسم المستخدم</span>
-                <div class="value">
-                    <input type="text" id="usernameDisplay" value="{{ user.username }}" readonly>
-                    <button class="copy-btn" onclick="copyText('usernameDisplay')"><i class="bi bi-files"></i></button>
+                <div>
+                    <div class="username">{{ user.username }}</div>
+                    <label class="file-btn">
+                        <i class="bi bi-camera"></i> تغيير الصورة
+                        <input type="file" id="avatarInput" accept="image/png,image/jpeg,image/webp" onchange="uploadAvatar(event)">
+                    </label>
                 </div>
             </div>
-            <div class="info-row">
-                <span class="label">كلمة المرور</span>
-                <div class="value">
-                    <input type="password" id="passwordDisplay" value="••••••••" readonly>
-                    <button class="copy-btn" onclick="togglePasswordVisibility()"><i class="bi bi-eye" id="eyeIcon"></i></button>
-                    <button class="copy-btn" onclick="copyText('passwordDisplay')"><i class="bi bi-files"></i></button>
+        </div>
+
+        <!-- Contribute a prompt -->
+        <div class="glass-card">
+            <div class="card-title"><i class="bi bi-cloud-upload"></i> ساهم في المكتبة</div>
+            <div class="card-sub">ارفع صورة وبرومبتها وكلمات مفتاحية ليسهل على الآخرين العثور عليها. برومبتك يظهر في المكتبة بعد مراجعة سريعة من الإدارة.</div>
+
+            <form id="promptForm" onsubmit="submitPrompt(event)">
+                <div class="form-group">
+                    <label>عنوان البرومبت</label>
+                    <input type="text" id="p_title" maxlength="200" required placeholder="مثال: بورتريه سينمائي غامض">
                 </div>
-            </div>
-            <div style="margin-top:16px;">
-                <button class="btn-primary" onclick="changePassword()"><i class="bi bi-key"></i> تغيير كلمة المرور</button>
-                <input type="password" id="newPassword" placeholder="كلمة المرور الجديدة" style="margin-top:8px; width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:12px; color:var(--text);">
-            </div>
+                <div class="form-group">
+                    <label>التصنيف</label>
+                    <select id="p_category">
+                        {% for cat in categories %}
+                        <option value="{{ cat.name }}">{{ cat.display_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>رفع صورة</label>
+                    <label class="file-btn" style="width:100%; justify-content:center;">
+                        <i class="bi bi-image"></i> <span id="fileLabel">اختر صورة (JPG, PNG, WEBP – بحد أقصى 4MB)</span>
+                        <input type="file" id="p_image" accept="image/png,image/jpeg,image/webp" required onchange="previewImage(event)">
+                    </label>
+                    <img id="p_preview" class="upload-preview">
+                </div>
+                <div class="form-group">
+                    <label>برومبت الصورة</label>
+                    <textarea id="p_prompt" maxlength="4000" required placeholder="اكتب نص البرومبت هنا..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>كلمات مفتاحية (لتسهيل البحث)</label>
+                    <input type="text" id="p_keywords" maxlength="300" placeholder="مثال: بورتريه، سينمائي، إضاءة درامية">
+                </div>
+                <button type="submit" class="btn btn-primary" id="submitPromptBtn"><i class="bi bi-send"></i> إرسال للمراجعة</button>
+                <div class="hint"><i class="bi bi-shield-check"></i> يتم فحص الصور تلقائياً قبل النشر لحماية المكتبة.</div>
+            </form>
         </div>
 
-        <!-- بطاقة البرومبت والكلمات المفتاحية -->
+        <!-- My submissions -->
+        {% if my_submissions %}
         <div class="glass-card">
-            <div class="card-title"><i class="bi bi-pencil"></i> البرومبت المخصص</div>
-            <div class="form-group">
-                <label>نص البرومبت</label>
-                <textarea id="customPrompt" placeholder="أدخل برومبتك المخصص هنا...">{{ user.custom_prompt or '' }}</textarea>
+            <div class="card-title"><i class="bi bi-collection"></i> برومبتاتي</div>
+            {% for item in my_submissions %}
+            <div class="my-item">
+                <img src="{{ item.image_url }}" alt="">
+                <div class="info">
+                    <div class="t">{{ item.title }}</div>
+                </div>
+                {% if item.is_approved %}
+                    <span class="badge badge-approved"><i class="bi bi-check-circle"></i> منشور</span>
+                {% else %}
+                    <span class="badge badge-pending"><i class="bi bi-hourglass-split"></i> قيد المراجعة</span>
+                {% endif %}
             </div>
-            <div class="form-group">
-                <label>الكلمات المفتاحية للبحث</label>
-                <input type="text" id="searchKeywords" placeholder="مثال: تصميم, كتابة, صور" value="{{ user.search_keywords or '' }}">
-            </div>
-            <button class="btn-primary" onclick="saveSettings()"><i class="bi bi-check-lg"></i> حفظ الإعدادات</button>
+            {% endfor %}
         </div>
-
-        <div class="glass-card">
-            <div class="card-title"><i class="bi bi-info-circle"></i> معلومات الحساب</div>
-            <p><strong>تاريخ الإنشاء:</strong> {{ user.created_at.strftime('%Y-%m-%d') if user.created_at else '—' }}</p>
-            <a href="/logout" class="btn-outline" style="margin-top:12px; display:inline-block;"><i class="bi bi-box-arrow-left"></i> تسجيل الخروج</a>
-        </div>
+        {% endif %}
     </div>
 
+    <div class="toast" id="toast"></div>
+
     <nav class="bottom-nav-bar">
-        <a href="/" class="nav-item"><i class="bi bi-house-door"></i><span class="nav-label">الرئيسية</span></a>
-        <a href="/about" class="nav-item"><i class="bi bi-info-circle"></i><span class="nav-label">حول</span></a>
-        <a href="/settings" class="nav-item active"><i class="bi bi-gear-fill"></i><span class="nav-label">الإعدادات</span></a>
+        <a href="/" class="nav-circle" title="الرئيسية"><i class="bi bi-house-door-fill"></i></a>
+        <a href="/about" class="nav-circle" title="حول"><i class="bi bi-info-circle"></i></a>
     </nav>
 
     <script>
-        const csrfToken = "{{ csrf_token }}";
-        let passwordVisible = false;
+        const CSRF_TOKEN = "{{ csrf_token }}";
 
-        function previewAndUpload(input) {
-            const file = input.files[0];
+        function showToast(msg, isError) {
+            const t = document.getElementById('toast');
+            t.innerHTML = `<i class="bi ${isError ? 'bi-exclamation-circle' : 'bi-check-lg'}"></i> ${msg}`;
+            t.style.color = isError ? 'var(--danger)' : 'var(--text)';
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function previewImage(e) {
+            const file = e.target.files[0];
+            const label = document.getElementById('fileLabel');
+            const preview = document.getElementById('p_preview');
             if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('profilePreview').src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-
-            const formData = new FormData();
-            formData.append('image', file);
-            formData.append('csrf_token', csrfToken);
-
-            fetch('/api/upload_image', {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (!data.success) alert(data.message || 'خطأ في الرفع');
-            })
-            .catch(() => alert('تعذر الاتصال بالخادم'));
-        }
-
-        function copyText(id) {
-            const input = document.getElementById(id);
-            navigator.clipboard.writeText(input.value).then(() => {
-                alert('تم نسخ القيمة');
-            }).catch(() => {
-                input.select();
-                document.execCommand('copy');
-                alert('تم نسخ القيمة');
-            });
-        }
-
-        function togglePasswordVisibility() {
-            const input = document.getElementById('passwordDisplay');
-            const icon = document.getElementById('eyeIcon');
-            if (passwordVisible) {
-                input.type = 'password';
-                icon.className = 'bi bi-eye';
-                passwordVisible = false;
-            } else {
-                input.type = 'text';
-                icon.className = 'bi bi-eye-slash';
-                passwordVisible = true;
+            if (file.size > 4 * 1024 * 1024) {
+                showToast('حجم الصورة يجب ألا يتجاوز 4 ميجابايت', true);
+                e.target.value = '';
+                preview.style.display = 'none';
+                label.textContent = 'اختر صورة (JPG, PNG, WEBP – بحد أقصى 4MB)';
+                return;
             }
+            label.textContent = file.name;
+            const reader = new FileReader();
+            reader.onload = ev => { preview.src = ev.target.result; preview.style.display = 'block'; };
+            reader.readAsDataURL(file);
         }
 
-        function changePassword() {
-            const newPass = document.getElementById('newPassword').value.trim();
-            if (!newPass) { alert('يرجى إدخال كلمة مرور جديدة'); return; }
-            // سيتم تنفيذ التحديث لاحقاً، يمكن إضافة endpoint لتغيير كلمة المرور
-            alert('سيتم تغيير كلمة المرور إلى: ' + newPass);
-            // يمكنك إضافة استدعاء API هنا
+        async function uploadAvatar(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 4 * 1024 * 1024) { showToast('حجم الصورة يجب ألا يتجاوز 4 ميجابايت', true); return; }
+            const fd = new FormData();
+            fd.append('image', file);
+            fd.append('csrf_token', CSRF_TOKEN);
+            try {
+                const res = await fetch('/api/upload_image', { method:'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('avatarWrap').innerHTML = `<img src="${data.image}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                    showToast('تم تحديث الصورة الشخصية');
+                } else { showToast(data.message || 'خطأ في رفع الصورة', true); }
+            } catch (err) { showToast('تعذر الاتصال بالخادم', true); }
         }
 
-        function saveSettings() {
-            const customPrompt = document.getElementById('customPrompt').value.trim();
-            const searchKeywords = document.getElementById('searchKeywords').value.trim();
+        async function submitPrompt(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitPromptBtn');
+            const imageInput = document.getElementById('p_image');
+            if (!imageInput.files[0]) { showToast('يرجى اختيار صورة', true); return; }
 
-            fetch('/api/settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    custom_prompt: customPrompt,
-                    search_keywords: searchKeywords,
-                    csrf_token: csrfToken
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) alert('تم حفظ الإعدادات');
-                else alert(data.message || 'خطأ في الحفظ');
-            })
-            .catch(() => alert('تعذر الاتصال بالخادم'));
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> جاري الإرسال...';
+
+            const fd = new FormData();
+            fd.append('title', document.getElementById('p_title').value.trim());
+            fd.append('category', document.getElementById('p_category').value);
+            fd.append('prompt_text', document.getElementById('p_prompt').value.trim());
+            fd.append('keywords', document.getElementById('p_keywords').value.trim());
+            fd.append('image', imageInput.files[0]);
+            fd.append('csrf_token', CSRF_TOKEN);
+
+            try {
+                const res = await fetch('/api/library/submit', { method:'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'تم إرسال البرومبت للمراجعة');
+                    document.getElementById('promptForm').reset();
+                    document.getElementById('p_preview').style.display = 'none';
+                    document.getElementById('fileLabel').textContent = 'اختر صورة (JPG, PNG, WEBP – بحد أقصى 4MB)';
+                    setTimeout(() => location.reload(), 1200);
+                } else {
+                    showToast(data.message || 'حدث خطأ', true);
+                }
+            } catch (err) {
+                showToast('تعذر الاتصال بالخادم', true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-send"></i> إرسال للمراجعة';
+            }
         }
     </script>
 </body>
