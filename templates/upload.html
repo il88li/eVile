@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>المساهمة – UFOQ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        :root {
+            --bg: #f8fafc;
+            --bg-card: #ffffff;
+            --border: rgba(0,0,0,0.08);
+            --text: #1e293b;
+            --text-dim: #475569;
+            --text-faint: #94a3b8;
+            --primary: #0ea5e9;
+            --primary-dim: rgba(14,165,233,0.08);
+            --primary-dark: #0284c7;
+            --shadow: 0 4px 20px rgba(0,0,0,0.06);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.1);
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 90px 16px 140px 16px;
+            line-height: 1.7;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover { box-shadow: var(--shadow-lg); }
+
+        /* Hero / Top motivational card */
+        .hero-card {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: #fff;
+            text-align: center;
+            padding: 36px 24px;
+            border: none;
+        }
+        .hero-card h1 { font-size: 1.6rem; font-weight: 900; margin-bottom: 8px; }
+        .hero-card p { font-size: 0.95rem; opacity: 0.95; max-width: 500px; margin: 0 auto; }
+        .hero-card .icon { font-size: 42px; margin-bottom: 12px; display: block; }
+
+        /* Small motivational card */
+        .motiv-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 20px;
+            background: var(--primary-dim);
+            border: 1px solid rgba(14,165,233,0.15);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .motiv-card i { font-size: 28px; color: var(--primary); flex-shrink: 0; }
+        .motiv-card strong { display: block; font-size: 0.95rem; color: var(--primary-dark); }
+        .motiv-card span { font-size: 0.85rem; color: var(--text-dim); }
+
+        /* Form */
+        .form-title {
+            font-size: 1.15rem; font-weight: 800; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .form-title i { color: var(--primary); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+        .form-group { margin-bottom: 4px; }
+        .form-group label {
+            display: block; font-size: 0.8rem; font-weight: 700;
+            color: var(--text-dim); margin-bottom: 6px;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%; padding: 10px 14px;
+            background: #f1f5f9; border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text);
+            font-family: 'Tajawal', sans-serif; font-size: 0.9rem;
+            outline: none; transition: 0.2s;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 3px var(--primary-dim);
+        }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+
+        /* Buttons - small horizontal rectangles */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 6px; padding: 8px 18px; border-radius: 8px;
+            border: none; font-family: 'Tajawal', sans-serif;
+            font-size: 0.85rem; font-weight: 700; cursor: pointer;
+            transition: 0.2s; text-decoration: none;
+        }
+        .btn-primary {
+            background: var(--primary); color: #fff;
+            box-shadow: 0 2px 8px rgba(14,165,233,0.25);
+        }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-outline {
+            background: transparent; color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        .btn-outline:hover { background: var(--primary-dim); }
+        .btn-telegram {
+            background: #229ed9; color: #fff;
+            box-shadow: 0 2px 8px rgba(34,158,217,0.25);
+        }
+        .btn-telegram:hover { background: #1a8bc2; }
+
+        /* FAQ */
+        .faq-item {
+            border-bottom: 1px solid var(--border);
+            padding: 14px 0;
+        }
+        .faq-item:last-child { border-bottom: none; }
+        .faq-question {
+            font-weight: 700; font-size: 0.95rem;
+            display: flex; align-items: center; gap: 8px;
+            cursor: pointer; color: var(--text);
+        }
+        .faq-question i { color: var(--primary); font-size: 1rem; }
+        .faq-answer {
+            font-size: 0.88rem; color: var(--text-dim);
+            margin-top: 8px; padding-right: 24px; line-height: 1.8;
+            display: none;
+        }
+        .faq-answer.open { display: block; }
+
+        /* Contact section */
+        .contact-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+        }
+        @media (max-width: 600px) { .contact-grid { grid-template-columns: 1fr; } }
+        .contact-card {
+            display: flex; align-items: center; gap: 12px;
+            padding: 16px; background: #f8fafc;
+            border: 1px solid var(--border); border-radius: 12px;
+            text-decoration: none; color: var(--text);
+            transition: 0.2s;
+        }
+        .contact-card:hover { border-color: var(--primary); background: #fff; }
+        .contact-card i { font-size: 24px; color: var(--primary); }
+        .contact-card div strong { display: block; font-size: 0.9rem; }
+        .contact-card div span { font-size: 0.8rem; color: var(--text-dim); }
+
+        /* About section inside upload */
+        .about-text { font-size: 0.9rem; color: var(--text-dim); line-height: 1.9; }
+        .about-text p { margin-bottom: 10px; }
+        .about-text .highlight { color: var(--primary); font-weight: 700; }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 100px; left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text); color: #fff;
+            padding: 10px 22px; border-radius: 8px;
+            font-weight: 700; font-size: 0.85rem;
+            z-index: 2000; opacity: 0; transition: 0.3s;
+            display: flex; align-items: center; gap: 8px;
+            font-family: 'Tajawal', sans-serif;
+            box-shadow: var(--shadow-lg);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { background: #10b981; }
+        .toast.error { background: #ef4444; }
+
+        /* Bottom nav */
+        .bottom-nav-bar {
+            position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; display: flex; align-items: center; gap: 6px;
+            padding: 8px 16px; background: #fff;
+            border: 1px solid var(--border); border-radius: 50px;
+            box-shadow: var(--shadow-lg); max-width: 600px; width: auto;
+        }
+        .nav-item {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: 40px;
+            background: transparent; border: none; color: var(--text-faint);
+            font-family: 'Tajawal', sans-serif; font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: 0.2s; text-decoration: none;
+            white-space: nowrap;
+        }
+        .nav-item:hover { color: var(--text); background: var(--primary-dim); }
+        .nav-item.active {
+            background: var(--primary); color: #fff;
+        }
+        .nav-item i { font-size: 18px; }
+        .nav-label {
+            max-width: 0; overflow: hidden; transition: 0.2s; opacity: 0;
+        }
+        .nav-item.active .nav-label { max-width: 80px; opacity: 1; }
+
+        @media (max-width: 600px) {
+            .bottom-nav-bar { padding: 6px 12px; max-width: 95vw; }
+            .nav-item { padding: 6px 12px; font-size: 12px; }
+            .nav-item i { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero motivational card -->
+        <div class="card hero-card">
+            <i class="bi bi-stars icon"></i>
+            <h1>شارك إبداعك مع العالم</h1>
+            <p>هل لديك برومبت رائع؟ ساهم في بناء أكبر مكتبة عربية للبرومبتات واساعد الآلاف على الإبداع بالذكاء الاصطناعي.</p>
+        </div>
+
+        <!-- Small motivational card -->
+        <div class="motiv-card">
+            <i class="bi bi-lightning-charge-fill"></i>
+            <div>
+                <strong>كل مساهمة تصنع فرقاً</strong>
+                <span>برومبتك قد يكون نقطة تحول في مشروع أحدهم. لا تتردد في المشاركة!</span>
+            </div>
+        </div>
+
+        <!-- Upload form card -->
+        <div class="card">
+            <div class="form-title"><i class="bi bi-cloud-upload"></i> رفع برومبت جديد</div>
+            <form id="uploadForm" onsubmit="handleUpload(event)">
+                <input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+                <div class="form-grid">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="title">عنوان البرومبت</label>
+                        <input type="text" id="title" placeholder="مثال: برومبت توليد صور واقعية" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">التصنيف</label>
+                        <select id="category" required>
+                            {% for cat in categories %}
+                            <option value="{{ cat.name }}">{{ cat.display_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="publisher_name">اسم الناشر (اختياري)</label>
+                        <input type="text" id="publisher_name" placeholder="اسمك أو اسم حسابك">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="image_url">رابط صورة توضيحية (اختياري)</label>
+                        <input type="url" id="image_url" placeholder="https://example.com/image.jpg">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="prompt_text">نص البرومبت</label>
+                        <textarea id="prompt_text" placeholder="اكتب نص البرومبت الكامل هنا..." required></textarea>
+                    </div>
+                </div>
+                <div style="margin-top: 16px; display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> إرسال المساهمة</button>
+                    <button type="reset" class="btn btn-outline"><i class="bi bi-x-lg"></i> مسح</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- About section (merged) -->
+        <div class="card">
+            <div class="form-title"><i class="bi bi-info-circle"></i> عن UFOQ</div>
+            <div class="about-text">
+                <p><span class="highlight">UFOQ</span> هي منصة مفتوحة تهدف إلى جمع وتنظيم أفضل البرومبتات (أوامر التوجيه) للذكاء الاصطناعي في مكان واحد. نقدم مكتبة غنية بالبرومبتات المصنفة، مع إمكانية البحث والتصفية، ونسخ البرومبتات بنقرة واحدة.</p>
+                <p>جميع المحتويات مقدمة من مجتمع المبدعين، ونحن نعمل على تحديث المكتبة باستمرار. فريق UFOQ هو مجموعة من عشاق الذكاء الاصطناعي والتكنولوجيا، نهدف إلى تسهيل الوصول إلى أدوات الإبداع الرقمي للجميع.</p>
+            </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="card">
+            <div class="form-title"><i class="bi bi-question-circle"></i> الأسئلة الشائعة</div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <i class="bi bi-chevron-left"></i> كيف يتم مراجعة البرومبتات المُرسلة؟
+                </div>
+                <div class="faq-answer">
+                    جميع البرومبتات تمر بمراجعة يدوية سريعة من فريق الإدارة للتأكد من الجودة والملاءمة قبل نشرها في المكتبة.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <i class="bi bi-chevron-left"></i> هل يمكنني إرفاق صورة مع البرومبت؟
+                </div>
+                <div class="faq-answer">
+                    نعم، يمكنك إرفاق رابط صورة توضيحية تساعد المستخدمين على فهم نتيجة البرومبت بشكل أفضل.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <i class="bi bi-chevron-left"></i> هل يظهر اسمي كناشر للبرومبت؟
+                </div>
+                <div class="faq-answer">
+                    نعم، إذا قمت بكتابة اسم الناشر في النموذج، سيظهر بجانب البرومبت في المكتبة بعد الموافقة عليه.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <i class="bi bi-chevron-left"></i> كم تستغرق عملية المراجعة؟
+                </div>
+                <div class="faq-answer">
+                    عادةً ما تستغرق المراجعة من بضع ساعات إلى 24 ساعة كحد أقصى.
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="card">
+            <div class="form-title"><i class="bi bi-chat-dots"></i> تواصل معنا</div>
+            <div class="contact-grid">
+                <a href="https://t.me/OlIiIl7" target="_blank" class="contact-card">
+                    <i class="bi bi-telegram"></i>
+                    <div>
+                        <strong>دعم فني</strong>
+                        <span>@OlIiIl7</span>
+                    </div>
+                </a>
+                <a href="https://t.me/Evile_Prompts" target="_blank" class="contact-card">
+                    <i class="bi bi-broadcast"></i>
+                    <div>
+                        <strong>قناة الموقع الرسمية</strong>
+                        <span>@Evile_Prompts</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"><i class="bi bi-check-lg"></i> <span id="toastMsg">تم!</span></div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav-bar">
+        <a href="/" class="nav-item"><i class="bi bi-house-door"></i><span class="nav-label">الرئيسية</span></a>
+        <a href="/upload" class="nav-item active"><i class="bi bi-cloud-upload"></i><span class="nav-label">المساهمة</span></a>
+    </nav>
+
+    <script>
+        function toggleFaq(el) {
+            const answer = el.nextElementSibling;
+            const icon = el.querySelector('i');
+            answer.classList.toggle('open');
+            icon.classList.toggle('bi-chevron-left');
+            icon.classList.toggle('bi-chevron-down');
+        }
+
+        function showToast(msg, type='success') {
+            const t = document.getElementById('toast');
+            const span = document.getElementById('toastMsg');
+            span.textContent = msg;
+            t.className = 'toast show ' + type;
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        async function handleUpload(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> جاري الإرسال...';
+
+            const payload = {
+                csrf_token: document.getElementById('csrf_token').value,
+                title: document.getElementById('title').value.trim(),
+                category: document.getElementById('category').value,
+                prompt_text: document.getElementById('prompt_text').value.trim(),
+                image_url: document.getElementById('image_url').value.trim(),
+                publisher_name: document.getElementById('publisher_name').value.trim()
+            };
+
+            try {
+                const res = await fetch('/upload', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    e.target.reset();
+                } else {
+                    showToast(data.message || 'حدث خطأ', 'error');
+                }
+            } catch (err) {
+                showToast('تعذر الاتصال بالخادم', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+    </script>
+</body>
+</html>
