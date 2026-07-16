@@ -1,9 +1,10 @@
 import os
+import re
 import logging
 import bcrypt
 import secrets
 import base64
-import time
+from io import BytesIO
 from datetime import datetime
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
@@ -14,8 +15,8 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
 from flask_session import Session
-from sqlalchemy.exc import SQLAlchemyError, OperationalError
-from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
+from PIL import Image, UnidentifiedImageError
 
 from models import db, User, Category, PromptLibrary, LibraryAd, SiteSetting
 from config import Config
@@ -52,7 +53,47 @@ def generate_csrf_token():
     return session['csrf_token']
 
 def validate_csrf_token(token):
-    return token == session.get('csrf_token')
+    session_token = session.get('csrf_token')
+    if not token or not session_token:
+        return False
+    return secrets.compare_digest(str(token).encode('utf-8'), str(session_token).encode('utf-8'))
+
+USERNAME_RE = re.compile(r'^[a-zA-Z0-9_\u0600-\u06FF]{3,30}$')
+
+def is_valid_username(username):
+    return bool(USERNAME_RE.match(username))
+
+ALLOWED_IMAGE_MIMES = {'image/jpeg': 'JPEG', 'image/png': 'PNG', 'image/webp': 'WEBP'}
+ALLOWED_IMAGE_EXT = {'jpg', 'jpeg', 'png', 'webp'}
+MAX_IMAGE_BYTES = 4 * 1024 * 1024  # 4MB
+
+def read_and_validate_image(file_storage):
+    """Reads an uploaded file and verifies it is really a supported image.
+    Returns (data_uri, error_message). data_uri is None on failure."""
+    filename = file_storage.filename or ''
+    ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
+    if ext not in ALLOWED_IMAGE_EXT:
+        return None, 'صيغة الصورة غير مدعومة (JPG, PNG, WEBP فقط)'
+
+    raw = file_storage.read()
+    if not raw:
+        return None, 'الملف فارغ'
+    if len(raw) > MAX_IMAGE_BYTES:
+        return None, 'حجم الصورة يتجاوز الحد المسموح (4MB)'
+
+    try:
+        img = Image.open(BytesIO(raw))
+        img.verify()  # raises if not a real image
+        img2 = Image.open(BytesIO(raw))  # re-open: verify() invalidates the file pointer
+        detected_format = img2.format
+        if detected_format not in ('JPEG', 'PNG', 'WEBP'):
+            return None, 'صيغة الصورة غير مدعومة'
+    except (UnidentifiedImageError, OSError, ValueError):
+        return None, 'الملف المرفوع ليس صورة صالحة'
+
+    mime = 'image/jpeg' if detected_format == 'JPEG' else 'image/png' if detected_format == 'PNG' else 'image/webp'
+    b64 = base64.b64encode(raw).decode('utf-8')
+    return f"data:{mime};base64,{b64}", None
 
 def login_required(f):
     @wraps(f)
@@ -71,104 +112,12 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
-# ---------- Database connection with retry ----------
-def wait_for_db(max_retries=5, delay=2):
-    for attempt in range(max_retries):
-        try:
-            with db.engine.connect() as conn:
-                conn.execute(text("SELECT 1"))
-                logger.info("✅ Database connection successful.")
-                return True
-        except OperationalError as e:
-            logger.warning(f"Database connection attempt {attempt+1}/{max_retries} failed: {e}")
-            if attempt < max_retries - 1:
-                time.sleep(delay)
-            else:
-                logger.error("❌ All database connection attempts failed.")
-                return False
-    return False
-
-# ===== Error handlers =====
-@app.errorhandler(404)
-def page_not_found(e):
-    try:
-        return render_template('error.html', error_code=404, message="الصفحة غير موجودة"), 404
-    except:
-        return """
-        <!DOCTYPE html>
-        <html dir="rtl">
-        <head><meta charset="UTF-8"><title>404 - غير موجود</title>
-        <style>body{font-family:Tajawal,sans-serif;background:#0b0e1a;color:#f8fafc;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px;margin:0;}
-        .card{background:rgba(20,30,48,0.6);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:40px;max-width:500px;width:100%;}
-        h1{font-size:48px;color:#38bdf8;margin:0 0 10px;}
-        p{color:#94a3b8;font-size:18px;}
-        a{display:inline-block;margin-top:16px;padding:12px 28px;background:#38bdf8;color:#0b0e1a;border-radius:14px;text-decoration:none;font-weight:700;}</style>
-        </head>
-        <body><div class="card"><h1>404</h1><p>الصفحة غير موجودة</p><a href="/">العودة للرئيسية</a></div></body>
-        </html>
-        """, 404
-
-@app.errorhandler(500)
-def internal_server_error(e):
-    logger.error(f"Internal Server Error: {e}")
-    try:
-        return render_template('error.html', error_code=500, message="حدث خطأ داخلي في الخادم، يرجى المحاولة لاحقاً."), 500
-    except:
-        return """
-        <!DOCTYPE html>
-        <html dir="rtl">
-        <head><meta charset="UTF-8"><title>500 - خطأ داخلي</title>
-        <style>body{font-family:Tajawal,sans-serif;background:#0b0e1a;color:#f8fafc;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px;margin:0;}
-        .card{background:rgba(20,30,48,0.6);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:40px;max-width:500px;width:100%;}
-        h1{font-size:48px;color:#38bdf8;margin:0 0 10px;}
-        p{color:#94a3b8;font-size:18px;}
-        a{display:inline-block;margin-top:16px;padding:12px 28px;background:#38bdf8;color:#0b0e1a;border-radius:14px;text-decoration:none;font-weight:700;}</style>
-        </head>
-        <body><div class="card"><h1>500</h1><p>حدث خطأ داخلي، يرجى المحاولة لاحقاً.</p><a href="/">العودة للرئيسية</a></div></body>
-        </html>
-        """, 500
-
-@app.errorhandler(Exception)
-def handle_exception(e):
-    logger.error(f"Unhandled Exception: {e}")
-    try:
-        return render_template('error.html', error_code=500, message="حدث خطأ غير متوقع."), 500
-    except:
-        return """
-        <!DOCTYPE html>
-        <html dir="rtl">
-        <head><meta charset="UTF-8"><title>500 - خطأ</title>
-        <style>body{font-family:Tajawal,sans-serif;background:#0b0e1a;color:#f8fafc;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px;margin:0;}
-        .card{background:rgba(20,30,48,0.6);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:40px;max-width:500px;width:100%;}
-        h1{font-size:48px;color:#38bdf8;margin:0 0 10px;}
-        p{color:#94a3b8;font-size:18px;}
-        a{display:inline-block;margin-top:16px;padding:12px 28px;background:#38bdf8;color:#0b0e1a;border-radius:14px;text-decoration:none;font-weight:700;}</style>
-        </head>
-        <body><div class="card"><h1>500</h1><p>حدث خطأ غير متوقع.</p><a href="/">العودة للرئيسية</a></div></body>
-        </html>
-        """, 500
-
 # ---------- Database initialization ----------
 _db_initialized = False
 @app.before_request
 def ensure_db_initialized():
     global _db_initialized
     if not _db_initialized:
-        if not wait_for_db():
-            return """
-            <!DOCTYPE html>
-            <html dir="rtl">
-            <head><meta charset="UTF-8"><title>503 - الخدمة غير متاحة</title>
-            <style>body{font-family:Tajawal,sans-serif;background:#0b0e1a;color:#f8fafc;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px;margin:0;}
-            .card{background:rgba(20,30,48,0.6);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:40px;max-width:500px;width:100%;}
-            h1{font-size:48px;color:#38bdf8;margin:0 0 10px;}
-            p{color:#94a3b8;font-size:18px;}
-            a{display:inline-block;margin-top:16px;padding:12px 28px;background:#38bdf8;color:#0b0e1a;border-radius:14px;text-decoration:none;font-weight:700;}</style>
-            </head>
-            <body><div class="card"><h1>503</h1><p>تعذر الاتصال بقاعدة البيانات، يرجى المحاولة لاحقاً.</p><a href="/">المحاولة مرة أخرى</a></div></body>
-            </html>
-            """, 503
-        
         try:
             db.create_all()
             if not SiteSetting.query.first():
@@ -191,71 +140,44 @@ def ensure_db_initialized():
         except Exception as e:
             logger.error(f"❌ DB init error: {e}")
             db.session.rollback()
-            return """
-            <!DOCTYPE html>
-            <html dir="rtl">
-            <head><meta charset="UTF-8"><title>500 - خطأ في التهيئة</title>
-            <style>body{font-family:Tajawal,sans-serif;background:#0b0e1a;color:#f8fafc;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px;margin:0;}
-            .card{background:rgba(20,30,48,0.6);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:40px;max-width:500px;width:100%;}
-            h1{font-size:48px;color:#38bdf8;margin:0 0 10px;}
-            p{color:#94a3b8;font-size:18px;}
-            a{display:inline-block;margin-top:16px;padding:12px 28px;background:#38bdf8;color:#0b0e1a;border-radius:14px;text-decoration:none;font-weight:700;}</style>
-            </head>
-            <body><div class="card"><h1>500</h1><p>خطأ في تهيئة قاعدة البيانات.</p><a href="/">المحاولة مرة أخرى</a></div></body>
-            </html>
-            """, 500
 
 # ---------- Public routes ----------
 @app.route('/')
 def index():
-    try:
-        site = SiteSetting.query.first()
-        if site and site.status == 'off':
-            return render_template('index.html', site_status='off', offline_message=site.offline_message)
+    site = SiteSetting.query.first()
+    if site and site.status == 'off' and not session.get('logged_in'):
+        return render_template('index.html', site_status='off', offline_message=site.offline_message)
 
-        categories = Category.query.order_by(Category.sort_order).all()
-        library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
-        active_ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
+    categories = Category.query.order_by(Category.sort_order).all()
+    library_items = (PromptLibrary.query
+                      .filter_by(is_approved=True)
+                      .order_by(PromptLibrary.created_at.desc())
+                      .all())
+    active_ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
 
-        # تحويل active_ad إلى قاموس
-        ad_dict = None
-        if active_ad:
-            ad_dict = {
-                'id': active_ad.id,
-                'title': active_ad.title,
-                'text': active_ad.text,
-                'image_url': active_ad.image_url,
-                'button_text': active_ad.button_text,
-                'button_link': active_ad.button_link,
-                'duration_seconds': active_ad.duration_seconds,
-                'is_active': active_ad.is_active
-            }
-
-        return render_template('index.html',
-                               categories=categories,
-                               library_items=library_items,
-                               active_ad=ad_dict,
-                               site_status='on',
-                               user_id=session.get('user_id'))
-    except Exception as e:
-        logger.error(f"Index error: {e}")
-        try:
-            return render_template('error.html', error_code=500, message="حدث خطأ أثناء تحميل الصفحة."), 500
-        except:
-            return "<h1>500</h1><p>حدث خطأ أثناء تحميل الصفحة.</p><a href='/'>العودة</a>", 500
+    return render_template('index.html',
+                           categories=categories,
+                           library_items=library_items,
+                           active_ad=active_ad,
+                           site_status='on',
+                           user_id=session.get('user_id'))
 
 @app.route('/about')
 def about():
-    return render_template('about.html', current_year=datetime.utcnow().year)
+    return render_template('about.html', current_year=datetime.utcnow().year, user_id=session.get('user_id'))
 
 @app.route('/sign', methods=['GET', 'POST'])
+@limiter.limit("15 per minute")
 def sign():
     if request.method == 'GET':
         return render_template('sign.html', csrf_token=generate_csrf_token())
 
-    data = request.get_json()
+    data = request.get_json(silent=True)
     if not data:
         return jsonify({'success': False, 'message': 'بيانات غير صحيحة'}), 400
+
+    if not validate_csrf_token(data.get('csrf_token')):
+        return jsonify({'success': False, 'message': 'CSRF خطأ، أعد تحميل الصفحة'}), 400
 
     username = data.get('username', '').strip()
     password = data.get('password', '').strip()
@@ -264,25 +186,27 @@ def sign():
     if not username or not password:
         return jsonify({'success': False, 'message': 'يرجى ملء جميع الحقول'}), 400
 
-    try:
-        if action == 'signup':
-            if User.query.filter_by(username=username).first():
-                return jsonify({'success': False, 'message': 'اسم المستخدم موجود مسبقاً'}), 400
-            user = User(username=username, password_hash=hash_password(password))
-            db.session.add(user)
-            db.session.commit()
+    if action == 'signup':
+        if not is_valid_username(username):
+            return jsonify({'success': False, 'message': 'اسم المستخدم يجب أن يكون 3-30 حرفاً (أحرف/أرقام فقط)'}), 400
+        if len(password) < 8:
+            return jsonify({'success': False, 'message': 'كلمة المرور يجب ألا تقل عن 8 أحرف'}), 400
+        if User.query.filter_by(username=username).first():
+            return jsonify({'success': False, 'message': 'اسم المستخدم موجود مسبقاً'}), 400
+        user = User(username=username, password_hash=hash_password(password))
+        db.session.add(user)
+        db.session.commit()
+        session.clear()
+        session['user_id'] = user.id
+        return jsonify({'success': True, 'message': 'تم إنشاء الحساب'})
+
+    else:
+        user = User.query.filter_by(username=username).first()
+        if user and check_password(password, user.password_hash):
+            session.clear()
             session['user_id'] = user.id
-            return jsonify({'success': True, 'message': 'تم إنشاء الحساب'})
-        else:
-            user = User.query.filter_by(username=username).first()
-            if user and check_password(password, user.password_hash):
-                session['user_id'] = user.id
-                return jsonify({'success': True, 'message': 'تم تسجيل الدخول'})
-            return jsonify({'success': False, 'message': 'بيانات غير صحيحة'}), 401
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Sign error: {e}")
-        return jsonify({'success': False, 'message': 'حدث خطأ في الخادم'}), 500
+            return jsonify({'success': True, 'message': 'تم تسجيل الدخول'})
+        return jsonify({'success': False, 'message': 'بيانات غير صحيحة'}), 401
 
 @app.route('/logout')
 def logout():
@@ -294,15 +218,17 @@ def logout():
 @app.route('/settings')
 @login_required
 def settings_page():
-    try:
-        user = User.query.get(session['user_id'])
-        return render_template('settings.html', user=user, csrf_token=generate_csrf_token())
-    except Exception as e:
-        logger.error(f"Settings page error: {e}")
-        try:
-            return render_template('error.html', error_code=500, message="حدث خطأ أثناء تحميل الإعدادات."), 500
-        except:
-            return "<h1>500</h1><p>حدث خطأ أثناء تحميل الإعدادات.</p><a href='/'>العودة</a>", 500
+    user = User.query.get(session['user_id'])
+    categories = Category.query.order_by(Category.sort_order).all()
+    my_submissions = (PromptLibrary.query
+                       .filter_by(submitted_by=user.id)
+                       .order_by(PromptLibrary.created_at.desc())
+                       .all())
+    return render_template('settings.html',
+                           user=user,
+                           categories=categories,
+                           my_submissions=my_submissions,
+                           csrf_token=generate_csrf_token())
 
 @app.route('/api/settings', methods=['POST'])
 @login_required
@@ -310,20 +236,16 @@ def update_settings():
     if not validate_csrf_token(request.json.get('csrf_token')):
         return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
 
-    try:
-        user = User.query.get(session['user_id'])
-        data = request.get_json()
-        user.custom_prompt = data.get('custom_prompt', '').strip()
-        user.search_keywords = data.get('search_keywords', '').strip()
-        db.session.commit()
-        return jsonify({'success': True, 'message': 'تم تحديث الإعدادات'})
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Settings update error: {e}")
-        return jsonify({'success': False, 'message': 'حدث خطأ في الخادم'}), 500
+    user = User.query.get(session['user_id'])
+    data = request.get_json()
+    user.custom_prompt = data.get('custom_prompt', '').strip()
+    user.search_keywords = data.get('search_keywords', '').strip()
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'تم تحديث الإعدادات'})
 
 @app.route('/api/upload_image', methods=['POST'])
 @login_required
+@limiter.limit("20 per hour")
 def upload_image():
     if not validate_csrf_token(request.form.get('csrf_token')):
         return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
@@ -335,13 +257,11 @@ def upload_image():
     if file.filename == '':
         return jsonify({'success': False, 'message': 'لم يتم اختيار ملف'}), 400
 
-    try:
-        data = file.read()
-        b64 = base64.b64encode(data).decode('utf-8')
-        ext = file.filename.split('.')[-1].lower()
-        mime = 'image/jpeg' if ext in ['jpg', 'jpeg'] else 'image/png' if ext == 'png' else 'image/webp'
-        image_data = f"data:{mime};base64,{b64}"
+    image_data, error = read_and_validate_image(file)
+    if error:
+        return jsonify({'success': False, 'message': error}), 400
 
+    try:
         user = User.query.get(session['user_id'])
         user.profile_image = image_data
         db.session.commit()
@@ -351,34 +271,85 @@ def upload_image():
         logger.error(f"Image upload error: {e}")
         return jsonify({'success': False, 'message': 'خطأ في رفع الصورة'}), 500
 
-# ---------- Admin panel ----------
+@app.route('/api/library/submit', methods=['POST'])
+@login_required
+@limiter.limit("10 per hour")
+def submit_library_prompt():
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
+
+    title = request.form.get('title', '').strip()[:200]
+    category = request.form.get('category', 'general').strip()[:50]
+    prompt_text = request.form.get('prompt_text', '').strip()[:4000]
+    keywords = request.form.get('keywords', '').strip()[:300]
+
+    if not title or not prompt_text:
+        return jsonify({'success': False, 'message': 'يرجى ملء العنوان والبرومبت'}), 400
+
+    if not Category.query.filter_by(name=category).first():
+        category = 'general'
+
+    if 'image' not in request.files or request.files['image'].filename == '':
+        return jsonify({'success': False, 'message': 'يرجى اختيار صورة'}), 400
+
+    image_data, error = read_and_validate_image(request.files['image'])
+    if error:
+        return jsonify({'success': False, 'message': error}), 400
+
+    try:
+        user = User.query.get(session['user_id'])
+        item = PromptLibrary(
+            title=title,
+            category=category,
+            image_url=image_data,
+            prompt_text=prompt_text,
+            keywords=keywords or None,
+            publisher=user.username,
+            submitted_by=user.id,
+            is_approved=False,
+        )
+        db.session.add(item)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'تم إرسال البرومبت، سيظهر في المكتبة بعد مراجعته'})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Prompt submission error: {e}")
+        return jsonify({'success': False, 'message': 'خطأ في إرسال البرومبت'}), 500
+
+# ---------- Admin ----------
 @app.route('/admin', methods=['GET', 'POST'])
+@limiter.limit("10 per minute")
 def admin_panel():
-    if request.method == 'POST' and request.form.get('password') == Config.ADMIN_PASSWORD:
-        session['logged_in'] = True
+    if request.method == 'POST':
+        submitted_password = request.form.get('password', '')
+        if secrets.compare_digest(submitted_password.encode('utf-8'), Config.ADMIN_PASSWORD.encode('utf-8')):
+            session['logged_in'] = True
+            return redirect(url_for('admin_panel'))
+        flash('كلمة المرور غير صحيحة', 'error')
         return redirect(url_for('admin_panel'))
 
     if session.get('logged_in'):
-        try:
-            categories = Category.query.order_by(Category.sort_order).all()
-            library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
-            library_ads = LibraryAd.query.order_by(LibraryAd.created_at.desc()).all()
-            users = User.query.all()
-            site_settings = SiteSetting.query.first()
-            return render_template('admin.html',
-                                   categories=categories,
-                                   library_items=library_items,
-                                   library_ads=library_ads,
-                                   users=users,
-                                   site_settings=site_settings,
-                                   csrf_token=generate_csrf_token())
-        except Exception as e:
-            logger.error(f"Admin panel error: {e}")
-            try:
-                return render_template('error.html', error_code=500, message="خطأ في لوحة التحكم"), 500
-            except:
-                return "<h1>500</h1><p>خطأ في لوحة التحكم</p><a href='/'>العودة</a>", 500
-    return render_template('admin.html')
+        categories = Category.query.order_by(Category.sort_order).all()
+        library_items = (PromptLibrary.query
+                          .filter_by(is_approved=True)
+                          .order_by(PromptLibrary.created_at.desc())
+                          .all())
+        pending_items = (PromptLibrary.query
+                          .filter_by(is_approved=False)
+                          .order_by(PromptLibrary.created_at.desc())
+                          .all())
+        library_ads = LibraryAd.query.order_by(LibraryAd.created_at.desc()).all()
+        users = User.query.all()
+        site_settings = SiteSetting.query.first()
+        return render_template('admin.html',
+                               categories=categories,
+                               library_items=library_items,
+                               pending_items=pending_items,
+                               library_ads=library_ads,
+                               users=users,
+                               site_settings=site_settings,
+                               csrf_token=generate_csrf_token())
+    return render_template('admin.html', csrf_token=generate_csrf_token())
 
 @app.route('/admin/logout')
 def admin_logout():
@@ -429,19 +400,6 @@ def delete_category(category_id):
         flash('خطأ في حذف التصنيف', 'error')
     return redirect(url_for('admin_panel'))
 
-@app.route('/admin/category/<int:category_id>/update', methods=['POST'])
-@admin_required
-def update_category(category_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    cat = Category.query.get_or_404(category_id)
-    cat.display_name = request.form.get('display_name', cat.display_name).strip()
-    cat.icon = request.form.get('icon', cat.icon).strip()
-    cat.sort_order = int(request.form.get('sort_order', cat.sort_order))
-    db.session.commit()
-    flash('تم تحديث التصنيف', 'success')
-    return redirect(url_for('admin_panel'))
-
 # ---------- Admin: Library ----------
 @app.route('/admin/library/add', methods=['POST'])
 @admin_required
@@ -454,7 +412,9 @@ def add_library_item():
             category=request.form.get('category', 'general'),
             image_url=request.form.get('image_url'),
             prompt_text=request.form.get('prompt_text'),
-            publisher=request.form.get('publisher', '').strip() or None
+            keywords=request.form.get('keywords', '').strip() or None,
+            publisher=request.form.get('publisher', '').strip() or None,
+            is_approved=True
         )
         db.session.add(item)
         db.session.commit()
@@ -486,9 +446,32 @@ def update_library_item(item_id):
     item.category = request.form.get('category', item.category)
     item.image_url = request.form.get('image_url', item.image_url)
     item.prompt_text = request.form.get('prompt_text', item.prompt_text)
+    item.keywords = request.form.get('keywords', item.keywords)
     item.publisher = request.form.get('publisher', item.publisher) or None
     db.session.commit()
     flash('تم تحديث البرومبت', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/library/<int:item_id>/approve', methods=['POST'])
+@admin_required
+def approve_library_item(item_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    item = PromptLibrary.query.get_or_404(item_id)
+    item.is_approved = True
+    db.session.commit()
+    flash('تمت الموافقة على البرومبت', 'success')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/library/<int:item_id>/reject', methods=['POST'])
+@admin_required
+def reject_library_item(item_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    item = PromptLibrary.query.get_or_404(item_id)
+    db.session.delete(item)
+    db.session.commit()
+    flash('تم رفض البرومبت وحذفه', 'success')
     return redirect(url_for('admin_panel'))
 
 # ---------- Admin: Library Ads ----------
@@ -569,7 +552,7 @@ def get_site_status():
         'offline_message': s.offline_message if s else 'الموقع تحت الصيانة حالياً.'
     })
 
-# ---------- Health check ----------
+# ---------- Health ----------
 @app.route('/health')
 def health_check():
     return jsonify({'status': 'ok', 'timestamp': datetime.utcnow().isoformat()})
