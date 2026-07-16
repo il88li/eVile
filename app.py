@@ -33,8 +33,6 @@ class Config:
     SQLALCHEMY_MAX_OVERFLOW = 40
     SQLALCHEMY_POOL_PRE_PING = True
 
-    REDIS_URL = os.getenv('REDIS_URL')
-
     SESSION_TYPE = 'sqlalchemy'
     SESSION_SQLALCHEMY_TABLE = 'flask_sessions'
     SESSION_PERMANENT = True
@@ -42,21 +40,11 @@ class Config:
     SESSION_KEY_PREFIX = 'ufoq_session:'
     PERMANENT_SESSION_LIFETIME = 2592000
 
-    if REDIS_URL:
-        CACHE_TYPE = 'RedisCache'
-        CACHE_REDIS_URL = REDIS_URL
-        CACHE_DEFAULT_TIMEOUT = 300
-        RATELIMIT_ENABLED = True
-        RATELIMIT_STORAGE_URI = REDIS_URL
-        RATELIMIT_STRATEGY = 'fixed-window'
-        logger.info("✅ Redis configured.")
-    else:
-        CACHE_TYPE = 'SimpleCache'
-        CACHE_DEFAULT_TIMEOUT = 300
-        RATELIMIT_ENABLED = True
-        RATELIMIT_STORAGE_URI = 'memory://'
-        RATELIMIT_STRATEGY = 'fixed-window'
-        logger.warning("⚠️ REDIS_URL not set. Using in-memory cache/limiter.")
+    CACHE_TYPE = 'SimpleCache'
+    CACHE_DEFAULT_TIMEOUT = 300
+    RATELIMIT_ENABLED = True
+    RATELIMIT_STORAGE_URI = 'memory://'
+    RATELIMIT_STRATEGY = 'fixed-window' 
 
 # ==================== Models ====================
 db = SQLAlchemy()
