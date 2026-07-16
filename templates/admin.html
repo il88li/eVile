@@ -9,19 +9,19 @@
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         :root {
-            --bg: #0b0e1a;
-            --bg-card: rgba(20,30,48,0.6);
+            --bg: #0f0c1d;
+            --bg-card: rgba(30,24,52,0.6);
             --glass-border: rgba(255,255,255,0.1);
-            --text: #f8fafc;
-            --text-dim: #94a3b8;
-            --text-faint: #64748b;
-            --primary: #38bdf8;
-            --primary-dim: rgba(56,189,248,0.15);
+            --text: #f7f5ff;
+            --text-dim: #a79fc4;
+            --text-faint: #6f6790;
+            --primary: #ffb454;
+            --primary-dim: rgba(255,180,84,0.15);
             --shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
         body {
             font-family: 'Tajawal', sans-serif;
-            background: linear-gradient(145deg, #0b0e1a 0%, #111827 100%);
+            background: linear-gradient(145deg, #0f0c1d 0%, #1a1330 100%);
             color: var(--text);
             min-height: 100vh;
             padding: 20px;
@@ -57,7 +57,7 @@
             display:inline-flex; align-items:center; gap:6px;
             font-family:'Tajawal',sans-serif;
         }
-        .btn-primary { background:var(--primary); color:#0b0e1a; }
+        .btn-primary { background:var(--primary); color:#0f0c1d; }
         .btn-danger { background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.2); }
         .btn-warning { background:rgba(245,158,11,0.15); color:#fbbf24; border:1px solid rgba(245,158,11,0.2); }
         .btn:hover { transform:scale(1.02); opacity:0.85; }
@@ -85,7 +85,7 @@
             cursor:pointer; transition:0.2s; text-decoration:none;
         }
         .nav-item:hover { color:var(--text); background:var(--primary-dim); }
-        .nav-item.active { background:var(--primary); color:#0b0e1a; }
+        .nav-item.active { background:var(--primary); color:#0f0c1d; }
         .nav-item i { font-size:20px; }
         .tab-content { display:none; }
         .tab-content.active { display:block; }
@@ -103,9 +103,36 @@
             <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
                 <button class="btn btn-primary" onclick="showTab('categories')">التصنيفات</button>
                 <button class="btn btn-primary" onclick="showTab('library')">المكتبة</button>
+                <button class="btn btn-warning" onclick="showTab('pending')">بانتظار المراجعة {% if pending_items %}({{ pending_items|length }}){% endif %}</button>
                 <button class="btn btn-primary" onclick="showTab('ads')">الإعلانات</button>
                 <button class="btn btn-primary" onclick="showTab('users')">المستخدمين</button>
                 <button class="btn btn-primary" onclick="showTab('settings')">إعدادات الموقع</button>
+            </div>
+
+            <!-- تبويب البرومبتات بانتظار المراجعة -->
+            <div id="tab-pending" class="tab-content glass-card">
+                <div class="section-title"><i class="bi bi-hourglass-split"></i> برومبتات بانتظار المراجعة</div>
+                {% for item in pending_items %}
+                <div class="item-card">
+                    <img src="{{ item.image_url }}" alt="" style="width:56px;height:56px;border-radius:12px;object-fit:cover;">
+                    <div class="info">
+                        <div class="title">{{ item.title }}</div>
+                        <div class="meta">تصنيف: {{ item.category }} | بواسطة: {{ item.publisher or '—' }}</div>
+                    </div>
+                    <div class="actions">
+                        <form method="POST" action="/admin/library/{{ item.id }}/approve">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> موافقة</button>
+                        </form>
+                        <form method="POST" action="/admin/library/{{ item.id }}/reject" onsubmit="return confirm('رفض وحذف البرومبت؟')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="btn btn-danger"><i class="bi bi-x-lg"></i> رفض</button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <p style="color:var(--text-dim);">لا توجد برومبتات بانتظار المراجعة حالياً.</p>
+                {% endfor %}
             </div>
 
             <!-- تبويب التصنيفات -->
@@ -153,6 +180,7 @@
                             </select>
                         </div>
                         <div class="form-group"><label>رابط الصورة</label><input type="url" name="image_url" required></div>
+                        <div class="form-group"><label>كلمات مفتاحية</label><input type="text" name="keywords" placeholder="مفصولة بفواصل"></div>
                         <div class="form-group" style="grid-column:1/-1;"><label>نص البرومبت</label><textarea name="prompt_text" required rows="4"></textarea></div>
                     </div>
                     <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> إضافة برومبت</button>
@@ -253,6 +281,7 @@
                 <div class="glass-card">
                     <h2 style="margin-bottom:20px;">لوحة التحكم</h2>
                     <form method="POST" action="/admin">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                         <div class="form-group">
                             <label>كلمة المرور</label>
                             <input type="password" name="password" required>
