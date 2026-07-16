@@ -26,7 +26,10 @@ class PromptLibrary(db.Model):
     category = db.Column(db.String(50), nullable=False, default='general')
     image_url = db.Column(db.String(500), nullable=False)
     prompt_text = db.Column(db.Text, nullable=False)
+    keywords = db.Column(db.String(300), nullable=True)
     publisher = db.Column(db.String(80), nullable=True)  # اسم الناشر
+    submitted_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    is_approved = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class LibraryAd(db.Model):
