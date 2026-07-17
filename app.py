@@ -143,18 +143,6 @@ def ensure_db_initialized():
             if not SiteSetting.query.first():
                 db.session.add(SiteSetting())
                 db.session.commit()
-            if not Category.query.first():
-                defaults = [
-                    Category(name='images', display_name='توليد صور', sort_order=1),
-                    Category(name='writing', display_name='كتابة محتوى', sort_order=2),
-                    Category(name='coding', display_name='برمجة', sort_order=3),
-                    Category(name='design', display_name='تصميم UI', sort_order=4),
-                    Category(name='analysis', display_name='تحليل بيانات', sort_order=5),
-                    Category(name='creative', display_name='إبداعي', sort_order=6),
-                ]
-                for cat in defaults:
-                    db.session.add(cat)
-                db.session.commit()
             _db_initialized = True
             logger.info("✅ Database initialized.")
         except Exception as e:
