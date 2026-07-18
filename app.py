@@ -1,481 +1,777 @@
-import os
-import logging
-import secrets
-import base64
-from datetime import datetime
-from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_caching import Cache
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from flask_talisman import Talisman
-from flask_session import Session
-from sqlalchemy.exc import SQLAlchemyError
-from dotenv import load_dotenv
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>UFOQ – مكتبة البرومبتات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        :root {
+            /* Obsidian Glow palette */
+            --bg: #050505;
+            --bg-card: rgba(255,255,255,0.045);
+            --border: rgba(255,255,255,0.09);
+            --border-strong: rgba(139,92,246,0.4);
+            --text: #F1EEFA;
+            --text-dim: #B4ACC9;
+            --text-faint: #6F6785;
+            --primary: #3A0CA3;
+            --primary-light: #8B5CF6;
+            --primary-dim: rgba(139,92,246,0.12);
+            --primary-dark: #2C0878;
+            --shadow: 0 4px 24px rgba(0,0,0,0.5);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.6);
+            --glow: 0 0 40px rgba(58,12,163,0.35);
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        /* Ambient glow — the Obsidian Glow signature */
+        body::before, body::after {
+            content: ''; position: fixed; z-index: 0; pointer-events: none;
+            border-radius: 50%; filter: blur(90px);
+        }
+        body::before {
+            width: 560px; height: 560px; top: -180px; right: -160px;
+            background: radial-gradient(circle, rgba(58,12,163,0.55) 0%, rgba(58,12,163,0) 70%);
+        }
+        body::after {
+            width: 480px; height: 480px; bottom: -160px; left: -140px;
+            background: radial-gradient(circle, rgba(114,9,183,0.4) 0%, rgba(114,9,183,0) 70%);
+        }
+        .main-content, .floating-header, .bottom-nav-bar { position: relative; z-index: 1; }
 
-load_dotenv()
-logger = logging.getLogger(__name__)
-
-# ==================== Config ====================
-class Config:
-    SECRET_KEY = os.getenv('SECRET_KEY')
-    if not SECRET_KEY:
-        raise ValueError("SECRET_KEY environment variable is required!")
-
-    ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
-
-    DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://user:pass@localhost:5432/db')
-    # Render provides postgres:// but SQLAlchemy 2.0 requires postgresql://
-    if DATABASE_URL.startswith('postgres://'):
-        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
-    SQLALCHEMY_DATABASE_URI = DATABASE_URL
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_POOL_SIZE = 20
-    SQLALCHEMY_MAX_OVERFLOW = 40
-    SQLALCHEMY_POOL_PRE_PING = True
-
-    SESSION_TYPE = 'sqlalchemy'
-    SESSION_SQLALCHEMY_TABLE = 'flask_sessions'
-    SESSION_PERMANENT = True
-    SESSION_USE_SIGNER = True
-    SESSION_KEY_PREFIX = 'ufoq_session:'
-    PERMANENT_SESSION_LIFETIME = 2592000
-
-    CACHE_TYPE = 'SimpleCache'
-    CACHE_DEFAULT_TIMEOUT = 300
-    RATELIMIT_ENABLED = True
-    RATELIMIT_STORAGE_URI = 'memory://'
-    RATELIMIT_STRATEGY = 'fixed-window' 
-
-# ==================== Models ====================
-db = SQLAlchemy()
-
-class Category(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False, unique=True)
-    display_name = db.Column(db.String(100), nullable=False)
-    icon = db.Column(db.String(50), default='bi-tag')
-    sort_order = db.Column(db.Integer, default=0)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class PromptLibrary(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    category = db.Column(db.String(50), nullable=False, default='general')
-    image_url = db.Column(db.String(500), nullable=False)
-    prompt_text = db.Column(db.Text, nullable=False)
-    publisher = db.Column(db.String(80), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class LibraryAd(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    text = db.Column(db.Text, nullable=False)
-    image_url = db.Column(db.String(500), nullable=True)
-    button_text = db.Column(db.String(100), nullable=False)
-    button_link = db.Column(db.String(500), nullable=False)
-    duration_seconds = db.Column(db.Integer, default=5)
-    is_active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class SiteSetting(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(db.String(10), default='on')
-    offline_message = db.Column(db.Text, default='الموقع تحت الصيانة حالياً.')
-
-class UploadContribution(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    category = db.Column(db.String(50), nullable=False, default='general')
-    image_url = db.Column(db.String(500), nullable=True)
-    prompt_text = db.Column(db.Text, nullable=False)
-    publisher_name = db.Column(db.String(80), nullable=True)
-    status = db.Column(db.String(20), default='pending')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-# ==================== App Factory ====================
-app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
-app.config.from_object(Config)
-
-db.init_app(app)
-migrate = Migrate(app, db)
-cache = Cache(app)
-limiter = Limiter(get_remote_address, app=app, default_limits=[], storage_uri=app.config['RATELIMIT_STORAGE_URI'])
-Talisman(app, force_https=False, content_security_policy={
-    'default-src': ["'self'"],
-    'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
-    'script-src': ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
-    'font-src': ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net"],
-    'img-src': ["'self'", "data:", "https:"],
-    'connect-src': ["'self'"]
-})
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# ---------- Helper functions ----------
-def generate_csrf_token():
-    if 'csrf_token' not in session:
-        session['csrf_token'] = secrets.token_urlsafe(32)
-    return session['csrf_token']
-
-def validate_csrf_token(token):
-    return token == session.get('csrf_token')
-
-def admin_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if not session.get('logged_in'):
-            return redirect(url_for('admin_panel'))
-        return f(*args, **kwargs)
-    return decorated
-
-# ---------- Database initialization ----------
-_db_initialized = False
-@app.before_request
-def ensure_db_initialized():
-    global _db_initialized
-    if not _db_initialized:
-        try:
-            db.create_all()
-            if not SiteSetting.query.first():
-                db.session.add(SiteSetting())
-                db.session.commit()
-            _db_initialized = True
-            logger.info("✅ Database initialized.")
-        except Exception as e:
-            logger.error(f"❌ DB init error: {e}")
-            db.session.rollback()
-
-# ---------- Public routes ----------
-@app.route('/')
-def index():
-    site = SiteSetting.query.first()
-    if site and site.status == 'off':
-        return render_template('index.html', site_status='off', offline_message=site.offline_message)
-
-    categories = Category.query.order_by(Category.sort_order).all()
-    library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
-    active_ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
-
-    ad_dict = None
-    if active_ad:
-        ad_dict = {
-            'id': active_ad.id,
-            'title': active_ad.title,
-            'text': active_ad.text,
-            'image_url': active_ad.image_url,
-            'button_text': active_ad.button_text,
-            'button_link': active_ad.button_link,
-            'duration_seconds': active_ad.duration_seconds
+        /* Glass surface */
+        .glass {
+            background: var(--bg-card);
+            backdrop-filter: blur(22px) saturate(160%);
+            -webkit-backdrop-filter: blur(22px) saturate(160%);
+            border: 1px solid var(--border);
         }
 
-    return render_template('index.html',
-                           categories=categories,
-                           library_items=library_items,
-                           active_ad=ad_dict,
-                           site_status='on')
+        /* Floating Header */
+        .floating-header {
+            position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 16px; max-width: 700px; margin: 0 auto;
+            border-radius: 16px;
+            background: var(--bg-card);
+            backdrop-filter: blur(22px) saturate(160%);
+            -webkit-backdrop-filter: blur(22px) saturate(160%);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+        .header-center {
+            position: absolute; left: 50%; transform: translateX(-50%);
+            font-size: 18px; font-weight: 900; letter-spacing: 2px; color: var(--text);
+            background: linear-gradient(90deg, var(--text) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .header-btn {
+            width: 34px; height: 34px; border-radius: 8px;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text-dim); transition: 0.2s;
+            text-decoration: none;
+        }
+        .header-btn:hover { background: var(--primary-dim); color: var(--primary-light); border-color: var(--border-strong); }
+        .header-btn i { font-size: 16px; }
 
-@app.route('/upload', methods=['GET', 'POST'])
-def upload():
-    if request.method == 'POST':
-        data = request.get_json()
-        if not data:
-            return jsonify({'success': False, 'message': 'بيانات غير صحيحة'}), 400
+        /* Main content */
+        .main-content {
+            padding: 90px 16px 140px 16px;
+            max-width: 1400px; margin: 0 auto;
+        }
 
-        title = data.get('title', '').strip()
-        category = data.get('category', 'general').strip()
-        prompt_text = data.get('prompt_text', '').strip()
-        image_url = data.get('image_url', '').strip()
-        publisher_name = data.get('publisher_name', '').strip()
-        csrf_token = data.get('csrf_token', '')
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(22px) saturate(160%);
+            -webkit-backdrop-filter: blur(22px) saturate(160%);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
 
-        if not validate_csrf_token(csrf_token):
-            return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
+        /* Hero */
+        .hero { text-align: center; padding: 32px 20px; }
+        .hero h1 { font-size: 2rem; font-weight: 900; margin-bottom: 6px; }
+        .hero h1 span { color: var(--primary-light); }
+        .hero p { font-size: 0.95rem; color: var(--text-dim); max-width: 500px; margin: 0 auto 16px; line-height: 1.7; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--primary-dim); border: 1px solid var(--border-strong);
+            padding: 6px 18px; border-radius: 50px; font-size: 0.85rem; color: var(--primary-light);
+            font-weight: 700;
+        }
 
-        if not title or not prompt_text:
-            return jsonify({'success': False, 'message': 'يرجى ملء العنوان ونص البرومبت'}), 400
+        /* Search & Filter */
+        .search-bar {
+            display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+            margin-bottom: 16px;
+        }
+        .search-bar input {
+            flex: 1; min-width: 200px;
+            padding: 10px 16px; border-radius: 8px;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            color: var(--text); font-family: 'Tajawal', sans-serif; font-size: 0.9rem;
+            outline: none; transition: 0.2s;
+        }
+        .search-bar input:focus { border-color: var(--primary-light); background: rgba(255,255,255,0.08); box-shadow: 0 0 0 3px var(--primary-dim); }
+        .search-bar input::placeholder { color: var(--text-faint); }
 
-        try:
-            contribution = UploadContribution(
-                title=title,
-                category=category,
-                prompt_text=prompt_text,
-                image_url=image_url or None,
-                publisher_name=publisher_name or None
-            )
-            db.session.add(contribution)
-            db.session.commit()
-            return jsonify({'success': True, 'message': 'تم استلام مساهمتك بنجاح! سيتم مراجعتها قريباً.'})
-        except Exception as e:
-            db.session.rollback()
-            logger.error(f"Upload error: {e}")
-            return jsonify({'success': False, 'message': 'خطأ في حفظ البيانات'}), 500
+        .categories-scroll {
+            display: flex; gap: 8px; overflow-x: auto; padding: 4px 0; scrollbar-width: none;
+        }
+        .categories-scroll::-webkit-scrollbar { display: none; }
+        .category-btn {
+            flex-shrink: 0; padding: 6px 16px; border-radius: 8px;
+            background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+            color: var(--text-dim); font-family: 'Tajawal', sans-serif;
+            font-weight: 600; font-size: 0.8rem; cursor: pointer;
+            transition: 0.2s; white-space: nowrap;
+        }
+        .category-btn:hover { background: var(--primary-dim); color: var(--primary-light); border-color: var(--border-strong); }
+        .category-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%);
+            color: #fff; border-color: var(--primary-light);
+            font-weight: 700; box-shadow: 0 0 16px rgba(139,92,246,0.35);
+        }
 
-    categories = Category.query.order_by(Category.sort_order).all()
-    return render_template('upload.html', categories=categories, csrf_token=generate_csrf_token())
+        /* Gallery grid */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
 
-# ---------- Admin ----------
-@app.route('/admin', methods=['GET', 'POST'])
-def admin_panel():
-    if request.method == 'POST' and request.form.get('password') == Config.ADMIN_PASSWORD:
-        session['logged_in'] = True
-        return redirect(url_for('admin_panel'))
+        /* Prompt card */
+        .prompt-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(22px) saturate(160%);
+            -webkit-backdrop-filter: blur(22px) saturate(160%);
+            border: 1px solid var(--border);
+            border-radius: 16px; overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex; flex-direction: column;
+        }
+        .prompt-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-strong);
+            box-shadow: 0 8px 28px rgba(58,12,163,0.3);
+        }
+        .prompt-card.highlighted {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 2px rgba(139,92,246,0.5), var(--glow);
+            animation: highlightPulse 1.8s ease-in-out 1;
+        }
+        @keyframes highlightPulse {
+            0% { box-shadow: 0 0 0 2px rgba(139,92,246,0.9), 0 0 50px rgba(139,92,246,0.6); }
+            100% { box-shadow: 0 0 0 2px rgba(139,92,246,0.5), var(--glow); }
+        }
+        .prompt-card .image-wrapper {
+            position: relative; overflow: hidden;
+            background: rgba(255,255,255,0.03);
+            display: flex; align-items: center; justify-content: center;
+            min-height: 180px;
+        }
+        .prompt-card .image-wrapper img {
+            width: 100%; height: auto; max-height: 350px; object-fit: contain; display: block;
+            transition: transform 0.4s ease;
+        }
+        .prompt-card:hover .image-wrapper img { transform: scale(1.03); }
+        .prompt-card .image-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .prompt-card .image-title {
+            position: absolute; bottom: 12px; right: 12px;
+            color: #fff; font-weight: 800; font-size: 1rem;
+            pointer-events: none; z-index: 2;
+        }
+        .prompt-card .card-category {
+            position: absolute; top: 10px; left: 10px;
+            background: rgba(5,5,5,0.55); backdrop-filter: blur(10px);
+            padding: 4px 12px; border-radius: 6px;
+            font-size: 0.7rem; font-weight: 600; color: #fff;
+            border: 1px solid rgba(255,255,255,0.1);
+            z-index: 3;
+        }
+        .prompt-card .card-actions {
+            padding: 14px 14px 8px 14px;
+            display: flex; gap: 8px; align-items: center;
+            flex-wrap: wrap;
+        }
+        .prompt-card .card-meta {
+            padding: 0 14px 14px 14px;
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 0.75rem; color: var(--text-faint);
+        }
+        .card-meta .meta-copies {
+            display: flex; align-items: center; gap: 5px;
+        }
+        .card-meta .meta-publisher {
+            display: flex; align-items: center; gap: 5px;
+            background: none; border: none; padding: 0;
+            font-family: 'Tajawal', sans-serif; font-size: 0.75rem;
+            color: var(--text-faint); cursor: default;
+        }
+        .card-meta .meta-publisher.linked {
+            color: var(--primary-light); cursor: pointer;
+            text-decoration: none;
+        }
+        .card-meta .meta-publisher.linked:hover { text-decoration: underline; }
 
-    if session.get('logged_in'):
-        categories = Category.query.order_by(Category.sort_order).all()
-        library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
-        library_ads = LibraryAd.query.order_by(LibraryAd.created_at.desc()).all()
-        site_settings = SiteSetting.query.first()
-        contributions = UploadContribution.query.order_by(UploadContribution.created_at.desc()).all()
-        return render_template('admin.html',
-                               categories=categories,
-                               library_items=library_items,
-                               library_ads=library_ads,
-                               site_settings=site_settings,
-                               contributions=contributions,
-                               csrf_token=generate_csrf_token())
-    return render_template('admin.html')
+        /* Publisher link disclaimer modal */
+        .disclaimer-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px);
+            z-index: 5500; display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .disclaimer-overlay.show { display: flex; }
+        .disclaimer-box {
+            background: rgba(15,13,20,0.92);
+            backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
+            border-radius: 16px; max-width: 380px; width: 100%;
+            border: 1px solid var(--border-strong);
+            box-shadow: var(--shadow-lg), var(--glow);
+            padding: 24px; text-align: center;
+        }
+        .disclaimer-box i.warn-icon { font-size: 34px; color: #f59e0b; margin-bottom: 10px; display: block; }
+        .disclaimer-box h3 { font-size: 1.05rem; font-weight: 900; margin-bottom: 10px; color: var(--text); }
+        .disclaimer-box p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.8; margin-bottom: 18px; }
+        .disclaimer-actions { display: flex; gap: 10px; }
+        .disclaimer-actions button {
+            flex: 1; padding: 10px; border-radius: 8px; border: none;
+            font-family: 'Tajawal', sans-serif; font-weight: 700; font-size: 0.85rem;
+            cursor: pointer; transition: 0.2s;
+        }
+        .disclaimer-cancel { background: rgba(255,255,255,0.06); color: var(--text-dim); }
+        .disclaimer-cancel:hover { background: rgba(255,255,255,0.1); }
+        .disclaimer-continue {
+            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%); color: #fff;
+        }
+        .disclaimer-continue:hover { filter: brightness(1.15); }
+        .copy-btn, .like-btn, .share-btn {
+            padding: 0 14px; border-radius: 8px;
+            border: none; font-weight: 700; cursor: pointer;
+            transition: 0.2s; font-family: 'Tajawal', sans-serif;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            font-size: 0.8rem;
+            height: 42px;
+        }
+        .copy-btn {
+            flex: 1;
+            background: linear-gradient(120deg, var(--primary) 0%, #7209B7 35%, var(--primary-light) 65%, var(--primary) 100%);
+            background-size: 300% 100%;
+            animation: copyGradientShift 6s ease infinite;
+            color: #fff;
+            box-shadow: 0 2px 10px rgba(58,12,163,0.4);
+        }
+        @keyframes copyGradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .copy-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+        .copy-btn:active { transform: scale(0.97); }
+        .copy-btn.copied { background: #10b981; animation: none; }
+        .like-btn, .share-btn {
+            background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 0 12px;
+            transition: 0.2s;
+        }
+        .like-btn:hover { border-color: #ef4444; color: #ef4444; }
+        .like-btn.liked { background: rgba(239,68,68,0.1); border-color: #ef4444; color: #ef4444; }
+        .like-btn i, .share-btn i { font-size: 1rem; }
+        .share-btn:hover { border-color: var(--border-strong); color: var(--primary-light); }
+        .share-btn.shared { background: rgba(139,92,246,0.15); border-color: var(--primary-light); color: var(--primary-light); }
 
-@app.route('/admin/logout')
-def admin_logout():
-    session.pop('logged_in', None)
-    return redirect(url_for('admin_panel'))
+        /* Empty state */
+        .empty-state {
+            text-align: center; padding: 60px 20px; grid-column: 1 / -1;
+            color: var(--text-faint);
+        }
+        .empty-state i { font-size: 48px; display: block; margin-bottom: 12px; opacity: 0.4; }
 
-# ---------- Admin: Categories ----------
-@app.route('/admin/category/add', methods=['POST'])
-@admin_required
-def add_category():
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        name = request.form.get('name', '').strip().lower().replace(' ', '_')
-        display_name = request.form.get('display_name', '').strip()
-        icon = request.form.get('icon', 'bi-tag').strip()
-        sort_order = int(request.form.get('sort_order', 0))
-        if not name or not display_name:
-            flash('اسم التصنيف واسم العرض مطلوبان', 'error')
-            return redirect(url_for('admin_panel'))
-        if Category.query.filter_by(name=name).first():
-            flash('التصنيف موجود مسبقاً', 'error')
-            return redirect(url_for('admin_panel'))
-        cat = Category(name=name, display_name=display_name, icon=icon, sort_order=sort_order)
-        db.session.add(cat)
-        db.session.commit()
-        flash('تمت إضافة التصنيف', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error adding category: {e}")
-        flash('خطأ في إضافة التصنيف', 'error')
-    return redirect(url_for('admin_panel'))
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 100px; left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(20,18,28,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-strong);
+            color: #fff;
+            padding: 10px 22px; border-radius: 8px;
+            font-weight: 700; font-size: 0.85rem;
+            z-index: 2000; opacity: 0; transition: 0.3s;
+            display: flex; align-items: center; gap: 8px;
+            font-family: 'Tajawal', sans-serif;
+            box-shadow: var(--shadow-lg);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-@app.route('/admin/category/<int:category_id>/delete', methods=['POST'])
-@admin_required
-def delete_category(category_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        cat = Category.query.get_or_404(category_id)
-        PromptLibrary.query.filter_by(category=cat.name).update({'category': 'general'})
-        db.session.delete(cat)
-        db.session.commit()
-        flash('تم حذف التصنيف', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error deleting category: {e}")
-        flash('خطأ في حذف التصنيف', 'error')
-    return redirect(url_for('admin_panel'))
+        /* Ad overlay */
+        .ad-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px);
+            z-index: 5000; display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .ad-overlay.show { display: flex; }
+        .ad-box {
+            background: rgba(15,13,20,0.9);
+            backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
+            border-radius: 16px; max-width: 400px; width: 100%;
+            border: 1px solid var(--border-strong); overflow: hidden;
+            position: relative; box-shadow: var(--shadow-lg), var(--glow);
+        }
+        .ad-box img { width: 100%; height: 160px; object-fit: contain; display: block; background: rgba(255,255,255,0.03); }
+        .ad-no-image {
+            height: 140px; display: flex; align-items: center; justify-content: center;
+            color: var(--text-faint); font-size: 40px; background: rgba(255,255,255,0.03);
+        }
+        .ad-content { padding: 22px; text-align: center; }
+        .ad-title { font-size: 1.1rem; font-weight: 900; margin-bottom: 6px; color: var(--text); }
+        .ad-text { font-size: 0.85rem; color: var(--text-dim); line-height: 1.7; margin-bottom: 18px; }
+        .ad-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%); color: #fff;
+            padding: 10px 24px; border-radius: 8px; text-decoration: none;
+            font-weight: 700; font-size: 0.85rem; border: none; cursor: pointer;
+            font-family: 'Tajawal', sans-serif; transition: 0.2s;
+            box-shadow: 0 2px 12px rgba(58,12,163,0.4);
+        }
+        .ad-btn:hover { filter: brightness(1.15); }
+        .ad-timer {
+            position: absolute; top: 10px; left: 10px;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
+            color: #fff; padding: 4px 12px; border-radius: 6px;
+            font-size: 12px; font-weight: 700;
+        }
 
-# ---------- Admin: Library ----------
-@app.route('/admin/library/add', methods=['POST'])
-@admin_required
-def add_library_item():
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        item = PromptLibrary(
-            title=request.form.get('title'),
-            category=request.form.get('category', 'general'),
-            image_url=request.form.get('image_url'),
-            prompt_text=request.form.get('prompt_text'),
-            publisher=request.form.get('publisher', '').strip() or None
-        )
-        db.session.add(item)
-        db.session.commit()
-        flash('تمت إضافة البرومبت', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error adding library item: {e}")
-        flash('خطأ في إضافة البرومبت', 'error')
-    return redirect(url_for('admin_panel'))
+        /* Bottom nav */
+        .bottom-nav-bar {
+            position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; display: flex; align-items: center; gap: 6px;
+            padding: 8px 16px;
+            background: var(--bg-card);
+            backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
+            border: 1px solid var(--border); border-radius: 50px;
+            box-shadow: var(--shadow-lg); max-width: 600px; width: auto;
+        }
+        .nav-item {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: 40px;
+            background: transparent; border: none; color: var(--text-faint);
+            font-family: 'Tajawal', sans-serif; font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: 0.2s; text-decoration: none;
+            white-space: nowrap;
+        }
+        .nav-item:hover { color: var(--text); background: var(--primary-dim); }
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%); color: #fff;
+            box-shadow: 0 0 14px rgba(139,92,246,0.4);
+        }
+        .nav-item i { font-size: 18px; }
+        .nav-label {
+            max-width: 0; overflow: hidden; transition: 0.2s; opacity: 0;
+        }
+        .nav-item.active .nav-label { max-width: 80px; opacity: 1; }
 
-@app.route('/admin/library/<int:item_id>/delete', methods=['POST'])
-@admin_required
-def delete_library_item(item_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    item = PromptLibrary.query.get_or_404(item_id)
-    db.session.delete(item)
-    db.session.commit()
-    flash('تم حذف البرومبت', 'success')
-    return redirect(url_for('admin_panel'))
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.5rem; }
+            .gallery-grid { grid-template-columns: 1fr; gap: 16px; }
+            .bottom-nav-bar { padding: 6px 12px; max-width: 95vw; }
+            .nav-item { padding: 6px 12px; font-size: 12px; }
+            .nav-item i { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Header -->
+    <header class="floating-header" style="justify-content: center;">
+        <div class="header-center" style="position: static; transform: none;">UFOQ</div>
+    </header>
 
-@app.route('/admin/library/<int:item_id>/update', methods=['POST'])
-@admin_required
-def update_library_item(item_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    item = PromptLibrary.query.get_or_404(item_id)
-    item.title = request.form.get('title', item.title)
-    item.category = request.form.get('category', item.category)
-    item.image_url = request.form.get('image_url', item.image_url)
-    item.prompt_text = request.form.get('prompt_text', item.prompt_text)
-    item.publisher = request.form.get('publisher', item.publisher) or None
-    db.session.commit()
-    flash('تم تحديث البرومبت', 'success')
-    return redirect(url_for('admin_panel'))
+    <div class="main-content">
+        <!-- Hero -->
+        <div class="card hero">
+            <h1>مرحباً بك في <span>UFOQ</span></h1>
+            <p>مكتبة ضخمة من البرومبتات الجاهزة للاستخدام – اختر، انسخ، وابدأ الإبداع فوراً.</p>
+            <div class="hero-badge"><i class="bi bi-stars"></i> أكثر من {{ library_items|length }} برومبت</div>
+        </div>
 
-# ---------- Admin: Contributions ----------
-@app.route('/admin/contribution/<int:contrib_id>/approve', methods=['POST'])
-@admin_required
-def approve_contribution(contrib_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        contrib = UploadContribution.query.get_or_404(contrib_id)
-        item = PromptLibrary(
-            title=contrib.title,
-            category=contrib.category,
-            image_url=contrib.image_url or '',
-            prompt_text=contrib.prompt_text,
-            publisher=contrib.publisher_name
-        )
-        db.session.add(item)
-        contrib.status = 'approved'
-        db.session.commit()
-        flash('تمت الموافقة على المساهمة', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error approving contribution: {e}")
-        flash('خطأ', 'error')
-    return redirect(url_for('admin_panel'))
+        <!-- Search & Filter -->
+        <div class="card">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="ابحث في البرومبتات (العنوان أو الكلمات المفتاحية)" oninput="filterPrompts()">
+            </div>
+            <div class="categories-scroll" id="categoriesContainer">
+                <button class="category-btn active" data-category="all">الكل</button>
+                {% for cat in categories %}
+                <button class="category-btn" data-category="{{ cat.name }}">{{ cat.display_name }}</button>
+                {% endfor %}
+            </div>
+        </div>
 
-@app.route('/admin/contribution/<int:contrib_id>/reject', methods=['POST'])
-@admin_required
-def reject_contribution(contrib_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        contrib = UploadContribution.query.get_or_404(contrib_id)
-        contrib.status = 'rejected'
-        db.session.commit()
-        flash('تم رفض المساهمة', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error rejecting contribution: {e}")
-        flash('خطأ', 'error')
-    return redirect(url_for('admin_panel'))
+        <!-- Gallery -->
+        <div class="gallery-grid" id="galleryGrid">
+            {% for item in library_items %}
+            <div class="prompt-card" id="prompt-{{ item.id }}" data-item-id="{{ item.id }}" data-category="{{ item.category }}" data-title="{{ item.title|lower }}" data-keywords="{{ (item.prompt_text ~ ' ' ~ (item.keywords or ''))|lower }}">
+                <div class="image-wrapper">
+                    <span class="card-category">{{ item.category }}</span>
+                    <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy" onerror="this.style.display='none';this.parentElement.innerHTML+='<div style=display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-faint)><i class=bi bi-image style=font-size:40px></i></div>'">
+                    <div class="image-overlay"></div>
+                    <div class="image-title">{{ item.title }}</div>
+                </div>
+                <div class="card-actions">
+                    <button class="copy-btn" data-prompt="{{ item.prompt_text }}" data-id="{{ item.id }}" onclick="handleCopy(event)"><i class="bi bi-files"></i> نسخ</button>
+                    <button class="share-btn" data-id="{{ item.id }}" onclick="shareCard(event)"><i class="bi bi-share"></i></button>
+                    <button class="like-btn" data-id="{{ item.id }}" onclick="toggleLike(event)"><i class="bi bi-heart"></i> <span class="like-count">0</span></button>
+                </div>
+                <div class="card-meta">
+                    <span class="meta-copies"><i class="bi bi-clipboard-check"></i> <span class="copy-count-display">{{ item.copy_count or 0 }}</span> نسخة</span>
+                    {% if item.publisher %}
+                        {% if item.publisher_link %}
+                        <span class="meta-publisher linked" onclick="openPublisherLink('{{ item.publisher_link }}')"><i class="bi bi-person-check"></i> {{ item.publisher }}</span>
+                        {% else %}
+                        <span class="meta-publisher"><i class="bi bi-person"></i> {{ item.publisher }}</span>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-collection"></i>
+                <p>لا توجد برومبتات في المكتبة حالياً</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 
-@app.route('/admin/contribution/<int:contrib_id>/delete', methods=['POST'])
-@admin_required
-def delete_contribution(contrib_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        contrib = UploadContribution.query.get_or_404(contrib_id)
-        db.session.delete(contrib)
-        db.session.commit()
-        flash('تم حذف المساهمة', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error deleting contribution: {e}")
-        flash('خطأ', 'error')
-    return redirect(url_for('admin_panel'))
+    <!-- Toast -->
+    <div class="toast" id="toast"><i class="bi bi-check-lg"></i> تم النسخ!</div>
 
-# ---------- Admin: Library Ads ----------
-@app.route('/admin/library_ad/add', methods=['POST'])
-@admin_required
-def add_library_ad():
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        ad = LibraryAd(
-            title=request.form.get('title'),
-            text=request.form.get('text'),
-            image_url=request.form.get('image_url') or None,
-            button_text=request.form.get('button_text'),
-            button_link=request.form.get('button_link'),
-            duration_seconds=int(request.form.get('duration_seconds', 5)),
-            is_active=request.form.get('is_active') == 'on'
-        )
-        db.session.add(ad)
-        db.session.commit()
-        flash('تمت إضافة الإعلان', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error adding library ad: {e}")
-        flash('خطأ في إضافة الإعلان', 'error')
-    return redirect(url_for('admin_panel'))
+    <!-- Ad Overlay -->
+    <div class="ad-overlay" id="adOverlay">
+        <div class="ad-box">
+            <div id="adImageContainer">
+                <div class="ad-no-image" id="adNoImage"><i class="bi bi-megaphone-fill"></i></div>
+            </div>
+            <div class="ad-content">
+                <div class="ad-title" id="adTitle">إعلان</div>
+                <div class="ad-text" id="adText">...</div>
+                <a href="#" target="_blank" class="ad-btn" id="adBtn"><i class="bi bi-box-arrow-up-right"></i> <span id="adBtnText">زيارة</span></a>
+            </div>
+            <div class="ad-timer" id="adTimer">5</div>
+        </div>
+    </div>
 
-@app.route('/admin/library_ad/<int:ad_id>/delete', methods=['POST'])
-@admin_required
-def delete_library_ad(ad_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        ad = LibraryAd.query.get_or_404(ad_id)
-        db.session.delete(ad)
-        db.session.commit()
-        flash('تم حذف الإعلان', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error deleting library ad: {e}")
-        flash('خطأ في حذف الإعلان', 'error')
-    return redirect(url_for('admin_panel'))
+    <!-- Publisher Link Disclaimer -->
+    <div class="disclaimer-overlay" id="disclaimerOverlay">
+        <div class="disclaimer-box">
+            <i class="bi bi-exclamation-triangle-fill warn-icon"></i>
+            <h3>أنت تغادر UFOQ</h3>
+            <p>هذا رابط خارجي أضافه الناشر بنفسه. موقع UFOQ لا يتحمل أي مسؤولية عن محتوى الروابط الخارجية أو أي أضرار قد تنتج عن زيارتها، ولا يضمن سلامتها. يرجى التعامل معها بحذر.</p>
+            <div class="disclaimer-actions">
+                <button class="disclaimer-cancel" onclick="closeDisclaimer()">إلغاء</button>
+                <button class="disclaimer-continue" onclick="confirmPublisherLink()">متابعة على مسؤوليتي</button>
+            </div>
+        </div>
+    </div>
 
-@app.route('/admin/library_ad/<int:ad_id>/toggle', methods=['POST'])
-@admin_required
-def toggle_library_ad(ad_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        ad = LibraryAd.query.get_or_404(ad_id)
-        ad.is_active = not ad.is_active
-        db.session.commit()
-        flash('تم تغيير حالة الإعلان', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error toggling library ad: {e}")
-        flash('خطأ في تغيير حالة الإعلان', 'error')
-    return redirect(url_for('admin_panel'))
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav-bar">
+        <a href="/" class="nav-item active"><i class="bi bi-house-door-fill"></i><span class="nav-label">الرئيسية</span></a>
+        <a href="/upload" class="nav-item"><i class="bi bi-cloud-upload"></i><span class="nav-label">المساهمة</span></a>
+    </nav>
 
-# ---------- Admin: Site Settings ----------
-@app.route('/api/admin/update_site_settings', methods=['POST'])
-@admin_required
-def update_site_settings():
-    if not validate_csrf_token(request.json.get('csrf_token')):
-        return jsonify({'error': 'CSRF Error'}), 400
-    s = SiteSetting.query.first()
-    s.status = request.json.get('status', 'on')
-    s.offline_message = request.json.get('offline_message', 'الموقع تحت الصيانة حالياً.')
-    db.session.commit()
-    return jsonify({'success': True})
+    <script>
+        // ---------- Like system (cookies) ----------
+        function getLikes() {
+            try {
+                const data = document.cookie.split('; ').find(row => row.startsWith('ufoq_likes='));
+                return data ? JSON.parse(decodeURIComponent(data.split('=')[1])) : {};
+            } catch { return {}; }
+        }
+        function setLikes(likes) {
+            document.cookie = `ufoq_likes=${encodeURIComponent(JSON.stringify(likes))}; path=/; max-age=31536000`;
+        }
 
-@app.route('/api/admin/get_site_status')
-@admin_required
-def get_site_status():
-    s = SiteSetting.query.first()
-    return jsonify({
-        'status': s.status if s else 'on',
-        'offline_message': s.offline_message if s else 'الموقع تحت الصيانة حالياً.'
-    })
+        function toggleLike(e) {
+            e.stopPropagation();
+            const btn = e.currentTarget;
+            const id = btn.dataset.id;
+            const span = btn.querySelector('.like-count');
+            const icon = btn.querySelector('i');
+            let likes = getLikes();
+            const count = parseInt(span.textContent) || 0;
+            if (likes[id]) {
+                delete likes[id];
+                span.textContent = Math.max(0, count - 1);
+                btn.classList.remove('liked');
+                icon.className = 'bi bi-heart';
+            } else {
+                likes[id] = true;
+                span.textContent = count + 1;
+                btn.classList.add('liked');
+                icon.className = 'bi bi-heart-fill';
+            }
+            setLikes(likes);
+        }
 
-# ---------- Health ----------
-@app.route('/health')
-def health_check():
-    return jsonify({'status': 'ok', 'timestamp': datetime.utcnow().isoformat()})
+        // ---------- Publisher link disclaimer ----------
+        let pendingPublisherLink = null;
+        function openPublisherLink(url) {
+            pendingPublisherLink = url;
+            document.getElementById('disclaimerOverlay').classList.add('show');
+        }
+        function closeDisclaimer() {
+            pendingPublisherLink = null;
+            document.getElementById('disclaimerOverlay').classList.remove('show');
+        }
+        function confirmPublisherLink() {
+            if (pendingPublisherLink) {
+                window.open(pendingPublisherLink, '_blank', 'noopener,noreferrer');
+            }
+            closeDisclaimer();
+        }
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)
+        // ---------- Share ----------
+        function shareCard(e) {
+            e.stopPropagation();
+            const btn = e.currentTarget;
+            const id = btn.dataset.id;
+            const card = document.getElementById(`prompt-${id}`);
+            const title = card ? (card.querySelector('.image-title')?.textContent || 'برومبت') : 'برومبت';
+            const url = `${location.origin}${location.pathname}?prompt=${id}`;
+
+            if (navigator.share) {
+                navigator.share({ title: title, text: 'شاهد هذا البرومبت على UFOQ', url: url }).catch(() => {});
+            } else {
+                copyShareLink(url);
+            }
+            markShared(btn);
+        }
+
+        function copyShareLink(url) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(() => showToast('تم نسخ رابط المشاركة!')).catch(() => legacyCopyLink(url));
+            } else {
+                legacyCopyLink(url);
+            }
+        }
+
+        function legacyCopyLink(url) {
+            const ta = document.createElement('textarea');
+            ta.value = url;
+            ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.select();
+            document.execCommand('copy'); document.body.removeChild(ta);
+            showToast('تم نسخ رابط المشاركة!');
+        }
+
+        function markShared(btn) {
+            btn.classList.add('shared');
+            setTimeout(() => btn.classList.remove('shared'), 1500);
+        }
+
+        // Bring a shared prompt to the front of the gallery and highlight it
+        function focusSharedPrompt() {
+            const params = new URLSearchParams(location.search);
+            const id = params.get('prompt');
+            if (!id) return;
+            const card = document.getElementById(`prompt-${id}`);
+            const grid = document.getElementById('galleryGrid');
+            if (!card || !grid) return;
+
+            grid.insertBefore(card, grid.firstChild);
+            card.classList.add('highlighted');
+            setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+            setTimeout(() => card.classList.remove('highlighted'), 2200);
+        }
+
+        function initLikes() {
+            const likes = getLikes();
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                const id = btn.dataset.id;
+                const span = btn.querySelector('.like-count');
+                if (likes[id]) {
+                    btn.classList.add('liked');
+                    btn.querySelector('i').className = 'bi bi-heart-fill';
+                    span.textContent = (parseInt(span.textContent) || 0) + 1;
+                }
+            });
+        }
+
+        // ---------- Copy with ad ----------
+        let pendingCopyText = null;
+        let adTimerInterval = null;
+
+        function handleCopy(e) {
+            const btn = e.currentTarget;
+            const text = btn.dataset.prompt;
+            if (!text) return;
+
+            const activeAd = {{ active_ad|tojson|default('null') }};
+            if (activeAd && activeAd.id) {
+                pendingCopyText = text;
+                showAdPopup(activeAd);
+            } else {
+                doCopy(text, btn);
+            }
+        }
+
+        function showAdPopup(ad) {
+            const overlay = document.getElementById('adOverlay');
+            const timerEl = document.getElementById('adTimer');
+            const btnText = document.getElementById('adBtnText');
+            const titleEl = document.getElementById('adTitle');
+            const textEl = document.getElementById('adText');
+            const btnLink = document.getElementById('adBtn');
+            const imgContainer = document.getElementById('adImageContainer');
+
+            titleEl.textContent = ad.title || 'إعلان';
+            textEl.textContent = ad.text || '';
+            btnLink.href = ad.button_link || '#';
+            btnText.textContent = ad.button_text || 'زيارة';
+
+            if (ad.image_url) {
+                imgContainer.innerHTML = `<img src="${ad.image_url}" alt="Ad" class="ad-image">`;
+            } else {
+                imgContainer.innerHTML = `<div class="ad-no-image"><i class="bi bi-megaphone-fill"></i></div>`;
+            }
+
+            let seconds = ad.duration_seconds || 5;
+            timerEl.textContent = seconds;
+            btnText.textContent = `${ad.button_text || 'زيارة'} (${seconds})`;
+            overlay.classList.add('show');
+
+            adTimerInterval = setInterval(() => {
+                seconds--;
+                timerEl.textContent = seconds;
+                btnText.textContent = `${ad.button_text || 'زيارة'} (${seconds})`;
+                if (seconds <= 0) {
+                    clearInterval(adTimerInterval);
+                    timerEl.style.display = 'none';
+                    btnText.textContent = ad.button_text || 'زيارة';
+                    closeAdPopup();
+                    if (pendingCopyText) {
+                        const btn = document.querySelector(`[data-prompt="${pendingCopyText.replace(/"/g, '\\"')}"]`);
+                        doCopy(pendingCopyText, btn);
+                        pendingCopyText = null;
+                    }
+                }
+            }, 1000);
+        }
+
+        function closeAdPopup() {
+            document.getElementById('adOverlay').classList.remove('show');
+            if (adTimerInterval) clearInterval(adTimerInterval);
+        }
+
+        function doCopy(text, btn) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('تم نسخ البرومبت!');
+                    if (btn) { markCopied(btn); trackCopy(btn); }
+                }).catch(() => fallbackCopy(text, btn));
+            } else {
+                fallbackCopy(text, btn);
+            }
+        }
+
+        function fallbackCopy(text, btn) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.select();
+            document.execCommand('copy'); document.body.removeChild(ta);
+            showToast('تم نسخ البرومبت!');
+            if (btn) { markCopied(btn); trackCopy(btn); }
+        }
+
+        function trackCopy(btn) {
+            const id = btn.dataset.id;
+            if (!id) return;
+            fetch(`/api/prompt/${id}/copy`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const card = document.getElementById(`prompt-${id}`);
+                        const display = card?.querySelector('.copy-count-display');
+                        if (display) display.textContent = data.copy_count;
+                    }
+                })
+                .catch(() => {});
+        }
+
+        function markCopied(btn) {
+            const orig = btn.innerHTML;
+            btn.classList.add('copied');
+            btn.innerHTML = '<i class="bi bi-check-lg"></i> تم النسخ!';
+            setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = orig; }, 2000);
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerHTML = `<i class="bi bi-check-lg"></i> ${msg}`;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        // ---------- Filtering & Search ----------
+        function filterPrompts() {
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+            const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || 'all';
+            const cards = document.querySelectorAll('.prompt-card');
+            let visible = 0;
+            cards.forEach(card => {
+                const cat = card.dataset.category;
+                const title = card.dataset.title || '';
+                const keywords = card.dataset.keywords || '';
+                const matchCategory = (activeCategory === 'all' || cat === activeCategory);
+                const matchSearch = title.includes(searchVal) || keywords.includes(searchVal);
+                if (matchCategory && matchSearch) {
+                    card.style.display = 'flex';
+                    visible++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            const empty = document.querySelector('.empty-state');
+            if (empty) {
+                if (visible === 0 && cards.length > 0) {
+                    empty.style.display = 'block';
+                    empty.querySelector('p').textContent = 'لا توجد برومبتات تطابق بحثك';
+                } else {
+                    empty.style.display = 'none';
+                }
+            }
+        }
+
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                filterPrompts();
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initLikes();
+            focusSharedPrompt();
+        });
+    </script>
+</body>
+</html>
