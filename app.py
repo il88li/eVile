@@ -72,6 +72,7 @@ class PromptLibrary(db.Model):
     publisher_link = db.Column(db.String(500), nullable=True)
     keywords = db.Column(db.Text, nullable=True)
     copy_count = db.Column(db.Integer, default=0, nullable=False)
+    share_count = db.Column(db.Integer, default=0, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class LibraryAd(db.Model):
@@ -165,6 +166,7 @@ def run_light_migrations():
             'publisher_link': 'VARCHAR(500)',
             'keywords': 'TEXT',
             'copy_count': 'INTEGER NOT NULL DEFAULT 0',
+            'share_count': 'INTEGER NOT NULL DEFAULT 0',
         },
         'upload_contribution': {
             'publisher_link': 'VARCHAR(500)',
@@ -561,6 +563,19 @@ def track_copy(item_id):
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error tracking copy: {e}")
+        return jsonify({'success': False}), 500
+
+@app.route('/api/prompt/<int:item_id>/share', methods=['POST'])
+@limiter.limit("30 per minute")
+def track_share(item_id):
+    try:
+        item = PromptLibrary.query.get_or_404(item_id)
+        item.share_count = (item.share_count or 0) + 1
+        db.session.commit()
+        return jsonify({'success': True, 'share_count': item.share_count})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error tracking share: {e}")
         return jsonify({'success': False}), 500
 
 # ---------- Health ----------
