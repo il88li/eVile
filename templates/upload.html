@@ -293,6 +293,19 @@
             </div>
         </div>
 
+        <!-- Contributor Program promo -->
+        <div class="card" style="border-color: var(--border-strong); background: linear-gradient(135deg, rgba(58,12,163,0.18) 0%, rgba(114,9,183,0.1) 100%);">
+            <div class="form-title"><i class="bi bi-patch-check-fill"></i> انضم إلى برنامج المساهم</div>
+            <div class="about-text" style="margin-bottom: 14px;">
+                <p>أضف اسمك ورابطك الخاص عند رفع برومبتك — كل من يعجبه برومبتك سيتمكن من الضغط على اسمك والوصول مباشرة إلى صفحتك أو حسابك. طريقة رائعة لبناء جمهورك والحصول على تقدير حقيقي لعملك الإبداعي، مع إظهار عدد مرات نسخ برومبتك للجميع.</p>
+            </div>
+            <div style="display:flex; gap:16px; flex-wrap:wrap;">
+                <span style="display:flex; align-items:center; gap:6px; font-size:0.82rem; color:var(--text-dim);"><i class="bi bi-check-circle-fill" style="color:var(--primary-light);"></i> ظهور اسمك كناشر</span>
+                <span style="display:flex; align-items:center; gap:6px; font-size:0.82rem; color:var(--text-dim);"><i class="bi bi-check-circle-fill" style="color:var(--primary-light);"></i> رابط مباشر لصفحتك</span>
+                <span style="display:flex; align-items:center; gap:6px; font-size:0.82rem; color:var(--text-dim);"><i class="bi bi-check-circle-fill" style="color:var(--primary-light);"></i> إحصائية عدد النسخ</span>
+            </div>
+        </div>
+
         <!-- Upload form card -->
         <div class="card">
             <div class="form-title"><i class="bi bi-cloud-upload"></i> رفع برومبت جديد</div>
@@ -311,9 +324,17 @@
                             {% endfor %}
                         </select>
                     </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="keywords">كلمات مفتاحية (اختياري)</label>
+                        <input type="text" id="keywords" placeholder="مثال: صور، واقعي، بورتريه — تفصل بينها بفاصلة">
+                    </div>
                     <div class="form-group">
                         <label for="publisher_name">اسم الناشر (اختياري)</label>
                         <input type="text" id="publisher_name" placeholder="اسمك أو اسم حسابك">
+                    </div>
+                    <div class="form-group">
+                        <label for="publisher_link"><i class="bi bi-patch-check-fill" style="color:var(--primary-light); font-size:0.8rem;"></i> رابط الناشر — برنامج المساهم (اختياري)</label>
+                        <input type="url" id="publisher_link" placeholder="https://t.me/yourchannel">
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label for="image_url">رابط صورة توضيحية (اختياري)</label>
@@ -324,7 +345,8 @@
                         <textarea id="prompt_text" placeholder="اكتب نص البرومبت الكامل هنا..." required></textarea>
                     </div>
                 </div>
-                <div style="margin-top: 16px; display: flex; gap: 10px;">
+                <p style="font-size: 0.78rem; color: var(--text-faint); margin-top: 10px;"><i class="bi bi-shield-check"></i> يتم فحص كل رابط ناشر يدوياً من فريق الإدارة قبل نشر البرومبت في المكتبة.</p>
+                <div style="margin-top: 12px; display: flex; gap: 10px;">
                     <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> إرسال المساهمة</button>
                     <button type="reset" class="btn btn-outline"><i class="bi bi-x-lg"></i> مسح</button>
                 </div>
@@ -377,6 +399,24 @@
                 </div>
                 <div class="faq-answer">
                     عادةً ما تستغرق المراجعة من بضع ساعات إلى 24 ساعة كحد أقصى.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span class="faq-q-text"><i class="bi bi-question-circle-fill"></i> ما هو رابط الناشر وكيف يعمل؟</span>
+                    <i class="bi bi-chevron-down faq-chevron"></i>
+                </div>
+                <div class="faq-answer">
+                    إذا أضفت رابطاً خاصاً بك، سيتمكن أي زائر يضغط على اسمك بجانب البرومبت من الانتقال إليه، بعد تنبيهه بإخلاء مسؤولية بسيط. يقوم فريق UFOQ بفحص كل رابط يدوياً قبل نشره.
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span class="faq-q-text"><i class="bi bi-question-circle-fill"></i> ما فائدة الكلمات المفتاحية؟</span>
+                    <i class="bi bi-chevron-down faq-chevron"></i>
+                </div>
+                <div class="faq-answer">
+                    الكلمات المفتاحية تساعد الزوار على إيجاد برومبتك بسهولة أكبر عند البحث في المكتبة، حتى لو لم يكتبوا العنوان بالضبط.
                 </div>
             </div>
         </div>
@@ -442,7 +482,9 @@
                 category: document.getElementById('category').value,
                 prompt_text: document.getElementById('prompt_text').value.trim(),
                 image_url: document.getElementById('image_url').value.trim(),
-                publisher_name: document.getElementById('publisher_name').value.trim()
+                publisher_name: document.getElementById('publisher_name').value.trim(),
+                publisher_link: document.getElementById('publisher_link').value.trim(),
+                keywords: document.getElementById('keywords').value.trim()
             };
 
             try {
