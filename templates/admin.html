@@ -153,7 +153,9 @@
                         </div>
                         <div class="form-group"><label>رابط الصورة</label><input type="url" name="image_url" required></div>
                         <div class="form-group" style="grid-column:1/-1;"><label>نص البرومبت</label><textarea name="prompt_text" required rows="4"></textarea></div>
+                        <div class="form-group" style="grid-column:1/-1;"><label>كلمات مفتاحية</label><input type="text" name="keywords" placeholder="تفصل بينها بفاصلة"></div>
                         <div class="form-group"><label>الناشر</label><input type="text" name="publisher" placeholder="اختياري"></div>
+                        <div class="form-group"><label>رابط الناشر</label><input type="url" name="publisher_link" placeholder="https:// — يُفحص تلقائياً"></div>
                     </div>
                     <button type="submit" class="btn btn-primary" style="margin-top:10px;"><i class="bi bi-plus-lg"></i> إضافة برومبت</button>
                 </form>
@@ -163,7 +165,7 @@
                     <div class="item-card">
                         <div class="info">
                             <div class="title">{{ item.title }}</div>
-                            <div class="meta">تصنيف: {{ item.category }}{% if item.publisher %} | ناشر: {{ item.publisher }}{% endif %}</div>
+                            <div class="meta">تصنيف: {{ item.category }} | نسخ: {{ item.copy_count or 0 }}{% if item.publisher %} | ناشر: {{ item.publisher }}{% endif %}{% if item.publisher_link %} | <a href="{{ item.publisher_link }}" target="_blank" rel="noopener noreferrer" style="color:var(--primary);">رابط الناشر <i class="bi bi-box-arrow-up-right"></i></a>{% endif %}{% if item.keywords %} | كلمات: {{ item.keywords }}{% endif %}</div>
                         </div>
                         <div class="actions">
                             <form method="POST" action="/admin/library/{{ item.id }}/delete" onsubmit="return confirm('حذف البرومبت؟')">
@@ -185,6 +187,16 @@
                         <div class="info">
                             <div class="title">{{ contrib.title }} <span class="status-badge status-{{ contrib.status }}">{{ contrib.status }}</span></div>
                             <div class="meta">تصنيف: {{ contrib.category }} | تاريخ: {{ contrib.created_at.strftime('%Y-%m-%d') if contrib.created_at else '—' }}{% if contrib.publisher_name %} | من: {{ contrib.publisher_name }}{% endif %}</div>
+                            {% if contrib.publisher_link %}
+                            <div class="meta" style="margin-top:4px;">
+                                <i class="bi bi-link-45deg"></i> رابط الناشر —
+                                <a href="{{ contrib.publisher_link }}" target="_blank" rel="noopener noreferrer" style="color:var(--warning); font-weight:700;">{{ contrib.publisher_link }} <i class="bi bi-box-arrow-up-right"></i></a>
+                                <span style="color:var(--warning);">(افحص الرابط قبل الموافقة)</span>
+                            </div>
+                            {% endif %}
+                            {% if contrib.keywords %}
+                            <div class="meta" style="margin-top:2px;">كلمات مفتاحية: {{ contrib.keywords }}</div>
+                            {% endif %}
                             <div style="margin-top:6px; font-size:0.8rem; color:var(--text-dim); background:#f1f5f9; padding:8px; border-radius:6px;">{{ contrib.prompt_text[:120] }}{% if contrib.prompt_text|length > 120 %}...{% endif %}</div>
                         </div>
                         <div class="actions">
