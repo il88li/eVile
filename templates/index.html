@@ -219,6 +219,9 @@
             font-size: 0.75rem; color: var(--text-faint);
         }
         .card-meta .meta-copies {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .meta-copies-inner, .meta-shares {
             display: flex; align-items: center; gap: 5px;
         }
         .card-meta .meta-publisher {
@@ -362,38 +365,58 @@
         /* Bottom nav */
         .bottom-nav-bar {
             position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; display: flex; align-items: center; gap: 6px;
-            padding: 8px 16px;
+            z-index: 1000;
+            padding: 9px;
             background: var(--bg-card);
             backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
             border: 1px solid var(--border); border-radius: 50px;
-            box-shadow: var(--shadow-lg); max-width: 600px; width: auto;
+            box-shadow: var(--shadow-lg);
         }
-        .nav-item {
-            display: flex; align-items: center; gap: 6px;
-            padding: 8px 16px; border-radius: 40px;
-            background: transparent; border: none; color: var(--text-faint);
-            font-family: 'Tajawal', sans-serif; font-size: 13px; font-weight: 600;
-            cursor: pointer; transition: 0.2s; text-decoration: none;
-            white-space: nowrap;
+        .nav-track {
+            position: relative;
+            display: flex; align-items: center; gap: 16px;
         }
-        .nav-item:hover { color: var(--text); background: var(--primary-dim); }
-        .nav-item.active {
-            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%); color: #fff;
-            box-shadow: 0 0 14px rgba(139,92,246,0.4);
+        .nav-circle {
+            position: relative;
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; color: #fff; font-size: 20px;
+            background: linear-gradient(120deg, var(--primary) 0%, #7209B7 35%, var(--primary-light) 65%, var(--primary) 100%);
+            background-size: 300% 100%;
+            animation: navGradientShift 6s ease infinite;
+            box-shadow: 0 2px 12px rgba(58,12,163,0.45);
+            z-index: 1;
+            transition: transform 0.2s;
         }
-        .nav-item i { font-size: 18px; }
-        .nav-label {
-            max-width: 0; overflow: hidden; transition: 0.2s; opacity: 0;
+        .nav-circle:hover { transform: translateY(-2px); }
+        .nav-circle i { position: relative; z-index: 2; pointer-events: none; }
+        @keyframes navGradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        .nav-item.active .nav-label { max-width: 80px; opacity: 1; }
+        /* The sliding glass "scroll bar" indicator that sits above the circles */
+        .nav-indicator {
+            position: absolute; top: 0; left: 0;
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.16);
+            backdrop-filter: blur(9px) saturate(180%); -webkit-backdrop-filter: blur(9px) saturate(180%);
+            border: 1.5px solid rgba(255,255,255,0.6);
+            box-shadow: 0 0 22px rgba(255,255,255,0.3), inset 0 0 14px rgba(255,255,255,0.3);
+            transition: transform 0.48s cubic-bezier(0.65,0,0.35,1);
+            pointer-events: none;
+            z-index: 3;
+        }
 
         @media (max-width: 600px) {
             .hero h1 { font-size: 1.5rem; }
             .gallery-grid { grid-template-columns: 1fr; gap: 16px; }
-            .bottom-nav-bar { padding: 6px 12px; max-width: 95vw; }
-            .nav-item { padding: 6px 12px; font-size: 12px; }
-            .nav-item i { font-size: 16px; }
+            .bottom-nav-bar { padding: 7px; }
+            .nav-track { gap: 12px; }
+            .nav-circle, .nav-indicator { width: 44px; height: 44px; }
+            .nav-circle i { font-size: 18px; }
         }
     </style>
 </head>
@@ -440,7 +463,10 @@
                     <button class="like-btn" data-id="{{ item.id }}" onclick="toggleLike(event)"><i class="bi bi-heart"></i> <span class="like-count">0</span></button>
                 </div>
                 <div class="card-meta">
-                    <span class="meta-copies"><i class="bi bi-clipboard-check"></i> <span class="copy-count-display">{{ item.copy_count or 0 }}</span> نسخة</span>
+                    <span class="meta-copies">
+                        <span class="meta-copies-inner"><i class="bi bi-clipboard-check"></i> <span class="copy-count-display">{{ item.copy_count or 0 }}</span> نسخة</span>
+                        <span class="meta-shares"><i class="bi bi-share-fill"></i> <span class="share-count-display">{{ item.share_count or 0 }}</span> مشاركة</span>
+                    </span>
                     {% if item.publisher %}
                         {% if item.publisher_link %}
                         <span class="meta-publisher linked" onclick="openPublisherLink('{{ item.publisher_link }}')"><i class="bi bi-person-check"></i> {{ item.publisher }}</span>
@@ -492,8 +518,11 @@
 
     <!-- Bottom Nav -->
     <nav class="bottom-nav-bar">
-        <a href="/" class="nav-item active"><i class="bi bi-house-door-fill"></i><span class="nav-label">الرئيسية</span></a>
-        <a href="/upload" class="nav-item"><i class="bi bi-cloud-upload"></i><span class="nav-label">المساهمة</span></a>
+        <div class="nav-track" id="navTrack">
+            <a href="/" class="nav-circle active" data-page="index"><i class="bi bi-house-door-fill"></i></a>
+            <a href="/upload" class="nav-circle" data-page="upload"><i class="bi bi-cloud-upload-fill"></i></a>
+            <div class="nav-indicator" id="navIndicator"></div>
+        </div>
     </nav>
 
     <script>
@@ -562,6 +591,21 @@
                 copyShareLink(url);
             }
             markShared(btn);
+            trackShare(id);
+        }
+
+        function trackShare(id) {
+            if (!id) return;
+            fetch(`/api/prompt/${id}/share`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const card = document.getElementById(`prompt-${id}`);
+                        const display = card?.querySelector('.share-count-display');
+                        if (display) display.textContent = data.share_count;
+                    }
+                })
+                .catch(() => {});
         }
 
         function copyShareLink(url) {
@@ -768,9 +812,48 @@
             });
         });
 
+        // ---------- Bottom nav glass indicator ----------
+        function initNavIndicator() {
+            const track = document.getElementById('navTrack');
+            const indicator = document.getElementById('navIndicator');
+            if (!track || !indicator) return;
+            const circles = track.querySelectorAll('.nav-circle');
+
+            function moveIndicatorTo(circle, animate) {
+                const trackRect = track.getBoundingClientRect();
+                const circleRect = circle.getBoundingClientRect();
+                const offset = circleRect.left - trackRect.left;
+                if (!animate) indicator.style.transition = 'none';
+                indicator.style.transform = `translateX(${offset}px)`;
+                if (!animate) {
+                    void indicator.offsetWidth;
+                    indicator.style.transition = '';
+                }
+            }
+
+            const activeCircle = track.querySelector('.nav-circle.active') || circles[0];
+            moveIndicatorTo(activeCircle, false);
+
+            circles.forEach(circle => {
+                circle.addEventListener('click', function (e) {
+                    if (this.classList.contains('active')) return;
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    moveIndicatorTo(this, true);
+                    setTimeout(() => { window.location.href = href; }, 480);
+                });
+            });
+
+            window.addEventListener('resize', () => {
+                const current = track.querySelector('.nav-circle.active') || circles[0];
+                moveIndicatorTo(current, false);
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             initLikes();
             focusSharedPrompt();
+            initNavIndicator();
         });
     </script>
 </body>
