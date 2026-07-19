@@ -902,6 +902,29 @@ def add_category():
         flash('خطأ في إضافة التصنيف', 'error')
     return redirect(url_for('admin_panel'))
 
+@app.route('/admin/category/<int:category_id>/edit', methods=['POST'])
+@admin_required
+def edit_category(category_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        cat = Category.query.get_or_404(category_id)
+        old_name = cat.name
+        cat.name = request.form.get('name', cat.name).strip().lower().replace(' ', '_')
+        cat.display_name = request.form.get('display_name', cat.display_name).strip()
+        cat.icon = request.form.get('icon', cat.icon).strip()
+        cat.sort_order = int(request.form.get('sort_order', cat.sort_order))
+        # Update prompts using old category name
+        if old_name != cat.name:
+            PromptLibrary.query.filter_by(category=old_name).update({'category': cat.name})
+        db.session.commit()
+        flash('تم تعديل التصنيف بنجاح', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error editing category: {e}")
+        flash('خطأ في تعديل التصنيف', 'error')
+    return redirect(url_for('admin_panel'))
+
 @app.route('/admin/category/<int:category_id>/delete', methods=['POST'])
 @admin_required
 def delete_category(category_id):
