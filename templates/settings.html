@@ -295,6 +295,74 @@
             pointer-events: none; z-index: 3;
         }
 
+        /* General Settings */
+        .general-settings-card {
+            background: linear-gradient(135deg, rgba(58,12,163,0.15) 0%, rgba(114,9,183,0.08) 100%);
+            border: 1px solid var(--border-strong);
+        }
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .setting-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .setting-row:first-child {
+            padding-top: 0;
+        }
+        .setting-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .setting-info i {
+            color: var(--primary-light);
+            font-size: 1.1rem;
+        }
+        .setting-info .setting-label {
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+        .setting-info .setting-desc {
+            font-size: 0.75rem;
+            color: var(--text-faint);
+            margin-top: 2px;
+        }
+        .setting-control {
+            display: flex;
+            gap: 6px;
+        }
+        .setting-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.04);
+            color: var(--text-dim);
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .setting-btn:hover {
+            border-color: var(--border-strong);
+            color: var(--primary-light);
+        }
+        .setting-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%);
+            color: #fff;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 12px rgba(139,92,246,0.35);
+        }
+
         @media (max-width: 600px) {
             .bottom-nav-bar { padding: 7px; }
             .nav-track { gap: 12px; }
@@ -326,6 +394,26 @@
                 <span class="edit-pencil" onclick="openEditModal('name','تعديل اسم الحساب','{{ user.name }}','text')"><i class="bi bi-pencil-fill"></i></span>
             </div>
             <div class="avatar-hint">اضغط على الصورة لتغييرها برابط جديد</div>
+        </div>
+
+        <!-- General Settings card -->
+        <div class="card general-settings-card">
+            <div class="section-title"><i class="bi bi-sliders"></i> إعدادات عامة</div>
+            <div class="setting-row">
+                <div class="setting-info">
+                    <i class="bi bi-grid-3x3-gap"></i>
+                    <div>
+                        <div class="setting-label">عدد البطاقات في السطر</div>
+                        <div class="setting-desc">يتحكم بعدد البرومبتات المعروضة في كل صف</div>
+                    </div>
+                </div>
+                <div class="setting-control" id="cardsPerRowControl">
+                    <button class="setting-btn" data-cols="1" onclick="setCardsPerRowSetting(1)">1</button>
+                    <button class="setting-btn" data-cols="2" onclick="setCardsPerRowSetting(2)">2</button>
+                    <button class="setting-btn active" data-cols="3" onclick="setCardsPerRowSetting(3)">3</button>
+                    <button class="setting-btn" data-cols="4" onclick="setCardsPerRowSetting(4)">4</button>
+                </div>
+            </div>
         </div>
 
         <!-- Account card -->
@@ -767,6 +855,21 @@
             }
         }
 
+        // Cards per row setting
+        function setCardsPerRowSetting(cols) {
+            localStorage.setItem('ufoq_cards_per_row', cols);
+            document.querySelectorAll('#cardsPerRowControl .setting-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.cols) === cols);
+            });
+            showToast('تم حفظ الإعداد', 'success');
+        }
+        function loadCardsPerRowSetting() {
+            const cols = parseInt(localStorage.getItem('ufoq_cards_per_row')) || 3;
+            document.querySelectorAll('#cardsPerRowControl .setting-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.cols) === cols);
+            });
+        }
+
         function initNavIndicator() {
             const track = document.getElementById('navTrack');
             const indicator = document.getElementById('navIndicator');
@@ -797,7 +900,10 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', initNavIndicator);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCardsPerRowSetting();
+            initNavIndicator();
+        });
     </script>
 </body>
 </html>
