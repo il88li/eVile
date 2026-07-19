@@ -14,6 +14,10 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
 from flask_session import Session
+
+# Note: Flask-Session with SQLAlchemy backend doesn't work well on serverless.
+# On Vercel, we rely on Flask's built-in secure cookies for session persistence.
+# The session data is stored in the signed cookie itself (client-side).
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import inspect, text, func
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -43,7 +47,8 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY')
     if not SECRET_KEY:
         logger.warning("SECRET_KEY not set! Using fallback (INSECURE for production)")
-        SECRET_KEY = os.urandom(32).hex()
+        # Use a deterministic fallback based on app name (NOT random - random changes between serverless instances)
+        SECRET_KEY = 'ufoq-default-secret-key-change-me-in-production-2024'
 
     ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
     GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '1066865562137-k509114e44npk13n5n78gb32b3meldrk.apps.googleusercontent.com')
@@ -63,12 +68,17 @@ class Config:
         'pool_timeout': 30,
     }
 
-    SESSION_TYPE = 'sqlalchemy'
+    SESSION_TYPE = 'filesystem' if not _is_serverless else 'null'
     SESSION_SQLALCHEMY_TABLE = 'flask_sessions'
     SESSION_PERMANENT = True
     SESSION_USE_SIGNER = True
     SESSION_KEY_PREFIX = 'ufoq_session:'
     PERMANENT_SESSION_LIFETIME = 2592000
+    # Cookie settings for cross-instance session persistence
+    SESSION_COOKIE_NAME = 'ufoq_session'
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    # SECRET_KEY must be stable across instances for signed cookies to work
 
     CACHE_TYPE = 'SimpleCache'
     CACHE_DEFAULT_TIMEOUT = 300
@@ -175,6 +185,14 @@ app.config.from_object(Config)
 
 db.init_app(app)
 migrate = Migrate(app, db)
+
+# On serverless (Vercel), skip Flask-Session SQLAlchemy backend
+# and use Flask's built-in signed cookies instead
+if not _is_serverless:
+    Session(app)
+else:
+    logger.info("Serverless detected: Using Flask built-in signed cookies for sessions")
+
 cache = Cache(app)
 limiter = Limiter(
     get_remote_address,
@@ -418,6 +436,7 @@ def auth_signup():
         db.session.add(user)
         db.session.commit()
         session['user_id'] = user.id
+        session.modified = True  # Ensure session cookie is updated
         return jsonify({'success': True, 'message': 'تم إنشاء الحساب بنجاح', 'redirect': url_for('settings_page')})
     except Exception as e:
         db.session.rollback()
@@ -440,6 +459,7 @@ def auth_login():
             return jsonify({'success': False, 'message': 'البريد الإلكتروني أو كلمة المرور غير صحيحة'}), 401
 
         session['user_id'] = user.id
+        session.modified = True  # Ensure session cookie is updated
         user.last_active = datetime.utcnow()
         db.session.commit()
         return jsonify({'success': True, 'message': 'تم تسجيل الدخول بنجاح', 'redirect': url_for('settings_page')})
@@ -478,6 +498,7 @@ def auth_google():
             user.avatar_url = user.avatar_url or avatar
         db.session.commit()
         session['user_id'] = user.id
+        session.modified = True  # Ensure session cookie is updated
         user.last_active = datetime.utcnow()
         db.session.commit()
         return jsonify({'success': True, 'message': 'تم تسجيل الدخول عبر جوجل', 'redirect': url_for('settings_page')})
@@ -701,6 +722,7 @@ def admin_panel():
     try:
         if request.method == 'POST' and request.form.get('password') == Config.ADMIN_PASSWORD:
             session['logged_in'] = True
+            session.modified = True  # Ensure session cookie is updated
             return redirect(url_for('admin_panel'))
 
         if session.get('logged_in'):
