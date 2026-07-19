@@ -24,13 +24,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ==================== Production Logging ====================
+# Detect serverless environment (Vercel, Render, AWS Lambda, etc.)
+_is_serverless = os.getenv('RENDER') or os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME')
+
+handlers = [logging.StreamHandler()]
+if not _is_serverless:
+    handlers.append(logging.FileHandler('app.log', encoding='utf-8'))
+
 logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] %(levelname)s in %(module)s [%(pathname)s:%(lineno)d]: %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler('app.log', encoding='utf-8') if not os.getenv('RENDER') else logging.StreamHandler()
-    ]
+    handlers=handlers
 )
 logger = logging.getLogger(__name__)
 
@@ -44,7 +48,7 @@ class Config:
     ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
     GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '1066865562137-k509114e44npk13n5n78gb32b3meldrk.apps.googleusercontent.com')
 
-    DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///ufoq.db')
+    DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///tmp/ufoq.db')
     if DATABASE_URL.startswith('postgres://'):
         DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
