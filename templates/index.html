@@ -250,8 +250,35 @@
             box-shadow: var(--shadow-lg), var(--glow);
             padding: 24px; text-align: center;
         }
-        .disclaimer-box i.warn-icon { font-size: 34px; color: #f59e0b; margin-bottom: 10px; display: block; }
         .disclaimer-box h3 { font-size: 1.05rem; font-weight: 900; margin-bottom: 10px; color: var(--text); }
+        .profile-popup-avatar {
+            width: 68px; height: 68px; border-radius: 50%; object-fit: cover;
+            margin: 0 auto 12px; display: block;
+            border: 2px solid var(--border-strong);
+        }
+        .profile-popup-avatar-fallback {
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%);
+            color: #fff; font-size: 28px;
+        }
+        .profile-popup-bio {
+            font-size: 0.85rem; color: var(--text-dim); line-height: 1.8;
+            margin-bottom: 14px;
+        }
+        .profile-popup-warning {
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 10px; padding: 10px 12px;
+            margin-bottom: 16px; text-align: right;
+        }
+        .profile-popup-warning .warn-icon-inline {
+            width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            color: #fff; font-size: 13px;
+        }
+        .profile-popup-warning span { font-size: 0.72rem; color: var(--text-faint); line-height: 1.6; }
         .disclaimer-box p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.8; margin-bottom: 18px; }
         .disclaimer-actions { display: flex; gap: 10px; }
         .disclaimer-actions button {
@@ -367,10 +394,10 @@
             position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
             z-index: 1000;
             padding: 9px;
-            background: var(--bg-card);
-            backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
-            border: 1px solid var(--border); border-radius: 50px;
-            box-shadow: var(--shadow-lg);
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(28px) saturate(200%); -webkit-backdrop-filter: blur(28px) saturate(200%);
+            border: 1px solid rgba(255,255,255,0.12); border-radius: 50px;
+            box-shadow: var(--shadow-lg), 0 0 40px rgba(58,12,163,0.2);
         }
         .nav-track {
             position: relative;
@@ -389,6 +416,11 @@
             z-index: 1;
             transition: transform 0.2s;
         }
+        .nav-circle::before {
+            content: ''; position: absolute; inset: 0;
+            background: rgba(255,255,255,0.1); opacity: 0; transition: 0.3s;
+        }
+        .nav-circle:hover::before { opacity: 1; }
         .nav-circle:hover { transform: translateY(-2px); }
         .nav-circle i { position: relative; z-index: 2; pointer-events: none; }
         @keyframes navGradientShift {
@@ -401,10 +433,10 @@
             position: absolute; top: 0; left: 0;
             width: 50px; height: 50px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.16);
-            backdrop-filter: blur(9px) saturate(180%); -webkit-backdrop-filter: blur(9px) saturate(180%);
-            border: 1.5px solid rgba(255,255,255,0.6);
-            box-shadow: 0 0 22px rgba(255,255,255,0.3), inset 0 0 14px rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px) saturate(220%); -webkit-backdrop-filter: blur(12px) saturate(220%);
+            border: 1.5px solid rgba(255,255,255,0.25);
+            box-shadow: 0 0 30px rgba(255,255,255,0.15), inset 0 0 20px rgba(255,255,255,0.1);
             transition: transform 0.48s cubic-bezier(0.65,0,0.35,1);
             pointer-events: none;
             z-index: 3;
@@ -467,12 +499,26 @@
                         <span class="meta-copies-inner"><i class="bi bi-clipboard-check"></i> <span class="copy-count-display">{{ item.copy_count or 0 }}</span> نسخة</span>
                         <span class="meta-shares"><i class="bi bi-share-fill"></i> <span class="share-count-display">{{ item.share_count or 0 }}</span> مشاركة</span>
                     </span>
-                    {% if item.publisher %}
-                        {% if item.publisher_link %}
-                        <span class="meta-publisher linked" onclick="openPublisherLink('{{ item.publisher_link }}')"><i class="bi bi-person-check"></i> {{ item.publisher }}</span>
-                        {% else %}
-                        <span class="meta-publisher"><i class="bi bi-person"></i> {{ item.publisher }}</span>
-                        {% endif %}
+                    {% if item.user and (item.user.bio or item.user.profile_link) %}
+                    <span class="meta-publisher linked"
+                          data-name="{{ item.user.name }}"
+                          data-avatar="{{ item.user.avatar_url or '' }}"
+                          data-bio="{{ item.user.bio or '' }}"
+                          data-link="{{ item.user.profile_link or '' }}"
+                          onclick="openProfilePopupFromEl(this)">
+                        <i class="bi bi-patch-check-fill"></i> {{ item.user.name }}
+                    </span>
+                    {% elif item.publisher_link %}
+                    <span class="meta-publisher linked"
+                          data-name="{{ item.publisher or 'ناشر' }}"
+                          data-avatar=""
+                          data-bio=""
+                          data-link="{{ item.publisher_link }}"
+                          onclick="openProfilePopupFromEl(this)">
+                        <i class="bi bi-person-check"></i> {{ item.publisher }}
+                    </span>
+                    {% elif item.user or item.publisher %}
+                    <span class="meta-publisher"><i class="bi bi-person"></i> {{ item.user.name if item.user else item.publisher }}</span>
                     {% endif %}
                 </div>
             </div>
@@ -503,24 +549,30 @@
         </div>
     </div>
 
-    <!-- Publisher Link Disclaimer -->
+    <!-- Publisher Profile Popup -->
     <div class="disclaimer-overlay" id="disclaimerOverlay">
         <div class="disclaimer-box">
-            <i class="bi bi-exclamation-triangle-fill warn-icon"></i>
-            <h3>أنت تغادر UFOQ</h3>
-            <p>هذا رابط خارجي أضافه الناشر بنفسه. موقع UFOQ لا يتحمل أي مسؤولية عن محتوى الروابط الخارجية أو أي أضرار قد تنتج عن زيارتها، ولا يضمن سلامتها. يرجى التعامل معها بحذر.</p>
+            <img class="profile-popup-avatar" id="popupAvatar" src="" alt="" style="display:none;">
+            <div class="profile-popup-avatar profile-popup-avatar-fallback" id="popupAvatarFallback"><i class="bi bi-person-fill"></i></div>
+            <h3 id="popupName">مستخدم</h3>
+            <p class="profile-popup-bio" id="popupBio" style="display:none;"></p>
+            <div class="profile-popup-warning">
+                <i class="bi bi-exclamation-triangle-fill warn-icon-inline"></i>
+                <span>هذا رابط خارجي أضافه المستخدم بنفسه، ولا يتحمل UFOQ أي مسؤولية عن محتواه أو أي أضرار قد تنتج عن زيارته.</span>
+            </div>
             <div class="disclaimer-actions">
-                <button class="disclaimer-cancel" onclick="closeDisclaimer()">إلغاء</button>
-                <button class="disclaimer-continue" onclick="confirmPublisherLink()">متابعة على مسؤوليتي</button>
+                <button class="disclaimer-cancel" onclick="closeDisclaimer()">إغلاق</button>
+                <button class="disclaimer-continue" id="popupOpenLinkBtn" onclick="confirmPublisherLink()"><i class="bi bi-box-arrow-up-right"></i> فتح الرابط</button>
             </div>
         </div>
     </div>
 
-    <!-- Bottom Nav -->
+    <!-- Bottom Nav: index (right) -> settings -> about -->
     <nav class="bottom-nav-bar">
         <div class="nav-track" id="navTrack">
             <a href="/" class="nav-circle active" data-page="index"><i class="bi bi-house-door-fill"></i></a>
-            <a href="/upload" class="nav-circle" data-page="upload"><i class="bi bi-cloud-upload-fill"></i></a>
+            <a href="/settings" class="nav-circle" data-page="settings"><i class="bi bi-person-circle"></i></a>
+            <a href="/about" class="nav-circle" data-page="about"><i class="bi bi-info-circle-fill"></i></a>
             <div class="nav-indicator" id="navIndicator"></div>
         </div>
     </nav>
@@ -559,11 +611,38 @@
             setLikes(likes);
         }
 
-        // ---------- Publisher link disclaimer ----------
+        // ---------- Publisher profile popup ----------
         let pendingPublisherLink = null;
-        function openPublisherLink(url) {
-            pendingPublisherLink = url;
+        function openProfilePopup({ name, avatar, bio, link }) {
+            document.getElementById('popupName').textContent = name || 'مستخدم';
+
+            const avatarImg = document.getElementById('popupAvatar');
+            const avatarFallback = document.getElementById('popupAvatarFallback');
+            if (avatar) {
+                avatarImg.src = avatar; avatarImg.style.display = 'block';
+                avatarFallback.style.display = 'none';
+            } else {
+                avatarImg.style.display = 'none';
+                avatarFallback.style.display = 'flex';
+            }
+
+            const bioEl = document.getElementById('popupBio');
+            if (bio) { bioEl.textContent = bio; bioEl.style.display = 'block'; }
+            else { bioEl.style.display = 'none'; }
+
+            pendingPublisherLink = link || null;
+            const linkBtn = document.getElementById('popupOpenLinkBtn');
+            linkBtn.style.display = pendingPublisherLink ? 'flex' : 'none';
+
             document.getElementById('disclaimerOverlay').classList.add('show');
+        }
+        function openProfilePopupFromEl(el) {
+            openProfilePopup({
+                name: el.dataset.name,
+                avatar: el.dataset.avatar,
+                bio: el.dataset.bio,
+                link: el.dataset.link
+            });
         }
         function closeDisclaimer() {
             pendingPublisherLink = null;
