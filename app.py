@@ -1,8 +1,9 @@
 import os
+import re
 import logging
 import secrets
 import base64
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 from urllib.parse import urlparse
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
@@ -14,7 +15,10 @@ from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
 from flask_session import Session
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import inspect, text
+from sqlalchemy import inspect, text, func
+from werkzeug.security import generate_password_hash, check_password_hash
+from google.oauth2 import id_token as google_id_token
+from google.auth.transport import requests as google_requests
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -27,9 +31,9 @@ class Config:
         raise ValueError("SECRET_KEY environment variable is required!")
 
     ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
+    GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '1066865562137-k509114e44npk13n5n78gb32b3meldrk.apps.googleusercontent.com')
 
     DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://user:pass@localhost:5432/db')
-    # Render provides postgres:// but SQLAlchemy 2.0 requires postgresql://
     if DATABASE_URL.startswith('postgres://'):
         DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
@@ -49,10 +53,23 @@ class Config:
     CACHE_DEFAULT_TIMEOUT = 300
     RATELIMIT_ENABLED = True
     RATELIMIT_STORAGE_URI = 'memory://'
-    RATELIMIT_STRATEGY = 'fixed-window' 
+    RATELIMIT_STRATEGY = 'fixed-window'
 
 # ==================== Models ====================
 db = SQLAlchemy()
+
+class User(db.Model):
+    __tablename__ = 'app_user'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), nullable=False)
+    email = db.Column(db.String(200), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=True)
+    google_id = db.Column(db.String(200), unique=True, nullable=True)
+    avatar_url = db.Column(db.String(500), nullable=True)
+    bio = db.Column(db.Text, nullable=True)
+    profile_link = db.Column(db.String(500), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_active = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -73,6 +90,8 @@ class PromptLibrary(db.Model):
     keywords = db.Column(db.Text, nullable=True)
     copy_count = db.Column(db.Integer, default=0, nullable=False)
     share_count = db.Column(db.Integer, default=0, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('app_user.id'), nullable=True)
+    user = db.relationship('User', backref='prompts')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class LibraryAd(db.Model):
@@ -101,6 +120,31 @@ class UploadContribution(db.Model):
     publisher_link = db.Column(db.String(500), nullable=True)
     keywords = db.Column(db.Text, nullable=True)
     status = db.Column(db.String(20), default='pending')
+    user_id = db.Column(db.Integer, db.ForeignKey('app_user.id'), nullable=True)
+    user = db.relationship('User', backref='contributions')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class PromptEditRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    prompt_id = db.Column(db.Integer, db.ForeignKey('prompt_library.id'), nullable=False)
+    prompt = db.relationship('PromptLibrary', backref='edit_requests')
+    user_id = db.Column(db.Integer, db.ForeignKey('app_user.id'), nullable=False)
+    user = db.relationship('User', backref='prompt_edit_requests')
+    new_title = db.Column(db.String(200), nullable=False)
+    new_category = db.Column(db.String(50), nullable=False)
+    new_prompt_text = db.Column(db.Text, nullable=False)
+    new_image_url = db.Column(db.String(500), nullable=True)
+    new_keywords = db.Column(db.Text, nullable=True)
+    status = db.Column(db.String(20), default='pending')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class PromptDeleteRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    prompt_id = db.Column(db.Integer, db.ForeignKey('prompt_library.id'), nullable=False)
+    prompt = db.relationship('PromptLibrary', backref='delete_requests')
+    user_id = db.Column(db.Integer, db.ForeignKey('app_user.id'), nullable=False)
+    user = db.relationship('User', backref='prompt_delete_requests')
+    status = db.Column(db.String(20), default='pending')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # ==================== App Factory ====================
@@ -114,10 +158,11 @@ limiter = Limiter(get_remote_address, app=app, default_limits=[], storage_uri=ap
 Talisman(app, force_https=False, content_security_policy={
     'default-src': ["'self'"],
     'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
-    'script-src': ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+    'script-src': ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://accounts.google.com"],
     'font-src': ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net"],
     'img-src': ["'self'", "data:", "https:"],
-    'connect-src': ["'self'"]
+    'connect-src': ["'self'", "https://accounts.google.com"],
+    'frame-src': ["https://accounts.google.com"]
 })
 
 logging.basicConfig(level=logging.INFO)
@@ -133,16 +178,35 @@ def validate_csrf_token(token):
     return token == session.get('csrf_token')
 
 def is_valid_publisher_link(url):
-    """Basic safety check before a publisher link is accepted: only http/https
-    with a real host are allowed. This is a first-pass automated filter —
-    admins should still manually check the link before approving a contribution."""
     if not url:
-        return True  # optional field
+        return True
     try:
         parsed = urlparse(url.strip())
         return parsed.scheme in ('http', 'https') and bool(parsed.netloc)
     except Exception:
         return False
+
+EMAIL_RE = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+def is_valid_email(email):
+    return bool(email) and bool(EMAIL_RE.match(email.strip()))
+
+def current_user():
+    uid = session.get('user_id')
+    if not uid:
+        return None
+    user = User.query.get(uid)
+    if user:
+        user.last_active = datetime.utcnow()
+        db.session.commit()
+    return user
+
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('user_id'):
+            return redirect(url_for('sign_page', next=request.path))
+        return f(*args, **kwargs)
+    return decorated
 
 def admin_required(f):
     @wraps(f)
@@ -156,21 +220,21 @@ def admin_required(f):
 _db_initialized = False
 
 def run_light_migrations():
-    """db.create_all() only creates tables that don't exist yet — it never
-    alters tables that are already deployed. Any column added to a model
-    after the first deploy (e.g. copy_count, keywords, publisher_link) has
-    to be patched onto the live table here, or existing databases will
-    raise 'column does not exist' errors."""
     required_columns = {
         'prompt_library': {
             'publisher_link': 'VARCHAR(500)',
             'keywords': 'TEXT',
             'copy_count': 'INTEGER NOT NULL DEFAULT 0',
             'share_count': 'INTEGER NOT NULL DEFAULT 0',
+            'user_id': 'INTEGER REFERENCES app_user(id)',
         },
         'upload_contribution': {
             'publisher_link': 'VARCHAR(500)',
             'keywords': 'TEXT',
+            'user_id': 'INTEGER REFERENCES app_user(id)',
+        },
+        'app_user': {
+            'last_active': 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
         },
     }
     inspector = inspect(db.engine)
@@ -235,8 +299,184 @@ def index():
                            active_ad=ad_dict,
                            site_status='on')
 
+@app.route('/about')
+def about_page():
+    prompt_count = PromptLibrary.query.count()
+    user_count = User.query.count()
+    total_copies = db.session.query(func.sum(PromptLibrary.copy_count)).scalar() or 0
+    total_shares = db.session.query(func.sum(PromptLibrary.share_count)).scalar() or 0
+    return render_template('about.html',
+                           prompt_count=prompt_count,
+                           user_count=user_count,
+                           total_copies=total_copies,
+                           total_shares=total_shares)
+
+# ---------- Auth ----------
+@app.route('/signup')
+def sign_page():
+    if session.get('user_id'):
+        return redirect(url_for('settings_page'))
+    return render_template('sign.html', csrf_token=generate_csrf_token(),
+                            google_client_id=Config.GOOGLE_CLIENT_ID)
+
+@app.route('/auth/signup', methods=['POST'])
+@limiter.limit("10 per minute")
+def auth_signup():
+    data = request.get_json() or {}
+    if not validate_csrf_token(data.get('csrf_token')):
+        return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
+
+    name = (data.get('name') or '').strip()
+    email = (data.get('email') or '').strip().lower()
+    password = data.get('password') or ''
+
+    if not name or not email or not password:
+        return jsonify({'success': False, 'message': 'يرجى ملء جميع الحقول'}), 400
+    if not is_valid_email(email):
+        return jsonify({'success': False, 'message': 'بريد إلكتروني غير صالح'}), 400
+    if len(password) < 6:
+        return jsonify({'success': False, 'message': 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'}), 400
+    if User.query.filter_by(email=email).first():
+        return jsonify({'success': False, 'message': 'هذا البريد الإلكتروني مستخدم بالفعل'}), 400
+
+    try:
+        user = User(name=name, email=email, password_hash=generate_password_hash(password))
+        db.session.add(user)
+        db.session.commit()
+        session['user_id'] = user.id
+        return jsonify({'success': True, 'message': 'تم إنشاء الحساب بنجاح', 'redirect': url_for('settings_page')})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Signup error: {e}")
+        return jsonify({'success': False, 'message': 'خطأ في إنشاء الحساب'}), 500
+
+@app.route('/auth/login', methods=['POST'])
+@limiter.limit("15 per minute")
+def auth_login():
+    data = request.get_json() or {}
+    if not validate_csrf_token(data.get('csrf_token')):
+        return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
+
+    email = (data.get('email') or '').strip().lower()
+    password = data.get('password') or ''
+    user = User.query.filter_by(email=email).first()
+
+    if not user or not user.password_hash or not check_password_hash(user.password_hash, password):
+        return jsonify({'success': False, 'message': 'البريد الإلكتروني أو كلمة المرور غير صحيحة'}), 401
+
+    session['user_id'] = user.id
+    user.last_active = datetime.utcnow()
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'تم تسجيل الدخول بنجاح', 'redirect': url_for('settings_page')})
+
+@app.route('/auth/google', methods=['POST'])
+@limiter.limit("10 per minute")
+def auth_google():
+    data = request.get_json() or {}
+    token = data.get('credential')
+    if not token:
+        return jsonify({'success': False, 'message': 'رمز جوجل مفقود'}), 400
+
+    try:
+        idinfo = google_id_token.verify_oauth2_token(token, google_requests.Request(), Config.GOOGLE_CLIENT_ID)
+        google_id = idinfo['sub']
+        email = (idinfo.get('email') or '').lower()
+        name = idinfo.get('name') or (email.split('@')[0] if email else 'مستخدم')
+        avatar = idinfo.get('picture')
+    except Exception as e:
+        logger.error(f"Google auth verification error: {e}")
+        return jsonify({'success': False, 'message': 'فشل التحقق من حساب جوجل'}), 400
+
+    try:
+        user = User.query.filter_by(google_id=google_id).first()
+        if not user and email:
+            user = User.query.filter_by(email=email).first()
+        if not user:
+            user = User(name=name, email=email, google_id=google_id, avatar_url=avatar)
+            db.session.add(user)
+        else:
+            user.google_id = user.google_id or google_id
+            user.avatar_url = user.avatar_url or avatar
+        db.session.commit()
+        session['user_id'] = user.id
+        user.last_active = datetime.utcnow()
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'تم تسجيل الدخول عبر جوجل', 'redirect': url_for('settings_page')})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Google auth save error: {e}")
+        return jsonify({'success': False, 'message': 'خطأ في حفظ الحساب'}), 500
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    return redirect(url_for('index'))
+
+# ---------- Settings ----------
+@app.route('/settings')
+@login_required
+def settings_page():
+    user = current_user()
+    categories = Category.query.order_by(Category.sort_order).all()
+    my_prompts = PromptLibrary.query.filter_by(user_id=user.id).order_by(PromptLibrary.created_at.desc()).all()
+    my_pending = UploadContribution.query.filter_by(user_id=user.id, status='pending').order_by(UploadContribution.created_at.desc()).all()
+    my_edit_requests = PromptEditRequest.query.filter_by(user_id=user.id, status='pending').order_by(PromptEditRequest.created_at.desc()).all()
+    my_delete_requests = PromptDeleteRequest.query.filter_by(user_id=user.id, status='pending').order_by(PromptDeleteRequest.created_at.desc()).all()
+    return render_template('settings.html', user=user, categories=categories, my_prompts=my_prompts,
+                           my_pending=my_pending, my_edit_requests=my_edit_requests,
+                           my_delete_requests=my_delete_requests, csrf_token=generate_csrf_token())
+
+@app.route('/settings/update', methods=['POST'])
+@login_required
+def update_settings():
+    data = request.get_json() or {}
+    if not validate_csrf_token(data.get('csrf_token')):
+        return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
+
+    user = current_user()
+    field = data.get('field')
+    value = (data.get('value') or '').strip()
+
+    try:
+        if field == 'name':
+            if not value:
+                return jsonify({'success': False, 'message': 'الاسم مطلوب'}), 400
+            user.name = value
+        elif field == 'avatar':
+            if value and not is_valid_publisher_link(value):
+                return jsonify({'success': False, 'message': 'رابط الصورة غير صالح'}), 400
+            user.avatar_url = value or None
+        elif field == 'bio':
+            user.bio = value or None
+        elif field == 'profile_link':
+            if value and not is_valid_publisher_link(value):
+                return jsonify({'success': False, 'message': 'الرابط غير صالح'}), 400
+            user.profile_link = value or None
+        elif field == 'email':
+            if not is_valid_email(value):
+                return jsonify({'success': False, 'message': 'بريد إلكتروني غير صالح'}), 400
+            existing = User.query.filter_by(email=value).first()
+            if existing and existing.id != user.id:
+                return jsonify({'success': False, 'message': 'هذا البريد مستخدم بالفعل'}), 400
+            user.email = value
+        elif field == 'password':
+            if len(value) < 6:
+                return jsonify({'success': False, 'message': 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'}), 400
+            user.password_hash = generate_password_hash(value)
+        else:
+            return jsonify({'success': False, 'message': 'حقل غير معروف'}), 400
+
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'تم التحديث بنجاح'})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Settings update error: {e}")
+        return jsonify({'success': False, 'message': 'خطأ في التحديث'}), 500
+
 @app.route('/upload', methods=['GET', 'POST'])
+@login_required
 def upload():
+    user = current_user()
     if request.method == 'POST':
         data = request.get_json()
         if not data:
@@ -246,8 +486,6 @@ def upload():
         category = data.get('category', 'general').strip()
         prompt_text = data.get('prompt_text', '').strip()
         image_url = data.get('image_url', '').strip()
-        publisher_name = data.get('publisher_name', '').strip()
-        publisher_link = data.get('publisher_link', '').strip()
         keywords = data.get('keywords', '').strip()
         csrf_token = data.get('csrf_token', '')
 
@@ -257,18 +495,16 @@ def upload():
         if not title or not prompt_text:
             return jsonify({'success': False, 'message': 'يرجى ملء العنوان ونص البرومبت'}), 400
 
-        if publisher_link and not is_valid_publisher_link(publisher_link):
-            return jsonify({'success': False, 'message': 'رابط الناشر غير صالح، يرجى إدخال رابط http/https صحيح'}), 400
-
         try:
             contribution = UploadContribution(
                 title=title,
                 category=category,
                 prompt_text=prompt_text,
                 image_url=image_url or None,
-                publisher_name=publisher_name or None,
-                publisher_link=publisher_link or None,
-                keywords=keywords or None
+                publisher_name=user.name,
+                publisher_link=user.profile_link,
+                keywords=keywords or None,
+                user_id=user.id
             )
             db.session.add(contribution)
             db.session.commit()
@@ -279,7 +515,74 @@ def upload():
             return jsonify({'success': False, 'message': 'خطأ في حفظ البيانات'}), 500
 
     categories = Category.query.order_by(Category.sort_order).all()
-    return render_template('upload.html', categories=categories, csrf_token=generate_csrf_token())
+    return render_template('upload.html', categories=categories, csrf_token=generate_csrf_token(), user=user)
+
+# ---------- Prompt Edit/Delete Requests ----------
+@app.route('/api/prompt/edit-request', methods=['POST'])
+@login_required
+def prompt_edit_request():
+    data = request.get_json() or {}
+    if not validate_csrf_token(data.get('csrf_token')):
+        return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
+
+    user = current_user()
+    prompt_id = data.get('prompt_id')
+    prompt = PromptLibrary.query.get_or_404(prompt_id)
+
+    if prompt.user_id != user.id:
+        return jsonify({'success': False, 'message': 'غير مصرح'}), 403
+
+    # Check if there's already a pending request
+    existing = PromptEditRequest.query.filter_by(prompt_id=prompt_id, status='pending').first()
+    if existing:
+        return jsonify({'success': False, 'message': 'يوجد طلب تعديل قيد المراجعة بالفعل'}), 400
+
+    try:
+        req = PromptEditRequest(
+            prompt_id=prompt_id,
+            user_id=user.id,
+            new_title=data.get('title', prompt.title),
+            new_category=data.get('category', prompt.category),
+            new_prompt_text=data.get('prompt_text', prompt.prompt_text),
+            new_image_url=data.get('image_url', prompt.image_url),
+            new_keywords=data.get('keywords', prompt.keywords)
+        )
+        db.session.add(req)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'تم إرسال طلب التعديل للمراجعة'})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Edit request error: {e}")
+        return jsonify({'success': False, 'message': 'خطأ في إرسال الطلب'}), 500
+
+@app.route('/api/prompt/delete-request', methods=['POST'])
+@login_required
+def prompt_delete_request():
+    data = request.get_json() or {}
+    if not validate_csrf_token(data.get('csrf_token')):
+        return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
+
+    user = current_user()
+    prompt_id = data.get('prompt_id')
+    prompt = PromptLibrary.query.get_or_404(prompt_id)
+
+    if prompt.user_id != user.id:
+        return jsonify({'success': False, 'message': 'غير مصرح'}), 403
+
+    # Check if there's already a pending request
+    existing = PromptDeleteRequest.query.filter_by(prompt_id=prompt_id, status='pending').first()
+    if existing:
+        return jsonify({'success': False, 'message': 'يوجد طلب حذف قيد المراجعة بالفعل'}), 400
+
+    try:
+        req = PromptDeleteRequest(prompt_id=prompt_id, user_id=user.id)
+        db.session.add(req)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'تم إرسال طلب الحذف للمراجعة'})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Delete request error: {e}")
+        return jsonify({'success': False, 'message': 'خطأ في إرسال الطلب'}), 500
 
 # ---------- Admin ----------
 @app.route('/admin', methods=['GET', 'POST'])
@@ -294,18 +597,137 @@ def admin_panel():
         library_ads = LibraryAd.query.order_by(LibraryAd.created_at.desc()).all()
         site_settings = SiteSetting.query.first()
         contributions = UploadContribution.query.order_by(UploadContribution.created_at.desc()).all()
+        edit_requests = PromptEditRequest.query.filter_by(status='pending').order_by(PromptEditRequest.created_at.desc()).all()
+        delete_requests = PromptDeleteRequest.query.filter_by(status='pending').order_by(PromptDeleteRequest.created_at.desc()).all()
+
+        # Get inactive users (15+ days)
+        fifteen_days_ago = datetime.utcnow() - timedelta(days=15)
+        inactive_users_raw = User.query.filter(
+            User.last_active < fifteen_days_ago
+        ).order_by(User.last_active.asc()).all()
+
+        inactive_users = []
+        for user in inactive_users_raw:
+            last_prompt = PromptLibrary.query.filter_by(user_id=user.id).order_by(PromptLibrary.created_at.desc()).first()
+            inactive_users.append({
+                'id': user.id,
+                'name': user.name,
+                'email': user.email,
+                'avatar_url': user.avatar_url,
+                'last_active_days': (datetime.utcnow() - user.last_active).days,
+                'last_prompt_date': last_prompt.created_at if last_prompt else None
+            })
+
         return render_template('admin.html',
                                categories=categories,
                                library_items=library_items,
                                library_ads=library_ads,
                                site_settings=site_settings,
                                contributions=contributions,
+                               edit_requests=edit_requests,
+                               delete_requests=delete_requests,
+                               inactive_users=inactive_users,
                                csrf_token=generate_csrf_token())
     return render_template('admin.html')
 
 @app.route('/admin/logout')
 def admin_logout():
     session.pop('logged_in', None)
+    return redirect(url_for('admin_panel'))
+
+# ---------- Admin: Edit/Delete Request Approval ----------
+@app.route('/admin/edit-request/<int:req_id>/approve', methods=['POST'])
+@admin_required
+def approve_edit_request(req_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        req = PromptEditRequest.query.get_or_404(req_id)
+        prompt = req.prompt
+        prompt.title = req.new_title
+        prompt.category = req.new_category
+        prompt.prompt_text = req.new_prompt_text
+        prompt.image_url = req.new_image_url or prompt.image_url
+        prompt.keywords = req.new_keywords
+        req.status = 'approved'
+        db.session.commit()
+        flash('تمت الموافقة على طلب التعديل', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error approving edit request: {e}")
+        flash('خطأ', 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/edit-request/<int:req_id>/reject', methods=['POST'])
+@admin_required
+def reject_edit_request(req_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        req = PromptEditRequest.query.get_or_404(req_id)
+        req.status = 'rejected'
+        db.session.commit()
+        flash('تم رفض طلب التعديل', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error rejecting edit request: {e}")
+        flash('خطأ', 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/delete-request/<int:req_id>/approve', methods=['POST'])
+@admin_required
+def approve_delete_request(req_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        req = PromptDeleteRequest.query.get_or_404(req_id)
+        prompt = req.prompt
+        db.session.delete(prompt)
+        req.status = 'approved'
+        db.session.commit()
+        flash('تم الحذف بنجاح', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error approving delete request: {e}")
+        flash('خطأ', 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/delete-request/<int:req_id>/reject', methods=['POST'])
+@admin_required
+def reject_delete_request(req_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        req = PromptDeleteRequest.query.get_or_404(req_id)
+        req.status = 'rejected'
+        db.session.commit()
+        flash('تم رفض طلب الحذف', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error rejecting delete request: {e}")
+        flash('خطأ', 'error')
+    return redirect(url_for('admin_panel'))
+
+# ---------- Admin: User Management ----------
+@app.route('/admin/user/<int:user_id>/delete', methods=['POST'])
+@admin_required
+def delete_user(user_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return "CSRF Error", 400
+    try:
+        user = User.query.get_or_404(user_id)
+        # Delete associated data
+        PromptLibrary.query.filter_by(user_id=user.id).delete()
+        UploadContribution.query.filter_by(user_id=user.id).delete()
+        PromptEditRequest.query.filter_by(user_id=user.id).delete()
+        PromptDeleteRequest.query.filter_by(user_id=user.id).delete()
+        db.session.delete(user)
+        db.session.commit()
+        flash('تم حذف الحساب بنجاح', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting user: {e}")
+        flash('خطأ في حذف الحساب', 'error')
     return redirect(url_for('admin_panel'))
 
 # ---------- Admin: Categories ----------
@@ -430,7 +852,8 @@ def approve_contribution(contrib_id):
             prompt_text=contrib.prompt_text,
             publisher=contrib.publisher_name,
             publisher_link=contrib.publisher_link,
-            keywords=contrib.keywords
+            keywords=contrib.keywords,
+            user_id=contrib.user_id
         )
         db.session.add(item)
         contrib.status = 'approved'
