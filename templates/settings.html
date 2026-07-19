@@ -418,8 +418,8 @@
                         <div class="meta"><span><i class="bi bi-clipboard-check"></i> {{ p.copy_count or 0 }}</span><span><i class="bi bi-share-fill"></i> {{ p.share_count or 0 }}</span></div>
                     </div>
                     <div class="my-prompt-actions">
-                        <button class="btn btn-warning" onclick="openEditPromptModal({{ p.id }}, '{{ p.title|replace("'", "\'") }}', '{{ p.category }}', '{{ p.prompt_text|replace("'", "\'")|replace(chr(10), "\n") }}', '{{ p.image_url or '' }}', '{{ p.keywords or '' }}')" title="تعديل"><i class="bi bi-pencil"></i></button>
-                        <button class="btn btn-danger" onclick="openDeletePromptModal({{ p.id }}, '{{ p.title|replace("'", "\'") }}')" title="حذف"><i class="bi bi-trash"></i></button>
+                        <button class="btn btn-warning" data-prompt-id="{{ p.id }}" data-prompt-title="{{ p.title|replace('"', '&quot;') }}" data-prompt-category="{{ p.category }}" data-prompt-text="{{ p.prompt_text|replace('"', '&quot;') }}" data-prompt-image="{{ p.image_url or '' }}" data-prompt-keywords="{{ p.keywords or '' }}" onclick="openEditPromptModalFromData(this)" title="تعديل"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-danger" data-delete-id="{{ p.id }}" onclick="openDeletePromptModal(this.dataset.deleteId)" title="حذف"><i class="bi bi-trash"></i></button>
                     </div>
                     <span class="my-prompt-badge">منشور</span>
                 </div>
@@ -691,13 +691,13 @@
         }
 
         // ---------- Prompt Edit Request ----------
-        function openEditPromptModal(id, title, category, text, imageUrl, keywords) {
-            document.getElementById('editPromptId').value = id;
-            document.getElementById('editPromptTitle').value = title;
-            document.getElementById('editPromptCategory').value = category;
-            document.getElementById('editPromptText').value = text;
-            document.getElementById('editPromptImageUrl').value = imageUrl;
-            document.getElementById('editPromptKeywords').value = keywords;
+        function openEditPromptModalFromData(btn) {
+            document.getElementById('editPromptId').value = btn.dataset.promptId;
+            document.getElementById('editPromptTitle').value = btn.dataset.promptTitle;
+            document.getElementById('editPromptCategory').value = btn.dataset.promptCategory;
+            document.getElementById('editPromptText').value = btn.dataset.promptText;
+            document.getElementById('editPromptImageUrl').value = btn.dataset.promptImage;
+            document.getElementById('editPromptKeywords').value = btn.dataset.promptKeywords;
             document.getElementById('editPromptModalOverlay').classList.add('show');
         }
 
