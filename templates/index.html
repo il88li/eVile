@@ -265,20 +265,13 @@
             font-size: 0.85rem; color: var(--text-dim); line-height: 1.8;
             margin-bottom: 14px;
         }
-        .profile-popup-warning {
-            display: flex; align-items: center; gap: 10px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 10px; padding: 10px 12px;
-            margin-bottom: 16px; text-align: right;
+        .profile-popup-warning-faint {
+            font-size: 0.72rem;
+            color: var(--text-faint);
+            text-align: center;
+            margin: 12px 0 16px;
+            opacity: 0.7;
         }
-        .profile-popup-warning .warn-icon-inline {
-            width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
-            color: #fff; font-size: 13px;
-        }
-        .profile-popup-warning span { font-size: 0.72rem; color: var(--text-faint); line-height: 1.6; }
         .disclaimer-box p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.8; margin-bottom: 18px; }
         .disclaimer-actions { display: flex; gap: 10px; }
         .disclaimer-actions button {
@@ -442,6 +435,47 @@
             z-index: 3;
         }
 
+        /* Cards per row selector */
+        .cards-per-row-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+        .cards-per-row-selector label {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+        .cards-per-row-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.04);
+            color: var(--text-dim);
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cards-per-row-btn:hover {
+            border-color: var(--border-strong);
+            color: var(--primary-light);
+        }
+        .cards-per-row-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%);
+            color: #fff;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 12px rgba(139,92,246,0.35);
+        }
+
         @media (max-width: 600px) {
             .hero h1 { font-size: 1.5rem; }
             .gallery-grid { grid-template-columns: 1fr; gap: 16px; }
@@ -476,6 +510,13 @@
                 {% for cat in categories %}
                 <button class="category-btn" data-category="{{ cat.name }}">{{ cat.display_name }}</button>
                 {% endfor %}
+            </div>
+            <div class="cards-per-row-selector">
+                <label><i class="bi bi-grid-3x3-gap"></i> البطاقات في السطر:</label>
+                <button class="cards-per-row-btn" data-cols="1" onclick="setCardsPerRow(1)">1</button>
+                <button class="cards-per-row-btn" data-cols="2" onclick="setCardsPerRow(2)">2</button>
+                <button class="cards-per-row-btn active" data-cols="3" onclick="setCardsPerRow(3)">3</button>
+                <button class="cards-per-row-btn" data-cols="4" onclick="setCardsPerRow(4)">4</button>
             </div>
         </div>
 
@@ -550,18 +591,14 @@
     </div>
 
     <!-- Publisher Profile Popup -->
-    <div class="disclaimer-overlay" id="disclaimerOverlay">
+    <div class="disclaimer-overlay" id="disclaimerOverlay" onclick="if(event.target===this)closeDisclaimer()">
         <div class="disclaimer-box">
             <img class="profile-popup-avatar" id="popupAvatar" src="" alt="" style="display:none;">
             <div class="profile-popup-avatar profile-popup-avatar-fallback" id="popupAvatarFallback"><i class="bi bi-person-fill"></i></div>
             <h3 id="popupName">مستخدم</h3>
             <p class="profile-popup-bio" id="popupBio" style="display:none;"></p>
-            <div class="profile-popup-warning">
-                <i class="bi bi-exclamation-triangle-fill warn-icon-inline"></i>
-                <span>هذا رابط خارجي أضافه المستخدم بنفسه، ولا يتحمل UFOQ أي مسؤولية عن محتواه أو أي أضرار قد تنتج عن زيارته.</span>
-            </div>
+            <p class="profile-popup-warning-faint">⚠️ رابط خارجي — لا يتحمل UFOQ مسؤولية محتواه</p>
             <div class="disclaimer-actions">
-                <button class="disclaimer-cancel" onclick="closeDisclaimer()">إغلاق</button>
                 <button class="disclaimer-continue" id="popupOpenLinkBtn" onclick="confirmPublisherLink()"><i class="bi bi-box-arrow-up-right"></i> فتح الرابط</button>
             </div>
         </div>
@@ -929,10 +966,35 @@
             });
         }
 
+        // Cards per row setting
+        function setCardsPerRow(cols) {
+            localStorage.setItem('ufoq_cards_per_row', cols);
+            applyCardsPerRow();
+            document.querySelectorAll('.cards-per-row-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.cols) === cols);
+            });
+        }
+        function applyCardsPerRow() {
+            const cols = parseInt(localStorage.getItem('ufoq_cards_per_row')) || 3;
+            const grid = document.getElementById('galleryGrid');
+            if (grid) {
+                if (window.innerWidth <= 600) {
+                    grid.style.gridTemplateColumns = '1fr';
+                } else {
+                    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+                }
+            }
+            document.querySelectorAll('.cards-per-row-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.cols) === cols);
+            });
+        }
+        window.addEventListener('resize', applyCardsPerRow);
+
         document.addEventListener('DOMContentLoaded', () => {
             initLikes();
             focusSharedPrompt();
             initNavIndicator();
+            applyCardsPerRow();
         });
     </script>
 </body>
