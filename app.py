@@ -6,16 +6,14 @@ import traceback
 from datetime import datetime, timedelta
 from functools import wraps
 from urllib.parse import urlparse
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_caching import Cache
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
-# flask_session removed for serverless compatibility
-# Session data stored in signed cookies (client-side) on Vercel
-# Session = None  # Not used on serverless
+from flask_session import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import inspect, text, func
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -26,17 +24,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ==================== Production Logging ====================
-# Detect serverless environment (Vercel, Render, AWS Lambda, etc.)
-_is_serverless = bool(os.getenv('RENDER') or os.getenv('VERCEL') or os.getenv('AWS_LAMBDA_FUNCTION_NAME'))
-
-handlers = [logging.StreamHandler()]
-if not _is_serverless:
-    handlers.append(logging.FileHandler('app.log', encoding='utf-8'))
-
 logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] %(levelname)s in %(module)s [%(pathname)s:%(lineno)d]: %(message)s',
-    handlers=handlers
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('app.log', encoding='utf-8') if not os.getenv('RENDER') else logging.StreamHandler()
+    ]
 )
 logger = logging.getLogger(__name__)
 
@@ -44,14 +38,18 @@ logger = logging.getLogger(__name__)
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY')
     if not SECRET_KEY:
-        logger.warning("SECRET_KEY not set! Using fallback (INSECURE for production)")
-        # MUST be stable across serverless instances for signed cookies to work
-        SECRET_KEY = 'ufoq-default-secret-key-change-me-in-production-immediately'
+        raise RuntimeError(
+            "SECRET_KEY environment variable is required and must be set to a fixed, "
+            "random value. Without it, sessions/CSRF tokens break across Gunicorn workers "
+            "and restarts. Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""
+        )
 
-    ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
+    ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
+    if not ADMIN_PASSWORD:
+        raise RuntimeError("ADMIN_PASSWORD environment variable is required (no insecure default is allowed).")
     GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '1066865562137-k509114e44npk13n5n78gb32b3meldrk.apps.googleusercontent.com')
 
-    DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///tmp/ufoq.db')
+    DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///ufoq.db')
     if DATABASE_URL.startswith('postgres://'):
         DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
@@ -66,17 +64,12 @@ class Config:
         'pool_timeout': 30,
     }
 
-    # On serverless: use Flask's built-in signed cookies (client-side session)
-    # On traditional hosting: can use sqlalchemy backend
-    SESSION_TYPE = 'null' if _is_serverless else 'filesystem'
+    SESSION_TYPE = 'sqlalchemy'
+    SESSION_SQLALCHEMY_TABLE = 'flask_sessions'
     SESSION_PERMANENT = True
     SESSION_USE_SIGNER = True
-    PERMANENT_SESSION_LIFETIME = 2592000  # 30 days
-    # Cookie settings for maximum compatibility
-    SESSION_COOKIE_NAME = 'ufoq_session'
-    SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Lax'
-    SESSION_COOKIE_SECURE = False  # Set to True only if using HTTPS (Vercel uses HTTPS but cookies work with False)
+    SESSION_KEY_PREFIX = 'ufoq_session:'
+    PERMANENT_SESSION_LIFETIME = 2592000
 
     CACHE_TYPE = 'SimpleCache'
     CACHE_DEFAULT_TIMEOUT = 300
@@ -181,23 +174,8 @@ class PromptDeleteRequest(db.Model):
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
 app.config.from_object(Config)
 
-# Ensure session cookie settings are applied
-app.config.update(
-    SESSION_COOKIE_NAME='ufoq_session',
-    SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE='Lax',
-    SESSION_COOKIE_SECURE=False,
-)
-
 db.init_app(app)
 migrate = Migrate(app, db)
-
-# NOTE: Flask-Session is NOT used on serverless.
-# We rely on Flask's built-in secure signed cookies.
-# The session data is stored in the cookie itself (client-side).
-if _is_serverless:
-    logger.info("Serverless mode: Using Flask signed cookies for sessions")
-
 cache = Cache(app)
 limiter = Limiter(
     get_remote_address,
@@ -218,7 +196,8 @@ csp = {
     'frame-src': ["https://accounts.google.com"],
     'frame-ancestors': ["'none'"],
 }
-Talisman(app, force_https=False, content_security_policy=csp)
+FORCE_HTTPS = os.getenv('FORCE_HTTPS', 'true').lower() not in ('0', 'false', 'no')
+Talisman(app, force_https=FORCE_HTTPS, content_security_policy=csp)
 
 # ==================== Error Handlers ====================
 @app.errorhandler(404)
@@ -270,18 +249,23 @@ def is_valid_email(email):
     return bool(email) and bool(EMAIL_RE.match(email.strip()))
 
 def current_user():
+    if hasattr(g, '_current_user'):
+        return g._current_user
     uid = session.get('user_id')
     if not uid:
+        g._current_user = None
         return None
     try:
         user = User.query.get(uid)
         if user:
             user.last_active = datetime.utcnow()
             db.session.commit()
+        g._current_user = user
         return user
     except Exception as e:
         logger.error(f"current_user error: {e}")
         db.session.rollback()
+        g._current_user = None
         return None
 
 def login_required(f):
@@ -299,6 +283,10 @@ def admin_required(f):
             return redirect(url_for('admin_panel'))
         return f(*args, **kwargs)
     return decorated
+
+@app.context_processor
+def inject_user():
+    return {'user': current_user()}
 
 # ---------- Database initialization ----------
 _db_initialized = False
@@ -440,9 +428,7 @@ def auth_signup():
         user = User(name=name, email=email, password_hash=generate_password_hash(password))
         db.session.add(user)
         db.session.commit()
-        session.permanent = True
         session['user_id'] = user.id
-        session.modified = True
         return jsonify({'success': True, 'message': 'تم إنشاء الحساب بنجاح', 'redirect': url_for('settings_page')})
     except Exception as e:
         db.session.rollback()
@@ -464,9 +450,7 @@ def auth_login():
         if not user or not user.password_hash or not check_password_hash(user.password_hash, password):
             return jsonify({'success': False, 'message': 'البريد الإلكتروني أو كلمة المرور غير صحيحة'}), 401
 
-        session.permanent = True
         session['user_id'] = user.id
-        session.modified = True
         user.last_active = datetime.utcnow()
         db.session.commit()
         return jsonify({'success': True, 'message': 'تم تسجيل الدخول بنجاح', 'redirect': url_for('settings_page')})
@@ -504,9 +488,7 @@ def auth_google():
             user.google_id = user.google_id or google_id
             user.avatar_url = user.avatar_url or avatar
         db.session.commit()
-        session.permanent = True
         session['user_id'] = user.id
-        session.modified = True
         user.last_active = datetime.utcnow()
         db.session.commit()
         return jsonify({'success': True, 'message': 'تم تسجيل الدخول عبر جوجل', 'redirect': url_for('settings_page')})
@@ -726,13 +708,19 @@ def prompt_delete_request():
 
 # ==================== Admin ====================
 @app.route('/admin', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def admin_panel():
     try:
-        if request.method == 'POST' and request.form.get('password') == Config.ADMIN_PASSWORD:
-            session.permanent = True
-            session['logged_in'] = True
-            session.modified = True
-            return redirect(url_for('admin_panel'))
+        if request.method == 'POST':
+            submitted = request.form.get('password') or ''
+            if secrets.compare_digest(submitted, Config.ADMIN_PASSWORD):
+                session['logged_in'] = True
+                session.permanent = True
+                return redirect(url_for('admin_panel'))
+            else:
+                logger.warning(f"Failed admin login attempt from {request.remote_addr}")
+                flash('كلمة مرور خاطئة', 'error')
+                return redirect(url_for('admin_panel'))
 
         if session.get('logged_in'):
             categories = Category.query.order_by(Category.sort_order).all()
@@ -900,29 +888,6 @@ def add_category():
         db.session.rollback()
         logger.error(f"Error adding category: {e}")
         flash('خطأ في إضافة التصنيف', 'error')
-    return redirect(url_for('admin_panel'))
-
-@app.route('/admin/category/<int:category_id>/edit', methods=['POST'])
-@admin_required
-def edit_category(category_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        cat = Category.query.get_or_404(category_id)
-        old_name = cat.name
-        cat.name = request.form.get('name', cat.name).strip().lower().replace(' ', '_')
-        cat.display_name = request.form.get('display_name', cat.display_name).strip()
-        cat.icon = request.form.get('icon', cat.icon).strip()
-        cat.sort_order = int(request.form.get('sort_order', cat.sort_order))
-        # Update prompts using old category name
-        if old_name != cat.name:
-            PromptLibrary.query.filter_by(category=old_name).update({'category': cat.name})
-        db.session.commit()
-        flash('تم تعديل التصنيف بنجاح', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error editing category: {e}")
-        flash('خطأ في تعديل التصنيف', 'error')
     return redirect(url_for('admin_panel'))
 
 @app.route('/admin/category/<int:category_id>/delete', methods=['POST'])
