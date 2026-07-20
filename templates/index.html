@@ -57,79 +57,73 @@
             border: 1px solid var(--border);
         }
 
-        /* Floating Header - Large circle on right */
+        /* Floating Header */
         .floating-header {
-            position: fixed; top: 16px; right: 16px; z-index: 100;
-            display: flex; align-items: center; gap: 12px;
-            padding: 8px 16px;
-            border-radius: 50px;
+            position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 16px; max-width: 700px; margin: 0 auto;
+            border-radius: 16px;
             background: var(--bg-card);
             backdrop-filter: blur(22px) saturate(160%);
             -webkit-backdrop-filter: blur(22px) saturate(160%);
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
         }
-        .header-brand {
-            display: flex; align-items: center;
-        }
-        .header-logo {
-            font-size: 16px; font-weight: 900; letter-spacing: 1px;
+        .header-center {
+            position: absolute; left: 50%; transform: translateX(-50%);
+            font-size: 18px; font-weight: 900; letter-spacing: 2px; color: var(--text);
             background: linear-gradient(90deg, var(--text) 0%, var(--primary-light) 100%);
             -webkit-background-clip: text; background-clip: text; color: transparent;
         }
+        .header-btn {
+            width: 34px; height: 34px; border-radius: 8px;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text-dim); transition: 0.2s;
+            text-decoration: none;
+        }
+        .header-btn:hover { background: var(--primary-dim); color: var(--primary-light); border-color: var(--border-strong); }
+        .header-btn i { font-size: 16px; }
         .header-avatar {
-            width: 42px; height: 42px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%);
+            width: 34px; height: 34px; border-radius: 50%; overflow: hidden;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; overflow: hidden;
-            border: 2px solid var(--border-strong);
-            box-shadow: 0 0 16px rgba(139,92,246,0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
+            color: var(--text-dim); text-decoration: none; transition: 0.2s; flex-shrink: 0;
         }
-        .header-avatar:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 24px rgba(139,92,246,0.5);
-        }
-        .header-avatar img {
-            width: 100%; height: 100%; object-fit: cover;
-        }
-        .header-avatar-fallback {
-            width: 100%; height: 100%;
-            display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 20px;
-        }
+        .header-avatar:hover { border-color: var(--border-strong); color: var(--primary-light); }
+        .header-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .header-avatar i { font-size: 18px; }
 
-        /* User Dropdown Menu */
-        .user-dropdown {
-            position: fixed; top: 75px; right: 16px; z-index: 99;
-            background: var(--bg-card);
-            backdrop-filter: blur(22px) saturate(160%);
-            -webkit-backdrop-filter: blur(22px) saturate(160%);
-            border: 1px solid var(--border-strong);
-            border-radius: 16px;
-            padding: 8px;
-            min-width: 180px;
-            box-shadow: var(--shadow-lg), var(--glow);
-            opacity: 0; transform: translateY(-10px) scale(0.95);
-            pointer-events: none;
-            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .user-dropdown.show {
-            opacity: 1; transform: translateY(0) scale(1);
-            pointer-events: auto;
-        }
-        .dropdown-item {
+        /* Floating glass search panel */
+        .floating-search {
+            position: fixed; top: 64px; left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            width: min(94%, 560px); z-index: 900;
             display: flex; align-items: center; gap: 10px;
-            padding: 10px 14px; border-radius: 10px;
-            color: var(--text); text-decoration: none;
-            font-size: 0.88rem; font-weight: 600;
-            transition: 0.2s;
+            padding: 10px; border-radius: 16px;
+            background: rgba(15,13,20,0.85);
+            backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--border-strong);
+            box-shadow: var(--shadow-lg), var(--glow);
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
         }
-        .dropdown-item:hover {
-            background: var(--primary-dim);
-            color: var(--primary-light);
+        .floating-search.show { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+        .floating-search input {
+            flex: 1; padding: 10px 16px; border-radius: 10px;
+            background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+            color: var(--text); font-family: 'Tajawal', sans-serif; font-size: 0.9rem;
+            outline: none; transition: 0.2s;
         }
-        .dropdown-item i { font-size: 1rem; }
+        .floating-search input:focus { border-color: var(--primary-light); background: rgba(255,255,255,0.09); box-shadow: 0 0 0 3px var(--primary-dim); }
+        .floating-search input::placeholder { color: var(--text-faint); }
+        .floating-search-close {
+            width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-dim); cursor: pointer; transition: 0.2s;
+        }
+        .floating-search-close:hover { color: var(--primary-light); border-color: var(--border-strong); }
 
         /* Main content */
         .main-content {
@@ -161,20 +155,7 @@
             font-weight: 700;
         }
 
-        /* Search & Filter */
-        .search-bar {
-            display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
-            margin-bottom: 16px;
-        }
-        .search-bar input {
-            flex: 1; min-width: 200px;
-            padding: 10px 16px; border-radius: 8px;
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-            color: var(--text); font-family: 'Tajawal', sans-serif; font-size: 0.9rem;
-            outline: none; transition: 0.2s;
-        }
-        .search-bar input:focus { border-color: var(--primary-light); background: rgba(255,255,255,0.08); box-shadow: 0 0 0 3px var(--primary-dim); }
-        .search-bar input::placeholder { color: var(--text-faint); }
+        /* Filter */
 
         .categories-scroll {
             display: flex; gap: 8px; overflow-x: auto; padding: 4px 0; scrollbar-width: none;
@@ -474,6 +455,7 @@
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
+        /* The sliding glass "scroll bar" indicator that sits above the circles */
         .nav-indicator {
             position: absolute; top: 0; left: 0;
             width: 50px; height: 50px;
@@ -487,59 +469,37 @@
             z-index: 3;
         }
 
-        /* Search circle - inside nav, white glass */
-        .search-circle {
-            width: 50px; height: 50px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(12px) saturate(200%);
-            -webkit-backdrop-filter: blur(12px) saturate(200%);
-            color: #fff; font-size: 20px;
-            border: 1.5px solid rgba(255,255,255,0.25);
-            box-shadow: 0 0 20px rgba(255,255,255,0.1), inset 0 0 10px rgba(255,255,255,0.05);
-            cursor: pointer;
-            transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
-            text-decoration: none;
-            position: relative;
-            z-index: 1;
-            flex-shrink: 0;
-        }
-        .search-circle:hover {
-            transform: translateY(-2px);
-            background: rgba(255,255,255,0.25);
-            box-shadow: 0 0 30px rgba(255,255,255,0.2), inset 0 0 15px rgba(255,255,255,0.1);
-        }
-        .search-circle:active { transform: scale(0.95); }
-        .search-circle i { position: relative; z-index: 2; pointer-events: none; }
-
         @media (max-width: 600px) {
             .hero h1 { font-size: 1.5rem; }
-            .gallery-grid { grid-template-columns: 1fr; gap: 16px; }
+            .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+            .prompt-card .image-wrapper { min-height: 130px; }
+            .prompt-card .card-actions { padding: 10px 10px 6px 10px; gap: 6px; }
+            .copy-btn, .like-btn, .share-btn { height: 38px; font-size: 0.72rem; padding: 0 10px; }
+            .prompt-card .card-meta { font-size: 0.68rem; padding: 0 10px 10px 10px; }
             .bottom-nav-bar { padding: 7px; }
             .nav-track { gap: 12px; }
             .nav-circle, .nav-indicator { width: 44px; height: 44px; }
             .nav-circle i { font-size: 18px; }
-            .search-circle { width: 44px; height: 44px; font-size: 18px; }
         }
     </style>
 </head>
 <body>
     <!-- Floating Header -->
     <header class="floating-header">
-        <div class="header-brand">
-            <span class="header-logo">UFOQ</span>
-        </div>
-        <div class="header-avatar" id="headerAvatar" onclick="toggleUserMenu(event)" style="display:none;">
-            <img src="" alt="" id="headerAvatarImg">
-            <div class="header-avatar-fallback" id="headerAvatarFallback"><i class="bi bi-person-fill"></i></div>
-        </div>
+        <a href="{{ '/settings' if user else '/sign' }}" class="header-avatar" aria-label="الحساب">
+            {% if user and user.avatar_url %}
+            <img src="{{ user.avatar_url }}" alt="{{ user.name }}">
+            {% else %}
+            <i class="bi bi-person-circle"></i>
+            {% endif %}
+        </a>
+        <div class="header-center">UFOQ</div>
     </header>
 
-    <!-- User Dropdown Menu -->
-    <div class="user-dropdown" id="userDropdown">
-        <a href="/settings" class="dropdown-item"><i class="bi bi-gear"></i> الإعدادات</a>
-        <a href="/about" class="dropdown-item"><i class="bi bi-info-circle"></i> عن UFOQ</a>
-        <a href="/logout" class="dropdown-item" style="color:var(--danger);"><i class="bi bi-box-arrow-right"></i> تسجيل الخروج</a>
+    <!-- Floating glass search panel -->
+    <div class="floating-search" id="floatingSearch">
+        <input type="text" id="searchInput" placeholder="ابحث في البرومبتات (العنوان أو الكلمات المفتاحية)" oninput="filterPrompts()">
+        <button class="floating-search-close" onclick="closeSearchPanel()" aria-label="إغلاق البحث"><i class="bi bi-x-lg"></i></button>
     </div>
 
     <div class="main-content">
@@ -550,11 +510,8 @@
             <div class="hero-badge"><i class="bi bi-stars"></i> أكثر من {{ library_items|length }} برومبت</div>
         </div>
 
-        <!-- Search & Filter -->
+        <!-- Filter -->
         <div class="card">
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="ابحث في البرومبتات (العنوان أو الكلمات المفتاحية)" oninput="filterPrompts()">
-            </div>
             <div class="categories-scroll" id="categoriesContainer">
                 <button class="category-btn active" data-category="all">الكل</button>
                 {% for cat in categories %}
@@ -651,19 +608,11 @@
         </div>
     </div>
 
-    <!-- Search Overlay -->
-    <div class="search-overlay" id="searchOverlay">
-        <button class="search-close" onclick="closeSearchOverlay()"><i class="bi bi-x-lg"></i></button>
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="ابحث في البرومبتات..." oninput="filterPrompts()" autofocus>
-        </div>
-    </div>
-
-    <!-- Bottom Nav: search + index + settings + about -->
+    <!-- Bottom Nav: index (right) -> settings -> about -->
     <nav class="bottom-nav-bar">
         <div class="nav-track" id="navTrack">
-            <a class="search-circle" onclick="openSearchOverlay()"><i class="bi bi-search"></i></a>
             <a href="/" class="nav-circle active" data-page="index"><i class="bi bi-house-door-fill"></i></a>
+            <a href="/?focus_search=1" class="nav-circle" data-page="search" onclick="return handleSearchNavClick(event)"><i class="bi bi-search"></i></a>
             <a href="/settings" class="nav-circle" data-page="settings"><i class="bi bi-person-circle"></i></a>
             <a href="/about" class="nav-circle" data-page="about"><i class="bi bi-info-circle-fill"></i></a>
             <div class="nav-indicator" id="navIndicator"></div>
@@ -801,6 +750,54 @@
             btn.classList.add('shared');
             setTimeout(() => btn.classList.remove('shared'), 1500);
         }
+
+        // ---------- Bottom nav: floating search panel ----------
+        function openSearchPanel() {
+            const panel = document.getElementById('floatingSearch');
+            if (!panel) return;
+            panel.classList.add('show');
+            setTimeout(() => document.getElementById('searchInput')?.focus(), 200);
+        }
+        function closeSearchPanel() {
+            document.getElementById('floatingSearch')?.classList.remove('show');
+        }
+        function toggleSearchPanel() {
+            const panel = document.getElementById('floatingSearch');
+            if (!panel) return;
+            if (panel.classList.contains('show')) closeSearchPanel();
+            else openSearchPanel();
+        }
+
+        // On the index page, open the floating search panel instead of navigating.
+        // On other pages, fall through to the normal nav-indicator navigation to /?focus_search=1.
+        function handleSearchNavClick(e) {
+            if (window.location.pathname === '/') {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                toggleSearchPanel();
+                return false;
+            }
+            return true;
+        }
+
+        // If we arrived here via the search nav button from another page, open the search panel
+        function focusSearchIfRequested() {
+            const params = new URLSearchParams(location.search);
+            if (params.get('focus_search') !== '1') return;
+            openSearchPanel();
+            history.replaceState(null, '', '/');
+        }
+
+        document.addEventListener('click', (e) => {
+            const panel = document.getElementById('floatingSearch');
+            if (!panel || !panel.classList.contains('show')) return;
+            if (panel.contains(e.target)) return;
+            if (e.target.closest('[data-page="search"]')) return;
+            closeSearchPanel();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeSearchPanel();
+        });
 
         // Bring a shared prompt to the front of the gallery and highlight it
         function focusSharedPrompt() {
@@ -957,7 +954,7 @@
                 const title = card.dataset.title || '';
                 const keywords = card.dataset.keywords || '';
                 const matchCategory = (activeCategory === 'all' || cat === activeCategory);
-                const matchSearch = !searchVal || title.includes(searchVal) || keywords.includes(searchVal);
+                const matchSearch = title.includes(searchVal) || keywords.includes(searchVal);
                 if (matchCategory && matchSearch) {
                     card.style.display = 'flex';
                     visible++;
@@ -965,20 +962,11 @@
                     card.style.display = 'none';
                 }
             });
-            // Show results counter when searching
-            const counter = document.getElementById('searchResultsCounter');
-            const countSpan = document.getElementById('resultsCount');
-            if (searchVal && counter && countSpan) {
-                counter.style.display = 'block';
-                countSpan.textContent = visible;
-            } else if (counter) {
-                counter.style.display = 'none';
-            }
             const empty = document.querySelector('.empty-state');
             if (empty) {
                 if (visible === 0 && cards.length > 0) {
                     empty.style.display = 'block';
-                    empty.querySelector('p').textContent = searchVal ? 'لا توجد نتائج مطابقة' : 'لا توجد برومبتات في هذا التصنيف';
+                    empty.querySelector('p').textContent = 'لا توجد برومبتات تطابق بحثك';
                 } else {
                     empty.style.display = 'none';
                 }
@@ -1034,6 +1022,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             initLikes();
             focusSharedPrompt();
+            focusSearchIfRequested();
             initNavIndicator();
         });
     </script>
