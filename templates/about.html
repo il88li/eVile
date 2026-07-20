@@ -52,6 +52,33 @@
         }
         .container { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; }
 
+        /* Floating Header */
+        .floating-header {
+            position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 16px; max-width: 700px; margin: 0 auto;
+            border-radius: 16px;
+            background: var(--bg-card);
+            backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+        .header-center {
+            position: absolute; left: 50%; transform: translateX(-50%);
+            font-size: 18px; font-weight: 900; letter-spacing: 2px;
+            background: linear-gradient(90deg, var(--text) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .header-avatar {
+            width: 34px; height: 34px; border-radius: 50%; overflow: hidden;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-dim); text-decoration: none; transition: 0.2s; flex-shrink: 0;
+        }
+        .header-avatar:hover { border-color: var(--border-strong); color: var(--primary-light); }
+        .header-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .header-avatar i { font-size: 18px; }
+
         /* Card base */
         .card {
             background: var(--bg-card);
@@ -284,6 +311,17 @@
     </style>
 </head>
 <body>
+    <header class="floating-header">
+        <a href="{{ '/settings' if user else '/sign' }}" class="header-avatar" aria-label="الحساب">
+            {% if user and user.avatar_url %}
+            <img src="{{ user.avatar_url }}" alt="{{ user.name }}">
+            {% else %}
+            <i class="bi bi-person-circle"></i>
+            {% endif %}
+        </a>
+        <div class="header-center">UFOQ</div>
+    </header>
+
     <div class="container">
         <!-- Hero -->
         <div class="card hero-card">
@@ -453,6 +491,7 @@
     <nav class="bottom-nav-bar">
         <div class="nav-track" id="navTrack">
             <a href="/" class="nav-circle" data-page="index"><i class="bi bi-house-door-fill"></i></a>
+            <a href="/?focus_search=1" class="nav-circle" data-page="search"><i class="bi bi-search"></i></a>
             <a href="/settings" class="nav-circle" data-page="settings"><i class="bi bi-person-circle"></i></a>
             <a href="/about" class="nav-circle active" data-page="about"><i class="bi bi-info-circle-fill"></i></a>
             <div class="nav-indicator" id="navIndicator"></div>
