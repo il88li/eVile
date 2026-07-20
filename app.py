@@ -20,6 +20,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from google.oauth2 import id_token as google_id_token
 from google.auth.transport import requests as google_requests
 from dotenv import load_dotenv
+import redis
 
 load_dotenv()
 
@@ -28,8 +29,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] %(levelname)s in %(module)s [%(pathname)s:%(lineno)d]: %(message)s',
     handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler('app.log', encoding='utf-8') if not os.getenv('RENDER') else logging.StreamHandler()
+        logging.StreamHandler()
     ]
 )
 logger = logging.getLogger(__name__)
@@ -64,17 +64,27 @@ class Config:
         'pool_timeout': 30,
     }
 
-    SESSION_TYPE = 'sqlalchemy'
-    SESSION_SQLALCHEMY_TABLE = 'flask_sessions'
+    REDIS_URL = os.getenv('REDIS_URL')
+
+    if REDIS_URL:
+        SESSION_TYPE = 'redis'
+        SESSION_REDIS = redis.from_url(REDIS_URL)
+    else:
+        SESSION_TYPE = 'sqlalchemy'
+        SESSION_SQLALCHEMY_TABLE = 'flask_sessions'
     SESSION_PERMANENT = True
     SESSION_USE_SIGNER = True
     SESSION_KEY_PREFIX = 'ufoq_session:'
     PERMANENT_SESSION_LIFETIME = 2592000
 
-    CACHE_TYPE = 'SimpleCache'
+    if REDIS_URL:
+        CACHE_TYPE = 'RedisCache'
+        CACHE_REDIS_URL = REDIS_URL
+    else:
+        CACHE_TYPE = 'SimpleCache'
     CACHE_DEFAULT_TIMEOUT = 300
     RATELIMIT_ENABLED = True
-    RATELIMIT_STORAGE_URI = os.getenv('REDIS_URL', 'memory://')
+    RATELIMIT_STORAGE_URI = REDIS_URL or 'memory://'
     RATELIMIT_STRATEGY = 'fixed-window'
     RATELIMIT_DEFAULT = "200 per minute"
 
