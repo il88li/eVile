@@ -2,9 +2,10 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم – UFOQ</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>الإعدادات — UFOQ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -22,22 +23,87 @@
             --shadow: 0 4px 24px rgba(0,0,0,0.5);
             --shadow-lg: 0 10px 40px rgba(0,0,0,0.6);
             --glow: 0 0 40px rgba(58,12,163,0.35);
-            --danger: #ef4444;
-            --danger-bg: rgba(239,68,68,0.1);
-            --warning: #f59e0b;
-            --warning-bg: rgba(245,158,11,0.1);
-            --success: #10b981;
-            --success-bg: rgba(16,185,129,0.1);
         }
         body {
             font-family: 'Tajawal', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            padding: 90px 16px 140px 16px;
-            position: relative;
-            overflow-x: hidden;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; padding: 90px 16px 140px 16px;
+            position: relative; overflow-x: hidden;
         }
+
+        /* Floating Header */
+        .floating-header {
+            position: fixed; top: 16px; right: 16px; z-index: 100;
+            display: flex; align-items: center; gap: 12px;
+            padding: 8px 16px;
+            border-radius: 50px;
+            background: var(--bg-card);
+            backdrop-filter: blur(22px) saturate(160%);
+            -webkit-backdrop-filter: blur(22px) saturate(160%);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+        .header-brand {
+            display: flex; align-items: center;
+        }
+        .header-logo {
+            font-size: 16px; font-weight: 900; letter-spacing: 1px;
+            background: linear-gradient(90deg, var(--text) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .header-avatar {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; overflow: hidden;
+            border: 2px solid var(--border-strong);
+            box-shadow: 0 0 16px rgba(139,92,246,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .header-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 24px rgba(139,92,246,0.5);
+        }
+        .header-avatar img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .header-avatar-fallback {
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 20px;
+        }
+
+        /* User Dropdown Menu */
+        .user-dropdown {
+            position: fixed; top: 75px; right: 16px; z-index: 99;
+            background: var(--bg-card);
+            backdrop-filter: blur(22px) saturate(160%);
+            -webkit-backdrop-filter: blur(22px) saturate(160%);
+            border: 1px solid var(--border-strong);
+            border-radius: 16px;
+            padding: 8px;
+            min-width: 180px;
+            box-shadow: var(--shadow-lg), var(--glow);
+            opacity: 0; transform: translateY(-10px) scale(0.95);
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .user-dropdown.show {
+            opacity: 1; transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        .dropdown-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 14px; border-radius: 10px;
+            color: var(--text); text-decoration: none;
+            font-size: 0.88rem; font-weight: 600;
+            transition: 0.2s;
+        }
+        .dropdown-item:hover {
+            background: var(--primary-dim);
+            color: var(--primary-light);
+        }
+        .dropdown-item i { font-size: 1rem; }
         body::before, body::after {
             content: ''; position: fixed; z-index: 0; pointer-events: none;
             border-radius: 50%; filter: blur(90px);
@@ -50,159 +116,154 @@
             width: 480px; height: 480px; bottom: -160px; right: -140px;
             background: radial-gradient(circle, rgba(114,9,183,0.38) 0%, rgba(114,9,183,0) 70%);
         }
-        .container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+        .container { max-width: 720px; margin: 0 auto; position: relative; z-index: 1; }
 
-        /* Floating Header */
-        .floating-header {
-            position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 8px 16px; max-width: 700px; margin: 0 auto;
-            border-radius: 16px;
-            background: var(--bg-card);
-            backdrop-filter: blur(22px) saturate(160%);
-            -webkit-backdrop-filter: blur(22px) saturate(160%);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-        }
-        .header-center {
-            position: absolute; left: 50%; transform: translateX(-50%);
-            font-size: 18px; font-weight: 900; letter-spacing: 2px;
-            background: linear-gradient(90deg, var(--text) 0%, var(--primary-light) 100%);
-            -webkit-background-clip: text; background-clip: text; color: transparent;
-        }
-        .header-btn {
-            width: 34px; height: 34px; border-radius: 8px;
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--text-dim); transition: 0.2s;
-            text-decoration: none;
-        }
-        .header-btn:hover { background: var(--primary-dim); color: var(--primary-light); border-color: var(--border-strong); }
-        .header-btn i { font-size: 16px; }
 
-        /* Card */
+
         .card {
             background: var(--bg-card);
-            backdrop-filter: blur(22px) saturate(160%);
-            -webkit-backdrop-filter: blur(22px) saturate(160%);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-            transition: border-color 0.3s;
+            backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
+            border: 1px solid var(--border); border-radius: 16px;
+            padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow);
         }
-        .card:hover { border-color: var(--border-strong); }
 
-        .section-title {
-            font-size: 1.1rem; font-weight: 800; margin-bottom: 16px;
-            display: flex; align-items: center; gap: 8px;
+        /* Profile card */
+        .profile-card { text-align: center; }
+        .avatar-wrapper {
+            position: relative; width: 92px; height: 92px; margin: 0 auto 14px; cursor: pointer;
         }
+        .avatar-img {
+            width: 92px; height: 92px; border-radius: 50%; object-fit: cover;
+            border: 3px solid var(--border-strong); display: block;
+            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%);
+        }
+        .avatar-fallback {
+            width: 92px; height: 92px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; color: #fff; border: 3px solid var(--border-strong);
+        }
+        .avatar-edit-badge {
+            position: absolute; bottom: 0; left: 0;
+            width: 30px; height: 30px; border-radius: 50%;
+            background: var(--primary-light); border: 2px solid var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 13px;
+        }
+        .profile-name-row {
+            display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px;
+        }
+        .profile-name-row h2 { font-size: 1.2rem; font-weight: 900; }
+        .edit-pencil {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            color: var(--text-faint); width: 26px; height: 26px; border-radius: 7px;
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s; font-size: 12px; flex-shrink: 0;
+        }
+        .edit-pencil:hover { color: var(--primary-light); border-color: var(--border-strong); background: var(--primary-dim); }
+        .avatar-hint { font-size: 0.75rem; color: var(--text-faint); }
+
+        /* Info rows */
+        .info-row {
+            display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+            padding: 14px 0; border-bottom: 1px solid var(--border);
+        }
+        .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .info-row:first-child { padding-top: 0; }
+        .info-row-label {
+            display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text-faint); margin-bottom: 4px;
+        }
+        .info-row-label i { color: var(--primary-light); }
+        .info-row-value { font-size: 0.92rem; color: var(--text); word-break: break-word; }
+        .info-row-value.muted { color: var(--text-faint); font-style: normal; }
+        .info-row-value.link { color: var(--primary-light); }
+        .info-row-main { flex: 1; min-width: 0; }
+
+        .section-title { font-size: 1rem; font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
         .section-title i { color: var(--primary-light); }
 
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
-        .form-group { margin-bottom: 10px; }
-        .form-group label { display: block; font-size: 0.8rem; font-weight: 700; color: var(--text-dim); margin-bottom: 4px; }
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%; padding: 10px 14px;
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-            border-radius: 8px; color: var(--text); font-family: 'Tajawal', sans-serif;
-            font-size: 0.85rem; outline: none; transition: 0.2s;
+        /* Upload prompt card */
+        .upload-prompt-card {
+            background: linear-gradient(135deg, rgba(58,12,163,0.2) 0%, rgba(114,9,183,0.1) 100%);
+            border: 1px solid var(--border-strong);
         }
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; color: var(--text-dim);
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 11px 14px;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text);
+            font-family: 'Tajawal', sans-serif; font-size: 0.9rem;
+            outline: none; transition: 0.2s;
+        }
+        .form-group input::placeholder, .form-group textarea::placeholder { color: var(--text-faint); }
+        .form-group select option { background: #0d0b14; color: var(--text); }
         .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
             border-color: var(--primary-light); background: rgba(255,255,255,0.08);
             box-shadow: 0 0 0 3px var(--primary-dim);
         }
-        .form-group input::placeholder, .form-group textarea::placeholder { color: var(--text-faint); }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
 
         .btn {
-            padding: 8px 16px; border-radius: 8px; border: none;
-            font-weight: 700; cursor: pointer; transition: 0.2s;
-            display: inline-flex; align-items: center; gap: 6px;
-            font-family: 'Tajawal', sans-serif; font-size: 0.8rem;
-            text-decoration: none;
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 6px; padding: 10px 18px; border-radius: 8px;
+            border: none; font-family: 'Tajawal', sans-serif;
+            font-size: 0.85rem; font-weight: 700; cursor: pointer;
+            transition: 0.2s; text-decoration: none;
         }
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%);
-            color: #fff; box-shadow: 0 2px 6px rgba(14,165,233,0.25);
+            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%); color: #fff;
+            box-shadow: 0 2px 12px rgba(58,12,163,0.4);
         }
         .btn-primary:hover { filter: brightness(1.15); transform: translateY(-1px); }
-        .btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
-        .btn-danger:hover { background: rgba(239,68,68,0.2); }
-        .btn-warning { background: var(--warning-bg); color: var(--warning); border: 1px solid rgba(245,158,11,0.2); }
-        .btn-warning:hover { background: rgba(245,158,11,0.2); }
-        .btn-success { background: var(--success-bg); color: var(--success); border: 1px solid rgba(16,185,129,0.2); }
-        .btn-success:hover { background: rgba(16,185,129,0.2); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
         .btn-outline {
             background: rgba(255,255,255,0.04); color: var(--primary-light);
             border: 1px solid var(--border-strong);
         }
         .btn-outline:hover { background: var(--primary-dim); }
-        .btn:hover { transform: translateY(-1px); }
+        .btn-danger {
+            background: rgba(239,68,68,0.1); color: #f87171;
+            border: 1px solid rgba(239,68,68,0.3);
+        }
+        .btn-danger:hover { background: rgba(239,68,68,0.2); }
+        .btn-warning {
+            background: rgba(245,158,11,0.1); color: #f59e0b;
+            border: 1px solid rgba(245,158,11,0.3);
+        }
+        .btn-warning:hover { background: rgba(245,158,11,0.2); }
 
-        .item-card {
+        /* My prompts list */
+        .my-prompts-list { display: flex; flex-direction: column; gap: 12px; }
+        .my-prompt-item {
+            display: flex; align-items: center; gap: 12px;
             background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-            border-radius: 12px; padding: 14px; margin-bottom: 10px;
-            display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-            transition: border-color 0.2s;
+            border-radius: 12px; padding: 10px; transition: 0.2s;
         }
-        .item-card:hover { border-color: var(--border-strong); }
-        .item-card .info { flex: 1; }
-        .item-card .info .title { font-weight: 700; font-size: 0.9rem; }
-        .item-card .info .meta { font-size: 0.75rem; color: var(--text-dim); }
-        .item-card .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+        .my-prompt-item:hover { border-color: var(--border-strong); }
+        .my-prompt-item img {
+            width: 54px; height: 54px; border-radius: 9px; object-fit: cover; flex-shrink: 0;
+            background: rgba(255,255,255,0.05);
+        }
+        .my-prompt-info { flex: 1; min-width: 0; }
+        .my-prompt-info .title { font-size: 0.88rem; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .my-prompt-info .meta { font-size: 0.72rem; color: var(--text-faint); display: flex; gap: 10px; }
+        .my-prompt-actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .my-prompt-badge {
+            font-size: 0.68rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; flex-shrink: 0;
+            background: rgba(139,92,246,0.15); color: var(--primary-light); border: 1px solid var(--border-strong);
+        }
+        .my-prompt-badge.pending { background: rgba(245,158,11,0.12); color: #f59e0b; border-color: rgba(245,158,11,0.35); }
+        .my-prompt-badge.edit-pending { background: rgba(14,165,233,0.12); color: #0ea5e9; border-color: rgba(14,165,233,0.35); }
+        .my-prompt-badge.delete-pending { background: rgba(239,68,68,0.12); color: #ef4444; border-color: rgba(239,68,68,0.35); }
+        .empty-prompts { text-align: center; padding: 30px 10px; color: var(--text-faint); font-size: 0.85rem; }
+        .empty-prompts i { font-size: 32px; display: block; margin-bottom: 10px; color: var(--text-faint); }
 
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        .status-badge {
-            display: inline-block; padding: 2px 10px; border-radius: 6px;
-            font-size: 0.7rem; font-weight: 700;
-        }
-        .status-pending { background: var(--warning-bg); color: var(--warning); }
-        .status-approved { background: var(--success-bg); color: var(--success); }
-        .status-rejected { background: var(--danger-bg); color: var(--danger); }
-
-        /* Inactive user card */
-        .inactive-user-card {
-            display: flex; align-items: center; gap: 14px;
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-            border-radius: 12px; padding: 14px; margin-bottom: 10px;
-            transition: border-color 0.2s;
-        }
-        .inactive-user-card:hover { border-color: var(--border-strong); }
-        .inactive-user-card .avatar {
-            width: 48px; height: 48px; border-radius: 50%;
-            background: linear-gradient(135deg, #3A0CA3 0%, #7209B7 100%);
-            display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 20px; flex-shrink: 0;
-        }
-        .inactive-user-card .user-info { flex: 1; }
-        .inactive-user-card .user-info .name { font-weight: 700; font-size: 0.9rem; }
-        .inactive-user-card .user-info .email { font-size: 0.78rem; color: var(--text-dim); }
-        .inactive-user-card .user-info .last-active { font-size: 0.72rem; color: var(--text-faint); margin-top: 2px; }
-        .inactive-user-card .actions { display: flex; gap: 6px; flex-shrink: 0; }
-
-        /* Request cards */
-        .request-card {
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-            border-radius: 12px; padding: 14px; margin-bottom: 10px;
-            transition: border-color 0.2s;
-        }
-        .request-card:hover { border-color: var(--border-strong); }
-        .request-card .request-header {
-            display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
-        }
-        .request-card .request-type {
-            display: inline-flex; align-items: center; gap: 4px;
-            padding: 2px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;
-        }
-        .request-type.edit { background: rgba(14,165,233,0.1); color: #0ea5e9; }
-        .request-type.delete { background: rgba(239,68,68,0.1); color: #ef4444; }
-        .request-card .request-details { font-size: 0.8rem; color: var(--text-dim); line-height: 1.6; }
-        .request-card .request-actions { display: flex; gap: 6px; margin-top: 10px; }
-
-        /* Edit category modal */
+        /* Edit/Delete request modal */
         .edit-modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px);
             z-index: 5500; display: none; align-items: center; justify-content: center; padding: 20px;
@@ -228,513 +289,600 @@
             border: 1px solid var(--border); border-radius: 8px; color: var(--text);
             font-family: 'Tajawal', sans-serif; font-size: 0.9rem; outline: none; margin-bottom: 14px;
         }
+        .edit-modal-body textarea { min-height: 90px; resize: vertical; }
         .edit-modal-body input:focus, .edit-modal-body textarea:focus, .edit-modal-body select:focus {
             border-color: var(--primary-light); box-shadow: 0 0 0 3px var(--primary-dim);
         }
         .btn-full { width: 100%; }
 
+        /* Delete confirmation */
+        .delete-confirm-box {
+            text-align: center; padding: 10px 0;
+        }
+        .delete-confirm-box i {
+            font-size: 48px; color: #ef4444; margin-bottom: 12px; display: block;
+        }
+        .delete-confirm-box p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.7; }
+        .delete-confirm-actions { display: flex; gap: 10px; }
+        .delete-confirm-actions button { flex: 1; }
+
         /* Toast */
         .toast {
-            position: fixed; bottom: 100px; left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: rgba(20,18,28,0.85);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border-strong);
-            color: #fff;
-            padding: 10px 22px; border-radius: 8px;
-            font-weight: 700; font-size: 0.85rem;
-            z-index: 2000; opacity: 0; transition: 0.3s;
-            display: flex; align-items: center; gap: 8px;
-            font-family: 'Tajawal', sans-serif;
-            box-shadow: var(--shadow-lg);
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: rgba(20,18,28,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-strong); color: #fff;
+            padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 0.85rem;
+            z-index: 2000; opacity: 0; transition: 0.3s; display: flex; align-items: center; gap: 8px;
+            font-family: 'Tajawal', sans-serif; box-shadow: var(--shadow-lg);
         }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.error { border-color: #ef4444; }
+        .toast.success { border-color: #10b981; }
+        .toast.info { border-color: #0ea5e9; }
 
-        /* Bottom nav - Draggable */
-        .admin-bottom-nav {
+        /* Bottom nav */
+        .bottom-nav-bar {
             position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; padding: 8px 16px;
+            z-index: 1000; padding: 9px;
             background: rgba(255,255,255,0.06);
             backdrop-filter: blur(28px) saturate(200%); -webkit-backdrop-filter: blur(28px) saturate(200%);
             border: 1px solid rgba(255,255,255,0.12); border-radius: 50px;
             box-shadow: var(--shadow-lg), 0 0 40px rgba(58,12,163,0.2);
-            display: flex; align-items: center; gap: 6px;
-            cursor: grab;
-            user-select: none;
-            touch-action: none;
         }
-        .admin-bottom-nav:active { cursor: grabbing; }
-        .admin-nav-btn {
-            padding: 8px 16px; border-radius: 20px; border: none;
-            font-family: 'Tajawal', sans-serif; font-size: 0.8rem; font-weight: 700;
-            cursor: pointer; transition: 0.2s; background: transparent; color: var(--text-dim);
-            white-space: nowrap;
+        .nav-track { position: relative; display: flex; align-items: center; gap: 16px; }
+        .nav-circle {
+            position: relative; width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; color: #fff; font-size: 20px;
+            background: linear-gradient(120deg, var(--primary) 0%, #7209B7 35%, var(--primary-light) 65%, var(--primary) 100%);
+            background-size: 300% 100%; animation: navGradientShift 6s ease infinite;
+            box-shadow: 0 2px 12px rgba(58,12,163,0.45); z-index: 1; transition: transform 0.2s;
+            overflow: hidden;
         }
-        .admin-nav-btn:hover { background: var(--primary-dim); color: var(--primary-light); }
-        .admin-nav-btn.active {
-            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%);
-            color: #fff;
-            box-shadow: 0 2px 8px rgba(58,12,163,0.3);
+        .nav-circle::before {
+            content: ''; position: absolute; inset: 0;
+            background: rgba(255,255,255,0.1); opacity: 0; transition: 0.3s;
         }
-
-        /* Login card */
-        .login-card {
-            max-width: 400px; margin: 40px auto; text-align: center;
+        .nav-circle:hover::before { opacity: 1; }
+        .nav-circle:hover { transform: translateY(-2px); }
+        .nav-circle i { position: relative; z-index: 2; pointer-events: none; }
+        @keyframes navGradientShift {
+            0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; }
         }
-        .login-card h2 { margin-bottom: 20px; font-weight: 900; }
-        .login-card input {
-            width: 100%; padding: 11px 14px;
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-            border-radius: 8px; color: var(--text);
-            font-family: 'Tajawal', sans-serif; font-size: 0.9rem;
-            outline: none; margin-bottom: 12px;
-        }
-        .login-card input:focus {
-            border-color: var(--primary-light); box-shadow: 0 0 0 3px var(--primary-dim);
+        .nav-indicator {
+            position: absolute; top: 0; left: 0; width: 50px; height: 50px; border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px) saturate(220%); -webkit-backdrop-filter: blur(12px) saturate(220%);
+            border: 1.5px solid rgba(255,255,255,0.25);
+            box-shadow: 0 0 30px rgba(255,255,255,0.15), inset 0 0 20px rgba(255,255,255,0.1);
+            transition: transform 0.48s cubic-bezier(0.65,0,0.35,1);
+            pointer-events: none; z-index: 3;
         }
 
         @media (max-width: 600px) {
-            .admin-bottom-nav { padding: 6px 10px; }
-            .admin-nav-btn { padding: 6px 10px; font-size: 0.75rem; }
-            .form-grid { grid-template-columns: 1fr; }
+            .bottom-nav-bar { padding: 7px; }
+            .nav-track { gap: 12px; }
+            .nav-circle, .nav-indicator { width: 44px; height: 44px; }
+            .nav-circle i { font-size: 18px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        {% if session.get('logged_in') %}
-            <!-- Floating Header -->
-            <header class="floating-header">
-                <a href="/" class="header-btn" title="الرئيسية"><i class="bi bi-house-door"></i></a>
-                <div class="header-center">UFOQ</div>
-                <a href="/admin/logout" class="header-btn" title="خروج"><i class="bi bi-box-arrow-right"></i></a>
-            </header>
+    <!-- Floating Header -->
+    <header class="floating-header">
+        <div class="header-brand">
+            <span class="header-logo">UFOQ</span>
+        </div>
+        <div class="header-avatar" id="headerAvatar" onclick="toggleUserMenu(event)">
+            {% if user.avatar_url %}
+            <img src="{{ user.avatar_url }}" alt="{{ user.name }}">
+            {% else %}
+            <div class="header-avatar-fallback"><i class="bi bi-person-fill"></i></div>
+            {% endif %}
+        </div>
+    </header>
 
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; margin-top:20px;">
-                <h2 style="font-size:22px; font-weight:900;"><i class="bi bi-shield-lock" style="color:var(--primary-light);"></i> لوحة التحكم</h2>
-            </div>
-
-            <!-- Categories -->
-            <div id="tab-categories" class="tab-content active card">
-                <div class="section-title"><i class="bi bi-tags"></i> إدارة التصنيفات</div>
-                <form method="POST" action="/admin/category/add" style="margin-bottom:20px;">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                    <div class="form-grid">
-                        <div class="form-group"><label>المعرف (بالإنجليزية)</label><input type="text" name="name" required></div>
-                        <div class="form-group"><label>اسم العرض</label><input type="text" name="display_name" required></div>
-                        <div class="form-group"><label>الأيقونة</label><input type="text" name="icon" value="bi-tag"></div>
-                        <div class="form-group"><label>الترتيب</label><input type="number" name="sort_order" value="0"></div>
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="margin-top:10px;"><i class="bi bi-plus-lg"></i> إضافة تصنيف</button>
-                </form>
-                <div>
-                    {% for cat in categories %}
-                    <div class="item-card">
-                        <div class="info">
-                            <div class="title">{{ cat.display_name }} <span style="font-weight:400; color:var(--text-dim);">({{ cat.name }})</span></div>
-                            <div class="meta">ترتيب: {{ cat.sort_order }} | أيقونة: {{ cat.icon }}</div>
-                        </div>
-                        <div class="actions">
-                            <button type="button" class="btn btn-warning" onclick="openEditCategoryModal({{ cat.id }}, '{{ cat.name }}', '{{ cat.display_name }}', '{{ cat.icon }}', {{ cat.sort_order }})"><i class="bi bi-pencil"></i> تعديل</button>
-                            <form method="POST" action="/admin/category/{{ cat.id }}/delete" onsubmit="return confirm('حذف التصنيف؟')" style="display:inline;">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Library -->
-            <div id="tab-library" class="tab-content card">
-                <div class="section-title"><i class="bi bi-collection"></i> إدارة المكتبة</div>
-                <form method="POST" action="/admin/library/add">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                    <div class="form-grid">
-                        <div class="form-group"><label>العنوان</label><input type="text" name="title" required></div>
-                        <div class="form-group"><label>التصنيف</label>
-                            <select name="category">
-                                {% for cat in categories %}<option value="{{ cat.name }}">{{ cat.display_name }}</option>{% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-group"><label>رابط الصورة</label><input type="url" name="image_url" required></div>
-                        <div class="form-group" style="grid-column:1/-1;"><label>نص البرومبت</label><textarea name="prompt_text" required rows="4"></textarea></div>
-                        <div class="form-group" style="grid-column:1/-1;"><label>كلمات مفتاحية</label><input type="text" name="keywords" placeholder="تفصل بينها بفاصلة"></div>
-                        <div class="form-group"><label>الناشر</label><input type="text" name="publisher" placeholder="اختياري"></div>
-                        <div class="form-group"><label>رابط الناشر</label><input type="url" name="publisher_link" placeholder="https:// — يُفحص تلقائياً"></div>
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="margin-top:10px;"><i class="bi bi-plus-lg"></i> إضافة برومبت</button>
-                </form>
-                <div style="margin-top:24px;">
-                    {% for item in library_items %}
-                    <div class="item-card">
-                        <div class="info">
-                            <div class="title">{{ item.title }}</div>
-                            <div class="meta">تصنيف: {{ item.category }} | نسخ: {{ item.copy_count or 0 }}{% if item.publisher %} | ناشر: {{ item.publisher }}{% endif %}{% if item.publisher_link %} | <a href="{{ item.publisher_link }}" target="_blank" rel="noopener noreferrer" style="color:var(--primary-light);">رابط الناشر <i class="bi bi-box-arrow-up-right"></i></a>{% endif %}{% if item.keywords %} | كلمات: {{ item.keywords }}{% endif %}</div>
-                        </div>
-                        <div class="actions">
-                            <form method="POST" action="/admin/library/{{ item.id }}/delete" onsubmit="return confirm('حذف البرومبت؟')">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Contributions -->
-            <div id="tab-contributions" class="tab-content card">
-                <div class="section-title"><i class="bi bi-inbox"></i> مساهمات المستخدمين</div>
-                <div>
-                    {% for contrib in contributions %}
-                    <div class="item-card">
-                        <div class="info">
-                            <div class="title">{{ contrib.title }} <span class="status-badge status-{{ contrib.status }}">{{ contrib.status }}</span></div>
-                            <div class="meta">تصنيف: {{ contrib.category }} | تاريخ: {{ contrib.created_at.strftime('%Y-%m-%d') if contrib.created_at else '—' }}{% if contrib.publisher_name %} | من: {{ contrib.publisher_name }}{% endif %}</div>
-                            {% if contrib.publisher_link %}
-                            <div class="meta" style="margin-top:4px;">
-                                <i class="bi bi-link-45deg"></i> رابط الناشر —
-                                <a href="{{ contrib.publisher_link }}" target="_blank" rel="noopener noreferrer" style="color:var(--warning); font-weight:700;">{{ contrib.publisher_link }} <i class="bi bi-box-arrow-up-right"></i></a>
-                                <span style="color:var(--warning);">(افحص الرابط قبل الموافقة)</span>
-                            </div>
-                            {% endif %}
-                            {% if contrib.keywords %}
-                            <div class="meta" style="margin-top:2px;">كلمات مفتاحية: {{ contrib.keywords }}</div>
-                            {% endif %}
-                            <div style="margin-top:6px; font-size:0.8rem; color:var(--text-dim); background:rgba(255,255,255,0.03); padding:8px; border-radius:6px;">{{ contrib.prompt_text[:120] }}{% if contrib.prompt_text|length > 120 %}...{% endif %}</div>
-                        </div>
-                        <div class="actions">
-                            {% if contrib.status == 'pending' %}
-                            <form method="POST" action="/admin/contribution/{{ contrib.id }}/approve">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> موافقة</button>
-                            </form>
-                            <form method="POST" action="/admin/contribution/{{ contrib.id }}/reject">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-warning"><i class="bi bi-x-lg"></i> رفض</button>
-                            </form>
-                            {% endif %}
-                            <form method="POST" action="/admin/contribution/{{ contrib.id }}/delete" onsubmit="return confirm('حذف المساهمة؟')">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                    {% else %}
-                    <p style="color:var(--text-faint); text-align:center; padding:20px;">لا توجد مساهمات حالياً</p>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Edit/Delete Requests -->
-            <div id="tab-requests" class="tab-content card">
-                <div class="section-title"><i class="bi bi-git"></i> طلبات التعديل والحذف</div>
-                <div>
-                    {% for req in edit_requests %}
-                    <div class="request-card">
-                        <div class="request-header">
-                            <div>
-                                <span class="request-type edit"><i class="bi bi-pencil"></i> تعديل</span>
-                                <span style="font-weight:700; margin-right:8px;">{{ req.prompt.title }}</span>
-                            </div>
-                            <span style="font-size:0.72rem; color:var(--text-faint);">{{ req.created_at.strftime('%Y-%m-%d') }}</span>
-                        </div>
-                        <div class="request-details">
-                            <strong>العنوان الجديد:</strong> {{ req.new_title }}<br>
-                            <strong>التصنيف:</strong> {{ req.new_category }}<br>
-                            <strong>النص:</strong> {{ req.new_prompt_text[:100] }}{% if req.new_prompt_text|length > 100 %}...{% endif %}
-                        </div>
-                        <div class="request-actions">
-                            <form method="POST" action="/admin/edit-request/{{ req.id }}/approve">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> قبول</button>
-                            </form>
-                            <form method="POST" action="/admin/edit-request/{{ req.id }}/reject">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-warning"><i class="bi bi-x-lg"></i> رفض</button>
-                            </form>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    {% for req in delete_requests %}
-                    <div class="request-card">
-                        <div class="request-header">
-                            <div>
-                                <span class="request-type delete"><i class="bi bi-trash"></i> حذف</span>
-                                <span style="font-weight:700; margin-right:8px;">{{ req.prompt.title }}</span>
-                            </div>
-                            <span style="font-size:0.72rem; color:var(--text-faint);">{{ req.created_at.strftime('%Y-%m-%d') }}</span>
-                        </div>
-                        <div class="request-details">
-                            <strong>الناشر:</strong> {{ req.prompt.publisher or 'غير معروف' }}<br>
-                            <strong>تاريخ النشر:</strong> {{ req.prompt.created_at.strftime('%Y-%m-%d') if req.prompt.created_at else '—' }}
-                        </div>
-                        <div class="request-actions">
-                            <form method="POST" action="/admin/delete-request/{{ req.id }}/approve">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> قبول</button>
-                            </form>
-                            <form method="POST" action="/admin/delete-request/{{ req.id }}/reject">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-warning"><i class="bi bi-x-lg"></i> رفض</button>
-                            </form>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    {% if not edit_requests and not delete_requests %}
-                    <p style="color:var(--text-faint); text-align:center; padding:20px;">لا توجد طلبات حالياً</p>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Ads -->
-            <div id="tab-ads" class="tab-content card">
-                <div class="section-title"><i class="bi bi-badge-ad"></i> إدارة الإعلانات</div>
-                <form method="POST" action="/admin/library_ad/add">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                    <div class="form-grid">
-                        <div class="form-group"><label>العنوان</label><input type="text" name="title" required></div>
-                        <div class="form-group"><label>النص</label><textarea name="text" required></textarea></div>
-                        <div class="form-group"><label>رابط الصورة (اختياري)</label><input type="url" name="image_url"></div>
-                        <div class="form-group"><label>نص الزر</label><input type="text" name="button_text" value="زيارة"></div>
-                        <div class="form-group"><label>رابط الزر</label><input type="url" name="button_link" required></div>
-                        <div class="form-group"><label>المدة (ثانية)</label><input type="number" name="duration_seconds" value="5"></div>
-                        <div class="form-group"><label><input type="checkbox" name="is_active" checked> نشط</label></div>
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="margin-top:10px;"><i class="bi bi-plus-lg"></i> إضافة إعلان</button>
-                </form>
-                <div style="margin-top:24px;">
-                    {% for ad in library_ads %}
-                    <div class="item-card">
-                        <div class="info">
-                            <div class="title">{{ ad.title }} <span class="status-badge" style="background:{% if ad.is_active %}var(--success-bg){% else %}var(--danger-bg){% endif %}; color:{% if ad.is_active %}var(--success){% else %}var(--danger){% endif %};">{{ 'نشط' if ad.is_active else 'معطل' }}</span></div>
-                            <div class="meta">{{ ad.duration_seconds }} ثانية</div>
-                        </div>
-                        <div class="actions">
-                            <form method="POST" action="/admin/library_ad/{{ ad.id }}/toggle">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-warning"><i class="bi bi-toggle-on"></i></button>
-                            </form>
-                            <form method="POST" action="/admin/library_ad/{{ ad.id }}/delete" onsubmit="return confirm('حذف الإعلان؟')">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Inactive Users -->
-            <div id="tab-inactive" class="tab-content card">
-                <div class="section-title"><i class="bi bi-person-x"></i> حسابات غير نشطة (15+ يوم)</div>
-                <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:16px;">
-                    <i class="bi bi-info-circle"></i> الحسابات التالية لم تسجل أي نشاط منذ 15 يوماً أو أكثر. يمكنك التواصل مع صاحب الحساب عبر بريده الإلكتروني أو حذفه نهائياً.
-                </p>
-                <div>
-                    {% for user in inactive_users %}
-                    <div class="inactive-user-card">
-                        <div class="avatar">
-                            {% if user.avatar_url %}
-                            <img src="{{ user.avatar_url }}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">
-                            {% else %}
-                            <i class="bi bi-person-fill"></i>
-                            {% endif %}
-                        </div>
-                        <div class="user-info">
-                            <div class="name">{{ user.name }}</div>
-                            <div class="email"><i class="bi bi-envelope"></i> {{ user.email }}</div>
-                            <div class="last-active">
-                                <i class="bi bi-clock-history"></i> آخر نشاط: {{ user.last_active_days }} يوم
-                                {% if user.last_prompt_date %}| آخر برومبت: {{ user.last_prompt_date.strftime('%Y-%m-%d') }}{% endif %}
-                            </div>
-                        </div>
-                        <div class="actions">
-                            <a href="mailto:{{ user.email }}" class="btn btn-primary" title="تواصل عبر البريد"><i class="bi bi-envelope-fill"></i></a>
-                            <form method="POST" action="/admin/user/{{ user.id }}/delete" onsubmit="return confirm('حذف الحساب نهائياً؟ لا يمكن التراجع عن هذا الإجراء.')" style="display:inline;">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-danger" title="حذف نهائي"><i class="bi bi-trash3"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                    {% else %}
-                    <p style="color:var(--text-faint); text-align:center; padding:20px;">لا توجد حسابات غير نشطة حالياً</p>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Site Settings -->
-            <div id="tab-settings" class="tab-content card">
-                <div class="section-title"><i class="bi bi-power"></i> إعدادات الموقع</div>
-                <div style="display:flex; flex-direction:column; gap:16px; max-width:400px;">
-                    <div>
-                        <label style="display:block; font-weight:700; font-size:0.85rem; margin-bottom:4px; color:var(--text-dim);">حالة الموقع</label>
-                        <select id="siteStatusSelect" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); font-family:'Tajawal',sans-serif;">
-                            <option value="on" {% if site_settings and site_settings.status=='on' %}selected{% endif %}>مفعل</option>
-                            <option value="off" {% if site_settings and site_settings.status=='off' %}selected{% endif %}>متوقف</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display:block; font-weight:700; font-size:0.85rem; margin-bottom:4px; color:var(--text-dim);">رسالة التوقف</label>
-                        <textarea id="offlineMsg" rows="3" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); font-family:'Tajawal',sans-serif;">{{ site_settings.offline_message if site_settings else 'الموقع تحت الصيانة' }}</textarea>
-                    </div>
-                    <button class="btn btn-primary" onclick="saveSiteSettings()" style="width:fit-content;"><i class="bi bi-floppy"></i> حفظ</button>
-                </div>
-            </div>
-
-        {% else %}
-            <div class="card login-card">
-                <div class="top-brand" style="margin-bottom:20px;">
-                    <div style="width:56px; height:56px; border-radius:16px; margin:0 auto 12px; background:linear-gradient(135deg, var(--primary) 0%, #7209B7 100%); display:flex; align-items:center; justify-content:center; font-size:26px; color:#fff; box-shadow:var(--glow);">
-                        <i class="bi bi-shield-lock"></i>
-                    </div>
-                    <h2 style="font-weight:900;">لوحة التحكم</h2>
-                </div>
-                <form method="POST" action="/admin">
-                    <input type="password" name="password" placeholder="كلمة المرور" required style="width:100%; padding:11px 14px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:'Tajawal',sans-serif; font-size:0.9rem; outline:none; margin-bottom:12px;">
-                    <button type="submit" class="btn btn-primary" style="width:100%;"><i class="bi bi-box-arrow-in-left"></i> دخول</button>
-                </form>
-            </div>
-        {% endif %}
+    <!-- User Dropdown Menu -->
+    <div class="user-dropdown" id="userDropdown">
+        <a href="/" class="dropdown-item"><i class="bi bi-house-door"></i> الرئيسية</a>
+        <a href="/about" class="dropdown-item"><i class="bi bi-info-circle"></i> عن UFOQ</a>
+        <a href="/logout" class="dropdown-item" style="color:var(--danger);"><i class="bi bi-box-arrow-right"></i> تسجيل الخروج</a>
     </div>
 
-    <!-- Edit Category Modal -->
-    <div class="edit-modal-overlay" id="editCategoryModal">
-        <div class="edit-modal-box">
-            <div class="edit-modal-header">
-                <span>تعديل التصنيف</span>
-                <button onclick="closeEditCategoryModal()"><i class="bi bi-x-lg"></i></button>
+    <div class="container">
+        <div style="text-align:center; margin-bottom:24px; margin-top:20px;">
+            <h2 style="font-size:1.3rem; font-weight:900;"><i class="bi bi-gear-fill" style="color:var(--primary-light);"></i> الإعدادات</h2>
+        </div>
+
+        <!-- Profile card -->
+        <div class="card profile-card">
+            <div class="avatar-wrapper" onclick="openAvatarEdit()">
+                {% if user.avatar_url %}
+                <img class="avatar-img" id="avatarImg" src="{{ user.avatar_url }}" alt="{{ user.name }}">
+                {% else %}
+                <div class="avatar-fallback" id="avatarFallback"><i class="bi bi-person-fill"></i></div>
+                <img class="avatar-img" id="avatarImg" src="" alt="{{ user.name }}" style="display:none;">
+                {% endif %}
+                <div class="avatar-edit-badge"><i class="bi bi-camera-fill"></i></div>
             </div>
-            <form method="POST" action="" id="editCategoryForm">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                <div class="edit-modal-body">
-                    <input type="hidden" name="category_id" id="editCatId">
-                    <div class="form-group">
-                        <label>المعرف (بالإنجليزية)</label>
-                        <input type="text" name="name" id="editCatName" required>
-                    </div>
-                    <div class="form-group">
-                        <label>اسم العرض</label>
-                        <input type="text" name="display_name" id="editCatDisplayName" required>
-                    </div>
-                    <div class="form-group">
-                        <label>الأيقونة</label>
-                        <input type="text" name="icon" id="editCatIcon" required>
-                    </div>
-                    <div class="form-group">
-                        <label>الترتيب</label>
-                        <input type="number" name="sort_order" id="editCatSortOrder" required>
+            <div class="profile-name-row">
+                <h2 id="displayName">{{ user.name }}</h2>
+                <span class="edit-pencil" onclick="openEditModal('name','تعديل اسم الحساب','{{ user.name }}','text')"><i class="bi bi-pencil-fill"></i></span>
+            </div>
+            <div class="avatar-hint">اضغط على الصورة لتغييرها</div>
+        </div>
+
+        <!-- General Settings -->
+        <div class="card general-settings-card">
+            <div class="section-title"><i class="bi bi-sliders"></i> إعدادات عامة</div>
+            <div class="setting-row">
+                <div class="setting-info">
+                    <i class="bi bi-grid-3x3-gap"></i>
+                    <div>
+                        <div class="setting-label">عدد البطاقات في السطر</div>
+                        <div class="setting-desc">يتحكم بعدد البرومبتات المعروضة في كل صف</div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary btn-full"><i class="bi bi-check-lg"></i> حفظ التعديلات</button>
+                <div class="setting-control" id="cardsPerRowControl">
+                    <button class="setting-btn" data-cols="1" onclick="setCardsPerRowSetting(1)">1</button>
+                    <button class="setting-btn" data-cols="2" onclick="setCardsPerRowSetting(2)">2</button>
+                    <button class="setting-btn active" data-cols="3" onclick="setCardsPerRowSetting(3)">3</button>
+                    <button class="setting-btn" data-cols="4" onclick="setCardsPerRowSetting(4)">4</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile link + bio card -->
+        <div class="card">
+            <div class="section-title"><i class="bi bi-link-45deg"></i> الملف العام</div>
+            <div class="info-row">
+                <div class="info-row-main">
+                    <div class="info-row-label"><i class="bi bi-box-arrow-up-right"></i> الرابط الخاص بك</div>
+                    <div class="info-row-value {{ 'link' if user.profile_link else 'muted' }}" id="displayLink">{{ user.profile_link or 'لم تتم إضافة رابط بعد' }}</div>
+                </div>
+                <span class="edit-pencil" onclick="openEditModal('profile_link','رابطك الخاص','{{ user.profile_link or '' }}','url')"><i class="bi bi-pencil-fill"></i></span>
+            </div>
+            <div class="info-row">
+                <div class="info-row-main">
+                    <div class="info-row-label"><i class="bi bi-chat-quote-fill"></i> النبذة التعريفية</div>
+                    <div class="info-row-value {{ '' if user.bio else 'muted' }}" id="displayBio">{{ user.bio or 'لم تتم إضافة نبذة بعد' }}</div>
+                </div>
+                <span class="edit-pencil" onclick="openEditModal('bio','النبذة التعريفية','{{ user.bio or '' }}','textarea')"><i class="bi bi-pencil-fill"></i></span>
+            </div>
+        </div>
+
+        <!-- Upload Prompt Card -->
+        <div class="card upload-prompt-card">
+            <div class="section-title"><i class="bi bi-cloud-upload"></i> نشر برومبت جديد</div>
+            <form id="uploadForm" onsubmit="handleUpload(event)">
+                <input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+                <div class="form-grid">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="title">عنوان البرومبت</label>
+                        <input type="text" id="title" placeholder="مثال: برومبت توليد صور واقعية" required>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="category">التصنيف</label>
+                        <select id="category" required>
+                            {% for cat in categories %}
+                            <option value="{{ cat.name }}">{{ cat.display_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="keywords">كلمات مفتاحية (اختياري)</label>
+                        <input type="text" id="keywords" placeholder="مثال: صور، واقعي، بورتريه — تفصل بينها بفاصلة">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="image_url">رابط صورة توضيحية (اختياري)</label>
+                        <input type="url" id="image_url" placeholder="https://example.com/image.jpg">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="prompt_text">نص البرومبت</label>
+                        <textarea id="prompt_text" placeholder="اكتب نص البرومبت الكامل هنا..." required></textarea>
+                    </div>
+                </div>
+                <p style="font-size: 0.78rem; color: var(--text-faint); margin-top: 10px;"><i class="bi bi-shield-check"></i> يراجع فريق الإدارة كل مساهمة قبل نشرها في المكتبة.</p>
+                <div style="margin-top: 12px; display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> إرسال المساهمة</button>
+                    <button type="reset" class="btn btn-outline"><i class="bi bi-x-lg"></i> مسح</button>
+                </div>
             </form>
+        </div>
+
+        <!-- Published prompts with edit/delete -->
+        <div class="card">
+            <div class="section-title"><i class="bi bi-collection-fill"></i> برومبتاتك المنشورة</div>
+            {% if my_prompts or my_pending or my_edit_requests or my_delete_requests %}
+            <div class="my-prompts-list">
+                {% for p in my_prompts %}
+                <div class="my-prompt-item" data-prompt-id="{{ p.id }}">
+                    <img src="{{ p.image_url }}" alt="{{ p.title }}" onerror="this.style.visibility='hidden'">
+                    <div class="my-prompt-info">
+                        <div class="title">{{ p.title }}</div>
+                        <div class="meta"><span><i class="bi bi-clipboard-check"></i> {{ p.copy_count or 0 }}</span><span><i class="bi bi-share-fill"></i> {{ p.share_count or 0 }}</span></div>
+                    </div>
+                    <div class="my-prompt-actions">
+                        <button class="btn btn-warning" data-prompt-id="{{ p.id }}" data-prompt-title="{{ p.title|replace('"', '&quot;') }}" data-prompt-category="{{ p.category }}" data-prompt-text="{{ p.prompt_text|replace('"', '&quot;') }}" data-prompt-image="{{ p.image_url or '' }}" data-prompt-keywords="{{ p.keywords or '' }}" onclick="openEditPromptModalFromData(this)" title="تعديل"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-danger" data-delete-id="{{ p.id }}" onclick="openDeletePromptModal(this.dataset.deleteId)" title="حذف"><i class="bi bi-trash"></i></button>
+                    </div>
+                    <span class="my-prompt-badge">منشور</span>
+                </div>
+                {% endfor %}
+                {% for c in my_pending %}
+                <div class="my-prompt-item">
+                    <img src="{{ c.image_url or '' }}" alt="{{ c.title }}" onerror="this.style.visibility='hidden'">
+                    <div class="my-prompt-info">
+                        <div class="title">{{ c.title }}</div>
+                        <div class="meta"><span>بانتظار مراجعة الإدارة</span></div>
+                    </div>
+                    <span class="my-prompt-badge pending">قيد المراجعة</span>
+                </div>
+                {% endfor %}
+                {% for er in my_edit_requests %}
+                <div class="my-prompt-item">
+                    <img src="{{ er.prompt.image_url }}" alt="{{ er.prompt.title }}" onerror="this.style.visibility='hidden'">
+                    <div class="my-prompt-info">
+                        <div class="title">{{ er.prompt.title }}</div>
+                        <div class="meta"><span>طلب تعديل بانتظار الموافقة</span></div>
+                    </div>
+                    <span class="my-prompt-badge edit-pending">تعديل قيد المراجعة</span>
+                </div>
+                {% endfor %}
+                {% for dr in my_delete_requests %}
+                <div class="my-prompt-item">
+                    <img src="{{ dr.prompt.image_url }}" alt="{{ dr.prompt.title }}" onerror="this.style.visibility='hidden'">
+                    <div class="my-prompt-info">
+                        <div class="title">{{ dr.prompt.title }}</div>
+                        <div class="meta"><span>طلب حذف بانتظار الموافقة</span></div>
+                    </div>
+                    <span class="my-prompt-badge delete-pending">حذف قيد المراجعة</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-prompts">
+                <i class="bi bi-inbox"></i>
+                لم تنشر أي برومبت بعد
+            </div>
+            {% endif %}
         </div>
     </div>
 
-    <!-- Toast -->
-    <div class="toast" id="toast"><i class="bi bi-check-lg"></i> <span id="toastMsg">تم!</span></div>
+    <!-- Edit Profile Modal -->
+    <div class="edit-modal-overlay" id="editModalOverlay">
+        <div class="edit-modal-box">
+            <div class="edit-modal-header">
+                <span id="editModalTitle">تعديل</span>
+                <button onclick="closeEditModal()"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="edit-modal-body">
+                <input type="text" id="editModalInput">
+                <textarea id="editModalTextarea" style="display:none;"></textarea>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="submitEditModal()"><i class="bi bi-check-lg"></i> حفظ</button>
+        </div>
+    </div>
 
-    <!-- Admin Bottom Nav - Draggable -->
-    {% if session.get('logged_in') %}
-    <nav class="admin-bottom-nav" id="adminBottomNav">
-        <button class="admin-nav-btn active" onclick="showTab('categories')" data-tab="categories"><i class="bi bi-tags"></i> التصنيفات</button>
-        <button class="admin-nav-btn" onclick="showTab('library')" data-tab="library"><i class="bi bi-collection"></i> المكتبة</button>
-        <button class="admin-nav-btn" onclick="showTab('contributions')" data-tab="contributions"><i class="bi bi-inbox"></i> المساهمات</button>
-        <button class="admin-nav-btn" onclick="showTab('requests')" data-tab="requests"><i class="bi bi-git"></i> الطلبات</button>
-        <button class="admin-nav-btn" onclick="showTab('ads')" data-tab="ads"><i class="bi bi-badge-ad"></i> الإعلانات</button>
-        <button class="admin-nav-btn" onclick="showTab('inactive')" data-tab="inactive"><i class="bi bi-person-x"></i> غير نشط</button>
-        <button class="admin-nav-btn" onclick="showTab('settings')" data-tab="settings"><i class="bi bi-power"></i> الإعدادات</button>
+    <!-- Edit Prompt Modal -->
+    <div class="edit-modal-overlay" id="editPromptModalOverlay">
+        <div class="edit-modal-box" style="max-width: 480px;">
+            <div class="edit-modal-header">
+                <span id="editPromptModalTitle">طلب تعديل برومبت</span>
+                <button onclick="closeEditPromptModal()"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="edit-modal-body">
+                <input type="hidden" id="editPromptId">
+                <div class="form-group">
+                    <label>العنوان</label>
+                    <input type="text" id="editPromptTitle">
+                </div>
+                <div class="form-group">
+                    <label>التصنيف</label>
+                    <select id="editPromptCategory">
+                        {% for cat in categories %}
+                        <option value="{{ cat.name }}">{{ cat.display_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>كلمات مفتاحية</label>
+                    <input type="text" id="editPromptKeywords">
+                </div>
+                <div class="form-group">
+                    <label>رابط الصورة</label>
+                    <input type="url" id="editPromptImageUrl">
+                </div>
+                <div class="form-group">
+                    <label>نص البرومبت</label>
+                    <textarea id="editPromptText" rows="4"></textarea>
+                </div>
+                <p style="font-size: 0.75rem; color: var(--text-faint); margin-bottom: 14px;">
+                    <i class="bi bi-info-circle"></i> سيتم إرسال طلب التعديل إلى الإدارة للمراجعة قبل تطبيقه.
+                </p>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="submitEditPromptRequest()"><i class="bi bi-send"></i> إرسال طلب التعديل</button>
+        </div>
+    </div>
+
+    <!-- Delete Prompt Modal -->
+    <div class="edit-modal-overlay" id="deletePromptModalOverlay">
+        <div class="edit-modal-box">
+            <div class="edit-modal-header">
+                <span>تأكيد الحذف</span>
+                <button onclick="closeDeletePromptModal()"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="delete-confirm-box">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <p>هل أنت متأكد من حذف هذا البرومبت؟<br>سيتم إرسال طلب الحذف إلى الإدارة للمراجعة.</p>
+                <input type="hidden" id="deletePromptId">
+                <div class="delete-confirm-actions">
+                    <button class="btn btn-outline" onclick="closeDeletePromptModal()">إلغاء</button>
+                    <button class="btn btn-danger" onclick="submitDeletePromptRequest()"><i class="bi bi-trash"></i> تأكيد الحذف</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"><i class="bi bi-check-circle-fill"></i> <span id="toastMsg"></span></div>
+
+    <!-- Bottom Nav: index (right) -> settings -> about -->
+    <nav class="bottom-nav-bar">
+        <div class="nav-track" id="navTrack">
+            <a href="/" class="nav-circle" data-page="index"><i class="bi bi-house-door-fill"></i></a>
+            <a href="/settings" class="nav-circle active" data-page="settings"><i class="bi bi-person-circle"></i></a>
+            <a href="/about" class="nav-circle" data-page="about"><i class="bi bi-info-circle-fill"></i></a>
+            <div class="nav-indicator" id="navIndicator"></div>
+        </div>
     </nav>
-    {% endif %}
 
     <script>
-        function showTab(id) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-'+id).classList.add('active');
-            document.querySelectorAll('.admin-nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector('.admin-nav-btn[data-tab="'+id+'"]').classList.add('active');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        const CSRF_TOKEN = "{{ csrf_token }}";
+        let currentEditField = null;
 
-        async function saveSiteSettings() {
-            const status = document.getElementById('siteStatusSelect').value;
-            const msg = document.getElementById('offlineMsg').value;
-            try {
-                const res = await fetch('/api/admin/update_site_settings', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ status, offline_message: msg, csrf_token: '{{ csrf_token }}' })
-                });
-                const data = await res.json();
-                if (data.success) showToast('تم حفظ الإعدادات');
-                else showToast('خطأ', true);
-            } catch(e) { showToast('خطأ في الاتصال', true); }
-        }
-
-        function showToast(msg, isError) {
+        function showToast(msg, type = 'success') {
             const t = document.getElementById('toast');
             document.getElementById('toastMsg').textContent = msg;
-            t.style.borderColor = isError ? '#ef4444' : 'var(--border-strong)';
-            t.classList.add('show');
+            t.className = 'toast show ' + type;
             setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        // Edit Category Modal
-        function openEditCategoryModal(id, name, displayName, icon, sortOrder) {
-            document.getElementById('editCatId').value = id;
-            document.getElementById('editCatName').value = name;
-            document.getElementById('editCatDisplayName').value = displayName;
-            document.getElementById('editCatIcon').value = icon;
-            document.getElementById('editCatSortOrder').value = sortOrder;
-            document.getElementById('editCategoryForm').action = '/admin/category/' + id + '/edit';
-            document.getElementById('editCategoryModal').classList.add('show');
+        function openEditModal(field, title, currentValue, inputType) {
+            currentEditField = field;
+            document.getElementById('editModalTitle').textContent = title;
+            const input = document.getElementById('editModalInput');
+            const textarea = document.getElementById('editModalTextarea');
+            if (inputType === 'textarea') {
+                textarea.style.display = 'block'; input.style.display = 'none';
+                textarea.value = currentValue || '';
+                textarea.placeholder = 'اكتب نبذة قصيرة عنك...';
+            } else {
+                input.style.display = 'block'; textarea.style.display = 'none';
+                input.type = (inputType === 'password') ? 'password' : (inputType === 'url' ? 'url' : (inputType === 'email' ? 'email' : 'text'));
+                if (inputType === 'password') {
+                    input.value = ''; input.placeholder = 'كلمة المرور الجديدة (6 أحرف على الأقل)';
+                } else if (inputType === 'url') {
+                    input.value = currentValue || ''; input.placeholder = 'https://...';
+                } else {
+                    input.value = currentValue || ''; input.placeholder = '';
+                }
+            }
+            document.getElementById('editModalOverlay').classList.add('show');
         }
-        function closeEditCategoryModal() {
-            document.getElementById('editCategoryModal').classList.remove('show');
-        }
-        document.getElementById('editCategoryModal').addEventListener('click', function(e) {
-            if (e.target === this) closeEditCategoryModal();
-        });
 
-        // Draggable bottom nav
-        (function() {
-            const nav = document.getElementById('adminBottomNav');
-            if (!nav) return;
-            let isDragging = false, startX, startLeft;
-            nav.addEventListener('mousedown', function(e) {
-                isDragging = true;
-                startX = e.clientX;
-                startLeft = nav.offsetLeft;
-                nav.style.cursor = 'grabbing';
+        function openAvatarEdit() {
+            const current = document.getElementById('avatarImg')?.getAttribute('src') || '';
+            openEditModal('avatar', 'رابط صورة الحساب', current, 'url');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModalOverlay').classList.remove('show');
+            currentEditField = null;
+        }
+
+        async function submitEditModal() {
+            if (!currentEditField) return;
+            const textarea = document.getElementById('editModalTextarea');
+            const input = document.getElementById('editModalInput');
+            const value = (textarea.style.display === 'block') ? textarea.value.trim() : input.value.trim();
+
+            if (currentEditField === 'password' && value && value.length < 6) {
+                showToast('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/settings/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ csrf_token: CSRF_TOKEN, field: currentEditField, value: value })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message);
+                    updateDisplayedField(currentEditField, value);
+                    closeEditModal();
+                } else {
+                    showToast(data.message || 'حدث خطأ', 'error');
+                }
+            } catch (err) {
+                showToast('تعذر الاتصال بالخادم', 'error');
+            }
+        }
+
+        function updateDisplayedField(field, value) {
+            if (field === 'name') {
+                document.getElementById('displayName').textContent = value;
+            } else if (field === 'avatar') {
+                const img = document.getElementById('avatarImg');
+                const fallback = document.getElementById('avatarFallback');
+                if (value) {
+                    img.src = value; img.style.display = 'block';
+                    if (fallback) fallback.style.display = 'none';
+                } else {
+                    img.style.display = 'none';
+                    if (fallback) fallback.style.display = 'flex';
+                }
+            } else if (field === 'bio') {
+                const el = document.getElementById('displayBio');
+                el.textContent = value || 'لم تتم إضافة نبذة بعد';
+                el.classList.toggle('muted', !value);
+            } else if (field === 'profile_link') {
+                const el = document.getElementById('displayLink');
+                el.textContent = value || 'لم تتم إضافة رابط بعد';
+                el.classList.toggle('muted', !value);
+                el.classList.toggle('link', !!value);
+            } else if (field === 'email') {
+                document.getElementById('displayEmail').textContent = value;
+            }
+        }
+
+        // ---------- Prompt Upload ----------
+        async function handleUpload(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> جاري الإرسال...';
+
+            const payload = {
+                csrf_token: document.getElementById('csrf_token').value,
+                title: document.getElementById('title').value.trim(),
+                category: document.getElementById('category').value,
+                prompt_text: document.getElementById('prompt_text').value.trim(),
+                image_url: document.getElementById('image_url').value.trim(),
+                keywords: document.getElementById('keywords').value.trim()
+            };
+
+            try {
+                const res = await fetch('/upload', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    e.target.reset();
+                } else {
+                    showToast(data.message || 'حدث خطأ', 'error');
+                }
+            } catch (err) {
+                showToast('تعذر الاتصال بالخادم', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        // ---------- Prompt Edit Request ----------
+        function openEditPromptModalFromData(btn) {
+            document.getElementById('editPromptId').value = btn.dataset.promptId;
+            document.getElementById('editPromptTitle').value = btn.dataset.promptTitle;
+            document.getElementById('editPromptCategory').value = btn.dataset.promptCategory;
+            document.getElementById('editPromptText').value = btn.dataset.promptText;
+            document.getElementById('editPromptImageUrl').value = btn.dataset.promptImage;
+            document.getElementById('editPromptKeywords').value = btn.dataset.promptKeywords;
+            document.getElementById('editPromptModalOverlay').classList.add('show');
+        }
+
+        function closeEditPromptModal() {
+            document.getElementById('editPromptModalOverlay').classList.remove('show');
+        }
+
+        async function submitEditPromptRequest() {
+            const id = document.getElementById('editPromptId').value;
+            const payload = {
+                csrf_token: CSRF_TOKEN,
+                prompt_id: id,
+                title: document.getElementById('editPromptTitle').value.trim(),
+                category: document.getElementById('editPromptCategory').value,
+                prompt_text: document.getElementById('editPromptText').value.trim(),
+                image_url: document.getElementById('editPromptImageUrl').value.trim(),
+                keywords: document.getElementById('editPromptKeywords').value.trim()
+            };
+
+            try {
+                const res = await fetch('/api/prompt/edit-request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('تم إرسال طلب التعديل للمراجعة', 'success');
+                    closeEditPromptModal();
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(data.message || 'حدث خطأ', 'error');
+                }
+            } catch (err) {
+                showToast('تعذر الاتصال بالخادم', 'error');
+            }
+        }
+
+        // ---------- Prompt Delete Request ----------
+        function openDeletePromptModal(id, title) {
+            document.getElementById('deletePromptId').value = id;
+            document.getElementById('deletePromptModalOverlay').classList.add('show');
+        }
+
+        function closeDeletePromptModal() {
+            document.getElementById('deletePromptModalOverlay').classList.remove('show');
+        }
+
+        async function submitDeletePromptRequest() {
+            const id = document.getElementById('deletePromptId').value;
+            try {
+                const res = await fetch('/api/prompt/delete-request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ csrf_token: CSRF_TOKEN, prompt_id: id })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('تم إرسال طلب الحذف للمراجعة', 'success');
+                    closeDeletePromptModal();
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(data.message || 'حدث خطأ', 'error');
+                }
+            } catch (err) {
+                showToast('تعذر الاتصال بالخادم', 'error');
+            }
+        }
+
+        function initNavIndicator() {
+            const track = document.getElementById('navTrack');
+            const indicator = document.getElementById('navIndicator');
+            if (!track || !indicator) return;
+            const circles = track.querySelectorAll('.nav-circle');
+            function moveIndicatorTo(circle, animate) {
+                const trackRect = track.getBoundingClientRect();
+                const circleRect = circle.getBoundingClientRect();
+                const offset = circleRect.left - trackRect.left;
+                if (!animate) indicator.style.transition = 'none';
+                indicator.style.transform = `translateX(${offset}px)`;
+                if (!animate) { void indicator.offsetWidth; indicator.style.transition = ''; }
+            }
+            const activeCircle = track.querySelector('.nav-circle.active') || circles[0];
+            moveIndicatorTo(activeCircle, false);
+            circles.forEach(circle => {
+                circle.addEventListener('click', function (e) {
+                    if (this.classList.contains('active')) return;
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    moveIndicatorTo(this, true);
+                    setTimeout(() => { window.location.href = href; }, 480);
+                });
             });
-            document.addEventListener('mousemove', function(e) {
-                if (!isDragging) return;
-                const dx = e.clientX - startX;
-                nav.style.left = (startLeft + dx) + 'px';
-                nav.style.transform = 'none';
+            window.addEventListener('resize', () => {
+                const current = track.querySelector('.nav-circle.active') || circles[0];
+                moveIndicatorTo(current, false);
             });
-            document.addEventListener('mouseup', function() {
-                isDragging = false;
-                nav.style.cursor = 'grab';
-            });
-            // Touch support
-            nav.addEventListener('touchstart', function(e) {
-                isDragging = true;
-                startX = e.touches[0].clientX;
-                startLeft = nav.offsetLeft;
-            });
-            document.addEventListener('touchmove', function(e) {
-                if (!isDragging) return;
-                const dx = e.touches[0].clientX - startX;
-                nav.style.left = (startLeft + dx) + 'px';
-                nav.style.transform = 'none';
-            });
-            document.addEventListener('touchend', function() {
-                isDragging = false;
-            });
-        })();
+        }
+
+        document.addEventListener('DOMContentLoaded', initNavIndicator);
     </script>
 </body>
 </html>
