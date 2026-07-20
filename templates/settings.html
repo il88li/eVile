@@ -30,80 +30,6 @@
             min-height: 100vh; padding: 90px 16px 140px 16px;
             position: relative; overflow-x: hidden;
         }
-
-        /* Floating Header */
-        .floating-header {
-            position: fixed; top: 16px; right: 16px; z-index: 100;
-            display: flex; align-items: center; gap: 12px;
-            padding: 8px 16px;
-            border-radius: 50px;
-            background: var(--bg-card);
-            backdrop-filter: blur(22px) saturate(160%);
-            -webkit-backdrop-filter: blur(22px) saturate(160%);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-        }
-        .header-brand {
-            display: flex; align-items: center;
-        }
-        .header-logo {
-            font-size: 16px; font-weight: 900; letter-spacing: 1px;
-            background: linear-gradient(90deg, var(--text) 0%, var(--primary-light) 100%);
-            -webkit-background-clip: text; background-clip: text; color: transparent;
-        }
-        .header-avatar {
-            width: 42px; height: 42px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; overflow: hidden;
-            border: 2px solid var(--border-strong);
-            box-shadow: 0 0 16px rgba(139,92,246,0.3);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .header-avatar:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 24px rgba(139,92,246,0.5);
-        }
-        .header-avatar img {
-            width: 100%; height: 100%; object-fit: cover;
-        }
-        .header-avatar-fallback {
-            width: 100%; height: 100%;
-            display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 20px;
-        }
-
-        /* User Dropdown Menu */
-        .user-dropdown {
-            position: fixed; top: 75px; right: 16px; z-index: 99;
-            background: var(--bg-card);
-            backdrop-filter: blur(22px) saturate(160%);
-            -webkit-backdrop-filter: blur(22px) saturate(160%);
-            border: 1px solid var(--border-strong);
-            border-radius: 16px;
-            padding: 8px;
-            min-width: 180px;
-            box-shadow: var(--shadow-lg), var(--glow);
-            opacity: 0; transform: translateY(-10px) scale(0.95);
-            pointer-events: none;
-            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .user-dropdown.show {
-            opacity: 1; transform: translateY(0) scale(1);
-            pointer-events: auto;
-        }
-        .dropdown-item {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px 14px; border-radius: 10px;
-            color: var(--text); text-decoration: none;
-            font-size: 0.88rem; font-weight: 600;
-            transition: 0.2s;
-        }
-        .dropdown-item:hover {
-            background: var(--primary-dim);
-            color: var(--primary-light);
-        }
-        .dropdown-item i { font-size: 1rem; }
         body::before, body::after {
             content: ''; position: fixed; z-index: 0; pointer-events: none;
             border-radius: 50%; filter: blur(90px);
@@ -118,7 +44,44 @@
         }
         .container { max-width: 720px; margin: 0 auto; position: relative; z-index: 1; }
 
+        /* Floating Header */
+        .floating-header {
+            position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 16px; max-width: 700px; margin: 0 auto;
+            border-radius: 16px;
+            background: var(--bg-card);
+            backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+        .header-center {
+            position: absolute; left: 50%; transform: translateX(-50%);
+            font-size: 18px; font-weight: 900; letter-spacing: 2px;
+            background: linear-gradient(90deg, var(--text) 0%, var(--primary-light) 100%);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .header-avatar {
+            width: 34px; height: 34px; border-radius: 50%; overflow: hidden;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-dim); text-decoration: none; transition: 0.2s; flex-shrink: 0;
+        }
+        .header-avatar:hover { border-color: var(--border-strong); color: var(--primary-light); }
+        .header-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .header-avatar i { font-size: 18px; }
 
+        .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+        .page-header h1 { font-size: 1.3rem; font-weight: 900; display: flex; align-items: center; gap: 8px; }
+        .page-header h1 i { color: var(--primary-light); }
+        .logout-btn {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 14px; border-radius: 8px;
+            background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.35);
+            color: #f87171; font-family: 'Tajawal', sans-serif; font-size: 0.8rem; font-weight: 700;
+            text-decoration: none; transition: 0.2s;
+        }
+        .logout-btn:hover { background: rgba(239,68,68,0.18); }
 
         .card {
             background: var(--bg-card);
@@ -368,30 +331,21 @@
     </style>
 </head>
 <body>
-    <!-- Floating Header -->
     <header class="floating-header">
-        <div class="header-brand">
-            <span class="header-logo">UFOQ</span>
-        </div>
-        <div class="header-avatar" id="headerAvatar" onclick="toggleUserMenu(event)">
-            {% if user.avatar_url %}
+        <a href="/settings" class="header-avatar" aria-label="الحساب">
+            {% if user and user.avatar_url %}
             <img src="{{ user.avatar_url }}" alt="{{ user.name }}">
             {% else %}
-            <div class="header-avatar-fallback"><i class="bi bi-person-fill"></i></div>
+            <i class="bi bi-person-circle"></i>
             {% endif %}
-        </div>
+        </a>
+        <div class="header-center">UFOQ</div>
     </header>
 
-    <!-- User Dropdown Menu -->
-    <div class="user-dropdown" id="userDropdown">
-        <a href="/" class="dropdown-item"><i class="bi bi-house-door"></i> الرئيسية</a>
-        <a href="/about" class="dropdown-item"><i class="bi bi-info-circle"></i> عن UFOQ</a>
-        <a href="/logout" class="dropdown-item" style="color:var(--danger);"><i class="bi bi-box-arrow-right"></i> تسجيل الخروج</a>
-    </div>
-
     <div class="container">
-        <div style="text-align:center; margin-bottom:24px; margin-top:20px;">
-            <h2 style="font-size:1.3rem; font-weight:900;"><i class="bi bi-gear-fill" style="color:var(--primary-light);"></i> الإعدادات</h2>
+        <div class="page-header">
+            <h1><i class="bi bi-gear-fill"></i> الإعدادات</h1>
+            <a href="/logout" class="logout-btn"><i class="bi bi-box-arrow-right"></i> تسجيل الخروج</a>
         </div>
 
         <!-- Profile card -->
@@ -409,26 +363,25 @@
                 <h2 id="displayName">{{ user.name }}</h2>
                 <span class="edit-pencil" onclick="openEditModal('name','تعديل اسم الحساب','{{ user.name }}','text')"><i class="bi bi-pencil-fill"></i></span>
             </div>
-            <div class="avatar-hint">اضغط على الصورة لتغييرها</div>
+            <div class="avatar-hint">اضغط على الصورة لتغييرها برابط جديد</div>
         </div>
 
-        <!-- General Settings -->
-        <div class="card general-settings-card">
-            <div class="section-title"><i class="bi bi-sliders"></i> إعدادات عامة</div>
-            <div class="setting-row">
-                <div class="setting-info">
-                    <i class="bi bi-grid-3x3-gap"></i>
-                    <div>
-                        <div class="setting-label">عدد البطاقات في السطر</div>
-                        <div class="setting-desc">يتحكم بعدد البرومبتات المعروضة في كل صف</div>
-                    </div>
+        <!-- Account card -->
+        <div class="card">
+            <div class="section-title"><i class="bi bi-shield-lock"></i> بيانات الحساب</div>
+            <div class="info-row">
+                <div class="info-row-main">
+                    <div class="info-row-label"><i class="bi bi-envelope-fill"></i> البريد الإلكتروني</div>
+                    <div class="info-row-value" id="displayEmail">{{ user.email }}</div>
                 </div>
-                <div class="setting-control" id="cardsPerRowControl">
-                    <button class="setting-btn" data-cols="1" onclick="setCardsPerRowSetting(1)">1</button>
-                    <button class="setting-btn" data-cols="2" onclick="setCardsPerRowSetting(2)">2</button>
-                    <button class="setting-btn active" data-cols="3" onclick="setCardsPerRowSetting(3)">3</button>
-                    <button class="setting-btn" data-cols="4" onclick="setCardsPerRowSetting(4)">4</button>
+                <span class="edit-pencil" onclick="openEditModal('email','تعديل البريد الإلكتروني','{{ user.email }}','email')"><i class="bi bi-pencil-fill"></i></span>
+            </div>
+            <div class="info-row">
+                <div class="info-row-main">
+                    <div class="info-row-label"><i class="bi bi-key-fill"></i> كلمة المرور</div>
+                    <div class="info-row-value">••••••••</div>
                 </div>
+                <span class="edit-pencil" onclick="openEditModal('password','تعيين كلمة مرور جديدة','','password')"><i class="bi bi-pencil-fill"></i></span>
             </div>
         </div>
 
@@ -630,6 +583,7 @@
     <nav class="bottom-nav-bar">
         <div class="nav-track" id="navTrack">
             <a href="/" class="nav-circle" data-page="index"><i class="bi bi-house-door-fill"></i></a>
+            <a href="/?focus_search=1" class="nav-circle" data-page="search"><i class="bi bi-search"></i></a>
             <a href="/settings" class="nav-circle active" data-page="settings"><i class="bi bi-person-circle"></i></a>
             <a href="/about" class="nav-circle" data-page="about"><i class="bi bi-info-circle-fill"></i></a>
             <div class="nav-indicator" id="navIndicator"></div>
