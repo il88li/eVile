@@ -319,6 +319,25 @@
             contain: layout style;
         }
         .nav-track { position: relative; display: flex; align-items: center; gap: 16px; }
+        .nav-search-btn {
+            width: 50px; height: 50px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1.5px solid rgba(255,255,255,0.35);
+            color: #fff; font-size: 20px; cursor: pointer;
+            z-index: 1; transition: all 0.2s ease; flex-shrink: 0;
+            box-shadow: 0 0 20px rgba(255,255,255,0.1), inset 0 0 12px rgba(255,255,255,0.08);
+            text-decoration: none;
+        }
+        .nav-search-btn:hover {
+            background: rgba(255,255,255,0.22);
+            border-color: rgba(255,255,255,0.55);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 0 30px rgba(255,255,255,0.2), inset 0 0 16px rgba(255,255,255,0.12);
+        }
+        .nav-search-btn:active { transform: scale(0.95); }
         .nav-circle {
             position: relative; width: 50px; height: 50px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
@@ -351,7 +370,8 @@
         @media (max-width: 600px) {
             .bottom-nav-bar { padding: 7px; }
             .nav-track { gap: 12px; }
-            .nav-circle, .nav-indicator { width: 44px; height: 44px; }
+            .nav-circle, .nav-indicator, .nav-search-btn { width: 44px; height: 44px; }
+        .nav-search-btn { font-size: 18px; }
             .nav-circle i { font-size: 18px; }
             .cpr-btn { width: 50px; height: 50px; }
         }
@@ -623,6 +643,7 @@
             <a href="/" class="nav-circle" data-page="index"><i class="bi bi-house-door-fill"></i></a>
             <a href="/settings" class="nav-circle active" data-page="settings"><i class="bi bi-person-circle"></i></a>
             <a href="/about" class="nav-circle" data-page="about"><i class="bi bi-info-circle-fill"></i></a>
+            <a href="/" class="nav-search-btn" title="بحث"><i class="bi bi-search"></i></a>
             <div class="nav-indicator" id="navIndicator"></div>
         </div>
     </nav>
@@ -642,7 +663,7 @@
         // CARDS PER ROW – Settings Control
         // ═══════════════════════════════════════════
         function initCardsPerRow() {
-            const saved = localStorage.getItem('ufoq_cards_per_row');
+            const saved = localStorage.getItem('ufoq_cards_per_row') || '2';
             document.querySelectorAll('.cpr-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.cols === saved);
             });
