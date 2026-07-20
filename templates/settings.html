@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>الإعدادات — UFOQ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="prefetch" href="/">
+    <link rel="prefetch" href="/about">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
         :root {
@@ -27,7 +30,7 @@
         body {
             font-family: 'Tajawal', sans-serif;
             background: var(--bg); color: var(--text);
-            min-height: 100vh; padding: 90px 16px 140px 16px;
+            min-height: 100vh; padding: 24px 16px 140px 16px;
             position: relative; overflow-x: hidden;
         }
         body::before, body::after {
@@ -43,33 +46,6 @@
             background: radial-gradient(circle, rgba(114,9,183,0.38) 0%, rgba(114,9,183,0) 70%);
         }
         .container { max-width: 720px; margin: 0 auto; position: relative; z-index: 1; }
-
-        /* Floating Header */
-        .floating-header {
-            position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 8px 16px; max-width: 700px; margin: 0 auto;
-            border-radius: 16px;
-            background: var(--bg-card);
-            backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-        }
-        .header-center {
-            position: absolute; left: 50%; transform: translateX(-50%);
-            font-size: 18px; font-weight: 900; letter-spacing: 2px;
-            background: linear-gradient(90deg, var(--text) 0%, var(--primary-light) 100%);
-            -webkit-background-clip: text; background-clip: text; color: transparent;
-        }
-        .header-avatar {
-            width: 34px; height: 34px; border-radius: 50%; overflow: hidden;
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
-            color: var(--text-dim); text-decoration: none; transition: 0.2s; flex-shrink: 0;
-        }
-        .header-avatar:hover { border-color: var(--border-strong); color: var(--primary-light); }
-        .header-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .header-avatar i { font-size: 18px; }
 
         .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
         .page-header h1 { font-size: 1.3rem; font-weight: 900; display: flex; align-items: center; gap: 8px; }
@@ -88,6 +64,7 @@
             backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
             border: 1px solid var(--border); border-radius: 16px;
             padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow);
+            contain: layout style;
         }
 
         /* Profile card */
@@ -144,6 +121,49 @@
 
         .section-title { font-size: 1rem; font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
         .section-title i { color: var(--primary-light); }
+
+        /* ═══════════════════════════════════════════
+           CARDS PER ROW SELECTOR
+           ═══════════════════════════════════════════ */
+        .cpr-selector {
+            display: flex; gap: 10px; align-items: center;
+        }
+        .cpr-btn {
+            width: 56px; height: 56px; border-radius: 12px;
+            border: 2px solid var(--border);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-dim);
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1.1rem; font-weight: 800;
+            cursor: pointer; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .cpr-btn:hover {
+            border-color: var(--border-strong);
+            background: var(--primary-dim);
+            color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+        .cpr-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%);
+            border-color: var(--primary-light);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(139,92,246,0.4);
+            transform: translateY(-2px);
+        }
+        .cpr-btn .cpr-icon {
+            display: grid; gap: 2px;
+        }
+        .cpr-btn .cpr-icon.cols-1 { grid-template-columns: 1fr; width: 18px; height: 22px; }
+        .cpr-btn .cpr-icon.cols-2 { grid-template-columns: 1fr 1fr; width: 18px; height: 22px; }
+        .cpr-btn .cpr-icon.cols-3 { grid-template-columns: 1fr 1fr 1fr; width: 18px; height: 22px; }
+        .cpr-btn .cpr-icon span {
+            background: currentColor; border-radius: 1px; opacity: 0.7;
+        }
+        .cpr-label {
+            font-size: 0.75rem; color: var(--text-faint); margin-top: 6px;
+        }
 
         /* Upload prompt card */
         .upload-prompt-card {
@@ -238,7 +258,10 @@
             border-radius: 16px; max-width: 420px; width: 100%;
             border: 1px solid var(--border-strong); box-shadow: var(--shadow-lg), var(--glow);
             padding: 22px;
+            transform: scale(0.9); opacity: 0;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
+        .edit-modal-overlay.show .edit-modal-box { transform: scale(1); opacity: 1; }
         .edit-modal-header {
             display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
         }
@@ -272,11 +295,13 @@
         /* Toast */
         .toast {
             position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px);
-            background: rgba(20,18,28,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            background: rgba(20,18,28,0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--border-strong); color: #fff;
-            padding: 10px 22px; border-radius: 8px; font-weight: 700; font-size: 0.85rem;
-            z-index: 2000; opacity: 0; transition: 0.3s; display: flex; align-items: center; gap: 8px;
+            padding: 10px 22px; border-radius: 10px; font-weight: 700; font-size: 0.85rem;
+            z-index: 2000; opacity: 0; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex; align-items: center; gap: 8px;
             font-family: 'Tajawal', sans-serif; box-shadow: var(--shadow-lg);
+            pointer-events: none;
         }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
         .toast.error { border-color: #ef4444; }
@@ -291,6 +316,7 @@
             backdrop-filter: blur(28px) saturate(200%); -webkit-backdrop-filter: blur(28px) saturate(200%);
             border: 1px solid rgba(255,255,255,0.12); border-radius: 50px;
             box-shadow: var(--shadow-lg), 0 0 40px rgba(58,12,163,0.2);
+            contain: layout style;
         }
         .nav-track { position: relative; display: flex; align-items: center; gap: 16px; }
         .nav-circle {
@@ -307,7 +333,7 @@
             background: rgba(255,255,255,0.1); opacity: 0; transition: 0.3s;
         }
         .nav-circle:hover::before { opacity: 1; }
-        .nav-circle:hover { transform: translateY(-2px); }
+        .nav-circle:hover { transform: translateY(-3px) scale(1.05); }
         .nav-circle i { position: relative; z-index: 2; pointer-events: none; }
         @keyframes navGradientShift {
             0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; }
@@ -327,21 +353,11 @@
             .nav-track { gap: 12px; }
             .nav-circle, .nav-indicator { width: 44px; height: 44px; }
             .nav-circle i { font-size: 18px; }
+            .cpr-btn { width: 50px; height: 50px; }
         }
     </style>
 </head>
 <body>
-    <header class="floating-header">
-        <a href="/settings" class="header-avatar" aria-label="الحساب">
-            {% if user and user.avatar_url %}
-            <img src="{{ user.avatar_url }}" alt="{{ user.name }}">
-            {% else %}
-            <i class="bi bi-person-circle"></i>
-            {% endif %}
-        </a>
-        <div class="header-center">UFOQ</div>
-    </header>
-
     <div class="container">
         <div class="page-header">
             <h1><i class="bi bi-gear-fill"></i> الإعدادات</h1>
@@ -404,6 +420,28 @@
             </div>
         </div>
 
+        <!-- ═══════════════════════════════════════════
+             DISPLAY SETTINGS – Cards Per Row
+             ═══════════════════════════════════════════ -->
+        <div class="card">
+            <div class="section-title"><i class="bi bi-grid"></i> إعدادات العرض</div>
+            <div class="form-group" style="margin-bottom: 4px;">
+                <label>عدد البطاقات في الصف الواحد</label>
+                <div class="cpr-selector" id="cprSelector">
+                    <button class="cpr-btn" data-cols="1" onclick="setCardsPerRow(1)">
+                        <div class="cpr-icon cols-1"><span></span><span></span><span></span></div>
+                    </button>
+                    <button class="cpr-btn" data-cols="2" onclick="setCardsPerRow(2)">
+                        <div class="cpr-icon cols-2"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                    </button>
+                    <button class="cpr-btn" data-cols="3" onclick="setCardsPerRow(3)">
+                        <div class="cpr-icon cols-3"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                    </button>
+                </div>
+                <p class="cpr-label"><i class="bi bi-info-circle"></i> يُطبّق فوراً عند العودة للصفحة الرئيسية</p>
+            </div>
+        </div>
+
         <!-- Upload Prompt Card -->
         <div class="card upload-prompt-card">
             <div class="section-title"><i class="bi bi-cloud-upload"></i> نشر برومبت جديد</div>
@@ -450,7 +488,7 @@
             <div class="my-prompts-list">
                 {% for p in my_prompts %}
                 <div class="my-prompt-item" data-prompt-id="{{ p.id }}">
-                    <img src="{{ p.image_url }}" alt="{{ p.title }}" onerror="this.style.visibility='hidden'">
+                    <img src="{{ p.image_url }}" alt="{{ p.title }}" onerror="this.style.visibility='hidden'" loading="lazy">
                     <div class="my-prompt-info">
                         <div class="title">{{ p.title }}</div>
                         <div class="meta"><span><i class="bi bi-clipboard-check"></i> {{ p.copy_count or 0 }}</span><span><i class="bi bi-share-fill"></i> {{ p.share_count or 0 }}</span></div>
@@ -464,7 +502,7 @@
                 {% endfor %}
                 {% for c in my_pending %}
                 <div class="my-prompt-item">
-                    <img src="{{ c.image_url or '' }}" alt="{{ c.title }}" onerror="this.style.visibility='hidden'">
+                    <img src="{{ c.image_url or '' }}" alt="{{ c.title }}" onerror="this.style.visibility='hidden'" loading="lazy">
                     <div class="my-prompt-info">
                         <div class="title">{{ c.title }}</div>
                         <div class="meta"><span>بانتظار مراجعة الإدارة</span></div>
@@ -474,7 +512,7 @@
                 {% endfor %}
                 {% for er in my_edit_requests %}
                 <div class="my-prompt-item">
-                    <img src="{{ er.prompt.image_url }}" alt="{{ er.prompt.title }}" onerror="this.style.visibility='hidden'">
+                    <img src="{{ er.prompt.image_url }}" alt="{{ er.prompt.title }}" onerror="this.style.visibility='hidden'" loading="lazy">
                     <div class="my-prompt-info">
                         <div class="title">{{ er.prompt.title }}</div>
                         <div class="meta"><span>طلب تعديل بانتظار الموافقة</span></div>
@@ -484,7 +522,7 @@
                 {% endfor %}
                 {% for dr in my_delete_requests %}
                 <div class="my-prompt-item">
-                    <img src="{{ dr.prompt.image_url }}" alt="{{ dr.prompt.title }}" onerror="this.style.visibility='hidden'">
+                    <img src="{{ dr.prompt.image_url }}" alt="{{ dr.prompt.title }}" onerror="this.style.visibility='hidden'" loading="lazy">
                     <div class="my-prompt-info">
                         <div class="title">{{ dr.prompt.title }}</div>
                         <div class="meta"><span>طلب حذف بانتظار الموافقة</span></div>
@@ -579,11 +617,10 @@
 
     <div class="toast" id="toast"><i class="bi bi-check-circle-fill"></i> <span id="toastMsg"></span></div>
 
-    <!-- Bottom Nav: index (right) -> settings -> about -->
+    <!-- Bottom Nav -->
     <nav class="bottom-nav-bar">
         <div class="nav-track" id="navTrack">
             <a href="/" class="nav-circle" data-page="index"><i class="bi bi-house-door-fill"></i></a>
-            <a href="/?focus_search=1" class="nav-circle" data-page="search"><i class="bi bi-search"></i></a>
             <a href="/settings" class="nav-circle active" data-page="settings"><i class="bi bi-person-circle"></i></a>
             <a href="/about" class="nav-circle" data-page="about"><i class="bi bi-info-circle-fill"></i></a>
             <div class="nav-indicator" id="navIndicator"></div>
@@ -599,6 +636,23 @@
             document.getElementById('toastMsg').textContent = msg;
             t.className = 'toast show ' + type;
             setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // ═══════════════════════════════════════════
+        // CARDS PER ROW – Settings Control
+        // ═══════════════════════════════════════════
+        function initCardsPerRow() {
+            const saved = localStorage.getItem('ufoq_cards_per_row');
+            document.querySelectorAll('.cpr-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.cols === saved);
+            });
+        }
+        function setCardsPerRow(cols) {
+            localStorage.setItem('ufoq_cards_per_row', cols);
+            document.querySelectorAll('.cpr-btn').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.cols) === cols);
+            });
+            showToast('تم حفظ إعدادات العرض');
         }
 
         function openEditModal(field, title, currentValue, inputType) {
@@ -670,13 +724,8 @@
             } else if (field === 'avatar') {
                 const img = document.getElementById('avatarImg');
                 const fallback = document.getElementById('avatarFallback');
-                if (value) {
-                    img.src = value; img.style.display = 'block';
-                    if (fallback) fallback.style.display = 'none';
-                } else {
-                    img.style.display = 'none';
-                    if (fallback) fallback.style.display = 'flex';
-                }
+                if (value) { img.src = value; img.style.display = 'block'; if (fallback) fallback.style.display = 'none'; }
+                else { img.style.display = 'none'; if (fallback) fallback.style.display = 'flex'; }
             } else if (field === 'bio') {
                 const el = document.getElementById('displayBio');
                 el.textContent = value || 'لم تتم إضافة نبذة بعد';
@@ -822,7 +871,7 @@
             const activeCircle = track.querySelector('.nav-circle.active') || circles[0];
             moveIndicatorTo(activeCircle, false);
             circles.forEach(circle => {
-                circle.addEventListener('click', function (e) {
+                circle.addEventListener('click', function(e) {
                     if (this.classList.contains('active')) return;
                     e.preventDefault();
                     const href = this.getAttribute('href');
@@ -836,7 +885,10 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', initNavIndicator);
+        document.addEventListener('DOMContentLoaded', () => {
+            initCardsPerRow();
+            initNavIndicator();
+        });
     </script>
 </body>
 </html>
