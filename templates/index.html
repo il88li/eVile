@@ -1,988 +1,1510 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>UFOQ – مكتبة البرومبتات</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>
-        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-        html { scroll-behavior: smooth; }
-        @media (prefers-reduced-motion: reduce) {
-            html { scroll-behavior: auto; }
-            *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
-        }
-        :root {
-            /* Obsidian Glow palette */
-            --bg: #050505;
-            --bg-card: rgba(255,255,255,0.045);
-            --border: rgba(255,255,255,0.09);
-            --border-strong: rgba(139,92,246,0.4);
-            --text: #F1EEFA;
-            --text-dim: #B4ACC9;
-            --text-faint: #6F6785;
-            --primary: #3A0CA3;
-            --primary-light: #8B5CF6;
-            --primary-dim: rgba(139,92,246,0.12);
-            --primary-dark: #2C0878;
-            --shadow: 0 4px 24px rgba(0,0,0,0.5);
-            --shadow-lg: 0 10px 40px rgba(0,0,0,0.6);
-            --glow: 0 0 40px rgba(58,12,163,0.35);
-        }
-        body {
-            font-family: 'Tajawal', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            min-height: 100dvh;
-            overflow-x: hidden;
-            position: relative;
-        }
-        /* Ambient glow — the Obsidian Glow signature */
-        body::before, body::after {
-            content: ''; position: fixed; z-index: 0; pointer-events: none;
-            border-radius: 50%; filter: blur(90px);
-            transform: translateZ(0); will-change: transform;
-            backface-visibility: hidden;
-        }
-        body::before {
-            width: 560px; height: 560px; top: -180px; right: -160px;
-            background: radial-gradient(circle, rgba(58,12,163,0.55) 0%, rgba(58,12,163,0) 70%);
-        }
-        body::after {
-            width: 480px; height: 480px; bottom: -160px; left: -140px;
-            background: radial-gradient(circle, rgba(114,9,183,0.4) 0%, rgba(114,9,183,0) 70%);
-        }
-        .main-content, .floating-header, .bottom-nav-bar { position: relative; z-index: 1; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UFOQ – مكتبة البرومبتات</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap');
 
-        /* Glass surface */
-        .glass {
-            background: var(--bg-card);
-            backdrop-filter: blur(22px) saturate(160%);
-            -webkit-backdrop-filter: blur(22px) saturate(160%);
-            border: 1px solid var(--border);
-        }
+  :root {
+    --very-light: #FFFDFE;
+    --soft-lavender: #DBB5EE;
+    --deep-purple: #4C0585;
+    --glass-bg: rgba(255, 253, 254, 0.72);
+    --glass-border: rgba(219, 181, 238, 0.35);
+    --shadow-sm: 0 2px 8px rgba(76, 5, 133, 0.06);
+    --shadow-md: 0 8px 32px rgba(76, 5, 133, 0.10);
+    --shadow-lg: 0 16px 48px rgba(76, 5, 133, 0.16);
+    --radius-sm: 12px;
+    --radius-md: 18px;
+    --radius-lg: 28px;
+  }
 
-        /* Floating Header */
-        .floating-header {
-            position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 8px 16px; max-width: 700px; margin: 0 auto;
-            border-radius: 16px;
-            background: var(--bg-card);
-            backdrop-filter: blur(22px) saturate(160%);
-            -webkit-backdrop-filter: blur(22px) saturate(160%);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-        }
-        .header-center {
-            position: absolute; left: 50%; transform: translateX(-50%);
-            font-size: 18px; font-weight: 900; letter-spacing: 2px; color: var(--text);
-            background: linear-gradient(90deg, var(--text) 0%, var(--primary-light) 100%);
-            -webkit-background-clip: text; background-clip: text; color: transparent;
-        }
-        .header-btn {
-            width: 34px; height: 34px; border-radius: 8px;
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--text-dim); transition: 0.2s;
-            text-decoration: none;
-        }
-        .header-btn:hover { background: var(--primary-dim); color: var(--primary-light); border-color: var(--border-strong); }
-        .header-btn i { font-size: 16px; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* Main content */
-        .main-content {
-            padding: 90px 16px 140px 16px;
-            max-width: 1400px; margin: 0 auto;
-        }
+  body {
+    font-family: 'Tajawal', sans-serif;
+    background: var(--very-light);
+    color: var(--deep-purple);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-        /* Cards */
-        .card {
-            background: var(--bg-card);
-            backdrop-filter: blur(22px) saturate(160%);
-            -webkit-backdrop-filter: blur(22px) saturate(160%);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-        }
+  /* ===== Navbar ===== */
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
+  }
 
-        /* Hero */
-        .hero { text-align: center; padding: 32px 20px; }
-        .hero h1 { font-size: 2rem; font-weight: 900; margin-bottom: 6px; }
-        .hero h1 span { color: var(--primary-light); }
-        .hero p { font-size: 0.95rem; color: var(--text-dim); max-width: 500px; margin: 0 auto 16px; line-height: 1.7; }
-        .hero-badge {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: var(--primary-dim); border: 1px solid var(--border-strong);
-            padding: 6px 18px; border-radius: 50px; font-size: 0.85rem; color: var(--primary-light);
-            font-weight: 700;
-        }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
 
-        /* Search & Filter */
-        .search-bar {
-            display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
-            margin-bottom: 16px;
-        }
-        .search-bar input {
-            flex: 1; min-width: 200px;
-            padding: 10px 16px; border-radius: 8px;
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-            color: var(--text); font-family: 'Tajawal', sans-serif; font-size: 0.9rem;
-            outline: none; transition: 0.2s;
-        }
-        .search-bar input:focus { border-color: var(--primary-light); background: rgba(255,255,255,0.08); box-shadow: 0 0 0 3px var(--primary-dim); }
-        .search-bar input::placeholder { color: var(--text-faint); }
+  .nav-logo {
+    font-size: 1.6rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--deep-purple), #7B2FBE);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-decoration: none;
+  }
 
-        .categories-scroll {
-            display: flex; gap: 8px; overflow-x: auto; padding: 4px 0; scrollbar-width: none;
-        }
-        .categories-scroll::-webkit-scrollbar { display: none; }
-        .category-btn {
-            flex-shrink: 0; padding: 6px 16px; border-radius: 8px;
-            background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-            color: var(--text-dim); font-family: 'Tajawal', sans-serif;
-            font-weight: 600; font-size: 0.8rem; cursor: pointer;
-            transition: 0.2s; white-space: nowrap;
-        }
-        .category-btn:hover { background: var(--primary-dim); color: var(--primary-light); border-color: var(--border-strong); }
-        .category-btn.active {
-            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%);
-            color: #fff; border-color: var(--primary-light);
-            font-weight: 700; box-shadow: 0 0 16px rgba(139,92,246,0.35);
-        }
+  .nav-links { display: flex; align-items: center; gap: 8px; }
 
-        /* Gallery grid */
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--deep-purple);
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    transition: all 0.25s ease;
+  }
 
-        /* Prompt card */
-        .prompt-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(22px) saturate(160%);
-            -webkit-backdrop-filter: blur(22px) saturate(160%);
-            border: 1px solid var(--border);
-            border-radius: 16px; overflow: hidden;
-            transition: all 0.3s ease;
-            display: flex; flex-direction: column;
-        }
-        .prompt-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--border-strong);
-            box-shadow: 0 8px 28px rgba(58,12,163,0.3);
-        }
-        .prompt-card.reveal-init {
-            opacity: 0; transform: translateY(18px);
-        }
-        .prompt-card.reveal-in {
-            animation: cardRevealIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards;
-        }
-        @keyframes cardRevealIn {
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .prompt-card.highlighted {
-            border-color: var(--primary-light);
-            box-shadow: 0 0 0 2px rgba(139,92,246,0.5), var(--glow);
-            animation: highlightPulse 1.8s ease-in-out 1;
-        }
-        @keyframes highlightPulse {
-            0% { box-shadow: 0 0 0 2px rgba(139,92,246,0.9), 0 0 50px rgba(139,92,246,0.6); }
-            100% { box-shadow: 0 0 0 2px rgba(139,92,246,0.5), var(--glow); }
-        }
-        .prompt-card .image-wrapper {
-            position: relative; overflow: hidden;
-            background: rgba(255,255,255,0.03);
-            display: flex; align-items: center; justify-content: center;
-            aspect-ratio: 4 / 3; min-height: 180px;
-        }
-        .prompt-card .image-wrapper .image-bg-fill {
-            position: absolute; inset: -12px; z-index: 0;
-            background-image: var(--bg-image, none);
-            background-size: cover; background-position: center;
-            filter: blur(24px) saturate(150%) brightness(0.6);
-            transform: scale(1.15);
-        }
-        .prompt-card .image-wrapper img {
-            position: relative; z-index: 1;
-            width: 100%; height: 100%; object-fit: contain; display: block;
-            transition: transform 0.4s ease;
-        }
-        .prompt-card:hover .image-wrapper img { transform: scale(1.03); }
-        .prompt-card .image-overlay {
-            position: absolute; inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%);
-            pointer-events: none;
-        }
-        .prompt-card .image-title {
-            position: absolute; bottom: 12px; right: 12px;
-            color: #fff; font-weight: 800; font-size: 1rem;
-            pointer-events: none; z-index: 2;
-        }
-        .prompt-card .card-category {
-            position: absolute; top: 10px; left: 10px;
-            background: rgba(5,5,5,0.55); backdrop-filter: blur(10px);
-            padding: 4px 12px; border-radius: 6px;
-            font-size: 0.7rem; font-weight: 600; color: #fff;
-            border: 1px solid rgba(255,255,255,0.1);
-            z-index: 3;
-        }
-        .prompt-card .card-actions {
-            padding: 14px 14px 8px 14px;
-            display: flex; gap: 8px; align-items: center;
-            flex-wrap: wrap;
-        }
-        .prompt-card .card-meta {
-            padding: 0 14px 14px 14px;
-            display: flex; align-items: center; justify-content: space-between;
-            font-size: 0.75rem; color: var(--text-faint);
-        }
-        .card-meta .meta-copies {
-            display: flex; align-items: center; gap: 10px;
-        }
-        .meta-copies-inner, .meta-shares {
-            display: flex; align-items: center; gap: 5px;
-        }
-        .card-meta .meta-publisher {
-            display: flex; align-items: center; gap: 5px;
-            background: none; border: none; padding: 0;
-            font-family: 'Tajawal', sans-serif; font-size: 0.75rem;
-            color: var(--text-faint); cursor: default;
-        }
-        .card-meta .meta-publisher.linked {
-            color: var(--primary-light); cursor: pointer;
-            text-decoration: none;
-        }
-        .card-meta .meta-publisher.linked:hover { text-decoration: underline; }
+  .nav-links a:hover, .nav-links a.active {
+    background: rgba(219, 181, 238, 0.3);
+  }
 
-        /* Publisher link disclaimer modal */
-        .disclaimer-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px);
-            z-index: 5500; display: none; align-items: center; justify-content: center; padding: 20px;
-        }
-        .disclaimer-overlay.show { display: flex; }
-        .disclaimer-box {
-            background: rgba(15,13,20,0.92);
-            backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
-            border-radius: 16px; max-width: 380px; width: 100%;
-            border: 1px solid var(--border-strong);
-            box-shadow: var(--shadow-lg), var(--glow);
-            padding: 24px; text-align: center;
-        }
-        .disclaimer-box h3 { font-size: 1.05rem; font-weight: 900; margin-bottom: 10px; color: var(--text); }
-        .profile-popup-avatar {
-            width: 68px; height: 68px; border-radius: 50%; object-fit: cover;
-            margin: 0 auto 12px; display: block;
-            border: 2px solid var(--border-strong);
-        }
-        .profile-popup-avatar-fallback {
-            display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%);
-            color: #fff; font-size: 28px;
-        }
-        .profile-popup-bio {
-            font-size: 0.85rem; color: var(--text-dim); line-height: 1.8;
-            margin-bottom: 14px;
-        }
-        .profile-popup-warning {
-            display: flex; align-items: center; gap: 10px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 10px; padding: 10px 12px;
-            margin-bottom: 16px; text-align: right;
-        }
-        .profile-popup-warning .warn-icon-inline {
-            width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center;
-            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
-            color: #fff; font-size: 13px;
-        }
-        .profile-popup-warning span { font-size: 0.72rem; color: var(--text-faint); line-height: 1.6; }
-        .disclaimer-box p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.8; margin-bottom: 18px; }
-        .disclaimer-actions { display: flex; gap: 10px; }
-        .disclaimer-actions button {
-            flex: 1; padding: 10px; border-radius: 8px; border: none;
-            font-family: 'Tajawal', sans-serif; font-weight: 700; font-size: 0.85rem;
-            cursor: pointer; transition: 0.2s;
-        }
-        .disclaimer-cancel { background: rgba(255,255,255,0.06); color: var(--text-dim); }
-        .disclaimer-cancel:hover { background: rgba(255,255,255,0.1); }
-        .disclaimer-continue {
-            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%); color: #fff;
-        }
-        .disclaimer-continue:hover { filter: brightness(1.15); }
-        .copy-btn, .like-btn, .share-btn {
-            padding: 0 14px; border-radius: 8px;
-            border: none; font-weight: 700; cursor: pointer;
-            transition: 0.2s; font-family: 'Tajawal', sans-serif;
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-            font-size: 0.8rem;
-            height: 42px;
-        }
-        .copy-btn {
-            flex: 1;
-            background: linear-gradient(120deg, var(--primary) 0%, #7209B7 35%, var(--primary-light) 65%, var(--primary) 100%);
-            background-size: 300% 100%;
-            animation: copyGradientShift 6s ease infinite;
-            color: #fff;
-            box-shadow: 0 2px 10px rgba(58,12,163,0.4);
-        }
-        @keyframes copyGradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        .copy-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
-        .copy-btn:active { transform: scale(0.97); }
-        .copy-btn.copied { background: #10b981; animation: none; }
-        .like-btn, .share-btn {
-            background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-            color: var(--text-dim);
-            padding: 0 12px;
-            transition: 0.2s;
-        }
-        .like-btn:hover { border-color: #ef4444; color: #ef4444; }
-        .like-btn.liked { background: rgba(239,68,68,0.1); border-color: #ef4444; color: #ef4444; }
-        .like-btn i, .share-btn i { font-size: 1rem; }
-        .share-btn:hover { border-color: var(--border-strong); color: var(--primary-light); }
-        .share-btn.shared { background: rgba(139,92,246,0.15); border-color: var(--primary-light); color: var(--primary-light); }
+  .nav-left { display: flex; align-items: center; gap: 10px; }
 
-        /* Empty state */
-        .empty-state {
-            text-align: center; padding: 60px 20px; grid-column: 1 / -1;
-            color: var(--text-faint);
-        }
-        .empty-state i { font-size: 48px; display: block; margin-bottom: 12px; opacity: 0.4; }
+  /* ===== Search Button ===== */
+  .search-btn {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--soft-lavender);
+    background: var(--very-light);
+    color: var(--deep-purple);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-        /* Toast */
-        .toast {
-            position: fixed; bottom: 100px; left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: rgba(20,18,28,0.85);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border-strong);
-            color: #fff;
-            padding: 10px 22px; border-radius: 8px;
-            font-weight: 700; font-size: 0.85rem;
-            z-index: 2000; opacity: 0; transition: 0.3s;
-            display: flex; align-items: center; gap: 8px;
-            font-family: 'Tajawal', sans-serif;
-            box-shadow: var(--shadow-lg);
-        }
-        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .search-btn:hover {
+    background: var(--soft-lavender);
+    transform: scale(1.08);
+  }
 
-        /* Ad overlay */
-        .ad-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px);
-            z-index: 5000; display: none; align-items: center; justify-content: center; padding: 20px;
-        }
-        .ad-overlay.show { display: flex; }
-        .ad-box {
-            background: rgba(15,13,20,0.9);
-            backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
-            border-radius: 16px; max-width: 400px; width: 100%;
-            border: 1px solid var(--border-strong); overflow: hidden;
-            position: relative; box-shadow: var(--shadow-lg), var(--glow);
-        }
-        .ad-box img { width: 100%; height: 160px; object-fit: contain; display: block; background: rgba(255,255,255,0.03); }
-        .ad-no-image {
-            height: 140px; display: flex; align-items: center; justify-content: center;
-            color: var(--text-faint); font-size: 40px; background: rgba(255,255,255,0.03);
-        }
-        .ad-content { padding: 22px; text-align: center; }
-        .ad-title { font-size: 1.1rem; font-weight: 900; margin-bottom: 6px; color: var(--text); }
-        .ad-text { font-size: 0.85rem; color: var(--text-dim); line-height: 1.7; margin-bottom: 18px; }
-        .ad-btn {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: linear-gradient(135deg, var(--primary) 0%, #7209B7 100%); color: #fff;
-            padding: 10px 24px; border-radius: 8px; text-decoration: none;
-            font-weight: 700; font-size: 0.85rem; border: none; cursor: pointer;
-            font-family: 'Tajawal', sans-serif; transition: 0.2s;
-            box-shadow: 0 2px 12px rgba(58,12,163,0.4);
-        }
-        .ad-btn:hover { filter: brightness(1.15); }
-        .ad-timer {
-            position: absolute; top: 10px; left: 10px;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
-            color: #fff; padding: 4px 12px; border-radius: 6px;
-            font-size: 12px; font-weight: 700;
-        }
+  .search-btn.active {
+    background: var(--deep-purple);
+    color: var(--very-light);
+    border-color: var(--deep-purple);
+  }
 
-        /* Bottom nav */
-        .bottom-nav-bar {
-            position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
-            z-index: 1000;
-            padding: 9px;
-            background: rgba(255,255,255,0.06);
-            backdrop-filter: blur(28px) saturate(200%); -webkit-backdrop-filter: blur(28px) saturate(200%);
-            border: 1px solid rgba(255,255,255,0.12); border-radius: 50px;
-            box-shadow: var(--shadow-lg), 0 0 40px rgba(58,12,163,0.2);
-        }
-        .nav-track {
-            position: relative;
-            display: flex; align-items: center; gap: 16px;
-        }
-        .nav-circle {
-            position: relative;
-            width: 50px; height: 50px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            text-decoration: none; color: #fff; font-size: 20px;
-            background: linear-gradient(120deg, var(--primary) 0%, #7209B7 35%, var(--primary-light) 65%, var(--primary) 100%);
-            background-size: 300% 100%;
-            animation: navGradientShift 6s ease infinite;
-            box-shadow: 0 2px 12px rgba(58,12,163,0.45);
-            z-index: 1;
-            transition: transform 0.2s;
-        }
-        .nav-circle::before {
-            content: ''; position: absolute; inset: 0;
-            background: rgba(255,255,255,0.1); opacity: 0; transition: 0.3s;
-        }
-        .nav-circle:hover::before { opacity: 1; }
-        .nav-circle:hover { transform: translateY(-2px); }
-        .nav-circle:active { transform: scale(0.88); transition: transform 0.12s ease; }
-        .nav-circle i { position: relative; z-index: 2; pointer-events: none; }
-        @keyframes navGradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        /* The sliding glass "scroll bar" indicator that sits above the circles */
-        .nav-indicator {
-            position: absolute; top: 0; left: 0;
-            width: 50px; height: 50px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(12px) saturate(220%); -webkit-backdrop-filter: blur(12px) saturate(220%);
-            border: 1.5px solid rgba(255,255,255,0.25);
-            box-shadow: 0 0 30px rgba(255,255,255,0.15), inset 0 0 20px rgba(255,255,255,0.1);
-            transition: transform 0.48s cubic-bezier(0.65,0,0.35,1);
-            pointer-events: none;
-            z-index: 3;
-        }
+  .search-btn .badge {
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    background: linear-gradient(135deg, #FF6B6B, #FF4757);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-        @media (max-width: 600px) {
-            .hero h1 { font-size: 1.5rem; }
-            .gallery-grid { grid-template-columns: 1fr; gap: 16px; }
-            .bottom-nav-bar { padding: 7px; }
-            .nav-track { gap: 12px; }
-            .nav-circle, .nav-indicator { width: 44px; height: 44px; }
-            .nav-circle i { font-size: 18px; }
-        }
-    </style>
+  .search-btn .badge.show {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .search-btn svg {
+    width: 20px;
+    height: 20px;
+    transition: all 0.3s ease;
+  }
+
+  .search-btn.active .icon-search { display: none; }
+  .search-btn:not(.active) .icon-close { display: none; }
+
+  /* ===== User Avatar Nav ===== */
+  .nav-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--soft-lavender);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .nav-avatar:hover {
+    border-color: var(--deep-purple);
+    transform: scale(1.05);
+  }
+
+  /* ===== Search Panel ===== */
+  .search-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, padding 0.4s ease;
+    background: linear-gradient(180deg, rgba(219,181,238,0.12) 0%, rgba(255,253,254,0) 100%);
+    opacity: 0;
+    padding: 0 28px;
+  }
+
+  .search-panel.open {
+    max-height: 220px;
+    opacity: 1;
+    padding: 20px 28px 24px;
+  }
+
+  .search-panel-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .search-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .search-input-wrap input {
+    width: 100%;
+    padding: 14px 50px 14px 20px;
+    border: 2px solid var(--soft-lavender);
+    border-radius: var(--radius-lg);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 1rem;
+    background: var(--very-light);
+    color: var(--deep-purple);
+    outline: none;
+    transition: all 0.3s ease;
+  }
+
+  .search-input-wrap input:focus {
+    border-color: var(--deep-purple);
+    box-shadow: 0 0 0 4px rgba(76, 5, 133, 0.08);
+  }
+
+  .search-input-wrap input::placeholder {
+    color: rgba(76, 5, 133, 0.4);
+  }
+
+  .search-input-wrap .search-icon-inside {
+    position: absolute;
+    right: 16px;
+    color: var(--deep-purple);
+    opacity: 0.5;
+  }
+
+  .search-input-wrap .search-icon-inside svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Category Dropdown in Search */
+  .search-category-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .search-category-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 50px;
+    border: 2px solid var(--soft-lavender);
+    background: var(--very-light);
+    color: var(--deep-purple);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+  }
+
+  .search-category-btn:hover {
+    background: var(--soft-lavender);
+  }
+
+  .search-category-btn .cat-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--deep-purple), #7B2FBE);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .search-category-btn .cat-circle svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .search-category-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 220px;
+    background: var(--very-light);
+    border: 2px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.25s ease;
+    overflow: hidden;
+  }
+
+  .search-category-dropdown.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .search-category-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    text-decoration: none;
+    color: var(--deep-purple);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(219,181,238,0.15);
+  }
+
+  .search-category-dropdown a:last-child { border-bottom: none; }
+
+  .search-category-dropdown a:hover,
+  .search-category-dropdown a.active {
+    background: rgba(219, 181, 238, 0.2);
+    padding-right: 24px;
+  }
+
+  .search-category-dropdown a .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--deep-purple);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .search-category-dropdown a.active .dot { opacity: 1; }
+
+  /* ===== Hero / Welcome ===== */
+  .hero {
+    text-align: center;
+    padding: 50px 28px 30px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero h1 {
+    font-size: 2.2rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--deep-purple), #7B2FBE);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+  }
+
+  .hero p {
+    font-size: 1.05rem;
+    color: rgba(76, 5, 133, 0.6);
+    max-width: 550px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  .hero .count-badge {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 8px 22px;
+    background: linear-gradient(135deg, var(--deep-purple), #7B2FBE);
+    color: white;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  /* ===== Categories Bar ===== */
+  .categories-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 28px 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    position: relative;
+    z-index: 1;
+  }
+
+  .categories-bar::-webkit-scrollbar { display: none; }
+
+  .cat-chip {
+    padding: 8px 22px;
+    border-radius: 50px;
+    border: 2px solid var(--soft-lavender);
+    background: var(--very-light);
+    color: var(--deep-purple);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.25s ease;
+    text-decoration: none;
+  }
+
+  .cat-chip:hover,
+  .cat-chip.active {
+    background: var(--deep-purple);
+    color: var(--very-light);
+    border-color: var(--deep-purple);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(76, 5, 133, 0.2);
+  }
+
+  /* ===== Masonry Grid (Pixabay Style) ===== */
+  .masonry-grid {
+    columns: 4;
+    column-gap: 18px;
+    padding: 0 28px 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (max-width: 1200px) { .masonry-grid { columns: 3; } }
+  @media (max-width: 800px)  { .masonry-grid { columns: 2; column-gap: 12px; padding: 0 14px 40px; } }
+  @media (max-width: 480px)  { .masonry-grid { columns: 1; } }
+
+  .prompt-card {
+    break-inside: avoid;
+    margin-bottom: 18px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--very-light);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+  }
+
+  .prompt-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--soft-lavender);
+  }
+
+  .prompt-card .card-image-wrap {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .prompt-card .card-image-wrap img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+
+  .prompt-card:hover .card-image-wrap img {
+    transform: scale(1.04);
+  }
+
+  .prompt-card .card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 30px 14px 12px;
+    background: linear-gradient(transparent, rgba(76, 5, 133, 0.75));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .prompt-card:hover .card-overlay {
+    opacity: 1;
+  }
+
+  .prompt-card .card-overlay .copy-btn-overlay {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--very-light);
+    color: var(--deep-purple);
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .prompt-card .card-overlay .copy-btn-overlay svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .prompt-card .card-overlay .copy-btn-overlay:hover {
+    background: var(--soft-lavender);
+  }
+
+  .prompt-card .card-body {
+    padding: 14px;
+  }
+
+  .prompt-card .card-cat {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--deep-purple);
+    opacity: 0.5;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+
+  .prompt-card .card-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--deep-purple);
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .prompt-card .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .prompt-card .card-author {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: rgba(76, 5, 133, 0.6);
+    font-weight: 500;
+  }
+
+  .prompt-card .card-author .author-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid var(--soft-lavender);
+  }
+
+  .prompt-card .card-copy-btn {
+    padding: 6px 14px;
+    border-radius: 50px;
+    border: 1.5px solid var(--soft-lavender);
+    background: var(--very-light);
+    color: var(--deep-purple);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .prompt-card .card-copy-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .prompt-card .card-copy-btn:hover {
+    background: var(--deep-purple);
+    color: var(--very-light);
+    border-color: var(--deep-purple);
+  }
+
+  .prompt-card .card-copy-btn.copied {
+    background: #27AE60;
+    color: white;
+    border-color: #27AE60;
+  }
+
+  /* ===== Empty State ===== */
+  .empty-state {
+    text-align: center;
+    padding: 80px 28px;
+    color: rgba(76, 5, 133, 0.4);
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+
+  .empty-state .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.4;
+  }
+
+  /* ===== Image Modal ===== */
+  .image-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(10, 2, 20, 0.92);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+  }
+
+  .image-modal.open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .modal-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(10, 2, 20, 0.6);
+    backdrop-filter: blur(10px);
+  }
+
+  .modal-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: 50px;
+    border: 2px solid rgba(219, 181, 238, 0.3);
+    background: rgba(255, 253, 254, 0.08);
+    color: var(--very-light);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .modal-back-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .modal-back-btn:hover {
+    background: rgba(219, 181, 238, 0.2);
+    border-color: var(--soft-lavender);
+  }
+
+  .modal-image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 28px;
+    flex: 1;
+  }
+
+  .modal-image-container img {
+    max-width: 100%;
+    max-height: 70vh;
+    border-radius: var(--radius-md);
+    object-fit: contain;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+
+  /* Thin Horizontal Card */
+  .modal-action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 14px 28px;
+    margin: 0 28px;
+    background: rgba(255, 253, 254, 0.1);
+    border: 1px solid rgba(219, 181, 238, 0.2);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(10px);
+  }
+
+  .modal-action-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--very-light);
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 50px;
+    background: rgba(255, 253, 254, 0.06);
+    border: 1px solid rgba(219, 181, 238, 0.15);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    user-select: none;
+  }
+
+  .modal-action-item svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .modal-action-item:hover {
+    background: rgba(219, 181, 238, 0.15);
+  }
+
+  .modal-action-item.liked {
+    background: rgba(255, 71, 87, 0.2);
+    border-color: rgba(255, 71, 87, 0.4);
+    color: #FF6B81;
+  }
+
+  .modal-action-item .action-count {
+    font-size: 0.82rem;
+    opacity: 0.8;
+  }
+
+  .modal-action-separator {
+    width: 1px;
+    height: 28px;
+    background: rgba(219, 181, 238, 0.2);
+  }
+
+  /* Similar Prompts in Modal */
+  .modal-similar-section {
+    padding: 30px 28px 50px;
+  }
+
+  .modal-similar-title {
+    color: var(--very-light);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+
+  .modal-similar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+
+  .similar-card {
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: rgba(255, 253, 254, 0.06);
+    border: 1px solid rgba(219, 181, 238, 0.12);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .similar-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--soft-lavender);
+    background: rgba(255, 253, 254, 0.1);
+  }
+
+  .similar-card img {
+    width: 100%;
+    height: 130px;
+    object-fit: cover;
+  }
+
+  .similar-card .similar-info {
+    padding: 10px;
+  }
+
+  .similar-card .similar-info h4 {
+    color: var(--very-light);
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+
+  .similar-card .similar-info span {
+    color: rgba(219, 181, 238, 0.6);
+    font-size: 0.7rem;
+  }
+
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    padding: 14px 32px;
+    background: var(--deep-purple);
+    color: var(--very-light);
+    border-radius: 50px;
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    z-index: 99999;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ===== Ad Banner ===== */
+  .ad-banner {
+    margin: 20px 28px;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, rgba(219,181,238,0.15), rgba(76,5,133,0.05));
+    border: 1px dashed var(--soft-lavender);
+    border-radius: var(--radius-md);
+    text-align: center;
+    font-size: 0.85rem;
+    color: rgba(76, 5, 133, 0.5);
+    position: relative;
+    z-index: 1;
+  }
+
+  .ad-banner a {
+    color: var(--deep-purple);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  /* ===== External Link Warning Modal ===== */
+  .external-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 99998;
+    background: rgba(10, 2, 20, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .external-modal.open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .external-modal-box {
+    background: var(--very-light);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .external-modal-box h3 {
+    color: var(--deep-purple);
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+  }
+
+  .external-modal-box p {
+    color: rgba(76, 5, 133, 0.6);
+    font-size: 0.88rem;
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+
+  .external-modal-box .ext-btns {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .external-modal-box .ext-btn {
+    padding: 10px 28px;
+    border-radius: 50px;
+    border: none;
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .ext-btn.primary {
+    background: var(--deep-purple);
+    color: var(--very-light);
+  }
+
+  .ext-btn.primary:hover {
+    background: #6B1FB0;
+  }
+
+  .ext-btn.secondary {
+    background: rgba(219, 181, 238, 0.2);
+    color: var(--deep-purple);
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 600px) {
+    .navbar { padding: 12px 16px; }
+    .hero { padding: 30px 16px 20px; }
+    .hero h1 { font-size: 1.6rem; }
+    .categories-bar { padding: 8px 16px 16px; }
+    .search-panel { padding: 0 16px; }
+    .search-panel.open { padding: 16px 16px 20px; }
+    .modal-action-bar { flex-wrap: wrap; gap: 8px; margin: 0 16px; }
+    .modal-similar-grid { grid-template-columns: repeat(2, 1fr); }
+    .nav-links a { font-size: 0.82rem; padding: 6px 10px; }
+  }
+
+  /* ===== Loading Skeleton ===== */
+  .skeleton {
+    background: linear-gradient(90deg, rgba(219,181,238,0.15) 25%, rgba(219,181,238,0.3) 50%, rgba(219,181,238,0.15) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-sm);
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ===== Scroll to top ===== */
+  .scroll-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--deep-purple);
+    color: var(--very-light);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .scroll-top svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .scroll-top.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .scroll-top:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+</style>
 </head>
 <body>
-    <!-- Floating Header -->
-    <header class="floating-header" style="justify-content: center;">
-        <div class="header-center" style="position: static; transform: none;">UFOQ</div>
-    </header>
 
-    <div class="main-content">
-        <!-- Hero -->
-        <div class="card hero">
-            <h1>مرحباً بك في <span>UFOQ</span></h1>
-            <p>مكتبة ضخمة من البرومبتات الجاهزة للاستخدام – اختر، انسخ، وابدأ الإبداع فوراً.</p>
-            <div class="hero-badge"><i class="bi bi-stars"></i> أكثر من {{ library_items|length }} برومبت</div>
-        </div>
-
-        <!-- Search & Filter -->
-        <div class="card">
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="ابحث في البرومبتات (العنوان أو الكلمات المفتاحية)" oninput="filterPrompts()">
-            </div>
-            <div class="categories-scroll" id="categoriesContainer">
-                <button class="category-btn active" data-category="all">الكل</button>
-                {% for cat in categories %}
-                <button class="category-btn" data-category="{{ cat.name }}">{{ cat.display_name }}</button>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- Gallery -->
-        <div class="gallery-grid" id="galleryGrid">
-            {% for item in library_items %}
-            <div class="prompt-card" id="prompt-{{ item.id }}" data-item-id="{{ item.id }}" data-category="{{ item.category }}" data-title="{{ item.title|lower }}" data-keywords="{{ (item.prompt_text ~ ' ' ~ (item.keywords or ''))|lower }}">
-                <div class="image-wrapper" style="--bg-image:url('{{ item.image_url }}');">
-                    {% if item.image_url %}<div class="image-bg-fill"></div>{% endif %}
-                    <span class="card-category">{{ item.category }}</span>
-                    <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy" width="400" height="300" onerror="this.style.display='none';const f=this.previousElementSibling; if(f&&f.classList.contains('image-bg-fill'))f.style.display='none'; this.parentElement.innerHTML+='<div style=display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-faint)><i class=bi bi-image style=font-size:40px></i></div>'">
-                    <div class="image-overlay"></div>
-                    <div class="image-title">{{ item.title }}</div>
-                </div>
-                <div class="card-actions">
-                    <button class="copy-btn" data-prompt="{{ item.prompt_text }}" data-id="{{ item.id }}" onclick="handleCopy(event)"><i class="bi bi-files"></i> نسخ</button>
-                    <button class="share-btn" data-id="{{ item.id }}" onclick="shareCard(event)"><i class="bi bi-share"></i></button>
-                    <button class="like-btn" data-id="{{ item.id }}" onclick="toggleLike(event)"><i class="bi bi-heart"></i> <span class="like-count">0</span></button>
-                </div>
-                <div class="card-meta">
-                    <span class="meta-copies">
-                        <span class="meta-copies-inner"><i class="bi bi-clipboard-check"></i> <span class="copy-count-display">{{ item.copy_count or 0 }}</span> نسخة</span>
-                        <span class="meta-shares"><i class="bi bi-share-fill"></i> <span class="share-count-display">{{ item.share_count or 0 }}</span> مشاركة</span>
-                    </span>
-                    {% if item.user and (item.user.bio or item.user.profile_link) %}
-                    <span class="meta-publisher linked"
-                          data-name="{{ item.user.name }}"
-                          data-avatar="{{ item.user.avatar_url or '' }}"
-                          data-bio="{{ item.user.bio or '' }}"
-                          data-link="{{ item.user.profile_link or '' }}"
-                          onclick="openProfilePopupFromEl(this)">
-                        <i class="bi bi-patch-check-fill"></i> {{ item.user.name }}
-                    </span>
-                    {% elif item.publisher_link %}
-                    <span class="meta-publisher linked"
-                          data-name="{{ item.publisher or 'ناشر' }}"
-                          data-avatar=""
-                          data-bio=""
-                          data-link="{{ item.publisher_link }}"
-                          onclick="openProfilePopupFromEl(this)">
-                        <i class="bi bi-person-check"></i> {{ item.publisher }}
-                    </span>
-                    {% elif item.user or item.publisher %}
-                    <span class="meta-publisher"><i class="bi bi-person"></i> {{ item.user.name if item.user else item.publisher }}</span>
-                    {% endif %}
-                </div>
-            </div>
-            {% else %}
-            <div class="empty-state">
-                <i class="bi bi-collection"></i>
-                <p>لا توجد برومبتات في المكتبة حالياً</p>
-            </div>
-            {% endfor %}
-        </div>
+<!-- ===== Navbar ===== -->
+<nav class="navbar">
+  <div class="nav-right">
+    <a href="/" class="nav-logo">UFOQ</a>
+    <div class="nav-links">
+      <a href="/" class="active">المكتبة</a>
+      <a href="/about">عن الموقع</a>
+      {% if user %}
+      <a href="/settings">الإعدادات</a>
+      {% endif %}
     </div>
+  </div>
+  <div class="nav-left">
+    {% if user and user.avatar_url %}
+    <a href="/settings"><img src="{{ user.avatar_url }}" alt="{{ user.name }}" class="nav-avatar"></a>
+    {% elif user %}
+    <a href="/settings" class="nav-avatar" style="display:flex;align-items:center;justify-content:center;background:var(--soft-lavender);color:var(--deep-purple);font-weight:700;font-size:0.85rem;text-decoration:none;">{{ user.name[0] if user.name else '؟' }}</a>
+    {% else %}
+    <a href="/sign" class="nav-avatar" style="display:flex;align-items:center;justify-content:center;background:var(--soft-lavender);color:var(--deep-purple);font-weight:700;font-size:0.85rem;text-decoration:none;">دخول</a>
+    {% endif %}
 
-    <!-- Toast -->
-    <div class="toast" id="toast"><i class="bi bi-check-lg"></i> تم النسخ!</div>
+    <!-- Search Button (Left Side) -->
+    <button class="search-btn" id="searchToggle" aria-label="بحث">
+      <svg class="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.35-4.35"></path>
+      </svg>
+      <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 6 6 18"></path>
+        <path d="m6 6 12 12"></path>
+      </svg>
+      <span class="badge" id="searchBadge">0</span>
+    </button>
+  </div>
+</nav>
 
-    <!-- Ad Overlay -->
-    <div class="ad-overlay" id="adOverlay">
-        <div class="ad-box">
-            <div id="adImageContainer">
-                <div class="ad-no-image" id="adNoImage"><i class="bi bi-megaphone-fill"></i></div>
-            </div>
-            <div class="ad-content">
-                <div class="ad-title" id="adTitle">إعلان</div>
-                <div class="ad-text" id="adText">...</div>
-                <a href="#" target="_blank" class="ad-btn" id="adBtn"><i class="bi bi-box-arrow-up-right"></i> <span id="adBtnText">زيارة</span></a>
-            </div>
-            <div class="ad-timer" id="adTimer">5</div>
-        </div>
+<!-- ===== Search Panel ===== -->
+<div class="search-panel" id="searchPanel">
+  <div class="search-panel-inner">
+    <div class="search-input-wrap">
+      <span class="search-icon-inside">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.35-4.35"></path>
+        </svg>
+      </span>
+      <input type="text" id="searchInput" placeholder="ابحث عن برومبت..." autocomplete="off">
     </div>
-
-    <!-- Publisher Profile Popup -->
-    <div class="disclaimer-overlay" id="disclaimerOverlay">
-        <div class="disclaimer-box">
-            <img class="profile-popup-avatar" id="popupAvatar" src="" alt="" style="display:none;">
-            <div class="profile-popup-avatar profile-popup-avatar-fallback" id="popupAvatarFallback"><i class="bi bi-person-fill"></i></div>
-            <h3 id="popupName">مستخدم</h3>
-            <p class="profile-popup-bio" id="popupBio" style="display:none;"></p>
-            <div class="profile-popup-warning">
-                <i class="bi bi-exclamation-triangle-fill warn-icon-inline"></i>
-                <span>هذا رابط خارجي أضافه المستخدم بنفسه، ولا يتحمل UFOQ أي مسؤولية عن محتواه أو أي أضرار قد تنتج عن زيارته.</span>
-            </div>
-            <div class="disclaimer-actions">
-                <button class="disclaimer-cancel" onclick="closeDisclaimer()">إغلاق</button>
-                <button class="disclaimer-continue" id="popupOpenLinkBtn" onclick="confirmPublisherLink()"><i class="bi bi-box-arrow-up-right"></i> فتح الرابط</button>
-            </div>
-        </div>
+    <div class="search-category-wrap">
+      <button class="search-category-btn" id="searchCatBtn">
+        <span class="cat-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="7" height="7" x="3" y="3" rx="1"></rect>
+            <rect width="7" height="7" x="14" y="3" rx="1"></rect>
+            <rect width="7" height="7" x="14" y="14" rx="1"></rect>
+            <rect width="7" height="7" x="3" y="14" rx="1"></rect>
+          </svg>
+        </span>
+        <span id="searchCatLabel">جميع التصنيفات</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m6 9 6 6 6-6"></path>
+        </svg>
+      </button>
+      <div class="search-category-dropdown" id="searchCatDropdown">
+        <a href="#" class="active" data-cat="all" onclick="selectSearchCategory(event, 'all', 'جميع التصنيفات')">
+          <span class="dot"></span> الكل
+        </a>
+        {% for cat in categories %}
+        <a href="#" data-cat="{{ cat.name }}" onclick="selectSearchCategory(event, '{{ cat.name }}', '{{ cat.display_name }}')">
+          <span class="dot"></span> {{ cat.display_name }}
+        </a>
+        {% endfor %}
+      </div>
     </div>
+  </div>
+</div>
 
-    <!-- Bottom Nav: index (right) -> settings -> about -->
-    <nav class="bottom-nav-bar">
-        <div class="nav-track" id="navTrack">
-            <a href="/" class="nav-circle active" data-page="index"><i class="bi bi-house-door-fill"></i></a>
-            <a href="/settings" class="nav-circle" data-page="settings"><i class="bi bi-person-circle"></i></a>
-            <a href="/about" class="nav-circle" data-page="about"><i class="bi bi-info-circle-fill"></i></a>
-            <div class="nav-indicator" id="navIndicator"></div>
+<!-- ===== Hero ===== -->
+<section class="hero">
+  <h1>مرحباً بك في UFOQ</h1>
+  <p>مكتبة ضخمة من البرومبتات الجاهزة للاستخدام – اختر، انسخ، وابدأ الإبداع فوراً.</p>
+  <div class="count-badge">أكثر من {{ library_items|length }} برومبت</div>
+</section>
+
+<!-- ===== Categories Bar ===== -->
+<div class="categories-bar">
+  <a href="/?cat=all" class="cat-chip {% if not current_cat or current_cat == 'all' %}active{% endif %}">الكل</a>
+  {% for cat in categories %}
+  <a href="/?cat={{ cat.name }}" class="cat-chip {% if current_cat == cat.name %}active{% endif %}">{{ cat.display_name }}</a>
+  {% endfor %}
+</div>
+
+<!-- ===== Masonry Grid ===== -->
+<div class="masonry-grid" id="masonryGrid">
+  {% for item in library_items %}
+  <div class="prompt-card" data-id="{{ item.id }}" data-keywords="{{ item.keywords or '' }}" data-category="{{ item.category }}">
+    <div class="card-image-wrap" onclick="openImageModal('{{ item.id }}', '{{ item.image_url or '' }}', '{{ item.title|replace("'", "\\'") }}', {{ item.copy_count or 0 }}, {{ item.share_count or 0 }})">
+      {% if item.image_url %}
+      <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy">
+      {% else %}
+      <div style="width:100%;height:180px;background:linear-gradient(135deg, var(--soft-lavender), rgba(76,5,133,0.15));display:flex;align-items:center;justify-content:center;opacity:0.4;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
+          <circle cx="9" cy="9" r="2"></circle>
+          <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
+        </svg>
+      </div>
+      {% endif %}
+      <div class="card-overlay">
+        <button class="copy-btn-overlay" onclick="event.stopPropagation(); copyPrompt(this, '{{ item.prompt_text|replace("'", "\\'") }}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+          </svg>
+          نسخ البرومبت
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-cat">{{ item.category }}</div>
+      <div class="card-title">{{ item.title }}</div>
+      <div class="card-footer">
+        <div class="card-author">
+          {% if item.user and (item.user.bio or item.user.profile_link) %}
+          {% if item.user.avatar_url %}<img src="{{ item.user.avatar_url }}" class="author-avatar" alt="{{ item.user.name }}">{% endif %}
+          <span>{{ item.user.name }}</span>
+          {% elif item.publisher_link %}
+          <span>{{ item.publisher }}</span>
+          {% elif item.user or item.publisher %}
+          <span>{{ item.user.name if item.user else item.publisher }}</span>
+          {% endif %}
         </div>
-    </nav>
+        <button class="card-copy-btn" onclick="copyPrompt(this, '{{ item.prompt_text|replace("'", "\\'") }}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+          </svg>
+          نسخ
+        </button>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state" style="column-span: all;">
+    <div class="empty-icon">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" x2="8" y1="13" y2="13"></line>
+        <line x1="16" x2="8" y1="17" y2="17"></line>
+        <line x1="10" x2="8" y1="9" y2="9"></line>
+      </svg>
+    </div>
+    لا توجد برومبتات في المكتبة حالياً
+  </div>
+  {% endfor %}
+</div>
 
-    <script>
-        // ---------- Like system (cookies) ----------
-        function getLikes() {
-            try {
-                const data = document.cookie.split('; ').find(row => row.startsWith('ufoq_likes='));
-                return data ? JSON.parse(decodeURIComponent(data.split('=')[1])) : {};
-            } catch { return {}; }
+<!-- ===== Ad Banner ===== -->
+<div class="ad-banner">
+  إعلان... <a href="https://t.me/OlIiIl7">أعلن لدى UFOQ</a>
+</div>
+
+<!-- ===== Image Modal ===== -->
+<div class="image-modal" id="imageModal">
+  <div class="modal-top-bar">
+    <button class="modal-back-btn" onclick="closeImageModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m15 18-6-6 6-6"></path>
+      </svg>
+      رجوع
+    </button>
+    <span style="color: var(--very-light); font-weight: 600; font-size: 0.9rem;" id="modalTitle"></span>
+    <div style="width: 80px;"></div>
+  </div>
+
+  <div class="modal-image-container">
+    <img id="modalImage" src="" alt="">
+  </div>
+
+  <!-- Thin Horizontal Action Bar -->
+  <div class="modal-action-bar">
+    <div class="modal-action-item" id="modalCopyBtn" onclick="copyFromModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+      </svg>
+      <span>نسخ</span>
+      <span class="action-count" id="modalCopyCount">0</span>
+    </div>
+    <div class="modal-action-separator"></div>
+    <div class="modal-action-item" id="modalLikeBtn" onclick="toggleLike()">
+      <svg id="modalLikeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+      </svg>
+      <span>إعجاب</span>
+    </div>
+    <div class="modal-action-separator"></div>
+    <div class="modal-action-item" onclick="sharePrompt()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="18" cy="5" r="3"></circle>
+        <circle cx="6" cy="12" r="3"></circle>
+        <circle cx="18" cy="19" r="3"></circle>
+        <line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line>
+        <line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line>
+      </svg>
+      <span>مشاركة</span>
+      <span class="action-count" id="modalShareCount">0</span>
+    </div>
+  </div>
+
+  <!-- Similar Prompts -->
+  <div class="modal-similar-section">
+    <div class="modal-similar-title">برومبتات مشابهة</div>
+    <div class="modal-similar-grid" id="similarGrid">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ===== External Link Warning ===== -->
+<div class="external-modal" id="externalModal">
+  <div class="external-modal-box">
+    <h3>⚠️ رابط خارجي</h3>
+    <p>هذا رابط خارجي أضافه المستخدم بنفسه، ولا يتحمل UFOQ أي مسؤولية عن محتواه أو أي أضرار قد تنتج عن زيارته.</p>
+    <div class="ext-btns">
+      <button class="ext-btn secondary" onclick="closeExternalModal()">إغلاق</button>
+      <button class="ext-btn primary" id="extConfirmBtn" onclick="confirmExternalLink()">فتح الرابط</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Toast ===== -->
+<div class="toast" id="toast">تم النسخ!</div>
+
+<!-- ===== Scroll to Top ===== -->
+<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m18 15-6-6-6 6"></path>
+  </svg>
+</button>
+
+<script>
+// ===== State =====
+let searchOpen = false;
+let currentSearchCategory = 'all';
+let currentSearchQuery = '';
+let allPrompts = [];
+let currentModalPrompt = null;
+let externalLinkUrl = '';
+
+// ===== Collect all prompts data =====
+document.addEventListener('DOMContentLoaded', () => {
+  const cards = document.querySelectorAll('.prompt-card');
+  cards.forEach(card => {
+    allPrompts.push({
+      id: card.dataset.id,
+      keywords: (card.dataset.keywords || '').toLowerCase(),
+      category: card.dataset.category,
+      element: card
+    });
+  });
+
+  // Scroll to top button
+  window.addEventListener('scroll', () => {
+    const btn = document.getElementById('scrollTopBtn');
+    if (window.scrollY > 400) btn.classList.add('show');
+    else btn.classList.remove('show');
+  });
+});
+
+// ===== Search Toggle =====
+const searchToggle = document.getElementById('searchToggle');
+const searchPanel = document.getElementById('searchPanel');
+const searchInput = document.getElementById('searchInput');
+const searchBadge = document.getElementById('searchBadge');
+
+searchToggle.addEventListener('click', () => {
+  searchOpen = !searchOpen;
+  searchToggle.classList.toggle('active', searchOpen);
+  searchPanel.classList.toggle('open', searchOpen);
+  if (searchOpen) {
+    setTimeout(() => searchInput.focus(), 300);
+  } else {
+    searchInput.value = '';
+    currentSearchQuery = '';
+    filterPrompts();
+    searchBadge.classList.remove('show');
+  }
+});
+
+// ===== Search Category Dropdown =====
+const searchCatBtn = document.getElementById('searchCatBtn');
+const searchCatDropdown = document.getElementById('searchCatDropdown');
+
+searchCatBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  searchCatDropdown.classList.toggle('open');
+});
+
+document.addEventListener('click', () => {
+  searchCatDropdown.classList.remove('open');
+});
+
+function selectSearchCategory(e, cat, label) {
+  e.preventDefault();
+  currentSearchCategory = cat;
+  document.getElementById('searchCatLabel').textContent = label;
+  searchCatBtn.querySelector('.cat-circle').innerHTML = cat === 'all' ? 
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg>' : 
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+
+  // Update active state
+  searchCatDropdown.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+  e.currentTarget.classList.add('active');
+
+  searchCatDropdown.classList.remove('open');
+  filterPrompts();
+}
+
+// ===== Search Input =====
+let searchTimeout;
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    currentSearchQuery = searchInput.value.trim().toLowerCase();
+    filterPrompts();
+  }, 200);
+});
+
+// ===== Filter Prompts =====
+function filterPrompts() {
+  const cards = document.querySelectorAll('.prompt-card');
+  let count = 0;
+
+  cards.forEach(card => {
+    const keywords = (card.dataset.keywords || '').toLowerCase();
+    const category = card.dataset.category;
+    const title = card.querySelector('.card-title').textContent.toLowerCase();
+
+    const matchQuery = !currentSearchQuery ||
+      keywords.includes(currentSearchQuery) ||
+      title.includes(currentSearchQuery);
+
+    const matchCat = currentSearchCategory === 'all' || category === currentSearchCategory;
+
+    if (matchQuery && matchCat) {
+      card.style.display = '';
+      count++;
+    } else {
+      card.style.display = 'none';
+    }
+  });
+
+  // Update badge
+  if (currentSearchQuery || currentSearchCategory !== 'all') {
+    searchBadge.textContent = count;
+    searchBadge.classList.add('show');
+  } else {
+    searchBadge.classList.remove('show');
+  }
+}
+
+// ===== Copy Prompt =====
+function copyPrompt(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><polyline points="20 6 9 17 4 12"></polyline></svg> تم النسخ!';
+    showToast('تم النسخ!');
+
+    // Increment copy count via API
+    const card = btn.closest('.prompt-card');
+    if (card) {
+      fetch('/api/copy/' + card.dataset.id, { method: 'POST' }).catch(() => {});
+    }
+
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = originalHTML;
+    }, 2000);
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('تم النسخ!');
+  });
+}
+
+// ===== Toast =====
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ===== Image Modal =====
+function openImageModal(id, imageUrl, title, copyCount, shareCount) {
+  if (!imageUrl) return;
+
+  const modal = document.getElementById('imageModal');
+  document.getElementById('modalImage').src = imageUrl;
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalCopyCount').textContent = copyCount;
+  document.getElementById('modalShareCount').textContent = shareCount;
+
+  // Find prompt data
+  currentModalPrompt = allPrompts.find(p => p.id === id);
+
+  // Load similar prompts
+  loadSimilarPrompts(currentModalPrompt);
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeImageModal() {
+  document.getElementById('imageModal').classList.remove('open');
+  document.body.style.overflow = '';
+  currentModalPrompt = null;
+}
+
+// Close modal on Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeImageModal();
+    closeExternalModal();
+  }
+});
+
+// ===== Similar Prompts =====
+function loadSimilarPrompts(prompt) {
+  const grid = document.getElementById('similarGrid');
+  grid.innerHTML = '';
+
+  if (!prompt) return;
+
+  const promptKeywords = prompt.keywords.split(',').map(k => k.trim().toLowerCase()).filter(k => k);
+
+  const similar = allPrompts.filter(p => {
+    if (p.id === prompt.id) return false;
+    const pKeywords = p.keywords.split(',').map(k => k.trim().toLowerCase()).filter(k => k);
+    return pKeywords.some(k => promptKeywords.includes(k)) || p.category === prompt.category;
+  }).slice(0, 8);
+
+  if (similar.length === 0) {
+    grid.innerHTML = '<p style="color:rgba(255,253,254,0.4);grid-column:1/-1;text-align:center;font-size:0.9rem;">لا توجد برومبتات مشابهة</p>';
+    return;
+  }
+
+  similar.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'similar-card';
+    card.onclick = () => {
+      const img = p.element.querySelector('.card-image-wrap img');
+      if (img) {
+        const title = p.element.querySelector('.card-title').textContent;
+        openImageModal(p.id, img.src, title, 0, 0);
+      }
+    };
+
+    const img = p.element.querySelector('.card-image-wrap img');
+    const title = p.element.querySelector('.card-title').textContent;
+
+    card.innerHTML = `
+      ${img ? `<img src="${img.src}" alt="${title}" loading="lazy">` : '<div style="width:100%;height:130px;background:linear-gradient(135deg,rgba(219,181,238,0.3),rgba(76,5,133,0.1));display:flex;align-items:center;justify-content:center;opacity:0.4;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg></div>'}
+      <div class="similar-info">
+        <h4>${title}</h4>
+        <span>${p.category}</span>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ===== Modal Actions =====
+function copyFromModal() {
+  if (!currentModalPrompt) return;
+  const card = currentModalPrompt.element;
+  const copyBtn = card.querySelector('.card-copy-btn');
+  if (copyBtn) {
+    const text = copyBtn.getAttribute('onclick').match(/'([^']+)'/);
+    if (text) copyPrompt(copyBtn, text[1]);
+  }
+}
+
+function toggleLike() {
+  const btn = document.getElementById('modalLikeBtn');
+  const icon = document.getElementById('modalLikeIcon');
+  btn.classList.toggle('liked');
+  if (btn.classList.contains('liked')) {
+    icon.innerHTML = '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" fill="currentColor"></path>';
+    showToast('تم الإعجاب!');
+  } else {
+    icon.innerHTML = '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>';
+  }
+}
+
+function sharePrompt() {
+  if (navigator.share) {
+    navigator.share({
+      title: currentModalPrompt ? currentModalPrompt.element.querySelector('.card-title').textContent : 'UFOQ',
+      url: window.location.href
+    }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(window.location.href);
+    showToast('تم نسخ الرابط!');
+  }
+}
+
+// ===== External Link Modal =====
+function openExternalModal(url) {
+  externalLinkUrl = url;
+  document.getElementById('externalModal').classList.add('open');
+}
+
+function closeExternalModal() {
+  document.getElementById('externalModal').classList.remove('open');
+  externalLinkUrl = '';
+}
+
+function confirmExternalLink() {
+  if (externalLinkUrl) {
+    window.open(externalLinkUrl, '_blank', 'noopener,noreferrer');
+  }
+  closeExternalModal();
+}
+
+// ===== Lazy Loading Enhancement =====
+if ('IntersectionObserver' in window) {
+  const imgObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        if (img.dataset.src) {
+          img.src = img.dataset.src;
+          img.removeAttribute('data-src');
         }
-        function setLikes(likes) {
-            document.cookie = `ufoq_likes=${encodeURIComponent(JSON.stringify(likes))}; path=/; max-age=31536000`;
-        }
+        imgObserver.unobserve(img);
+      }
+    });
+  }, { rootMargin: '200px' });
 
-        function toggleLike(e) {
-            e.stopPropagation();
-            const btn = e.currentTarget;
-            const id = btn.dataset.id;
-            const span = btn.querySelector('.like-count');
-            const icon = btn.querySelector('i');
-            let likes = getLikes();
-            const count = parseInt(span.textContent) || 0;
-            if (likes[id]) {
-                delete likes[id];
-                span.textContent = Math.max(0, count - 1);
-                btn.classList.remove('liked');
-                icon.className = 'bi bi-heart';
-            } else {
-                likes[id] = true;
-                span.textContent = count + 1;
-                btn.classList.add('liked');
-                icon.className = 'bi bi-heart-fill';
-            }
-            setLikes(likes);
-        }
+  document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+    imgObserver.observe(img);
+  });
+}
+</script>
 
-        // ---------- Publisher profile popup ----------
-        let pendingPublisherLink = null;
-        function openProfilePopup({ name, avatar, bio, link }) {
-            document.getElementById('popupName').textContent = name || 'مستخدم';
-
-            const avatarImg = document.getElementById('popupAvatar');
-            const avatarFallback = document.getElementById('popupAvatarFallback');
-            if (avatar) {
-                avatarImg.src = avatar; avatarImg.style.display = 'block';
-                avatarFallback.style.display = 'none';
-            } else {
-                avatarImg.style.display = 'none';
-                avatarFallback.style.display = 'flex';
-            }
-
-            const bioEl = document.getElementById('popupBio');
-            if (bio) { bioEl.textContent = bio; bioEl.style.display = 'block'; }
-            else { bioEl.style.display = 'none'; }
-
-            pendingPublisherLink = link || null;
-            const linkBtn = document.getElementById('popupOpenLinkBtn');
-            linkBtn.style.display = pendingPublisherLink ? 'flex' : 'none';
-
-            document.getElementById('disclaimerOverlay').classList.add('show');
-        }
-        function openProfilePopupFromEl(el) {
-            openProfilePopup({
-                name: el.dataset.name,
-                avatar: el.dataset.avatar,
-                bio: el.dataset.bio,
-                link: el.dataset.link
-            });
-        }
-        function closeDisclaimer() {
-            pendingPublisherLink = null;
-            document.getElementById('disclaimerOverlay').classList.remove('show');
-        }
-        function confirmPublisherLink() {
-            if (pendingPublisherLink) {
-                window.open(pendingPublisherLink, '_blank', 'noopener,noreferrer');
-            }
-            closeDisclaimer();
-        }
-
-        // ---------- Share ----------
-        function shareCard(e) {
-            e.stopPropagation();
-            const btn = e.currentTarget;
-            const id = btn.dataset.id;
-            const card = document.getElementById(`prompt-${id}`);
-            const title = card ? (card.querySelector('.image-title')?.textContent || 'برومبت') : 'برومبت';
-            const url = `${location.origin}${location.pathname}?prompt=${id}`;
-
-            if (navigator.share) {
-                navigator.share({ title: title, text: 'شاهد هذا البرومبت على UFOQ', url: url }).catch(() => {});
-            } else {
-                copyShareLink(url);
-            }
-            markShared(btn);
-            trackShare(id);
-        }
-
-        function trackShare(id) {
-            if (!id) return;
-            fetch(`/api/prompt/${id}/share`, { method: 'POST' })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        const card = document.getElementById(`prompt-${id}`);
-                        const display = card?.querySelector('.share-count-display');
-                        if (display) display.textContent = data.share_count;
-                    }
-                })
-                .catch(() => {});
-        }
-
-        function copyShareLink(url) {
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(url).then(() => showToast('تم نسخ رابط المشاركة!')).catch(() => legacyCopyLink(url));
-            } else {
-                legacyCopyLink(url);
-            }
-        }
-
-        function legacyCopyLink(url) {
-            const ta = document.createElement('textarea');
-            ta.value = url;
-            ta.style.position = 'fixed'; ta.style.opacity = '0';
-            document.body.appendChild(ta); ta.select();
-            document.execCommand('copy'); document.body.removeChild(ta);
-            showToast('تم نسخ رابط المشاركة!');
-        }
-
-        function markShared(btn) {
-            btn.classList.add('shared');
-            setTimeout(() => btn.classList.remove('shared'), 1500);
-        }
-
-        // Bring a shared prompt to the front of the gallery and highlight it
-        function focusSharedPrompt() {
-            const params = new URLSearchParams(location.search);
-            const id = params.get('prompt');
-            if (!id) return;
-            const card = document.getElementById(`prompt-${id}`);
-            const grid = document.getElementById('galleryGrid');
-            if (!card || !grid) return;
-
-            grid.insertBefore(card, grid.firstChild);
-            card.classList.add('highlighted');
-            setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
-            setTimeout(() => card.classList.remove('highlighted'), 2200);
-        }
-
-        function initLikes() {
-            const likes = getLikes();
-            document.querySelectorAll('.like-btn').forEach(btn => {
-                const id = btn.dataset.id;
-                const span = btn.querySelector('.like-count');
-                if (likes[id]) {
-                    btn.classList.add('liked');
-                    btn.querySelector('i').className = 'bi bi-heart-fill';
-                    span.textContent = (parseInt(span.textContent) || 0) + 1;
-                }
-            });
-        }
-
-        // ---------- Copy with ad ----------
-        let pendingCopyText = null;
-        let adTimerInterval = null;
-
-        function handleCopy(e) {
-            const btn = e.currentTarget;
-            const text = btn.dataset.prompt;
-            if (!text) return;
-
-            const activeAd = {{ active_ad|tojson|default('null') }};
-            if (activeAd && activeAd.id) {
-                pendingCopyText = text;
-                showAdPopup(activeAd);
-            } else {
-                doCopy(text, btn);
-            }
-        }
-
-        function showAdPopup(ad) {
-            const overlay = document.getElementById('adOverlay');
-            const timerEl = document.getElementById('adTimer');
-            const btnText = document.getElementById('adBtnText');
-            const titleEl = document.getElementById('adTitle');
-            const textEl = document.getElementById('adText');
-            const btnLink = document.getElementById('adBtn');
-            const imgContainer = document.getElementById('adImageContainer');
-
-            titleEl.textContent = ad.title || 'إعلان';
-            textEl.textContent = ad.text || '';
-            btnLink.href = ad.button_link || '#';
-            btnText.textContent = ad.button_text || 'زيارة';
-
-            if (ad.image_url) {
-                imgContainer.innerHTML = `<img src="${ad.image_url}" alt="Ad" class="ad-image">`;
-            } else {
-                imgContainer.innerHTML = `<div class="ad-no-image"><i class="bi bi-megaphone-fill"></i></div>`;
-            }
-
-            let seconds = ad.duration_seconds || 5;
-            timerEl.textContent = seconds;
-            btnText.textContent = `${ad.button_text || 'زيارة'} (${seconds})`;
-            overlay.classList.add('show');
-
-            adTimerInterval = setInterval(() => {
-                seconds--;
-                timerEl.textContent = seconds;
-                btnText.textContent = `${ad.button_text || 'زيارة'} (${seconds})`;
-                if (seconds <= 0) {
-                    clearInterval(adTimerInterval);
-                    timerEl.style.display = 'none';
-                    btnText.textContent = ad.button_text || 'زيارة';
-                    closeAdPopup();
-                    if (pendingCopyText) {
-                        const btn = document.querySelector(`[data-prompt="${pendingCopyText.replace(/"/g, '\\"')}"]`);
-                        doCopy(pendingCopyText, btn);
-                        pendingCopyText = null;
-                    }
-                }
-            }, 1000);
-        }
-
-        function closeAdPopup() {
-            document.getElementById('adOverlay').classList.remove('show');
-            if (adTimerInterval) clearInterval(adTimerInterval);
-        }
-
-        function doCopy(text, btn) {
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(text).then(() => {
-                    showToast('تم نسخ البرومبت!');
-                    if (btn) { markCopied(btn); trackCopy(btn); }
-                }).catch(() => fallbackCopy(text, btn));
-            } else {
-                fallbackCopy(text, btn);
-            }
-        }
-
-        function fallbackCopy(text, btn) {
-            const ta = document.createElement('textarea');
-            ta.value = text;
-            ta.style.position = 'fixed'; ta.style.opacity = '0';
-            document.body.appendChild(ta); ta.select();
-            document.execCommand('copy'); document.body.removeChild(ta);
-            showToast('تم نسخ البرومبت!');
-            if (btn) { markCopied(btn); trackCopy(btn); }
-        }
-
-        function trackCopy(btn) {
-            const id = btn.dataset.id;
-            if (!id) return;
-            fetch(`/api/prompt/${id}/copy`, { method: 'POST' })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        const card = document.getElementById(`prompt-${id}`);
-                        const display = card?.querySelector('.copy-count-display');
-                        if (display) display.textContent = data.copy_count;
-                    }
-                })
-                .catch(() => {});
-        }
-
-        function markCopied(btn) {
-            const orig = btn.innerHTML;
-            btn.classList.add('copied');
-            btn.innerHTML = '<i class="bi bi-check-lg"></i> تم النسخ!';
-            setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = orig; }, 2000);
-        }
-
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerHTML = `<i class="bi bi-check-lg"></i> ${msg}`;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 2500);
-        }
-
-        // ---------- Filtering & Search ----------
-        function filterPrompts() {
-            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
-            const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || 'all';
-            const cards = document.querySelectorAll('.prompt-card');
-            let visible = 0;
-            cards.forEach(card => {
-                const cat = card.dataset.category;
-                const title = card.dataset.title || '';
-                const keywords = card.dataset.keywords || '';
-                const matchCategory = (activeCategory === 'all' || cat === activeCategory);
-                const matchSearch = title.includes(searchVal) || keywords.includes(searchVal);
-                if (matchCategory && matchSearch) {
-                    card.style.display = 'flex';
-                    visible++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-            const empty = document.querySelector('.empty-state');
-            if (empty) {
-                if (visible === 0 && cards.length > 0) {
-                    empty.style.display = 'block';
-                    empty.querySelector('p').textContent = 'لا توجد برومبتات تطابق بحثك';
-                } else {
-                    empty.style.display = 'none';
-                }
-            }
-        }
-
-        document.querySelectorAll('.category-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                filterPrompts();
-            });
-        });
-
-        // ---------- Bottom nav glass indicator ----------
-        function initNavIndicator() {
-            const track = document.getElementById('navTrack');
-            const indicator = document.getElementById('navIndicator');
-            if (!track || !indicator) return;
-            const circles = track.querySelectorAll('.nav-circle');
-
-            function moveIndicatorTo(circle, animate) {
-                const trackRect = track.getBoundingClientRect();
-                const circleRect = circle.getBoundingClientRect();
-                const offset = circleRect.left - trackRect.left;
-                if (!animate) indicator.style.transition = 'none';
-                indicator.style.transform = `translateX(${offset}px)`;
-                if (!animate) {
-                    void indicator.offsetWidth;
-                    indicator.style.transition = '';
-                }
-            }
-
-            const activeCircle = track.querySelector('.nav-circle.active') || circles[0];
-            moveIndicatorTo(activeCircle, false);
-
-            circles.forEach(circle => {
-                circle.addEventListener('click', function (e) {
-                    if (this.classList.contains('active')) return;
-                    e.preventDefault();
-                    const href = this.getAttribute('href');
-                    moveIndicatorTo(this, true);
-                    setTimeout(() => { window.location.href = href; }, 480);
-                });
-            });
-
-            window.addEventListener('resize', () => {
-                const current = track.querySelector('.nav-circle.active') || circles[0];
-                moveIndicatorTo(current, false);
-            });
-        }
-
-        function initScrollReveal() {
-            const cards = document.querySelectorAll('.prompt-card');
-            if (!cards.length) return;
-            if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                cards.forEach(c => c.classList.add('reveal-in'));
-                return;
-            }
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('reveal-in');
-                        entry.target.classList.remove('reveal-init');
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-            cards.forEach(card => {
-                card.classList.add('reveal-init');
-                observer.observe(card);
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            initLikes();
-            focusSharedPrompt();
-            initNavIndicator();
-            initScrollReveal();
-        });
-    </script>
 </body>
 </html>
