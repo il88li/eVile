@@ -6,7 +6,7 @@ import traceback
 from datetime import datetime, timedelta
 from functools import wraps
 from urllib.parse import urlparse
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, make_response
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_caching import Cache
@@ -27,7 +27,10 @@ load_dotenv()
 logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] %(levelname)s in %(module)s [%(pathname)s:%(lineno)d]: %(message)s',
-    handlers=[logging.StreamHandler()]
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('app.log', encoding='utf-8') if not os.getenv('RENDER') else logging.StreamHandler()
+    ]
 )
 logger = logging.getLogger(__name__)
 
@@ -62,6 +65,11 @@ class Config:
     SESSION_USE_SIGNER = True
     SESSION_KEY_PREFIX = 'ufoq_session:'
     PERMANENT_SESSION_LIFETIME = 2592000
+    SESSION_COOKIE_NAME = 'ufoq_session'
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SECURE = os.getenv('RENDER') is not None or os.getenv('FORCE_HTTPS') == '1'
+    SESSION_REFRESH_EACH_REQUEST = True
 
     CACHE_TYPE = 'SimpleCache'
     CACHE_DEFAULT_TIMEOUT = 300
@@ -106,7 +114,7 @@ class PromptLibrary(db.Model):
     copy_count = db.Column(db.Integer, default=0, nullable=False)
     share_count = db.Column(db.Integer, default=0, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('app_user.id'), nullable=True)
-    user = db.relationship('User', backref='prompts', lazy='joined')
+    user = db.relationship('User', backref='prompts')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class LibraryAd(db.Model):
@@ -168,6 +176,8 @@ app.config.from_object(Config)
 
 db.init_app(app)
 migrate = Migrate(app, db)
+app.config['SESSION_SQLALCHEMY'] = db
+Session(app)  # was imported but never initialized -> sessions were never actually persisted server-side
 cache = Cache(app)
 limiter = Limiter(
     get_remote_address,
@@ -189,27 +199,6 @@ csp = {
     'frame-ancestors': ["'none'"],
 }
 Talisman(app, force_https=False, content_security_policy=csp)
-
-# ═══════════════════════════════════════════
-# PERFORMANCE: Response optimization headers
-# ═══════════════════════════════════════════
-@app.after_request
-def add_performance_headers(response):
-    # Enable browser caching for static assets
-    if request.endpoint and 'static' in request.endpoint:
-        response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
-    else:
-        response.headers['Cache-Control'] = 'public, max-age=0, must-revalidate'
-
-    # Performance hints
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    response.headers['Permissions-Policy'] = 'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()'
-
-    # Compression hint
-    response.headers['Vary'] = 'Accept-Encoding'
-
-    return response
 
 # ==================== Error Handlers ====================
 @app.errorhandler(404)
@@ -349,18 +338,29 @@ def ensure_db_initialized():
             logger.error(f"DB init error: {e}")
             db.session.rollback()
 
+# ---------- Cached read helpers (avoid re-querying the full table on every hit) ----------
+@cache.memoize(timeout=60)
+def get_categories_cached():
+    return Category.query.order_by(Category.sort_order).all()
+
+@cache.memoize(timeout=30)
+def get_library_items_cached():
+    return PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
+
+def invalidate_library_cache():
+    cache.delete_memoized(get_categories_cached)
+    cache.delete_memoized(get_library_items_cached)
+
 # ==================== Public Routes ====================
 @app.route('/')
-@cache.cached(timeout=60, query_string=True)
 def index():
     try:
         site = SiteSetting.query.first()
         if site and site.status == 'off':
             return render_template('index.html', site_status='off', offline_message=site.offline_message)
 
-        # Use joinedload to reduce N+1 queries
-        categories = Category.query.order_by(Category.sort_order).all()
-        library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
+        categories = get_categories_cached()
+        library_items = get_library_items_cached()
         active_ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
 
         ad_dict = None
@@ -375,18 +375,16 @@ def index():
                 'duration_seconds': active_ad.duration_seconds
             }
 
-        response = make_response(render_template('index.html',
+        return render_template('index.html',
                                categories=categories,
                                library_items=library_items,
                                active_ad=ad_dict,
-                               site_status='on'))
-        return response
+                               site_status='on')
     except Exception as e:
         logger.error(f"Index error: {e}\n{traceback.format_exc()}")
         return render_template('index.html', site_status='on', categories=[], library_items=[], active_ad=None)
 
 @app.route('/about')
-@cache.cached(timeout=120)
 def about_page():
     try:
         prompt_count = PromptLibrary.query.count()
@@ -404,7 +402,7 @@ def about_page():
 
 # ==================== Auth ====================
 @app.route('/signup')
-@app.route('/sign')
+@app.route('/sign')  # Alias for backward compatibility
 def sign_page():
     if session.get('user_id'):
         return redirect(url_for('settings_page'))
@@ -435,6 +433,7 @@ def auth_signup():
         user = User(name=name, email=email, password_hash=generate_password_hash(password))
         db.session.add(user)
         db.session.commit()
+        session.permanent = True
         session['user_id'] = user.id
         return jsonify({'success': True, 'message': 'تم إنشاء الحساب بنجاح', 'redirect': url_for('settings_page')})
     except Exception as e:
@@ -457,6 +456,7 @@ def auth_login():
         if not user or not user.password_hash or not check_password_hash(user.password_hash, password):
             return jsonify({'success': False, 'message': 'البريد الإلكتروني أو كلمة المرور غير صحيحة'}), 401
 
+        session.permanent = True
         session['user_id'] = user.id
         user.last_active = datetime.utcnow()
         db.session.commit()
@@ -495,6 +495,7 @@ def auth_google():
             user.google_id = user.google_id or google_id
             user.avatar_url = user.avatar_url or avatar
         db.session.commit()
+        session.permanent = True
         session['user_id'] = user.id
         user.last_active = datetime.utcnow()
         db.session.commit()
@@ -536,6 +537,7 @@ def settings_page():
     except Exception as e:
         logger.error(f"Settings page error: {e}\n{traceback.format_exc()}")
         db.session.rollback()
+        # Graceful fallback
         try:
             user = current_user()
             return render_template('settings.html',
@@ -717,6 +719,7 @@ def prompt_delete_request():
 def admin_panel():
     try:
         if request.method == 'POST' and request.form.get('password') == Config.ADMIN_PASSWORD:
+            session.permanent = True
             session['logged_in'] = True
             return redirect(url_for('admin_panel'))
 
@@ -783,6 +786,7 @@ def approve_edit_request(req_id):
         prompt.keywords = req.new_keywords
         req.status = 'approved'
         db.session.commit()
+        invalidate_library_cache()
         flash('تمت الموافقة على طلب التعديل', 'success')
     except Exception as e:
         db.session.rollback()
@@ -817,6 +821,7 @@ def approve_delete_request(req_id):
         db.session.delete(prompt)
         req.status = 'approved'
         db.session.commit()
+        invalidate_library_cache()
         flash('تم الحذف بنجاح', 'success')
     except Exception as e:
         db.session.rollback()
@@ -854,6 +859,7 @@ def delete_user(user_id):
         PromptDeleteRequest.query.filter_by(user_id=user.id).delete()
         db.session.delete(user)
         db.session.commit()
+        invalidate_library_cache()
         flash('تم حذف الحساب بنجاح', 'success')
     except Exception as e:
         db.session.rollback()
@@ -881,6 +887,7 @@ def add_category():
         cat = Category(name=name, display_name=display_name, icon=icon, sort_order=sort_order)
         db.session.add(cat)
         db.session.commit()
+        invalidate_library_cache()
         flash('تمت إضافة التصنيف', 'success')
     except Exception as e:
         db.session.rollback()
@@ -898,6 +905,7 @@ def delete_category(category_id):
         PromptLibrary.query.filter_by(category=cat.name).update({'category': 'general'})
         db.session.delete(cat)
         db.session.commit()
+        invalidate_library_cache()
         flash('تم حذف التصنيف', 'success')
     except Exception as e:
         db.session.rollback()
@@ -927,6 +935,7 @@ def add_library_item():
         )
         db.session.add(item)
         db.session.commit()
+        invalidate_library_cache()
         flash('تمت إضافة البرومبت', 'success')
     except Exception as e:
         db.session.rollback()
@@ -943,6 +952,7 @@ def delete_library_item(item_id):
         item = PromptLibrary.query.get_or_404(item_id)
         db.session.delete(item)
         db.session.commit()
+        invalidate_library_cache()
         flash('تم حذف البرومبت', 'success')
     except Exception as e:
         db.session.rollback()
@@ -971,6 +981,7 @@ def update_library_item(item_id):
         item.publisher = request.form.get('publisher', item.publisher) or None
         item.keywords = request.form.get('keywords', item.keywords)
         db.session.commit()
+        invalidate_library_cache()
         flash('تم تحديث البرومبت', 'success')
     except Exception as e:
         db.session.rollback()
@@ -999,6 +1010,7 @@ def approve_contribution(contrib_id):
         db.session.add(item)
         contrib.status = 'approved'
         db.session.commit()
+        invalidate_library_cache()
         flash('تمت الموافقة على المساهمة', 'success')
     except Exception as e:
         db.session.rollback()
