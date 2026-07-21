@@ -16,6 +16,7 @@ from flask_talisman import Talisman
 from flask_session import Session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import inspect, text, func
+from sqlalchemy.orm import joinedload
 from werkzeug.security import generate_password_hash, check_password_hash
 from google.oauth2 import id_token as google_id_token
 from google.auth.transport import requests as google_requests
@@ -349,7 +350,10 @@ def get_categories_cached():
 
 @cache.memoize(timeout=30)
 def get_library_items_cached():
-    return PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
+    return (PromptLibrary.query
+            .options(joinedload(PromptLibrary.user))
+            .order_by(PromptLibrary.created_at.desc())
+            .all())
 
 def invalidate_library_cache():
     cache.delete_memoized(get_categories_cached)
