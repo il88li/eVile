@@ -138,6 +138,7 @@
             border: 1px solid var(--border-strong);
         }
         .btn-outline:hover { background: var(--primary-dim); }
+        .btn-sm { padding: 4px 10px; font-size: 0.7rem; }
         .btn:hover { transform: translateY(-1px); }
 
         .item-card {
@@ -162,6 +163,17 @@
         .status-pending { background: var(--warning-bg); color: var(--warning); }
         .status-approved { background: var(--success-bg); color: var(--success); }
         .status-rejected { background: var(--danger-bg); color: var(--danger); }
+        .status-ignored { background: rgba(100,100,100,0.2); color: #aaa; }
+
+        /* Error table */
+        .error-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+        .error-table th { text-align: right; padding: 8px 6px; border-bottom: 1px solid var(--border); color: var(--text-dim); font-weight: 700; }
+        .error-table td { padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+        .error-table .url-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .error-table .details-cell { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .error-table .count-badge { background: var(--primary-dim); color: var(--primary-light); padding: 2px 8px; border-radius: 12px; font-weight: 700; }
+        .error-table .ignored-row { opacity: 0.4; }
+        .error-table .ignored-row td { text-decoration: line-through; }
 
         /* Inactive user card */
         .inactive-user-card {
@@ -293,10 +305,16 @@
             border-color: var(--primary-light); box-shadow: 0 0 0 3px var(--primary-dim);
         }
 
+        .errors-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .errors-header .filter-group { display: flex; gap: 8px; align-items: center; }
+
         @media (max-width: 600px) {
             .admin-bottom-nav { padding: 8px 10px; gap: 6px; }
             .admin-nav-btn { width: 40px; height: 40px; font-size: 1rem; }
             .form-grid { grid-template-columns: 1fr; }
+            .error-table { font-size: 0.65rem; }
+            .error-table .url-cell, .error-table .details-cell { max-width: 80px; }
+            .errors-header { flex-direction: column; align-items: stretch; }
         }
     </style>
 </head>
@@ -315,7 +333,7 @@
             </div>
 
             <!-- Categories -->
-            <div id="tab-categories" class="tab-content active card">
+            <div id="tab-categories" class="tab-content card">
                 <div class="section-title"><i class="bi bi-tags"></i> إدارة التصنيفات</div>
                 <form method="POST" action="/admin/category/add" style="margin-bottom:20px;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -565,6 +583,41 @@
                 </div>
             </div>
 
+            <!-- ===== NEW: Errors Tab ===== -->
+            <div id="tab-errors" class="tab-content card">
+                <div class="section-title"><i class="bi bi-exclamation-triangle"></i> الأخطاء (404 & الصور المفقودة)</div>
+                
+                <div class="errors-header">
+                    <div class="filter-group">
+                        <button class="btn btn-outline btn-sm" id="toggleIgnoredBtn" onclick="toggleIgnoredErrors()">
+                            <i class="bi bi-eye"></i> إظهار المتجاهل
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="clearAllErrors()">
+                            <i class="bi bi-trash3"></i> حذف الكل
+                        </button>
+                    </div>
+                    <span style="font-size:0.75rem; color:var(--text-faint);" id="errorCount">0 خطأ</span>
+                </div>
+                
+                <div style="overflow-x:auto; margin-top:12px;">
+                    <table class="error-table" id="errorTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>المسار</th>
+                                <th>التفاصيل</th>
+                                <th>المرات</th>
+                                <th>آخر ظهور</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="errorTableBody">
+                            <tr><td colspan="6" style="text-align:center; color:var(--text-faint); padding:20px;">جاري التحميل...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- Site Settings -->
             <div id="tab-settings" class="tab-content card">
                 <div class="section-title"><i class="bi bi-power"></i> إعدادات الموقع</div>
@@ -645,17 +698,22 @@
         <button class="admin-nav-btn" onclick="showTab('requests')" data-tab="requests" title="الطلبات"><i class="bi bi-git"></i></button>
         <button class="admin-nav-btn" onclick="showTab('ads')" data-tab="ads" title="الإعلانات"><i class="bi bi-badge-ad-fill"></i></button>
         <button class="admin-nav-btn" onclick="showTab('inactive')" data-tab="inactive" title="غير نشط"><i class="bi bi-person-x-fill"></i></button>
+        <button class="admin-nav-btn" onclick="showTab('errors')" data-tab="errors" title="الأخطاء"><i class="bi bi-exclamation-triangle-fill"></i></button>
         <button class="admin-nav-btn" onclick="showTab('settings')" data-tab="settings" title="الإعدادات"><i class="bi bi-power"></i></button>
     </nav>
     {% endif %}
 
     <script>
+        let showIgnored = false;
+        let currentErrors = [];
+
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-'+id).classList.add('active');
             document.querySelectorAll('.admin-nav-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelector('.admin-nav-btn[data-tab="'+id+'"]').classList.add('active');
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (id === 'errors') loadErrors();
         }
 
         async function saveSiteSettings() {
@@ -698,7 +756,122 @@
             if (e.target === this) closeEditCategoryModal();
         });
 
+        // ====== ERROR MANAGEMENT ======
+        async function loadErrors() {
+            try {
+                const url = `/admin/errors?show_ignored=${showIgnored}`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Failed to fetch');
+                const data = await res.json();
+                currentErrors = data;
+                renderErrors(data);
+                document.getElementById('errorCount').textContent = data.length + ' خطأ';
+            } catch(e) {
+                document.getElementById('errorTableBody').innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--danger); padding:20px;">فشل تحميل الأخطاء</td></tr>';
+            }
+        }
 
+        function renderErrors(errors) {
+            const tbody = document.getElementById('errorTableBody');
+            if (!errors || errors.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-faint); padding:20px;">لا توجد أخطاء مسجلة</td></tr>';
+                return;
+            }
+            tbody.innerHTML = errors.map(e => {
+                const isIgnored = e.ignored;
+                const rowClass = isIgnored ? 'ignored-row' : '';
+                const lastSeen = e.last_seen ? new Date(e.last_seen).toLocaleDateString('ar') : '—';
+                return `
+                    <tr class="${rowClass}">
+                        <td>${e.id}</td>
+                        <td class="url-cell" title="${e.url}">${e.url}</td>
+                        <td class="details-cell" title="${e.details || ''}">${e.details || '—'}</td>
+                        <td><span class="count-badge">${e.count}</span></td>
+                        <td>${lastSeen}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="toggleIgnoreError(${e.id}, ${!isIgnored})">
+                                <i class="bi ${isIgnored ? 'bi-eye' : 'bi-eye-slash'}"></i>
+                                ${isIgnored ? 'إلغاء التجاهل' : 'تجاهل'}
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteError(${e.id})">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function toggleIgnoredErrors() {
+            showIgnored = !showIgnored;
+            document.getElementById('toggleIgnoredBtn').innerHTML = showIgnored ? 
+                '<i class="bi bi-eye-slash"></i> إخفاء المتجاهل' : 
+                '<i class="bi bi-eye"></i> إظهار المتجاهل';
+            loadErrors();
+        }
+
+        async function toggleIgnoreError(id, ignore) {
+            try {
+                const url = ignore ? `/admin/error/${id}/ignore` : `/admin/error/${id}/unignore`;
+                const formData = new FormData();
+                formData.append('csrf_token', '{{ csrf_token }}');
+                const res = await fetch(url, { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message);
+                    loadErrors();
+                } else {
+                    showToast(data.message || 'خطأ', true);
+                }
+            } catch(e) {
+                showToast('خطأ في الاتصال', true);
+            }
+        }
+
+        async function deleteError(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا الخطأ؟')) return;
+            try {
+                const formData = new FormData();
+                formData.append('csrf_token', '{{ csrf_token }}');
+                const res = await fetch(`/admin/error/${id}/delete`, { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message);
+                    loadErrors();
+                } else {
+                    showToast(data.message || 'خطأ', true);
+                }
+            } catch(e) {
+                showToast('خطأ في الاتصال', true);
+            }
+        }
+
+        async function clearAllErrors() {
+            if (!confirm('هل أنت متأكد من حذف جميع الأخطاء (غير المتجاهلة)؟')) return;
+            try {
+                const formData = new FormData();
+                formData.append('csrf_token', '{{ csrf_token }}');
+                const res = await fetch(`/admin/errors/clear-all`, { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message);
+                    loadErrors();
+                } else {
+                    showToast(data.message || 'خطأ', true);
+                }
+            } catch(e) {
+                showToast('خطأ في الاتصال', true);
+            }
+        }
+
+        // Load errors when tab is shown (auto-load on first visit)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if errors tab is active initially
+            const errorsTab = document.getElementById('tab-errors');
+            if (errorsTab && errorsTab.classList.contains('active')) {
+                loadErrors();
+            }
+        });
     </script>
 </body>
 </html>
