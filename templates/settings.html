@@ -10,10 +10,11 @@
   *{margin:0;padding:0;box-sizing:border-box;} html{scroll-behavior:smooth;}
   body{font-family:'Tajawal',sans-serif;background:var(--very-light);color:var(--deep-purple);min-height:100vh;overflow-x:hidden;padding-top:74px;padding-bottom:96px;}
   .top-float{position:fixed;top:10px;left:12px;right:12px;z-index:1000;display:flex;flex-direction:column;align-items:stretch;gap:8px;pointer-events:none;} .top-float>*{pointer-events:auto;}
-  .header-capsule{align-self:center;display:flex;align-items:center;gap:8px;padding:5px 8px 5px 14px;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:50px;box-shadow:var(--shadow-md);cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);max-width:92vw;}
+  .header-capsule{align-self:center;display:flex;align-items:center;gap:8px;padding:5px 14px;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:50px;box-shadow:var(--shadow-md);cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);max-width:92vw;}
   .header-capsule:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--soft-lavender);}
-  .hc-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--soft-lavender);flex-shrink:0;} .hc-avatar-text{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;font-weight:800;font-size:.78rem;border:none;}
-  .hc-name{font-size:.82rem;font-weight:700;color:var(--deep-purple);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;} .hc-chevron{width:14px;height:14px;opacity:.5;transition:transform .3s;} .header-capsule.open .hc-chevron{transform:rotate(180deg);}
+  .hc-brand{font-size:1.1rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.5px;}
+  .hc-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--soft-lavender);flex-shrink:0;cursor:pointer;}
+  .hc-avatar-text{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;font-weight:800;font-size:.78rem;border:none;cursor:pointer;}
   .account-popover{position:fixed;top:62px;left:50%;transform:translateX(-50%) translateY(-10px) scale(.96);width:330px;max-width:calc(100vw - 24px);background:var(--glass-bg);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:18px;z-index:1200;opacity:0;visibility:hidden;transition:all .3s cubic-bezier(.34,1.56,.64,1);}
   .account-popover.open{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0) scale(1);}
   .ap-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--glass-border);} .ap-avatar-wrap{position:relative;cursor:pointer;flex-shrink:0;} .ap-avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2.5px solid var(--soft-lavender);}
@@ -33,10 +34,10 @@
   .search-cat-chip{position:absolute;left:5px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:3px;padding:3px 7px;border-radius:50px;border:1px solid var(--soft-lavender);background:rgba(219,181,238,.22);color:var(--deep-purple);font-family:'Tajawal',sans-serif;font-size:.6rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;} .search-cat-chip svg{width:9px;height:9px;} .search-cat-chip:hover{background:var(--soft-lavender);}
   .search-cat-dropdown{position:fixed;z-index:1300;min-width:150px;max-height:240px;overflow-y:auto;background:var(--very-light);border:1px solid var(--glass-border);border-radius:12px;box-shadow:var(--shadow-lg);padding:4px;opacity:0;visibility:hidden;transform:translateY(-6px);transition:all .2s;} .search-cat-dropdown.open{opacity:1;visibility:visible;transform:translateY(0);}
   .search-cat-dropdown a{display:flex;align-items:center;gap:7px;padding:7px 10px;text-decoration:none;color:var(--deep-purple);font-size:.74rem;font-weight:600;border-radius:8px;transition:all .18s;} .search-cat-dropdown a:hover,.search-cat-dropdown a.active{background:rgba(219,181,238,.25);} .search-cat-dropdown a .dot{width:6px;height:6px;border-radius:50%;background:var(--deep-purple);opacity:0;transition:opacity .2s;} .search-cat-dropdown a.active .dot{opacity:1;}
-  .bottom-nav{position:fixed;bottom:6px;left:10px;right:10px;z-index:1000;display:flex;align-items:center;justify-content:space-around;gap:2px;padding:4px 6px;background:var(--glass-bg);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid var(--glass-border);border-radius:18px;box-shadow:var(--shadow-lg);overflow-x:auto;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--soft-lavender) transparent;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+  .bottom-nav{position:fixed;bottom:6px;left:10px;right:10px;z-index:1000;display:flex;align-items:center;justify-content:space-around;gap:1px;padding:2px 4px;background:var(--glass-bg);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid var(--glass-border);border-radius:18px;box-shadow:var(--shadow-lg);overflow-x:auto;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--soft-lavender) transparent;transition:transform .45s cubic-bezier(.4,0,.2,1);}
   .bottom-nav::-webkit-scrollbar{height:2px;} .bottom-nav::-webkit-scrollbar-track{background:transparent;} .bottom-nav::-webkit-scrollbar-thumb{background:var(--soft-lavender);border-radius:4px;} .bottom-nav.hidden{transform:translateY(160%);}
-  .bn-item{display:flex;flex-direction:column;align-items:center;gap:1px;text-decoration:none;color:rgba(76,5,133,.55);font-size:.5rem;font-weight:600;padding:1px 4px;flex-shrink:0;cursor:pointer;background:none;border:none;font-family:'Tajawal',sans-serif;}
-  .bn-circle{width:30px;height:30px;border-radius:50%;background:rgba(219,181,238,.28);display:flex;align-items:center;justify-content:center;color:var(--deep-purple);transition:all .4s cubic-bezier(.34,1.56,.64,1);} .bn-circle svg{width:14px;height:14px;}
+  .bn-item{display:flex;flex-direction:column;align-items:center;gap:1px;text-decoration:none;color:rgba(76,5,133,.55);font-size:.45rem;font-weight:600;padding:1px 4px;flex-shrink:0;cursor:pointer;background:none;border:none;font-family:'Tajawal',sans-serif;}
+  .bn-circle{width:24px;height:24px;border-radius:50%;background:rgba(219,181,238,.28);display:flex;align-items:center;justify-content:center;color:var(--deep-purple);transition:all .4s cubic-bezier(.34,1.56,.64,1);} .bn-circle svg{width:12px;height:12px;}
   .bn-item:hover .bn-circle{transform:translateY(-2px) scale(1.05);background:var(--soft-lavender);} .bn-item.active .bn-circle{background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;box-shadow:0 4px 12px rgba(76,5,133,.4);transform:translateY(-2px);} .bn-item.active{color:var(--deep-purple);}
   .search-btn{position:relative;} .search-btn .badge{position:absolute;top:-3px;right:2px;background:linear-gradient(135deg,#FF6B6B,#FF4757);color:#fff;font-size:.55rem;font-weight:700;min-width:15px;height:15px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;opacity:0;transform:scale(0);transition:all .3s cubic-bezier(.34,1.56,.64,1);} .search-btn .badge.show{opacity:1;transform:scale(1);} .search-btn.active .icon-search{display:none;} .search-btn:not(.active) .icon-close{display:none;}
 
@@ -50,7 +51,6 @@
   .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--deep-purple);box-shadow:0 0 0 3px rgba(76,5,133,.08);} .form-group textarea{resize:vertical;min-height:80px;} .form-group .field-hint{font-size:.68rem;color:rgba(76,5,133,.4);margin-top:4px;}
   .submit-btn{width:100%;padding:11px;border:none;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;font-family:'Tajawal',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:6px;} .submit-btn svg{width:15px;height:15px;} .submit-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-md);}
 
-  /* My prompts list */
   .prompt-list{display:flex;flex-direction:column;gap:10px;}
   .prompt-item{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(219,181,238,.08);border:1px solid var(--glass-border);border-radius:var(--radius-md);transition:all .25s;}
   .prompt-item:hover{border-color:var(--soft-lavender);background:rgba(219,181,238,.15);}
@@ -77,14 +77,17 @@
 <body>
 
 <div class="top-float">
-  <div class="header-capsule" id="headerCapsule" onclick="toggleAccountPopover(event)">
-    <span class="hc-avatar-text" style="font-size:.7rem;">U</span>
-    <span class="hc-brand-logo">UFOQ</span>
+  <div class="header-capsule" id="headerCapsule" onclick="handleHeaderClick(event)">
+    <span class="hc-brand">UFOQ</span>
     {% if user %}
       <span style="width:1px;height:18px;background:var(--glass-border);margin:0 4px;flex-shrink:0;"></span>
-      {% if user.avatar_url %}<img src="{{ user.avatar_url }}" alt="{{ user.name }}" class="hc-avatar" style="width:26px;height:26px;">{% else %}<span class="hc-avatar hc-avatar-text" style="width:26px;height:26px;font-size:.65rem;">{{ user.name[0] if user.name else '؟' }}</span>{% endif %}
+      {% if user.avatar_url %}
+        <img src="{{ user.avatar_url }}" alt="{{ user.name }}" class="hc-avatar">
+      {% else %}
+        <span class="hc-avatar-text">{{ user.name[0] if user.name else '؟' }}</span>
+      {% endif %}
     {% else %}
-      <a href="/sign" class="hc-login" onclick="event.stopPropagation()" style="margin-right:4px;padding:4px 12px;font-size:.72rem;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" x2="3" y1="12" y2="12"></line></svg> دخول</a>
+      <span class="hc-avatar-text" style="font-size:.9rem;">👤</span>
     {% endif %}
   </div>
   {% if user %}
@@ -229,8 +232,22 @@
 
 <script>
 let searchOpen=false, currentSearchCategory='all', lastScroll=0;
-function toggleAccountPopover(e){ e.stopPropagation(); const p=document.getElementById('accountPopover'); if(!p) return; const c=document.getElementById('headerCapsule'); p.classList.toggle('open'); c.classList.toggle('open',p.classList.contains('open')); document.getElementById('searchCatDropdown').classList.remove('open'); }
-document.addEventListener('click',(e)=>{ const p=document.getElementById('accountPopover'), c=document.getElementById('headerCapsule'); if(p&&p.classList.contains('open')&&!p.contains(e.target)&&!c.contains(e.target)){ p.classList.remove('open'); c.classList.remove('open'); } });
+
+function handleHeaderClick(e) {
+    e.stopPropagation();
+    {% if user %}
+        const p = document.getElementById('accountPopover');
+        const c = document.getElementById('headerCapsule');
+        if (p) {
+            p.classList.toggle('open');
+            c.classList.toggle('open', p.classList.contains('open'));
+        }
+    {% else %}
+        window.location.href = '/sign';
+    {% endif %}
+}
+
+document.addEventListener('click',(e)=>{ const p=document.getElementById('accountPopover'), cap=document.getElementById('headerCapsule'); if(p&&p.classList.contains('open')&&!p.contains(e.target)&&!cap.contains(e.target)){ p.classList.remove('open'); cap.classList.remove('open'); } });
 function initCardsSelect(){ const s=document.getElementById('cardsPerRowSelect'); if(!s) return; const v=localStorage.getItem('cardsPerRow')||'4'; s.value=v; const h=document.getElementById('cardsPerRowHidden'); if(h) h.value=v; }
 function onCardsChange(v){ localStorage.setItem('cardsPerRow',v); const h=document.getElementById('cardsPerRowHidden'); if(h) h.value=v; }
 function updateAvatar(input){ if(input.files&&input.files[0]){ const r=new FileReader(); r.onload=(e)=>{ fetch('/update-avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({avatar_url:e.target.result})}).then(()=>location.reload()).catch(()=>showToast('حدث خطأ في تحديث الصورة')); }; r.readAsDataURL(input.files[0]); } }
