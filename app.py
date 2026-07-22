@@ -1,1443 +1,253 @@
-import os
-import re
-import logging
-import secrets
-import traceback
-from datetime import datetime, timedelta
-from functools import wraps
-from urllib.parse import urlparse
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_caching import Cache
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from flask_talisman import Talisman
-from flask_session import Session
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import inspect, text, func
-from sqlalchemy.orm import joinedload
-from werkzeug.security import generate_password_hash, check_password_hash
-from google.oauth2 import id_token as google_id_token
-from google.auth.transport import requests as google_requests
-from dotenv import load_dotenv
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الإعدادات — UFOQ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap');
+  :root{--very-light:#FFFDFE;--soft-lavender:#DBB5EE;--deep-purple:#4C0585;--glass-bg:rgba(255,253,254,0.80);--glass-border:rgba(219,181,238,0.38);--shadow-sm:0 2px 8px rgba(76,5,133,0.06);--shadow-md:0 6px 24px rgba(76,5,133,0.12);--shadow-lg:0 14px 40px rgba(76,5,133,0.18);--radius-sm:10px;--radius-md:14px;--radius-lg:20px;--amber-start:#F59E0B;--amber-end:#D97706;--warm-cream:#FEF3C7;--charcoal:#1F2937;}
+  *{margin:0;padding:0;box-sizing:border-box;} html{scroll-behavior:smooth;}
+  body{font-family:'Tajawal',sans-serif;background:var(--very-light);color:var(--deep-purple);min-height:100vh;overflow-x:hidden;padding-top:74px;padding-bottom:96px;}
+  .top-float{position:fixed;top:10px;left:12px;right:12px;z-index:1000;display:flex;flex-direction:column;align-items:stretch;gap:8px;pointer-events:none;} .top-float>*{pointer-events:auto;}
+  .header-capsule{align-self:center;display:flex;align-items:center;gap:8px;padding:5px 14px;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:50px;box-shadow:var(--shadow-md);cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);max-width:92vw;}
+  .header-capsule:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--soft-lavender);}
+  .hc-brand{font-size:1.1rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.5px;}
+  .hc-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--soft-lavender);flex-shrink:0;cursor:pointer;}
+  .hc-avatar-text{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;font-weight:800;font-size:.78rem;border:none;cursor:pointer;}
+  .account-popover{position:fixed;top:62px;left:50%;transform:translateX(-50%) translateY(-10px) scale(.96);width:330px;max-width:calc(100vw - 24px);background:var(--glass-bg);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:18px;z-index:1200;opacity:0;visibility:hidden;transition:all .3s cubic-bezier(.34,1.56,.64,1);}
+  .account-popover.open{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0) scale(1);}
+  .ap-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--glass-border);} .ap-avatar-wrap{position:relative;cursor:pointer;flex-shrink:0;} .ap-avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2.5px solid var(--soft-lavender);}
+  .ap-avatar-ph{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--soft-lavender),rgba(76,5,133,.2));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;color:var(--deep-purple);border:2.5px solid var(--soft-lavender);}
+  .ap-avatar-wrap .ap-cam{position:absolute;inset:0;border-radius:50%;background:rgba(76,5,133,.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .25s;} .ap-avatar-wrap:hover .ap-cam{opacity:1;} .ap-avatar-wrap .ap-cam svg{width:18px;height:18px;color:#fff;}
+  .ap-meta{min-width:0;} .ap-name{font-size:.95rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;} .ap-email{font-size:.72rem;color:rgba(76,5,133,.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ap-form label{display:block;font-size:.72rem;font-weight:600;margin-bottom:5px;color:var(--deep-purple);} .ap-form .ap-field{margin-bottom:11px;}
+  .ap-form input,.ap-form textarea,.ap-form select{width:100%;padding:8px 11px;border:1.5px solid var(--glass-border);border-radius:var(--radius-sm);font-family:'Tajawal',sans-serif;font-size:.8rem;background:var(--very-light);color:var(--deep-purple);outline:none;transition:all .25s;}
+  .ap-form input:focus,.ap-form textarea:focus,.ap-form select:focus{border-color:var(--deep-purple);box-shadow:0 0 0 3px rgba(76,5,133,.08);} .ap-form textarea{resize:vertical;min-height:54px;}
+  .ap-actions{display:flex;gap:8px;margin-top:4px;} .ap-save{flex:1;padding:9px;border:none;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;font-family:'Tajawal',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .25s;} .ap-save:hover{transform:translateY(-1px);box-shadow:var(--shadow-md);}
+  .ap-link{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:9px;border-radius:var(--radius-sm);background:rgba(219,181,238,.22);color:var(--deep-purple);text-decoration:none;font-size:.78rem;font-weight:600;transition:all .25s;} .ap-link svg{width:14px;height:14px;} .ap-link:hover{background:rgba(219,181,238,.4);}
+  .ap-logout{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;padding:8px;border-radius:var(--radius-sm);border:1.5px solid rgba(255,71,87,.3);background:rgba(255,71,87,.07);color:#FF4757;text-decoration:none;font-size:.76rem;font-weight:600;transition:all .25s;} .ap-logout svg{width:14px;height:14px;} .ap-logout:hover{background:rgba(255,71,87,.15);}
 
-load_dotenv()
+  .settings-container{max-width:760px;margin:0 auto;padding:18px 14px 30px;position:relative;z-index:1;}
+  .settings-brand{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:6px;} .settings-brand .sb-logo{font-size:1.3rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.5px;}
+  .settings-header{text-align:center;margin-bottom:22px;} .settings-header h1{font-size:1.4rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:5px;} .settings-header p{color:rgba(76,5,133,.6);font-size:.8rem;}
+  .section-card{background:var(--very-light);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow-sm);}
+  .section-card h3{font-size:1rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px;} .section-card h3 svg{width:18px;height:18px;color:var(--deep-purple);}
+  .form-group{margin-bottom:14px;} .form-group label{display:block;font-size:.76rem;font-weight:600;margin-bottom:6px;color:var(--deep-purple);}
+  .form-group input,.form-group textarea,.form-group select{width:100%;padding:9px 13px;border:1.5px solid var(--glass-border);border-radius:var(--radius-sm);font-family:'Tajawal',sans-serif;font-size:.84rem;background:var(--very-light);color:var(--deep-purple);outline:none;transition:all .25s;}
+  .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--deep-purple);box-shadow:0 0 0 3px rgba(76,5,133,.08);} .form-group textarea{resize:vertical;min-height:80px;} .form-group .field-hint{font-size:.68rem;color:rgba(76,5,133,.4);margin-top:4px;}
+  .submit-btn{width:100%;padding:11px;border:none;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;font-family:'Tajawal',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:6px;} .submit-btn svg{width:15px;height:15px;} .submit-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-md);}
 
-# ==================== Production Logging ====================
-_log_handlers = [logging.StreamHandler()]
-if not os.getenv('VERCEL') and not os.getenv('RENDER'):
-    try:
-        _log_handlers.append(logging.FileHandler('app.log', encoding='utf-8'))
-    except OSError:
-        pass  # read-only filesystem (serverless) — stdout logging still works
+  .prompt-list{display:flex;flex-direction:column;gap:10px;}
+  .prompt-item{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(219,181,238,.08);border:1px solid var(--glass-border);border-radius:var(--radius-md);transition:all .25s;}
+  .prompt-item:hover{border-color:var(--soft-lavender);background:rgba(219,181,238,.15);}
+  .prompt-item-info{flex:1;min-width:0;}
+  .prompt-item-info h4{font-size:.84rem;font-weight:700;margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .prompt-stats{display:flex;gap:12px;font-size:.7rem;color:rgba(76,5,133,.6);font-weight:600;}
+  .prompt-stats .ps{display:flex;align-items:center;gap:4px;} .prompt-stats .ps svg{width:13px;height:13px;}
+  .prompt-status{padding:3px 10px;border-radius:50px;font-size:.62rem;font-weight:700;white-space:nowrap;flex-shrink:0;}
+  .prompt-status.published{background:rgba(39,174,96,.15);color:#27AE60;} .prompt-status.pending{background:rgba(245,176,65,.15);color:#D68910;} .prompt-status.editing{background:rgba(52,152,219,.15);color:#2E86C1;} .prompt-status.deleting{background:rgba(255,71,87,.15);color:#FF4757;}
+  .prompt-actions{display:flex;gap:6px;flex-shrink:0;}
+  .prompt-action-btn{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--glass-border);background:var(--very-light);color:var(--deep-purple);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;} .prompt-action-btn svg{width:14px;height:14px;}
+  .prompt-action-btn:hover{background:var(--soft-lavender);border-color:var(--soft-lavender);} .prompt-action-btn.delete:hover{background:rgba(255,71,87,.15);border-color:rgba(255,71,87,.4);color:#FF4757;}
+  .empty-prompts{text-align:center;padding:30px 16px;color:rgba(76,5,133,.4);font-size:.84rem;} .empty-prompts svg{width:38px;height:38px;margin-bottom:10px;opacity:.4;}
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='[%(asctime)s] %(levelname)s in %(module)s [%(pathname)s:%(lineno)d]: %(message)s',
-    handlers=_log_handlers
-)
-logger = logging.getLogger(__name__)
+  .modal-overlay{position:fixed;inset:0;z-index:9999;background:rgba(10,2,20,.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all .3s;} .modal-overlay.open{opacity:1;visibility:visible;}
+  .modal-box{background:var(--very-light);border-radius:var(--radius-lg);padding:22px;max-width:440px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow-lg);} .modal-box h3{font-size:1.05rem;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px;} .modal-box h3 svg{width:18px;height:18px;}
+  .modal-actions{display:flex;gap:8px;margin-top:16px;} .modal-btn{flex:1;padding:10px;border-radius:var(--radius-sm);border:none;font-family:'Tajawal',sans-serif;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .25s;}
+  .modal-btn.primary{background:var(--deep-purple);color:#fff;} .modal-btn.primary:hover{background:#6B1FB0;} .modal-btn.secondary{background:rgba(219,181,238,.2);color:var(--deep-purple);} .modal-btn.secondary:hover{background:rgba(219,181,238,.3);} .modal-btn.danger{background:#FF4757;color:#fff;} .modal-btn.danger:hover{background:#FF6B81;}
+  .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(80px);padding:9px 24px;background:var(--deep-purple);color:#fff;border-radius:50px;font-family:'Tajawal',sans-serif;font-weight:600;font-size:.82rem;z-index:99999;opacity:0;transition:all .4s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-lg);} .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .scroll-top{position:fixed;bottom:84px;right:14px;width:38px;height:38px;border-radius:50%;background:var(--deep-purple);color:#fff;border:none;cursor:pointer;z-index:998;opacity:0;visibility:hidden;transform:translateY(16px);transition:all .3s;box-shadow:var(--shadow-md);display:flex;align-items:center;justify-content:center;} .scroll-top svg{width:16px;height:16px;} .scroll-top.show{opacity:1;visibility:visible;transform:translateY(0);} .scroll-top:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+  @media (max-width:600px){.settings-container{padding:14px 12px 24px;}.section-card{padding:16px;}.prompt-item{flex-wrap:wrap;}.prompt-actions{margin-right:auto;}}
+  /* Bottom navigation style (same as index) */
+  .bottom-nav-wrapper{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;gap:8px;direction:ltr;}
+  .bottom-nav-main{display:flex;align-items:center;gap:4px;padding:6px 10px;background:rgba(255,248,235,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,215,140,0.35);border-radius:40px;box-shadow:0 8px 32px rgba(0,0,0,0.08),0 2px 8px rgba(0,0,0,0.04);transition:all .3s ease;}
+  .bn-item{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;text-decoration:none;color:var(--charcoal);transition:all .25s cubic-bezier(.34,1.56,.64,1);cursor:pointer;background:transparent;border:none;font-family:'Tajawal',sans-serif;position:relative;}
+  .bn-item svg{width:18px;height:18px;stroke:var(--charcoal);stroke-width:1.8;fill:none;transition:all .3s ease;}
+  .bn-item.active{background:radial-gradient(circle at 40% 35%,#FCD34D,#F59E0B 70%,#D97706);box-shadow:0 0 20px rgba(245,158,11,0.4),inset 0 0 8px rgba(255,255,255,0.3);transform:scale(1.05);}
+  .bn-item.active svg{stroke:#FFFFFF;stroke-width:2.2;fill:#FFFFFF;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.1));}
+  .bn-item:not(.active):hover{background:rgba(255,215,140,0.2);transform:translateY(-2px);}
+  .bn-item:not(.active):hover svg{stroke:#D97706;}
+</style>
+</head>
+<body>
 
-# ==================== Config ====================
-class Config:
-    SECRET_KEY = os.getenv('SECRET_KEY')
-    if not SECRET_KEY:
-        logger.warning("SECRET_KEY not set! Using fallback (INSECURE for production)")
-        SECRET_KEY = os.urandom(32).hex()
+<div class="top-float">
+  <div class="header-capsule" id="headerCapsule" onclick="handleHeaderClick(event)">
+    <span class="hc-brand">UFOQ</span>
+    {% if user %}
+      <span style="width:1px;height:18px;background:var(--glass-border);margin:0 4px;flex-shrink:0;"></span>
+      {% if user.avatar_url %}
+        <img src="{{ user.avatar_url }}" alt="{{ user.name }}" class="hc-avatar">
+      {% else %}
+        <span class="hc-avatar-text">{{ user.name[0] if user.name else '؟' }}</span>
+      {% endif %}
+    {% else %}
+      <span class="hc-avatar-text" style="font-size:.9rem;">👤</span>
+    {% endif %}
+  </div>
+  {% if user %}
+  <div class="account-popover" id="accountPopover" onclick="event.stopPropagation()">
+    <form method="POST" action="/settings" class="ap-form">
+      <div class="ap-head">
+        <div class="ap-avatar-wrap" onclick="event.stopPropagation(); document.getElementById('avatarInput').click()">
+          {% if user.avatar_url %}<img src="{{ user.avatar_url }}" alt="{{ user.name }}" class="ap-avatar">{% else %}<div class="ap-avatar-ph">{{ user.name[0] if user.name else '؟' }}</div>{% endif %}
+          <div class="ap-cam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg></div>
+          <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="updateAvatar(this)">
+        </div>
+        <div class="ap-meta"><div class="ap-name">{{ user.name }}</div><div class="ap-email">{{ user.email }}</div></div>
+      </div>
+      <div class="ap-field"><label>الرابط الخاص بك</label><input type="url" name="profile_link" value="{{ user.profile_link or '' }}" placeholder="https://example.com"></div>
+      <div class="ap-field"><label>النبذة التعريفية</label><textarea name="bio" placeholder="اكتب نبذة قصيرة عنك...">{{ user.bio or '' }}</textarea></div>
+      <div class="ap-field"><label>عدد البطاقات في الصف الواحد</label>
+        <select id="cardsPerRowSelect" onchange="onCardsChange(this.value)"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
+        <input type="hidden" name="cards_per_row" id="cardsPerRowHidden">
+      </div>
+      <div class="ap-actions">
+        <button type="submit" class="ap-save">حفظ التغييرات</button>
+        <a href="/settings" class="ap-link" onclick="event.preventDefault()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg> برومبتاتي</a>
+      </div>
+    </form>
+    <a href="/logout" class="ap-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg> تسجيل الخروج</a>
+  </div>
+  {% endif %}
+</div>
 
-    ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
-    GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '1066865562137-k509114e44npk13n5n78gb32b3meldrk.apps.googleusercontent.com')
+<div class="settings-container">
+  <div class="settings-brand"><span class="sb-logo">UFOQ</span></div>
+  <div class="settings-header"><h1>الإعدادات</h1><p>إدارة مساهماتك وبرومبتاتك — تعديل بياناتك من بطاقة الحساب أعلاه</p></div>
 
-    DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///ufoq.db')
-    if DATABASE_URL.startswith('postgres://'):
-        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
-    SQLALCHEMY_DATABASE_URI = DATABASE_URL
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_POOL_SIZE = int(os.getenv('DB_POOL_SIZE', '20'))
-    SQLALCHEMY_MAX_OVERFLOW = int(os.getenv('DB_MAX_OVERFLOW', '40'))
-    SQLALCHEMY_POOL_PRE_PING = True
-    SQLALCHEMY_POOL_RECYCLE = 3600
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_pre_ping': True,
-        'pool_recycle': 3600,
-        'pool_timeout': 30,
+  {% if user %}
+  <!-- Publish -->
+  <div class="section-card">
+    <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg> نشر برومبت جديد</h3>
+    <form method="POST" action="/publish">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="form-group"><label>عنوان البرومبت</label><input type="text" name="title" required placeholder="مثال: صورة قطة في غابة خيالية"></div>
+      <div class="form-group"><label>التصنيف</label><select name="category" required>{% for cat in categories %}<option value="{{ cat.name }}">{{ cat.display_name }}</option>{% endfor %}</select></div>
+      <div class="form-group"><label>كلمات مفتاحية (اختياري)</label><input type="text" name="keywords" placeholder="افصل بين الكلمات بفاصلة"><div class="field-hint">تساعد في البحث والتصنيف</div></div>
+      <div class="form-group"><label>رابط صورة توضيحية (اختياري)</label><input type="url" name="image_url" placeholder="https://example.com/image.jpg"></div>
+      <div class="form-group"><label>نص البرومبت</label><textarea name="prompt_text" required placeholder="اكتب نص البرومبت هنا..." style="min-height:120px;"></textarea><div class="field-hint">يراجع فريق الإدارة كل مساهمة قبل نشرها في المكتبة.</div></div>
+      <button type="submit" class="submit-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="11" y1="2" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> إرسال المساهمة</button>
+    </form>
+  </div>
+
+  <!-- My prompts -->
+  <div class="section-card">
+    <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg> برومبتاتي المنشورة</h3>
+    {% if my_prompts or my_pending or my_edit_requests or my_delete_requests %}
+    <div class="prompt-list">
+      {% for p in my_prompts %}
+      <div class="prompt-item">
+        <div class="prompt-item-info">
+          <h4>{{ p.title }}</h4>
+          <div class="prompt-stats">
+            <span class="ps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> {{ p.copy_count or 0 }} نسخة</span>
+            <span class="ps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line></svg> {{ p.share_count or 0 }} مشاركة</span>
+          </div>
+        </div>
+        <span class="prompt-status published">منشور</span>
+        <div class="prompt-actions">
+          <button class="prompt-action-btn" onclick="openEditModal('{{ p.id }}','{{ p.title|replace("'", "\\'") }}','{{ p.category }}','{{ p.keywords or "" }}','{{ p.image_url or "" }}','{{ p.prompt_text|replace("'", "\\'") }}')" title="تعديل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg></button>
+          <button class="prompt-action-btn delete" onclick="openDeleteModal('{{ p.id }}','{{ p.title|replace("'", "\\'") }}')" title="حذف"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+        </div>
+      </div>
+      {% endfor %}
+      {% for c in my_pending %}
+      <div class="prompt-item"><div class="prompt-item-info"><h4>{{ c.title }}</h4></div><span class="prompt-status pending">قيد المراجعة</span></div>
+      {% endfor %}
+      {% for er in my_edit_requests %}
+      <div class="prompt-item"><div class="prompt-item-info"><h4>{{ er.prompt.title }}</h4></div><span class="prompt-status editing">تعديل قيد المراجعة</span></div>
+      {% endfor %}
+      {% for dr in my_delete_requests %}
+      <div class="prompt-item"><div class="prompt-item-info"><h4>{{ dr.prompt.title }}</h4></div><span class="prompt-status deleting">حذف قيد المراجعة</span></div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-prompts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg><p>لم تنشر أي برومبت بعد</p></div>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<!-- Edit modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box">
+    <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg> طلب تعديل برومبت</h3>
+    <form method="POST" action="/edit-request">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="prompt_id" id="editPromptId">
+      <div class="form-group"><label>العنوان</label><input type="text" name="title" id="editTitle" required></div>
+      <div class="form-group"><label>التصنيف</label><select name="category" id="editCategory" required>{% for cat in categories %}<option value="{{ cat.name }}">{{ cat.display_name }}</option>{% endfor %}</select></div>
+      <div class="form-group"><label>كلمات مفتاحية</label><input type="text" name="keywords" id="editKeywords"></div>
+      <div class="form-group"><label>رابط الصورة</label><input type="url" name="image_url" id="editImageUrl"></div>
+      <div class="form-group"><label>نص البرومبت</label><textarea name="prompt_text" id="editPromptText" required style="min-height:100px;"></textarea><div class="field-hint">سيتم إرسال طلب التعديل إلى الإدارة للمراجعة قبل تطبيقه.</div></div>
+      <div class="modal-actions"><button type="button" class="modal-btn secondary" onclick="closeEditModal()">إلغاء</button><button type="submit" class="modal-btn primary">إرسال طلب التعديل</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#FF4757;"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg> تأكيد الحذف</h3>
+    <p style="color:rgba(76,5,133,.7);margin-bottom:16px;line-height:1.7;font-size:.84rem;">هل أنت متأكد من حذف هذا البرومبت؟<br><strong style="color:var(--deep-purple);" id="deletePromptTitle"></strong><br><br>سيتم إرسال طلب الحذف إلى الإدارة للمراجعة.</p>
+    <form method="POST" action="/delete-request">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="prompt_id" id="deletePromptId">
+      <div class="modal-actions"><button type="button" class="modal-btn secondary" onclick="closeDeleteModal()">إلغاء</button><button type="submit" class="modal-btn danger">تأكيد الحذف</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== Bottom Navigation ===== -->
+<div class="bottom-nav-wrapper">
+  <div class="bottom-nav-main">
+    <a href="/" class="bn-item" aria-label="الرئيسية">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </a>
+    <a href="/settings" class="bn-item active" aria-label="الإعدادات">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+    </a>
+    <a href="/about" class="bn-item" aria-label="حول">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+    </a>
+  </div>
+</div>
+
+<div class="toast" id="toast">تم!</div>
+<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"></path></svg></button>
+
+<script>
+const isLoggedIn = {{ 'true' if user else 'false' }};
+let lastScroll=0;
+
+function handleHeaderClick(e) {
+    e.stopPropagation();
+    if (isLoggedIn) {
+        const p = document.getElementById('accountPopover');
+        const c = document.getElementById('headerCapsule');
+        if (p) {
+            p.classList.toggle('open');
+            c.classList.toggle('open', p.classList.contains('open'));
+        }
+    } else {
+        window.location.href = '/sign';
     }
-
-    SESSION_TYPE = 'sqlalchemy'
-    SESSION_SQLALCHEMY_TABLE = 'flask_sessions'
-    SESSION_PERMANENT = True
-    SESSION_USE_SIGNER = True
-    SESSION_KEY_PREFIX = 'ufoq_session:'
-    PERMANENT_SESSION_LIFETIME = 2592000
-    SESSION_COOKIE_NAME = 'ufoq_session'
-    SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Lax'
-    SESSION_COOKIE_SECURE = os.getenv('RENDER') is not None or os.getenv('FORCE_HTTPS') == '1'
-    SESSION_REFRESH_EACH_REQUEST = True
-
-    CACHE_TYPE = 'SimpleCache'
-    CACHE_DEFAULT_TIMEOUT = 300
-    RATELIMIT_ENABLED = True
-    RATELIMIT_STORAGE_URI = os.getenv('REDIS_URL', 'memory://')
-    RATELIMIT_STRATEGY = 'fixed-window'
-    RATELIMIT_DEFAULT = "200 per minute"
-
-# ==================== Models ====================
-db = SQLAlchemy()
-
-class User(db.Model):
-    __tablename__ = 'app_user'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), nullable=False)
-    email = db.Column(db.String(200), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=True)
-    google_id = db.Column(db.String(200), unique=True, nullable=True)
-    avatar_url = db.Column(db.String(500), nullable=True)
-    bio = db.Column(db.Text, nullable=True)
-    profile_link = db.Column(db.String(500), nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_active = db.Column(db.DateTime, default=datetime.utcnow)
-
-class Category(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False, unique=True)
-    display_name = db.Column(db.String(100), nullable=False)
-    icon = db.Column(db.String(50), default='bi-tag')
-    sort_order = db.Column(db.Integer, default=0)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class PromptLibrary(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    category = db.Column(db.String(50), nullable=False, default='general')
-    image_url = db.Column(db.String(500), nullable=False, default='')
-    prompt_text = db.Column(db.Text, nullable=False)
-    publisher = db.Column(db.String(80), nullable=True)
-    publisher_link = db.Column(db.String(500), nullable=True)
-    keywords = db.Column(db.Text, nullable=True)
-    copy_count = db.Column(db.Integer, default=0, nullable=False)
-    share_count = db.Column(db.Integer, default=0, nullable=False)
-    likes = db.Column(db.Integer, default=0, nullable=False)   # <-- NEW
-    user_id = db.Column(db.Integer, db.ForeignKey('app_user.id'), nullable=True)
-    user = db.relationship('User', backref='prompts')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class LibraryAd(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    text = db.Column(db.Text, nullable=False)
-    image_url = db.Column(db.String(500), nullable=True)
-    button_text = db.Column(db.String(100), nullable=False, default='زيارة')
-    button_link = db.Column(db.String(500), nullable=False)
-    duration_seconds = db.Column(db.Integer, default=5)
-    is_active = db.Column(db.Boolean, default=True)
-    is_mandatory = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class SiteSetting(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(db.String(10), default='on')
-    offline_message = db.Column(db.Text, default='الموقع تحت الصيانة حالياً.')
-
-class UploadContribution(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    category = db.Column(db.String(50), nullable=False, default='general')
-    image_url = db.Column(db.String(500), nullable=True)
-    prompt_text = db.Column(db.Text, nullable=False)
-    publisher_name = db.Column(db.String(80), nullable=True)
-    publisher_link = db.Column(db.String(500), nullable=True)
-    keywords = db.Column(db.Text, nullable=True)
-    status = db.Column(db.String(20), default='pending')
-    user_id = db.Column(db.Integer, db.ForeignKey('app_user.id'), nullable=True)
-    user = db.relationship('User', backref='contributions')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class PromptEditRequest(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    prompt_id = db.Column(db.Integer, db.ForeignKey('prompt_library.id'), nullable=False)
-    prompt = db.relationship('PromptLibrary', backref='edit_requests')
-    user_id = db.Column(db.Integer, db.ForeignKey('app_user.id'), nullable=False)
-    user = db.relationship('User', backref='prompt_edit_requests')
-    new_title = db.Column(db.String(200), nullable=False)
-    new_category = db.Column(db.String(50), nullable=False)
-    new_prompt_text = db.Column(db.Text, nullable=False)
-    new_image_url = db.Column(db.String(500), nullable=True)
-    new_keywords = db.Column(db.Text, nullable=True)
-    status = db.Column(db.String(20), default='pending')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-class PromptDeleteRequest(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    prompt_id = db.Column(db.Integer, db.ForeignKey('prompt_library.id'), nullable=False)
-    prompt = db.relationship('PromptLibrary', backref='delete_requests')
-    user_id = db.Column(db.Integer, db.ForeignKey('app_user.id'), nullable=False)
-    user = db.relationship('User', backref='prompt_delete_requests')
-    status = db.Column(db.String(20), default='pending')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-# ==================== App Factory ====================
-app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
-app.config.from_object(Config)
-
-db.init_app(app)
-migrate = Migrate(app, db)
-app.config['SESSION_SQLALCHEMY'] = db
-Session(app)  # was imported but never initialized -> sessions were never actually persisted server-side
-
-# ====== Improved caching with Redis support ======
-if os.getenv('REDIS_URL'):
-    try:
-        from flask_caching.backends.redis import RedisCache
-        cache = Cache(app, config={
-            'CACHE_TYPE': 'RedisCache',
-            'CACHE_REDIS_URL': os.getenv('REDIS_URL'),
-            'CACHE_DEFAULT_TIMEOUT': 300
-        })
-        logger.info("Using Redis cache")
-    except Exception as e:
-        logger.warning(f"Redis cache failed: {e}, falling back to SimpleCache")
-        cache = Cache(app, config={'CACHE_TYPE': 'SimpleCache'})
-else:
-    cache = Cache(app, config={'CACHE_TYPE': 'SimpleCache'})
-
-limiter = Limiter(
-    get_remote_address,
-    app=app,
-    default_limits=["200 per minute"],
-    storage_uri=app.config['RATELIMIT_STORAGE_URI'],
-    strategy='fixed-window'
-)
-
-# Production CSP
-csp = {
-    'default-src': ["'self'"],
-    'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
-    'script-src': ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://accounts.google.com"],
-    'font-src': ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net"],
-    'img-src': ["'self'", "data:", "https:", "blob:"],
-    'connect-src': ["'self'", "https://accounts.google.com"],
-    'frame-src': ["https://accounts.google.com"],
-    'frame-ancestors': ["'none'"],
 }
-Talisman(app, force_https=False, content_security_policy=csp)
 
-# ==================== Error Handlers ====================
-@app.errorhandler(404)
-def not_found(e):
-    logger.warning(f"404: {request.url} - {request.remote_addr}")
-    if request.path.startswith('/api/'):
-        return jsonify({'success': False, 'message': 'الصفحة غير موجودة'}), 404
-    return render_template('index.html', site_status='on', categories=[], library_items=[], active_ad=None), 404
-
-@app.errorhandler(500)
-def internal_error(e):
-    logger.error(f"500 ERROR: {str(e)}\n{traceback.format_exc()}")
-    db.session.rollback()
-    if request.path.startswith('/api/'):
-        return jsonify({'success': False, 'message': 'خطأ داخلي في الخادم'}), 500
-    return render_template('index.html', site_status='on', categories=[], library_items=[], active_ad=None), 500
-
-@app.errorhandler(Exception)
-def handle_exception(e):
-    from werkzeug.exceptions import HTTPException
-    if isinstance(e, HTTPException):
-        return e
-    logger.error(f"UNHANDLED: {str(e)}\n{traceback.format_exc()}")
-    db.session.rollback()
-    if request.path.startswith('/api/'):
-        return jsonify({'success': False, 'message': 'حدث خطأ غير متوقع'}), 500
-    return render_template('index.html', site_status='on', categories=[], library_items=[], active_ad=None), 500
-
-# ---------- Helper functions ----------
-def generate_csrf_token():
-    if 'csrf_token' not in session:
-        session['csrf_token'] = secrets.token_urlsafe(32)
-    return session['csrf_token']
-
-def validate_csrf_token(token):
-    return token == session.get('csrf_token')
-
-def is_valid_publisher_link(url):
-    if not url:
-        return True
-    try:
-        parsed = urlparse(url.strip())
-        return parsed.scheme in ('http', 'https') and bool(parsed.netloc)
-    except Exception:
-        return False
-
-EMAIL_RE = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
-def is_valid_email(email):
-    return bool(email) and bool(EMAIL_RE.match(email.strip()))
-
-def current_user():
-    uid = session.get('user_id')
-    if not uid:
-        return None
-    try:
-        user = User.query.get(uid)
-        if user:
-            user.last_active = datetime.utcnow()
-            db.session.commit()
-        return user
-    except Exception as e:
-        logger.error(f"current_user error: {e}")
-        db.session.rollback()
-        return None
-
-def login_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if not session.get('user_id'):
-            return redirect(url_for('sign_page', next=request.path))
-        return f(*args, **kwargs)
-    return decorated
-
-def admin_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if not session.get('logged_in'):
-            return redirect(url_for('admin_panel'))
-        return f(*args, **kwargs)
-    return decorated
-
-# ====== Safe redirect helper ======
-def safe_redirect(next_url, default='/'):
-    """Ensure redirect URL is internal (no open redirect vulnerability)"""
-    if not next_url:
-        return default
-    # Only allow relative paths starting with '/'
-    if next_url.startswith('/') and not next_url.startswith('//'):
-        return next_url
-    return default
-
-# ---------- Database initialization ----------
-_db_initialized = False
-
-def run_light_migrations():
-    required_columns = {
-        'prompt_library': {
-            'publisher_link': 'VARCHAR(500)',
-            'keywords': 'TEXT',
-            'copy_count': 'INTEGER NOT NULL DEFAULT 0',
-            'share_count': 'INTEGER NOT NULL DEFAULT 0',
-            'user_id': 'INTEGER',
-            'likes': 'INTEGER NOT NULL DEFAULT 0',   # <-- NEW
-        },
-        'upload_contribution': {
-            'publisher_link': 'VARCHAR(500)',
-            'keywords': 'TEXT',
-            'user_id': 'INTEGER',
-        },
-        'library_ad': {
-            'is_mandatory': 'BOOLEAN DEFAULT FALSE',
-        },
-        'app_user': {
-            'last_active': 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
-        },
-    }
-    try:
-        inspector = inspect(db.engine)
-        existing_tables = inspector.get_table_names()
-        for table_name, columns in required_columns.items():
-            if table_name not in existing_tables:
-                continue
-            existing_columns = {col['name'] for col in inspector.get_columns(table_name)}
-            for col_name, col_def in columns.items():
-                if col_name in existing_columns:
-                    continue
-                try:
-                    db.session.execute(text(f'ALTER TABLE {table_name} ADD COLUMN IF NOT EXISTS {col_name} {col_def}'))
-                    db.session.commit()
-                    logger.info(f"Migration: added column {table_name}.{col_name}")
-                except Exception as e:
-                    db.session.rollback()
-                    logger.warning(f"Migration skipped for {table_name}.{col_name}: {e}")
-    except Exception as e:
-        logger.error(f"Migration error: {e}")
-        db.session.rollback()
-
-@app.before_request
-def ensure_db_initialized():
-    global _db_initialized
-    if not _db_initialized:
-        try:
-            db.create_all()
-            run_light_migrations()
-            if not SiteSetting.query.first():
-                db.session.add(SiteSetting())
-                db.session.commit()
-            _db_initialized = True
-            logger.info("Database initialized successfully")
-        except Exception as e:
-            logger.error(f"DB init error: {e}")
-            db.session.rollback()
-
-# ---------- Cached read helpers (avoid re-querying the full table on every hit) ----------
-@cache.memoize(timeout=60)
-def get_categories_cached():
-    return Category.query.order_by(Category.sort_order).all()
-
-@cache.memoize(timeout=30)
-def get_library_items_cached():
-    return (PromptLibrary.query
-            .options(joinedload(PromptLibrary.user))
-            .order_by(PromptLibrary.created_at.desc())
-            .all())
-
-def invalidate_library_cache():
-    cache.delete_memoized(get_categories_cached)
-    cache.delete_memoized(get_library_items_cached)
-
-# ==================== Public Routes ====================
-@app.route('/')
-def index():
-    try:
-        site = SiteSetting.query.first()
-        if site and site.status == 'off':
-            return render_template('index.html', site_status='off', offline_message=site.offline_message)
-
-        categories = get_categories_cached()
-        library_items = get_library_items_cached()
-        active_ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
-
-        ad_dict = None
-        if active_ad:
-            ad_dict = {
-                'id': active_ad.id,
-                'title': active_ad.title,
-                'text': active_ad.text,
-                'image_url': active_ad.image_url,
-                'button_text': active_ad.button_text,
-                'button_link': active_ad.button_link,
-                'duration_seconds': active_ad.duration_seconds
-            }
-
-        return render_template('index.html',
-                               categories=categories,
-                               library_items=library_items,
-                               active_ad=ad_dict,
-                               site_status='on')
-    except Exception as e:
-        logger.error(f"Index error: {e}\n{traceback.format_exc()}")
-        return render_template('index.html', site_status='on', categories=[], library_items=[], active_ad=None)
-
-@app.route('/about')
-def about_page():
-    try:
-        prompt_count = PromptLibrary.query.count()
-        user_count = User.query.count()
-        total_copies = db.session.query(func.sum(PromptLibrary.copy_count)).scalar() or 0
-        total_shares = db.session.query(func.sum(PromptLibrary.share_count)).scalar() or 0
-        return render_template('about.html',
-                               prompt_count=prompt_count,
-                               user_count=user_count,
-                               total_copies=total_copies,
-                               total_shares=total_shares)
-    except Exception as e:
-        logger.error(f"About error: {e}\n{traceback.format_exc()}")
-        return render_template('about.html', prompt_count=0, user_count=0, total_copies=0, total_shares=0)
-
-# ==================== Auth ====================
-@app.route('/signup')
-@app.route('/sign')  # Alias for backward compatibility
-def sign_page():
-    if session.get('user_id'):
-        return redirect(url_for('settings_page'))
-    return render_template('sign.html', csrf_token=generate_csrf_token(),
-                            google_client_id=Config.GOOGLE_CLIENT_ID)
-
-@app.route('/auth/signup', methods=['POST'])
-@limiter.limit("10 per minute")
-def auth_signup():
-    try:
-        data = request.get_json() or {}
-        if not validate_csrf_token(data.get('csrf_token')):
-            return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
-
-        name = (data.get('name') or '').strip()
-        email = (data.get('email') or '').strip().lower()
-        password = data.get('password') or ''
-        next_url = data.get('next')
-
-        if not name or not email or not password:
-            return jsonify({'success': False, 'message': 'يرجى ملء جميع الحقول'}), 400
-        if not is_valid_email(email):
-            return jsonify({'success': False, 'message': 'بريد إلكتروني غير صالح'}), 400
-        if len(password) < 6:
-            return jsonify({'success': False, 'message': 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'}), 400
-        if User.query.filter_by(email=email).first():
-            return jsonify({'success': False, 'message': 'هذا البريد الإلكتروني مستخدم بالفعل'}), 400
-
-        user = User(name=name, email=email, password_hash=generate_password_hash(password))
-        db.session.add(user)
-        db.session.commit()
-        session.permanent = True
-        session['user_id'] = user.id
-        redirect_to = safe_redirect(next_url, url_for('settings_page'))
-        return jsonify({'success': True, 'message': 'تم إنشاء الحساب بنجاح', 'redirect': redirect_to})
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Signup error: {e}\n{traceback.format_exc()}")
-        return jsonify({'success': False, 'message': 'خطأ في إنشاء الحساب'}), 500
-
-@app.route('/auth/login', methods=['POST'])
-@limiter.limit("15 per minute")
-def auth_login():
-    try:
-        data = request.get_json() or {}
-        if not validate_csrf_token(data.get('csrf_token')):
-            return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
-
-        email = (data.get('email') or '').strip().lower()
-        password = data.get('password') or ''
-        next_url = data.get('next')
-        user = User.query.filter_by(email=email).first()
-
-        if not user or not user.password_hash or not check_password_hash(user.password_hash, password):
-            return jsonify({'success': False, 'message': 'البريد الإلكتروني أو كلمة المرور غير صحيحة'}), 401
-
-        session.permanent = True
-        session['user_id'] = user.id
-        user.last_active = datetime.utcnow()
-        db.session.commit()
-        redirect_to = safe_redirect(next_url, url_for('settings_page'))
-        return jsonify({'success': True, 'message': 'تم تسجيل الدخول بنجاح', 'redirect': redirect_to})
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Login error: {e}\n{traceback.format_exc()}")
-        return jsonify({'success': False, 'message': 'خطأ في تسجيل الدخول'}), 500
-
-@app.route('/auth/google', methods=['POST'])
-@limiter.limit("10 per minute")
-def auth_google():
-    try:
-        data = request.get_json() or {}
-        token = data.get('credential')
-        next_url = data.get('next')
-        if not token:
-            return jsonify({'success': False, 'message': 'رمز جوجل مفقود'}), 400
-
-        try:
-            idinfo = google_id_token.verify_oauth2_token(token, google_requests.Request(), Config.GOOGLE_CLIENT_ID)
-            google_id = idinfo['sub']
-            email = (idinfo.get('email') or '').lower()
-            name = idinfo.get('name') or (email.split('@')[0] if email else 'مستخدم')
-            avatar = idinfo.get('picture')
-        except Exception as e:
-            logger.error(f"Google auth verification error: {e}")
-            return jsonify({'success': False, 'message': 'فشل التحقق من حساب جوجل'}), 400
-
-        user = User.query.filter_by(google_id=google_id).first()
-        if not user and email:
-            user = User.query.filter_by(email=email).first()
-        if not user:
-            user = User(name=name, email=email, google_id=google_id, avatar_url=avatar)
-            db.session.add(user)
-        else:
-            user.google_id = user.google_id or google_id
-            user.avatar_url = user.avatar_url or avatar
-        db.session.commit()
-        session.permanent = True
-        session['user_id'] = user.id
-        user.last_active = datetime.utcnow()
-        db.session.commit()
-        redirect_to = safe_redirect(next_url, url_for('settings_page'))
-        return jsonify({'success': True, 'message': 'تم تسجيل الدخول عبر جوجل', 'redirect': redirect_to})
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Google auth save error: {e}\n{traceback.format_exc()}")
-        return jsonify({'success': False, 'message': 'خطأ في حفظ الحساب'}), 500
-
-@app.route('/logout')
-def logout():
-    session.pop('user_id', None)
-    return redirect(url_for('index'))
-
-# ==================== Settings ====================
-@app.route('/settings')
-@login_required
-def settings_page():
-    try:
-        user = current_user()
-        if not user:
-            session.pop('user_id', None)
-            return redirect(url_for('sign_page'))
-
-        categories = Category.query.order_by(Category.sort_order).all()
-        my_prompts = PromptLibrary.query.filter_by(user_id=user.id).order_by(PromptLibrary.created_at.desc()).all()
-        my_pending = UploadContribution.query.filter_by(user_id=user.id, status='pending').order_by(UploadContribution.created_at.desc()).all()
-        my_edit_requests = PromptEditRequest.query.filter_by(user_id=user.id, status='pending').order_by(PromptEditRequest.created_at.desc()).all()
-        my_delete_requests = PromptDeleteRequest.query.filter_by(user_id=user.id, status='pending').order_by(PromptDeleteRequest.created_at.desc()).all()
-
-        return render_template('settings.html',
-                               user=user,
-                               categories=categories,
-                               my_prompts=my_prompts,
-                               my_pending=my_pending,
-                               my_edit_requests=my_edit_requests,
-                               my_delete_requests=my_delete_requests,
-                               csrf_token=generate_csrf_token())
-    except Exception as e:
-        logger.error(f"Settings page error: {e}\n{traceback.format_exc()}")
-        db.session.rollback()
-        # Graceful fallback
-        try:
-            user = current_user()
-            return render_template('settings.html',
-                                   user=user,
-                                   categories=[],
-                                   my_prompts=[],
-                                   my_pending=[],
-                                   my_edit_requests=[],
-                                   my_delete_requests=[],
-                                   csrf_token=generate_csrf_token())
-        except:
-            return redirect(url_for('index'))
-
-@app.route('/settings/update', methods=['POST'])
-@login_required
-def update_settings():
-    try:
-        data = request.get_json() or {}
-        if not validate_csrf_token(data.get('csrf_token')):
-            return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
-
-        user = current_user()
-        if not user:
-            return jsonify({'success': False, 'message': 'الجلسة منتهية'}), 401
-
-        field = data.get('field')
-        value = (data.get('value') or '').strip()
-
-        if field == 'name':
-            if not value:
-                return jsonify({'success': False, 'message': 'الاسم مطلوب'}), 400
-            user.name = value
-        elif field == 'avatar':
-            if value and not is_valid_publisher_link(value):
-                return jsonify({'success': False, 'message': 'رابط الصورة غير صالح'}), 400
-            user.avatar_url = value or None
-        elif field == 'bio':
-            user.bio = value or None
-        elif field == 'profile_link':
-            if value and not is_valid_publisher_link(value):
-                return jsonify({'success': False, 'message': 'الرابط غير صالح'}), 400
-            user.profile_link = value or None
-        elif field == 'email':
-            if not is_valid_email(value):
-                return jsonify({'success': False, 'message': 'بريد إلكتروني غير صالح'}), 400
-            existing = User.query.filter_by(email=value).first()
-            if existing and existing.id != user.id:
-                return jsonify({'success': False, 'message': 'هذا البريد مستخدم بالفعل'}), 400
-            user.email = value
-        elif field == 'password':
-            if len(value) < 6:
-                return jsonify({'success': False, 'message': 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'}), 400
-            user.password_hash = generate_password_hash(value)
-        else:
-            return jsonify({'success': False, 'message': 'حقل غير معروف'}), 400
-
-        db.session.commit()
-        return jsonify({'success': True, 'message': 'تم التحديث بنجاح'})
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Settings update error: {e}\n{traceback.format_exc()}")
-        return jsonify({'success': False, 'message': 'خطأ في التحديث'}), 500
-
-@app.route('/upload', methods=['GET', 'POST'])
-@login_required
-def upload():
-    user = current_user()
-    if request.method == 'POST':
-        try:
-            data = request.get_json()
-            if not data:
-                return jsonify({'success': False, 'message': 'بيانات غير صحيحة'}), 400
-
-            title = data.get('title', '').strip()
-            category = data.get('category', 'general').strip()
-            prompt_text = data.get('prompt_text', '').strip()
-            image_url = data.get('image_url', '').strip()
-            keywords = data.get('keywords', '').strip()
-            csrf_token = data.get('csrf_token', '')
-
-            if not validate_csrf_token(csrf_token):
-                return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
-
-            if not title or not prompt_text:
-                return jsonify({'success': False, 'message': 'يرجى ملء العنوان ونص البرومبت'}), 400
-
-            contribution = UploadContribution(
-                title=title,
-                category=category,
-                prompt_text=prompt_text,
-                image_url=image_url or None,
-                publisher_name=user.name,
-                publisher_link=user.profile_link,
-                keywords=keywords or None,
-                user_id=user.id
-            )
-            db.session.add(contribution)
-            db.session.commit()
-            return jsonify({'success': True, 'message': 'تم استلام مساهمتك بنجاح! سيتم مراجعتها قريباً.'})
-        except Exception as e:
-            db.session.rollback()
-            logger.error(f"Upload error: {e}\n{traceback.format_exc()}")
-            return jsonify({'success': False, 'message': 'خطأ في حفظ البيانات'}), 500
-
-    try:
-        categories = Category.query.order_by(Category.sort_order).all()
-        return render_template('upload.html', categories=categories, csrf_token=generate_csrf_token(), user=user)
-    except Exception as e:
-        logger.error(f"Upload GET error: {e}")
-        return render_template('upload.html', categories=[], csrf_token=generate_csrf_token(), user=user)
-
-# ==================== New Routes for missing actions ====================
-
-@app.route('/publish', methods=['POST'])
-@login_required
-def publish_prompt():
-    try:
-        if not validate_csrf_token(request.form.get('csrf_token')):
-            flash('CSRF خطأ', 'error')
-            return redirect(url_for('settings_page'))
-        
-        user = current_user()
-        if not user:
-            flash('الرجاء تسجيل الدخول', 'error')
-            return redirect(url_for('sign_page'))
-        
-        title = request.form.get('title', '').strip()
-        category = request.form.get('category', 'general').strip()
-        prompt_text = request.form.get('prompt_text', '').strip()
-        image_url = request.form.get('image_url', '').strip()
-        keywords = request.form.get('keywords', '').strip()
-        
-        if not title or not prompt_text:
-            flash('يرجى ملء العنوان ونص البرومبت', 'error')
-            return redirect(url_for('settings_page'))
-        
-        contribution = UploadContribution(
-            title=title,
-            category=category,
-            prompt_text=prompt_text,
-            image_url=image_url or None,
-            publisher_name=user.name,
-            publisher_link=user.profile_link,
-            keywords=keywords or None,
-            user_id=user.id
-        )
-        db.session.add(contribution)
-        db.session.commit()
-        flash('تم إرسال مساهمتك بنجاح! سيتم مراجعتها قريباً.', 'success')
-        return redirect(url_for('settings_page'))
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Publish error: {e}\n{traceback.format_exc()}")
-        flash('حدث خطأ أثناء النشر', 'error')
-        return redirect(url_for('settings_page'))
-
-@app.route('/edit-request', methods=['POST'])
-@login_required
-def edit_request():
-    try:
-        if not validate_csrf_token(request.form.get('csrf_token')):
-            flash('CSRF خطأ', 'error')
-            return redirect(url_for('settings_page'))
-        
-        user = current_user()
-        if not user:
-            flash('الرجاء تسجيل الدخول', 'error')
-            return redirect(url_for('sign_page'))
-        
-        prompt_id = request.form.get('prompt_id')
-        prompt = PromptLibrary.query.get_or_404(prompt_id)
-        
-        if prompt.user_id != user.id:
-            flash('غير مصرح لك بتعديل هذا البرومبت', 'error')
-            return redirect(url_for('settings_page'))
-        
-        existing = PromptEditRequest.query.filter_by(prompt_id=prompt_id, status='pending').first()
-        if existing:
-            flash('يوجد طلب تعديل قيد المراجعة بالفعل', 'error')
-            return redirect(url_for('settings_page'))
-        
-        req = PromptEditRequest(
-            prompt_id=prompt_id,
-            user_id=user.id,
-            new_title=request.form.get('title', prompt.title),
-            new_category=request.form.get('category', prompt.category),
-            new_prompt_text=request.form.get('prompt_text', prompt.prompt_text),
-            new_image_url=request.form.get('image_url', prompt.image_url),
-            new_keywords=request.form.get('keywords', prompt.keywords)
-        )
-        db.session.add(req)
-        db.session.commit()
-        flash('تم إرسال طلب التعديل للمراجعة', 'success')
-        return redirect(url_for('settings_page'))
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Edit request error: {e}\n{traceback.format_exc()}")
-        flash('حدث خطأ في إرسال الطلب', 'error')
-        return redirect(url_for('settings_page'))
-
-@app.route('/delete-request', methods=['POST'])
-@login_required
-def delete_request():
-    try:
-        if not validate_csrf_token(request.form.get('csrf_token')):
-            flash('CSRF خطأ', 'error')
-            return redirect(url_for('settings_page'))
-        
-        user = current_user()
-        if not user:
-            flash('الرجاء تسجيل الدخول', 'error')
-            return redirect(url_for('sign_page'))
-        
-        prompt_id = request.form.get('prompt_id')
-        prompt = PromptLibrary.query.get_or_404(prompt_id)
-        
-        if prompt.user_id != user.id:
-            flash('غير مصرح لك بحذف هذا البرومبت', 'error')
-            return redirect(url_for('settings_page'))
-        
-        existing = PromptDeleteRequest.query.filter_by(prompt_id=prompt_id, status='pending').first()
-        if existing:
-            flash('يوجد طلب حذف قيد المراجعة بالفعل', 'error')
-            return redirect(url_for('settings_page'))
-        
-        req = PromptDeleteRequest(prompt_id=prompt_id, user_id=user.id)
-        db.session.add(req)
-        db.session.commit()
-        flash('تم إرسال طلب الحذف للمراجعة', 'success')
-        return redirect(url_for('settings_page'))
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Delete request error: {e}\n{traceback.format_exc()}")
-        flash('حدث خطأ في إرسال الطلب', 'error')
-        return redirect(url_for('settings_page'))
-
-@app.route('/update-avatar', methods=['POST'])
-@login_required
-def update_avatar():
-    try:
-        if not validate_csrf_token(request.json.get('csrf_token')):
-            return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
-        
-        user = current_user()
-        if not user:
-            return jsonify({'success': False, 'message': 'الجلسة منتهية'}), 401
-        
-        avatar_url = request.json.get('avatar_url', '').strip()
-        if avatar_url and not is_valid_publisher_link(avatar_url):
-            return jsonify({'success': False, 'message': 'رابط الصورة غير صالح'}), 400
-        
-        user.avatar_url = avatar_url or None
-        db.session.commit()
-        return jsonify({'success': True, 'message': 'تم تحديث الصورة'})
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Update avatar error: {e}\n{traceback.format_exc()}")
-        return jsonify({'success': False, 'message': 'حدث خطأ'}), 500
-
-@app.route('/admin/category/<int:category_id>/edit', methods=['POST'])
-@admin_required
-def edit_category(category_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        flash('CSRF خطأ', 'error')
-        return redirect(url_for('admin_panel'))
-    try:
-        cat = Category.query.get_or_404(category_id)
-        name = request.form.get('name', '').strip().lower().replace(' ', '_')
-        display_name = request.form.get('display_name', '').strip()
-        icon = request.form.get('icon', 'bi-tag').strip()
-        sort_order = int(request.form.get('sort_order', 0))
-        
-        if not name or not display_name:
-            flash('اسم التصنيف واسم العرض مطلوبان', 'error')
-            return redirect(url_for('admin_panel'))
-        
-        existing = Category.query.filter(Category.name == name, Category.id != category_id).first()
-        if existing:
-            flash('التصنيف موجود مسبقاً', 'error')
-            return redirect(url_for('admin_panel'))
-        
-        cat.name = name
-        cat.display_name = display_name
-        cat.icon = icon
-        cat.sort_order = sort_order
-        db.session.commit()
-        invalidate_library_cache()
-        flash('تم تحديث التصنيف', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Edit category error: {e}\n{traceback.format_exc()}")
-        flash('خطأ في تحديث التصنيف', 'error')
-    return redirect(url_for('admin_panel'))
-
-# ==================== Prompt Edit/Delete Requests (API) ====================
-@app.route('/api/prompt/edit-request', methods=['POST'])
-@login_required
-def prompt_edit_request():
-    try:
-        data = request.get_json() or {}
-        if not validate_csrf_token(data.get('csrf_token')):
-            return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
-
-        user = current_user()
-        prompt_id = data.get('prompt_id')
-        prompt = PromptLibrary.query.get_or_404(prompt_id)
-
-        if prompt.user_id != user.id:
-            return jsonify({'success': False, 'message': 'غير مصرح'}), 403
-
-        existing = PromptEditRequest.query.filter_by(prompt_id=prompt_id, status='pending').first()
-        if existing:
-            return jsonify({'success': False, 'message': 'يوجد طلب تعديل قيد المراجعة بالفعل'}), 400
-
-        req = PromptEditRequest(
-            prompt_id=prompt_id,
-            user_id=user.id,
-            new_title=data.get('title', prompt.title),
-            new_category=data.get('category', prompt.category),
-            new_prompt_text=data.get('prompt_text', prompt.prompt_text),
-            new_image_url=data.get('image_url', prompt.image_url),
-            new_keywords=data.get('keywords', prompt.keywords)
-        )
-        db.session.add(req)
-        db.session.commit()
-        return jsonify({'success': True, 'message': 'تم إرسال طلب التعديل للمراجعة'})
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Edit request error: {e}\n{traceback.format_exc()}")
-        return jsonify({'success': False, 'message': 'خطأ في إرسال الطلب'}), 500
-
-@app.route('/api/prompt/delete-request', methods=['POST'])
-@login_required
-def prompt_delete_request():
-    try:
-        data = request.get_json() or {}
-        if not validate_csrf_token(data.get('csrf_token')):
-            return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
-
-        user = current_user()
-        prompt_id = data.get('prompt_id')
-        prompt = PromptLibrary.query.get_or_404(prompt_id)
-
-        if prompt.user_id != user.id:
-            return jsonify({'success': False, 'message': 'غير مصرح'}), 403
-
-        existing = PromptDeleteRequest.query.filter_by(prompt_id=prompt_id, status='pending').first()
-        if existing:
-            return jsonify({'success': False, 'message': 'يوجد طلب حذف قيد المراجعة بالفعل'}), 400
-
-        req = PromptDeleteRequest(prompt_id=prompt_id, user_id=user.id)
-        db.session.add(req)
-        db.session.commit()
-        return jsonify({'success': True, 'message': 'تم إرسال طلب الحذف للمراجعة'})
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Delete request error: {e}\n{traceback.format_exc()}")
-        return jsonify({'success': False, 'message': 'خطأ في إرسال الطلب'}), 500
-
-# ==================== Admin ====================
-@app.route('/admin', methods=['GET', 'POST'])
-def admin_panel():
-    try:
-        if request.method == 'POST' and request.form.get('password') == Config.ADMIN_PASSWORD:
-            session.permanent = True
-            session['logged_in'] = True
-            return redirect(url_for('admin_panel'))
-
-        if session.get('logged_in'):
-            categories = Category.query.order_by(Category.sort_order).all()
-            library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
-            library_ads = LibraryAd.query.order_by(LibraryAd.created_at.desc()).all()
-            site_settings = SiteSetting.query.first()
-            contributions = UploadContribution.query.order_by(UploadContribution.created_at.desc()).all()
-            edit_requests = PromptEditRequest.query.filter_by(status='pending').order_by(PromptEditRequest.created_at.desc()).all()
-            delete_requests = PromptDeleteRequest.query.filter_by(status='pending').order_by(PromptDeleteRequest.created_at.desc()).all()
-
-            fifteen_days_ago = datetime.utcnow() - timedelta(days=15)
-            inactive_users_raw = User.query.filter(
-                User.last_active < fifteen_days_ago
-            ).order_by(User.last_active.asc()).all()
-
-            inactive_users = []
-            for user in inactive_users_raw:
-                last_prompt = PromptLibrary.query.filter_by(user_id=user.id).order_by(PromptLibrary.created_at.desc()).first()
-                inactive_users.append({
-                    'id': user.id,
-                    'name': user.name,
-                    'email': user.email,
-                    'avatar_url': user.avatar_url,
-                    'last_active_days': (datetime.utcnow() - user.last_active).days,
-                    'last_prompt_date': last_prompt.created_at if last_prompt else None
-                })
-
-            return render_template('admin.html',
-                                   categories=categories,
-                                   library_items=library_items,
-                                   library_ads=library_ads,
-                                   site_settings=site_settings,
-                                   contributions=contributions,
-                                   edit_requests=edit_requests,
-                                   delete_requests=delete_requests,
-                                   inactive_users=inactive_users,
-                                   csrf_token=generate_csrf_token())
-        return render_template('admin.html')
-    except Exception as e:
-        logger.error(f"Admin panel error: {e}\n{traceback.format_exc()}")
-        db.session.rollback()
-        return render_template('admin.html'), 500
-
-@app.route('/admin/logout')
-def admin_logout():
-    session.pop('logged_in', None)
-    return redirect(url_for('admin_panel'))
-
-# ---------- Admin: Edit/Delete Request Approval ----------
-@app.route('/admin/edit-request/<int:req_id>/approve', methods=['POST'])
-@admin_required
-def approve_edit_request(req_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        req = PromptEditRequest.query.get_or_404(req_id)
-        prompt = req.prompt
-        prompt.title = req.new_title
-        prompt.category = req.new_category
-        prompt.prompt_text = req.new_prompt_text
-        prompt.image_url = req.new_image_url or prompt.image_url
-        prompt.keywords = req.new_keywords
-        req.status = 'approved'
-        db.session.commit()
-        invalidate_library_cache()
-        flash('تمت الموافقة على طلب التعديل', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error approving edit request: {e}")
-        flash('خطأ', 'error')
-    return redirect(url_for('admin_panel'))
-
-@app.route('/admin/edit-request/<int:req_id>/reject', methods=['POST'])
-@admin_required
-def reject_edit_request(req_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        req = PromptEditRequest.query.get_or_404(req_id)
-        req.status = 'rejected'
-        db.session.commit()
-        flash('تم رفض طلب التعديل', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error rejecting edit request: {e}")
-        flash('خطأ', 'error')
-    return redirect(url_for('admin_panel'))
-
-@app.route('/admin/delete-request/<int:req_id>/approve', methods=['POST'])
-@admin_required
-def approve_delete_request(req_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        req = PromptDeleteRequest.query.get_or_404(req_id)
-        prompt = req.prompt
-        db.session.delete(prompt)
-        req.status = 'approved'
-        db.session.commit()
-        invalidate_library_cache()
-        flash('تم الحذف بنجاح', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error approving delete request: {e}")
-        flash('خطأ', 'error')
-    return redirect(url_for('admin_panel'))
-
-@app.route('/admin/delete-request/<int:req_id>/reject', methods=['POST'])
-@admin_required
-def reject_delete_request(req_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        req = PromptDeleteRequest.query.get_or_404(req_id)
-        req.status = 'rejected'
-        db.session.commit()
-        flash('تم رفض طلب الحذف', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error rejecting delete request: {e}")
-        flash('خطأ', 'error')
-    return redirect(url_for('admin_panel'))
-
-# ---------- Admin: User Management ----------
-@app.route('/admin/user/<int:user_id>/delete', methods=['POST'])
-@admin_required
-def delete_user(user_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        user = User.query.get_or_404(user_id)
-        PromptLibrary.query.filter_by(user_id=user.id).delete()
-        UploadContribution.query.filter_by(user_id=user.id).delete()
-        PromptEditRequest.query.filter_by(user_id=user.id).delete()
-        PromptDeleteRequest.query.filter_by(user_id=user.id).delete()
-        db.session.delete(user)
-        db.session.commit()
-        invalidate_library_cache()
-        flash('تم حذف الحساب بنجاح', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error deleting user: {e}")
-        flash('خطأ في حذف الحساب', 'error')
-    return redirect(url_for('admin_panel'))
-
-# ---------- Admin: Categories ----------
-@app.route('/admin/category/add', methods=['POST'])
-@admin_required
-def add_category():
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        name = request.form.get('name', '').strip().lower().replace(' ', '_')
-        display_name = request.form.get('display_name', '').strip()
-        icon = request.form.get('icon', 'bi-tag').strip()
-        sort_order = int(request.form.get('sort_order', 0))
-        if not name or not display_name:
-            flash('اسم التصنيف واسم العرض مطلوبان', 'error')
-            return redirect(url_for('admin_panel'))
-        if Category.query.filter_by(name=name).first():
-            flash('التصنيف موجود مسبقاً', 'error')
-            return redirect(url_for('admin_panel'))
-        cat = Category(name=name, display_name=display_name, icon=icon, sort_order=sort_order)
-        db.session.add(cat)
-        db.session.commit()
-        invalidate_library_cache()
-        flash('تمت إضافة التصنيف', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error adding category: {e}")
-        flash('خطأ في إضافة التصنيف', 'error')
-    return redirect(url_for('admin_panel'))
-
-@app.route('/admin/category/<int:category_id>/delete', methods=['POST'])
-@admin_required
-def delete_category(category_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        cat = Category.query.get_or_404(category_id)
-        PromptLibrary.query.filter_by(category=cat.name).update({'category': 'general'})
-        db.session.delete(cat)
-        db.session.commit()
-        invalidate_library_cache()
-        flash('تم حذف التصنيف', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error deleting category: {e}")
-        flash('خطأ في حذف التصنيف', 'error')
-    return redirect(url_for('admin_panel'))
-
-# ---------- Admin: Library ----------
-@app.route('/admin/library/add', methods=['POST'])
-@admin_required
-def add_library_item():
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    publisher_link = request.form.get('publisher_link', '').strip()
-    if publisher_link and not is_valid_publisher_link(publisher_link):
-        flash('رابط الناشر غير صالح', 'error')
-        return redirect(url_for('admin_panel'))
-    try:
-        item = PromptLibrary(
-            title=request.form.get('title'),
-            category=request.form.get('category', 'general'),
-            image_url=request.form.get('image_url', ''),
-            prompt_text=request.form.get('prompt_text'),
-            publisher=request.form.get('publisher', '').strip() or None,
-            publisher_link=publisher_link or None,
-            keywords=request.form.get('keywords', '').strip() or None
-        )
-        db.session.add(item)
-        db.session.commit()
-        invalidate_library_cache()
-        flash('تمت إضافة البرومبت', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error adding library item: {e}")
-        flash('خطأ في إضافة البرومبت', 'error')
-    return redirect(url_for('admin_panel'))
-
-@app.route('/admin/library/<int:item_id>/delete', methods=['POST'])
-@admin_required
-def delete_library_item(item_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        item = PromptLibrary.query.get_or_404(item_id)
-        db.session.delete(item)
-        db.session.commit()
-        invalidate_library_cache()
-        flash('تم حذف البرومبت', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error deleting library item: {e}")
-        flash('خطأ', 'error')
-    return redirect(url_for('admin_panel'))
-
-@app.route('/admin/library/<int:item_id>/update', methods=['POST'])
-@admin_required
-def update_library_item(item_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        item = PromptLibrary.query.get_or_404(item_id)
-        publisher_link = request.form.get('publisher_link')
-        if publisher_link is not None:
-            publisher_link = publisher_link.strip()
-            if publisher_link and not is_valid_publisher_link(publisher_link):
-                flash('رابط الناشر غير صالح', 'error')
-                return redirect(url_for('admin_panel'))
-            item.publisher_link = publisher_link or None
-        item.title = request.form.get('title', item.title)
-        item.category = request.form.get('category', item.category)
-        item.image_url = request.form.get('image_url', item.image_url)
-        item.prompt_text = request.form.get('prompt_text', item.prompt_text)
-        item.publisher = request.form.get('publisher', item.publisher) or None
-        item.keywords = request.form.get('keywords', item.keywords)
-        db.session.commit()
-        invalidate_library_cache()
-        flash('تم تحديث البرومبت', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error updating library item: {e}")
-        flash('خطأ', 'error')
-    return redirect(url_for('admin_panel'))
-
-# ---------- Admin: Contributions ----------
-@app.route('/admin/contribution/<int:contrib_id>/approve', methods=['POST'])
-@admin_required
-def approve_contribution(contrib_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        contrib = UploadContribution.query.get_or_404(contrib_id)
-        item = PromptLibrary(
-            title=contrib.title,
-            category=contrib.category,
-            image_url=contrib.image_url or '',
-            prompt_text=contrib.prompt_text,
-            publisher=contrib.publisher_name,
-            publisher_link=contrib.publisher_link,
-            keywords=contrib.keywords,
-            user_id=contrib.user_id
-        )
-        db.session.add(item)
-        contrib.status = 'approved'
-        db.session.commit()
-        invalidate_library_cache()
-        flash('تمت الموافقة على المساهمة', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error approving contribution: {e}")
-        flash('خطأ', 'error')
-    return redirect(url_for('admin_panel'))
-
-@app.route('/admin/contribution/<int:contrib_id>/reject', methods=['POST'])
-@admin_required
-def reject_contribution(contrib_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        contrib = UploadContribution.query.get_or_404(contrib_id)
-        contrib.status = 'rejected'
-        db.session.commit()
-        flash('تم رفض المساهمة', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error rejecting contribution: {e}")
-        flash('خطأ', 'error')
-    return redirect(url_for('admin_panel'))
-
-@app.route('/admin/contribution/<int:contrib_id>/delete', methods=['POST'])
-@admin_required
-def delete_contribution(contrib_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        contrib = UploadContribution.query.get_or_404(contrib_id)
-        db.session.delete(contrib)
-        db.session.commit()
-        flash('تم حذف المساهمة', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error deleting contribution: {e}")
-        flash('خطأ', 'error')
-    return redirect(url_for('admin_panel'))
-
-# ---------- Admin: Library Ads ----------
-@app.route('/admin/library_ad/add', methods=['POST'])
-@admin_required
-def add_library_ad():
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        ad = LibraryAd(
-            title=request.form.get('title'),
-            text=request.form.get('text'),
-            image_url=request.form.get('image_url') or None,
-            button_text=request.form.get('button_text', 'زيارة'),
-            button_link=request.form.get('button_link'),
-            duration_seconds=int(request.form.get('duration_seconds', 5)),
-            is_active=request.form.get('is_active') == 'on',
-            is_mandatory=request.form.get('is_mandatory') == 'on'
-        )
-        db.session.add(ad)
-        db.session.commit()
-        flash('تمت إضافة الإعلان', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error adding library ad: {e}")
-        flash('خطأ في إضافة الإعلان', 'error')
-    return redirect(url_for('admin_panel'))
-
-@app.route('/admin/library_ad/<int:ad_id>/delete', methods=['POST'])
-@admin_required
-def delete_library_ad(ad_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        ad = LibraryAd.query.get_or_404(ad_id)
-        db.session.delete(ad)
-        db.session.commit()
-        flash('تم حذف الإعلان', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error deleting library ad: {e}")
-        flash('خطأ في حذف الإعلان', 'error')
-    return redirect(url_for('admin_panel'))
-
-@app.route('/admin/library_ad/<int:ad_id>/toggle', methods=['POST'])
-@admin_required
-def toggle_library_ad(ad_id):
-    if not validate_csrf_token(request.form.get('csrf_token')):
-        return "CSRF Error", 400
-    try:
-        ad = LibraryAd.query.get_or_404(ad_id)
-        ad.is_active = not ad.is_active
-        db.session.commit()
-        flash('تم تغيير حالة الإعلان', 'success')
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error toggling library ad: {e}")
-        flash('خطأ في تغيير حالة الإعلان', 'error')
-    return redirect(url_for('admin_panel'))
-
-# ---------- Admin: Site Settings ----------
-@app.route('/api/admin/update_site_settings', methods=['POST'])
-@admin_required
-def update_site_settings():
-    try:
-        if not validate_csrf_token(request.json.get('csrf_token')):
-            return jsonify({'error': 'CSRF Error'}), 400
-        s = SiteSetting.query.first()
-        s.status = request.json.get('status', 'on')
-        s.offline_message = request.json.get('offline_message', 'الموقع تحت الصيانة حالياً.')
-        db.session.commit()
-        return jsonify({'success': True})
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Site settings error: {e}")
-        return jsonify({'success': False}), 500
-
-@app.route('/api/admin/get_site_status')
-@admin_required
-def get_site_status():
-    try:
-        s = SiteSetting.query.first()
-        return jsonify({
-            'status': s.status if s else 'on',
-            'offline_message': s.offline_message if s else 'الموقع تحت الصيانة حالياً.'
-        })
-    except Exception as e:
-        logger.error(f"Get site status error: {e}")
-        return jsonify({'status': 'on', 'offline_message': 'الموقع تحت الصيانة حالياً.'})
-
-@app.route('/api/prompt/<int:item_id>/copy', methods=['POST'])
-@limiter.limit("30 per minute")
-def track_copy(item_id):
-    try:
-        item = PromptLibrary.query.get_or_404(item_id)
-        item.copy_count = (item.copy_count or 0) + 1
-        db.session.commit()
-        return jsonify({'success': True, 'copy_count': item.copy_count})
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error tracking copy: {e}")
-        return jsonify({'success': False}), 500
-
-@app.route('/api/prompt/<int:item_id>/share', methods=['POST'])
-@limiter.limit("30 per minute")
-def track_share(item_id):
-    try:
-        item = PromptLibrary.query.get_or_404(item_id)
-        item.share_count = (item.share_count or 0) + 1
-        db.session.commit()
-        return jsonify({'success': True, 'share_count': item.share_count})
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error tracking share: {e}")
-        return jsonify({'success': False}), 500
-
-@app.route('/api/prompt/<int:item_id>/like', methods=['POST'])
-@limiter.limit("30 per minute")
-def track_like(item_id):
-    try:
-        item = PromptLibrary.query.get_or_404(item_id)
-        item.likes = (item.likes or 0) + 1
-        db.session.commit()
-        return jsonify({'success': True, 'likes': item.likes})
-    except Exception as e:
-        db.session.rollback()
-        logger.error(f"Error tracking like: {e}")
-        return jsonify({'success': False}), 500
-
-@app.route('/api/mandatory-ad')
-def get_mandatory_ad():
-    try:
-        # Return the first active ad (same as the one shown in the banner)
-        ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
-        if not ad:
-            return jsonify({'success': False, 'message': 'No active ad'}), 404
-        return jsonify({
-            'success': True,
-            'ad': {
-                'id': ad.id,
-                'title': ad.title,
-                'text': ad.text,
-                'image_url': ad.image_url,
-                'button_text': ad.button_text,
-                'button_link': ad.button_link,
-                'duration_seconds': ad.duration_seconds
-            }
-        })
-    except Exception as e:
-        logger.error(f"Mandatory ad error: {e}")
-        return jsonify({'success': False}), 500
-
-# ---------- Health ----------
-@app.route('/health')
-def health_check():
-    try:
-        db.session.execute(text('SELECT 1'))
-        return jsonify({'status': 'ok', 'db': 'connected', 'timestamp': datetime.utcnow().isoformat()})
-    except Exception as e:
-        logger.error(f"Health check failed: {e}")
-        return jsonify({'status': 'error', 'db': 'disconnected', 'timestamp': datetime.utcnow().isoformat()}), 503
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)
+document.addEventListener('click',(e)=>{ const p=document.getElementById('accountPopover'), cap=document.getElementById('headerCapsule'); if(p&&p.classList.contains('open')&&!p.contains(e.target)&&!cap.contains(e.target)){ p.classList.remove('open'); cap.classList.remove('open'); } });
+function initCardsSelect(){ const s=document.getElementById('cardsPerRowSelect'); if(!s) return; const v=localStorage.getItem('cardsPerRow')||'4'; s.value=v; const h=document.getElementById('cardsPerRowHidden'); if(h) h.value=v; }
+function onCardsChange(v){ localStorage.setItem('cardsPerRow',v); const h=document.getElementById('cardsPerRowHidden'); if(h) h.value=v; }
+function updateAvatar(input){ if(input.files&&input.files[0]){ const r=new FileReader(); r.onload=(e)=>{ fetch('/update-avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({avatar_url:e.target.result, csrf_token: '{{ csrf_token }}'})}).then(()=>location.reload()).catch(()=>showToast('حدث خطأ في تحديث الصورة')); }; r.readAsDataURL(input.files[0]); } }
+function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
+function openEditModal(id,title,category,keywords,imageUrl,promptText){ document.getElementById('editPromptId').value=id; document.getElementById('editTitle').value=title; document.getElementById('editCategory').value=category; document.getElementById('editKeywords').value=keywords; document.getElementById('editImageUrl').value=imageUrl; document.getElementById('editPromptText').value=promptText; document.getElementById('editModal').classList.add('open'); }
+function closeEditModal(){ document.getElementById('editModal').classList.remove('open'); }
+function openDeleteModal(id,title){ document.getElementById('deletePromptId').value=id; document.getElementById('deletePromptTitle').textContent=title; document.getElementById('deleteModal').classList.add('open'); }
+function closeDeleteModal(){ document.getElementById('deleteModal').classList.remove('open'); }
+window.addEventListener('scroll',()=>{ const y=window.scrollY, nav=document.querySelector('.bottom-nav-wrapper'); if(nav){ if(y>lastScroll&&y>140) nav.style.transform='translateX(-50%) translateY(120%)'; else nav.style.transform='translateX(-50%) translateY(0)'; } lastScroll=y; const s=document.getElementById('scrollTopBtn'); if(s) s.classList.toggle('show',y>400); });
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ closeEditModal(); closeDeleteModal(); } });
+document.addEventListener('DOMContentLoaded',initCardsSelect);
+</script>
+</body>
+</html>
