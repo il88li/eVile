@@ -5,7 +5,7 @@ import secrets
 import traceback
 from datetime import datetime, timedelta
 from functools import wraps
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlencode
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -15,7 +15,7 @@ from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
 from flask_session import Session
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import inspect, text, func
+from sqlalchemy import inspect, text, func, or_
 from sqlalchemy.orm import joinedload
 from werkzeug.security import generate_password_hash, check_password_hash
 from google.oauth2 import id_token as google_id_token
@@ -177,6 +177,34 @@ class PromptDeleteRequest(db.Model):
     status = db.Column(db.String(20), default='pending')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+# ===== NEW: Error Log Model for 404 & Image tracking =====
+class ErrorLog(db.Model):
+    __tablename__ = 'error_logs'
+    id = db.Column(db.Integer, primary_key=True)
+    error_type = db.Column(db.String(20), default='404')
+    url = db.Column(db.String(500), nullable=False)
+    referer = db.Column(db.String(500), nullable=True)
+    user_agent = db.Column(db.String(300), nullable=True)
+    ip_address = db.Column(db.String(50), nullable=True)
+    details = db.Column(db.Text, nullable=True)  # e.g., "Image: /img/missing.png"
+    count = db.Column(db.Integer, default=1, nullable=False)
+    ignored = db.Column(db.Boolean, default=False)
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'error_type': self.error_type,
+            'url': self.url,
+            'referer': self.referer,
+            'details': self.details,
+            'count': self.count,
+            'ignored': self.ignored,
+            'last_seen': self.last_seen.isoformat() if self.last_seen else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+
 # ==================== App Factory ====================
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
 app.config.from_object(Config)
@@ -223,10 +251,56 @@ csp = {
 }
 Talisman(app, force_https=False, content_security_policy=csp)
 
-# ==================== Error Handlers ====================
+# ==================== Error Handlers (Enhanced with DB logging) ====================
+def log_error(error_type, url, details=None, status_code=404):
+    """Helper to log errors into the database with aggregation."""
+    try:
+        # Check if we already have this error (by url and details if provided)
+        query = ErrorLog.query.filter_by(error_type=error_type, url=url)
+        if details:
+            query = query.filter_by(details=details)
+        else:
+            query = query.filter(ErrorLog.details.is_(None))
+        
+        existing = query.first()
+        if existing:
+            existing.count += 1
+            existing.last_seen = datetime.utcnow()
+            # If it was ignored, but we see it again, maybe un-ignore? No, keep user choice.
+        else:
+            new_log = ErrorLog(
+                error_type=error_type,
+                url=url,
+                referer=request.referrer,
+                user_agent=request.user_agent.string if request.user_agent else None,
+                ip_address=request.remote_addr,
+                details=details,
+                count=1
+            )
+            db.session.add(new_log)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Failed to log error to DB: {e}")
+
 @app.errorhandler(404)
 def not_found(e):
     logger.warning(f"404: {request.url} - {request.remote_addr}")
+    
+    # Determine details based on path
+    details = None
+    path = request.path.lower()
+    if path.endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.ico')):
+        details = f"Image missing: {request.path}"
+    elif path.endswith(('.css', '.js', '.json')):
+        details = f"Asset missing: {request.path}"
+    else:
+        details = f"Page not found: {request.path}"
+    
+    # Log to database (ignore admin requests to avoid clutter)
+    if not request.path.startswith('/admin') and not request.path.startswith('/api'):
+        log_error('404', request.url, details)
+    
     if request.path.startswith('/api/'):
         return jsonify({'success': False, 'message': 'الصفحة غير موجودة'}), 404
     return render_template('index.html', site_status='on', categories=[], library_items=[], active_ad=None), 404
@@ -318,7 +392,7 @@ def ensure_db_initialized():
         if 'app_user' not in inspector.get_table_names():
             logger.info("Database tables not found, creating...")
             db.create_all()
-            # Run light migrations
+            # Run light migrations (including error_logs)
             required_columns = {
                 'prompt_library': {
                     'publisher_link': 'VARCHAR(500)',
@@ -682,8 +756,7 @@ def upload():
         logger.error(f"Upload GET error: {e}")
         return render_template('upload.html', categories=[], csrf_token=generate_csrf_token(), user=user)
 
-# ==================== NEW: Publish, Edit, Delete Requests ====================
-
+# ==================== Publish, Edit, Delete Requests ====================
 @app.route('/publish', methods=['POST'])
 @login_required
 def publish_prompt():
@@ -707,7 +780,6 @@ def publish_prompt():
             flash('يرجى ملء العنوان ونص البرومبت', 'error')
             return redirect(url_for('settings_page'))
         
-        # Save as contribution with pending status
         contribution = UploadContribution(
             title=title,
             category=category,
@@ -751,12 +823,10 @@ def edit_request():
             flash('البرومبت غير موجود', 'error')
             return redirect(url_for('settings_page'))
         
-        # Check ownership: the user must be the owner of the prompt
         if prompt.user_id != user.id:
             flash('غير مصرح لك بتعديل هذا البرومبت', 'error')
             return redirect(url_for('settings_page'))
         
-        # Check if there's already a pending edit request
         existing = PromptEditRequest.query.filter_by(prompt_id=prompt_id, status='pending').first()
         if existing:
             flash('يوجد طلب تعديل قيد المراجعة بالفعل', 'error')
@@ -834,7 +904,7 @@ def delete_request():
         flash('حدث خطأ في إرسال الطلب', 'error')
         return redirect(url_for('settings_page'))
 
-# ==================== Avatar update (from frontend) ====================
+# ==================== Avatar update ====================
 @app.route('/update-avatar', methods=['POST'])
 @login_required
 def update_avatar():
@@ -861,7 +931,79 @@ def update_avatar():
         logger.error(f"Update avatar error: {e}\n{traceback.format_exc()}")
         return jsonify({'success': False, 'message': 'حدث خطأ'}), 500
 
-# ==================== Admin: Edit Category ====================
+# ==================== Admin: Error Management ====================
+@app.route('/admin/errors')
+@admin_required
+def admin_get_errors():
+    """Return all error logs as JSON (excluding ignored ones by default)."""
+    show_ignored = request.args.get('show_ignored', 'false').lower() == 'true'
+    query = ErrorLog.query
+    if not show_ignored:
+        query = query.filter_by(ignored=False)
+    errors = query.order_by(ErrorLog.last_seen.desc()).all()
+    return jsonify([e.to_dict() for e in errors])
+
+@app.route('/admin/error/<int:error_id>/ignore', methods=['POST'])
+@admin_required
+def admin_ignore_error(error_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
+    try:
+        error = ErrorLog.query.get_or_404(error_id)
+        error.ignored = True
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'تم تجاهل الخطأ'})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error ignoring error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/admin/error/<int:error_id>/unignore', methods=['POST'])
+@admin_required
+def admin_unignore_error(error_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
+    try:
+        error = ErrorLog.query.get_or_404(error_id)
+        error.ignored = False
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'تم إلغاء تجاهل الخطأ'})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error unignoring error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/admin/error/<int:error_id>/delete', methods=['POST'])
+@admin_required
+def admin_delete_error(error_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
+    try:
+        error = ErrorLog.query.get_or_404(error_id)
+        db.session.delete(error)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'تم حذف الخطأ'})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/admin/errors/clear-all', methods=['POST'])
+@admin_required
+def admin_clear_all_errors():
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
+    try:
+        # Only delete non-ignored errors to be safe
+        ErrorLog.query.filter_by(ignored=False).delete()
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'تم حذف جميع الأخطاء'})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error clearing errors: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+# ==================== Admin: Category Edit ====================
 @app.route('/admin/category/<int:category_id>/edit', methods=['POST'])
 @admin_required
 def edit_category(category_id):
@@ -906,7 +1048,6 @@ def approve_contribution(contrib_id):
         return redirect(url_for('admin_panel'))
     try:
         contrib = UploadContribution.query.get_or_404(contrib_id)
-        # Create new prompt from contribution
         item = PromptLibrary(
             title=contrib.title,
             category=contrib.category,
@@ -1099,7 +1240,7 @@ def admin_logout():
     session.pop('logged_in', None)
     return redirect(url_for('admin_panel'))
 
-# ==================== Admin: Categories CRUD (Add/Delete) ====================
+# ==================== Admin: Categories CRUD ====================
 @app.route('/admin/category/add', methods=['POST'])
 @admin_required
 def add_category():
@@ -1147,7 +1288,7 @@ def delete_category(category_id):
         flash('خطأ في حذف التصنيف', 'error')
     return redirect(url_for('admin_panel'))
 
-# ==================== Admin: Library (Add/Delete/Update) ====================
+# ==================== Admin: Library ====================
 @app.route('/admin/library/add', methods=['POST'])
 @admin_required
 def add_library_item():
