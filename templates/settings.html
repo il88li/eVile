@@ -6,153 +6,109 @@
 <title>الإعدادات — UFOQ</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap');
-  :root {
-    --very-light:#FFFDFE; --soft-lavender:#DBB5EE; --deep-purple:#4C0585;
-    --glass-bg:rgba(255,253,254,0.78); --glass-border:rgba(219,181,238,0.35);
-    --shadow-sm:0 2px 8px rgba(76,5,133,0.06); --shadow-md:0 6px 24px rgba(76,5,133,0.10); --shadow-lg:0 12px 36px rgba(76,5,133,0.16);
-    --radius-sm:10px; --radius-md:14px; --radius-lg:20px;
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Tajawal',sans-serif;background:var(--very-light);color:var(--deep-purple);min-height:100vh;overflow-x:hidden;padding-top:66px;padding-bottom:82px;}
+  :root{--very-light:#FFFDFE;--soft-lavender:#DBB5EE;--deep-purple:#4C0585;--glass-bg:rgba(255,253,254,0.80);--glass-border:rgba(219,181,238,0.38);--shadow-sm:0 2px 8px rgba(76,5,133,0.06);--shadow-md:0 6px 24px rgba(76,5,133,0.12);--shadow-lg:0 14px 40px rgba(76,5,133,0.18);--radius-sm:10px;--radius-md:14px;--radius-lg:20px;}
+  *{margin:0;padding:0;box-sizing:border-box;} html{scroll-behavior:smooth;}
+  body{font-family:'Tajawal',sans-serif;background:var(--very-light);color:var(--deep-purple);min-height:100vh;overflow-x:hidden;padding-top:74px;padding-bottom:96px;}
+  .top-float{position:fixed;top:10px;left:12px;right:12px;z-index:1000;display:flex;flex-direction:column;align-items:stretch;gap:8px;pointer-events:none;} .top-float>*{pointer-events:auto;}
+  .header-capsule{align-self:center;display:flex;align-items:center;gap:8px;padding:5px 8px 5px 14px;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:50px;box-shadow:var(--shadow-md);cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);max-width:92vw;}
+  .header-capsule:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--soft-lavender);}
+  .hc-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--soft-lavender);flex-shrink:0;} .hc-avatar-text{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;font-weight:800;font-size:.78rem;border:none;}
+  .hc-name{font-size:.82rem;font-weight:700;color:var(--deep-purple);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;} .hc-chevron{width:14px;height:14px;opacity:.5;transition:transform .3s;} .header-capsule.open .hc-chevron{transform:rotate(180deg);}
+  .account-popover{position:fixed;top:62px;left:50%;transform:translateX(-50%) translateY(-10px) scale(.96);width:330px;max-width:calc(100vw - 24px);background:var(--glass-bg);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:18px;z-index:1200;opacity:0;visibility:hidden;transition:all .3s cubic-bezier(.34,1.56,.64,1);}
+  .account-popover.open{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0) scale(1);}
+  .ap-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--glass-border);} .ap-avatar-wrap{position:relative;cursor:pointer;flex-shrink:0;} .ap-avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2.5px solid var(--soft-lavender);}
+  .ap-avatar-ph{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--soft-lavender),rgba(76,5,133,.2));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.2rem;color:var(--deep-purple);border:2.5px solid var(--soft-lavender);}
+  .ap-avatar-wrap .ap-cam{position:absolute;inset:0;border-radius:50%;background:rgba(76,5,133,.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .25s;} .ap-avatar-wrap:hover .ap-cam{opacity:1;} .ap-avatar-wrap .ap-cam svg{width:18px;height:18px;color:#fff;}
+  .ap-meta{min-width:0;} .ap-name{font-size:.95rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;} .ap-email{font-size:.72rem;color:rgba(76,5,133,.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .ap-form label{display:block;font-size:.72rem;font-weight:600;margin-bottom:5px;color:var(--deep-purple);} .ap-form .ap-field{margin-bottom:11px;}
+  .ap-form input,.ap-form textarea,.ap-form select{width:100%;padding:8px 11px;border:1.5px solid var(--glass-border);border-radius:var(--radius-sm);font-family:'Tajawal',sans-serif;font-size:.8rem;background:var(--very-light);color:var(--deep-purple);outline:none;transition:all .25s;}
+  .ap-form input:focus,.ap-form textarea:focus,.ap-form select:focus{border-color:var(--deep-purple);box-shadow:0 0 0 3px rgba(76,5,133,.08);} .ap-form textarea{resize:vertical;min-height:54px;}
+  .ap-actions{display:flex;gap:8px;margin-top:4px;} .ap-save{flex:1;padding:9px;border:none;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;font-family:'Tajawal',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .25s;} .ap-save:hover{transform:translateY(-1px);box-shadow:var(--shadow-md);}
+  .ap-link{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:9px;border-radius:var(--radius-sm);background:rgba(219,181,238,.22);color:var(--deep-purple);text-decoration:none;font-size:.78rem;font-weight:600;transition:all .25s;} .ap-link svg{width:14px;height:14px;} .ap-link:hover{background:rgba(219,181,238,.4);}
+  .ap-logout{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;padding:8px;border-radius:var(--radius-sm);border:1.5px solid rgba(255,71,87,.3);background:rgba(255,71,87,.07);color:#FF4757;text-decoration:none;font-size:.76rem;font-weight:600;transition:all .25s;} .ap-logout svg{width:14px;height:14px;} .ap-logout:hover{background:rgba(255,71,87,.15);}
+  .search-panel{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .35s cubic-bezier(.4,0,.2,1),opacity .3s;} .search-panel.open{grid-template-rows:1fr;opacity:1;}
+  .search-panel-inner{overflow:visible;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;box-shadow:var(--shadow-md);padding:9px 11px;} .search-panel:not(.open) .search-panel-inner{padding-top:0;padding-bottom:0;border-color:transparent;box-shadow:none;}
+  .search-input-wrap{position:relative;display:flex;align-items:center;} .search-input-wrap input{width:100%;padding:9px 76px 9px 32px;border:1.5px solid var(--soft-lavender);border-radius:50px;font-family:'Tajawal',sans-serif;font-size:.82rem;background:var(--very-light);color:var(--deep-purple);outline:none;transition:all .25s;} .search-input-wrap input:focus{border-color:var(--deep-purple);box-shadow:0 0 0 3px rgba(76,5,133,.08);} .search-input-wrap input::placeholder{color:rgba(76,5,133,.4);}
+  .search-icon-inside{position:absolute;right:11px;color:var(--deep-purple);opacity:.45;display:flex;} .search-icon-inside svg{width:15px;height:15px;}
+  .search-cat-chip{position:absolute;left:5px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:3px;padding:3px 7px;border-radius:50px;border:1px solid var(--soft-lavender);background:rgba(219,181,238,.22);color:var(--deep-purple);font-family:'Tajawal',sans-serif;font-size:.6rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;} .search-cat-chip svg{width:9px;height:9px;} .search-cat-chip:hover{background:var(--soft-lavender);}
+  .search-cat-dropdown{position:fixed;z-index:1300;min-width:150px;max-height:240px;overflow-y:auto;background:var(--very-light);border:1px solid var(--glass-border);border-radius:12px;box-shadow:var(--shadow-lg);padding:4px;opacity:0;visibility:hidden;transform:translateY(-6px);transition:all .2s;} .search-cat-dropdown.open{opacity:1;visibility:visible;transform:translateY(0);}
+  .search-cat-dropdown a{display:flex;align-items:center;gap:7px;padding:7px 10px;text-decoration:none;color:var(--deep-purple);font-size:.74rem;font-weight:600;border-radius:8px;transition:all .18s;} .search-cat-dropdown a:hover,.search-cat-dropdown a.active{background:rgba(219,181,238,.25);} .search-cat-dropdown a .dot{width:6px;height:6px;border-radius:50%;background:var(--deep-purple);opacity:0;transition:opacity .2s;} .search-cat-dropdown a.active .dot{opacity:1;}
+  .bottom-nav{position:fixed;bottom:12px;left:12px;right:12px;z-index:1000;display:flex;align-items:center;justify-content:space-around;gap:6px;padding:8px 12px;background:var(--glass-bg);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid var(--glass-border);border-radius:26px;box-shadow:var(--shadow-lg);overflow-x:auto;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--soft-lavender) transparent;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+  .bottom-nav::-webkit-scrollbar{height:4px;} .bottom-nav::-webkit-scrollbar-track{background:transparent;} .bottom-nav::-webkit-scrollbar-thumb{background:var(--soft-lavender);border-radius:4px;} .bottom-nav.hidden{transform:translateY(160%);}
+  .bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:rgba(76,5,133,.55);font-size:.6rem;font-weight:600;padding:2px 6px;flex-shrink:0;cursor:pointer;background:none;border:none;font-family:'Tajawal',sans-serif;}
+  .bn-circle{width:46px;height:46px;border-radius:50%;background:rgba(219,181,238,.28);display:flex;align-items:center;justify-content:center;color:var(--deep-purple);transition:all .4s cubic-bezier(.34,1.56,.64,1);} .bn-circle svg{width:20px;height:20px;}
+  .bn-item:hover .bn-circle{transform:translateY(-5px) scale(1.07);background:var(--soft-lavender);} .bn-item.active .bn-circle{background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;box-shadow:0 7px 18px rgba(76,5,133,.4);transform:translateY(-5px);} .bn-item.active{color:var(--deep-purple);}
+  .search-btn{position:relative;} .search-btn .badge{position:absolute;top:-3px;right:2px;background:linear-gradient(135deg,#FF6B6B,#FF4757);color:#fff;font-size:.55rem;font-weight:700;min-width:15px;height:15px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;opacity:0;transform:scale(0);transition:all .3s cubic-bezier(.34,1.56,.64,1);} .search-btn .badge.show{opacity:1;transform:scale(1);} .search-btn.active .icon-search{display:none;} .search-btn:not(.active) .icon-close{display:none;}
 
-  .top-float{position:fixed;top:10px;left:10px;right:10px;z-index:1000;display:flex;flex-direction:column;gap:7px;pointer-events:none;}
-  .top-float>*{pointer-events:auto;}
-  .navbar{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:18px;box-shadow:var(--shadow-md);}
-  .nav-logo{font-size:1.25rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none;letter-spacing:-0.5px;}
-  .nav-user{display:flex;align-items:center;gap:8px;}
-  .nav-user-name{font-size:0.78rem;font-weight:700;color:var(--deep-purple);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .nav-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--soft-lavender);}
-  .nav-avatar-text{display:flex;align-items:center;justify-content:center;background:var(--soft-lavender);color:var(--deep-purple);font-weight:800;font-size:0.75rem;}
-
-  .search-panel{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .35s cubic-bezier(0.4,0,0.2,1),opacity .3s;}
-  .search-panel.open{grid-template-rows:1fr;opacity:1;}
-  .search-panel-inner{overflow:visible;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;box-shadow:var(--shadow-md);padding:9px 11px;}
-  .search-panel:not(.open) .search-panel-inner{padding-top:0;padding-bottom:0;border-color:transparent;box-shadow:none;}
-  .search-input-wrap{position:relative;display:flex;align-items:center;}
-  .search-input-wrap input{width:100%;padding:9px 76px 9px 32px;border:1.5px solid var(--soft-lavender);border-radius:50px;font-family:'Tajawal',sans-serif;font-size:0.82rem;background:var(--very-light);color:var(--deep-purple);outline:none;transition:all .25s;}
-  .search-input-wrap input:focus{border-color:var(--deep-purple);box-shadow:0 0 0 3px rgba(76,5,133,0.08);}
-  .search-input-wrap input::placeholder{color:rgba(76,5,133,0.4);}
-  .search-icon-inside{position:absolute;right:11px;color:var(--deep-purple);opacity:0.45;display:flex;}
-  .search-icon-inside svg{width:15px;height:15px;}
-  .search-cat-chip{position:absolute;left:5px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:3px;padding:3px 7px;border-radius:50px;border:1px solid var(--soft-lavender);background:rgba(219,181,238,0.22);color:var(--deep-purple);font-family:'Tajawal',sans-serif;font-size:0.6rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s;}
-  .search-cat-chip svg{width:9px;height:9px;}
-  .search-cat-chip:hover{background:var(--soft-lavender);}
-  .search-cat-dropdown{position:fixed;z-index:1200;min-width:140px;max-height:230px;overflow-y:auto;background:var(--very-light);border:1px solid var(--glass-border);border-radius:12px;box-shadow:var(--shadow-lg);padding:4px;opacity:0;visibility:hidden;transform:translateY(-6px);transition:all .2s;}
-  .search-cat-dropdown.open{opacity:1;visibility:visible;transform:translateY(0);}
-  .search-cat-dropdown a{display:flex;align-items:center;gap:7px;padding:7px 10px;text-decoration:none;color:var(--deep-purple);font-size:0.74rem;font-weight:600;border-radius:8px;transition:all .18s;}
-  .search-cat-dropdown a:hover,.search-cat-dropdown a.active{background:rgba(219,181,238,0.25);}
-  .search-cat-dropdown a .dot{width:6px;height:6px;border-radius:50%;background:var(--deep-purple);opacity:0;transition:opacity .2s;}
-  .search-cat-dropdown a.active .dot{opacity:1;}
-
-  .bottom-nav{position:fixed;bottom:10px;left:10px;right:10px;z-index:1000;display:flex;align-items:center;justify-content:space-around;padding:5px 8px;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:22px;box-shadow:var(--shadow-lg);}
-  .bottom-nav a{display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:rgba(76,5,133,0.5);font-size:0.6rem;font-weight:600;padding:5px 14px;border-radius:14px;transition:all .25s;}
-  .bottom-nav a svg{width:19px;height:19px;}
-  .bottom-nav a:hover{color:var(--deep-purple);}
-  .bottom-nav a.active{color:var(--deep-purple);background:rgba(219,181,238,0.35);}
-  .search-btn{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;color:rgba(76,5,133,0.5);font-family:'Tajawal',sans-serif;font-size:0.6rem;font-weight:600;padding:5px 14px;border-radius:14px;cursor:pointer;transition:all .25s;}
-  .search-btn svg{width:19px;height:19px;transition:all .3s;}
-  .search-btn:hover{color:var(--deep-purple);}
-  .search-btn.active{color:var(--deep-purple);background:rgba(219,181,238,0.35);}
-  .search-btn.active .icon-search{display:none;}
-  .search-btn:not(.active) .icon-close{display:none;}
-  .search-btn .badge{position:absolute;top:-2px;right:6px;background:linear-gradient(135deg,#FF6B6B,#FF4757);color:white;font-size:0.55rem;font-weight:700;min-width:15px;height:15px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;opacity:0;transform:scale(0);transition:all .3s cubic-bezier(0.4,0,0.2,1);}
-  .search-btn .badge.show{opacity:1;transform:scale(1);}
-
-  .settings-container{max-width:760px;margin:0 auto;padding:22px 14px 30px;position:relative;z-index:1;}
-  .settings-header{text-align:center;margin-bottom:22px;}
-  .settings-header h1{font-size:1.4rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:5px;}
-  .settings-header p{color:rgba(76,5,133,0.6);font-size:0.8rem;}
-  .settings-header .logout-btn{display:inline-flex;align-items:center;gap:5px;margin-top:11px;padding:6px 16px;border-radius:50px;border:1.5px solid rgba(255,71,87,0.3);background:rgba(255,71,87,0.08);color:#FF4757;font-family:'Tajawal',sans-serif;font-size:0.76rem;font-weight:600;text-decoration:none;transition:all .25s;}
-  .settings-header .logout-btn svg{width:13px;height:13px;}
-  .settings-header .logout-btn:hover{background:rgba(255,71,87,0.15);border-color:rgba(255,71,87,0.5);}
-
-  .profile-section{background:var(--very-light);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow-sm);}
-  .profile-header{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
-  .profile-avatar-wrap{position:relative;cursor:pointer;}
-  .profile-avatar{width:60px;height:60px;border-radius:50%;object-fit:cover;border:2.5px solid var(--soft-lavender);transition:all .25s;}
-  .profile-avatar-wrap:hover .profile-avatar{border-color:var(--deep-purple);transform:scale(1.04);}
-  .profile-avatar-wrap .avatar-overlay{position:absolute;inset:0;border-radius:50%;background:rgba(76,5,133,0.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .25s;}
-  .profile-avatar-wrap:hover .avatar-overlay{opacity:1;}
-  .profile-avatar-wrap .avatar-overlay svg{width:18px;height:18px;color:white;}
-  .profile-avatar-placeholder{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--soft-lavender),rgba(76,5,133,0.2));display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:900;color:var(--deep-purple);border:2.5px solid var(--soft-lavender);cursor:pointer;transition:all .25s;}
-  .profile-avatar-placeholder:hover{border-color:var(--deep-purple);transform:scale(1.04);}
-  .profile-info h2{font-size:1.05rem;font-weight:800;margin-bottom:3px;}
-  .profile-info p{font-size:0.72rem;color:rgba(76,5,133,0.5);}
-
-  .form-group{margin-bottom:14px;}
-  .form-group label{display:block;font-size:0.76rem;font-weight:600;margin-bottom:6px;color:var(--deep-purple);}
-  .form-group input,.form-group textarea,.form-group select{width:100%;padding:9px 13px;border:1.5px solid var(--glass-border);border-radius:var(--radius-sm);font-family:'Tajawal',sans-serif;font-size:0.84rem;background:var(--very-light);color:var(--deep-purple);outline:none;transition:all .25s;}
-  .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--deep-purple);box-shadow:0 0 0 3px rgba(76,5,133,0.08);}
-  .form-group textarea{resize:vertical;min-height:80px;}
-  .form-group .field-hint{font-size:0.68rem;color:rgba(76,5,133,0.4);margin-top:4px;}
-
+  .settings-container{max-width:760px;margin:0 auto;padding:18px 14px 30px;position:relative;z-index:1;}
+  .settings-brand{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:6px;} .settings-brand .sb-logo{font-size:1.3rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.5px;}
+  .settings-header{text-align:center;margin-bottom:22px;} .settings-header h1{font-size:1.4rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:5px;} .settings-header p{color:rgba(76,5,133,.6);font-size:.8rem;}
   .section-card{background:var(--very-light);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow-sm);}
-  .section-card h3{font-size:1rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-  .section-card h3 svg{width:18px;height:18px;color:var(--deep-purple);}
+  .section-card h3{font-size:1rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px;} .section-card h3 svg{width:18px;height:18px;color:var(--deep-purple);}
+  .form-group{margin-bottom:14px;} .form-group label{display:block;font-size:.76rem;font-weight:600;margin-bottom:6px;color:var(--deep-purple);}
+  .form-group input,.form-group textarea,.form-group select{width:100%;padding:9px 13px;border:1.5px solid var(--glass-border);border-radius:var(--radius-sm);font-family:'Tajawal',sans-serif;font-size:.84rem;background:var(--very-light);color:var(--deep-purple);outline:none;transition:all .25s;}
+  .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--deep-purple);box-shadow:0 0 0 3px rgba(76,5,133,.08);} .form-group textarea{resize:vertical;min-height:80px;} .form-group .field-hint{font-size:.68rem;color:rgba(76,5,133,.4);margin-top:4px;}
+  .submit-btn{width:100%;padding:11px;border:none;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;font-family:'Tajawal',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:6px;} .submit-btn svg{width:15px;height:15px;} .submit-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-md);}
 
-  .submit-btn{width:100%;padding:11px;border:none;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:var(--very-light);font-family:'Tajawal',sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:6px;}
-  .submit-btn svg{width:15px;height:15px;}
-  .submit-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-md);}
-
-  .prompt-list{display:flex;flex-direction:column;gap:9px;}
-  .prompt-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(219,181,238,0.08);border:1px solid var(--glass-border);border-radius:var(--radius-sm);transition:all .25s;gap:8px;}
-  .prompt-item:hover{border-color:var(--soft-lavender);background:rgba(219,181,238,0.15);}
+  /* My prompts list */
+  .prompt-list{display:flex;flex-direction:column;gap:10px;}
+  .prompt-item{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(219,181,238,.08);border:1px solid var(--glass-border);border-radius:var(--radius-md);transition:all .25s;}
+  .prompt-item:hover{border-color:var(--soft-lavender);background:rgba(219,181,238,.15);}
   .prompt-item-info{flex:1;min-width:0;}
-  .prompt-item-info h4{font-size:0.82rem;font-weight:700;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .prompt-item-info .prompt-stats{display:flex;gap:10px;font-size:0.68rem;color:rgba(76,5,133,0.5);}
-  .prompt-item-info .prompt-stats svg{width:11px;height:11px;display:inline-block;vertical-align:middle;margin-left:2px;}
-  .prompt-status{padding:3px 10px;border-radius:50px;font-size:0.62rem;font-weight:600;white-space:nowrap;}
-  .prompt-status.published{background:rgba(39,174,96,0.15);color:#27AE60;}
-  .prompt-status.pending{background:rgba(245,176,65,0.15);color:#F5B041;}
-  .prompt-status.editing{background:rgba(52,152,219,0.15);color:#3498DB;}
-  .prompt-status.deleting{background:rgba(255,71,87,0.15);color:#FF4757;}
-  .prompt-actions{display:flex;gap:6px;}
-  .prompt-action-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--glass-border);background:var(--very-light);color:var(--deep-purple);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;}
-  .prompt-action-btn svg{width:13px;height:13px;}
-  .prompt-action-btn:hover{background:var(--soft-lavender);border-color:var(--soft-lavender);}
-  .prompt-action-btn.delete:hover{background:rgba(255,71,87,0.15);border-color:rgba(255,71,87,0.4);color:#FF4757;}
-  .empty-prompts{text-align:center;padding:30px 16px;color:rgba(76,5,133,0.4);font-size:0.84rem;}
-  .empty-prompts svg{width:38px;height:38px;margin-bottom:10px;opacity:0.4;}
+  .prompt-item-info h4{font-size:.84rem;font-weight:700;margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .prompt-stats{display:flex;gap:12px;font-size:.7rem;color:rgba(76,5,133,.6);font-weight:600;}
+  .prompt-stats .ps{display:flex;align-items:center;gap:4px;} .prompt-stats .ps svg{width:13px;height:13px;}
+  .prompt-status{padding:3px 10px;border-radius:50px;font-size:.62rem;font-weight:700;white-space:nowrap;flex-shrink:0;}
+  .prompt-status.published{background:rgba(39,174,96,.15);color:#27AE60;} .prompt-status.pending{background:rgba(245,176,65,.15);color:#D68910;} .prompt-status.editing{background:rgba(52,152,219,.15);color:#2E86C1;} .prompt-status.deleting{background:rgba(255,71,87,.15);color:#FF4757;}
+  .prompt-actions{display:flex;gap:6px;flex-shrink:0;}
+  .prompt-action-btn{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--glass-border);background:var(--very-light);color:var(--deep-purple);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;} .prompt-action-btn svg{width:14px;height:14px;}
+  .prompt-action-btn:hover{background:var(--soft-lavender);border-color:var(--soft-lavender);} .prompt-action-btn.delete:hover{background:rgba(255,71,87,.15);border-color:rgba(255,71,87,.4);color:#FF4757;}
+  .empty-prompts{text-align:center;padding:30px 16px;color:rgba(76,5,133,.4);font-size:.84rem;} .empty-prompts svg{width:38px;height:38px;margin-bottom:10px;opacity:.4;}
 
-  .modal-overlay{position:fixed;inset:0;z-index:9999;background:rgba(10,2,20,0.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all .3s;}
-  .modal-overlay.open{opacity:1;visibility:visible;}
-  .modal-box{background:var(--very-light);border-radius:var(--radius-lg);padding:22px;max-width:440px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow-lg);}
-  .modal-box h3{font-size:1.05rem;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
-  .modal-box h3 svg{width:18px;height:18px;}
-  .modal-actions{display:flex;gap:8px;margin-top:16px;}
-  .modal-btn{flex:1;padding:10px;border-radius:var(--radius-sm);border:none;font-family:'Tajawal',sans-serif;font-size:0.84rem;font-weight:600;cursor:pointer;transition:all .25s;}
-  .modal-btn.primary{background:var(--deep-purple);color:var(--very-light);}
-  .modal-btn.primary:hover{background:#6B1FB0;}
-  .modal-btn.secondary{background:rgba(219,181,238,0.2);color:var(--deep-purple);}
-  .modal-btn.secondary:hover{background:rgba(219,181,238,0.3);}
-  .modal-btn.danger{background:#FF4757;color:white;}
-  .modal-btn.danger:hover{background:#FF6B81;}
-
-  .toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%) translateY(80px);padding:9px 24px;background:var(--deep-purple);color:var(--very-light);border-radius:50px;font-family:'Tajawal',sans-serif;font-weight:600;font-size:0.82rem;z-index:99999;opacity:0;transition:all .4s cubic-bezier(0.4,0,0.2,1);box-shadow:var(--shadow-lg);}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-  .scroll-top{position:fixed;bottom:80px;right:14px;width:38px;height:38px;border-radius:50%;background:var(--deep-purple);color:var(--very-light);border:none;cursor:pointer;z-index:998;opacity:0;visibility:hidden;transform:translateY(16px);transition:all .3s;box-shadow:var(--shadow-md);display:flex;align-items:center;justify-content:center;}
-  .scroll-top svg{width:16px;height:16px;}
-  .scroll-top.show{opacity:1;visibility:visible;transform:translateY(0);}
-  .scroll-top:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
-  @media (max-width:600px){.settings-container{padding:16px 12px 24px;}.profile-section,.section-card{padding:16px;}.profile-header{flex-direction:column;text-align:center;}.prompt-item{flex-direction:column;align-items:flex-start;}.prompt-actions{align-self:flex-end;}.nav-user-name{max-width:80px;}}
+  .modal-overlay{position:fixed;inset:0;z-index:9999;background:rgba(10,2,20,.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all .3s;} .modal-overlay.open{opacity:1;visibility:visible;}
+  .modal-box{background:var(--very-light);border-radius:var(--radius-lg);padding:22px;max-width:440px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow-lg);} .modal-box h3{font-size:1.05rem;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px;} .modal-box h3 svg{width:18px;height:18px;}
+  .modal-actions{display:flex;gap:8px;margin-top:16px;} .modal-btn{flex:1;padding:10px;border-radius:var(--radius-sm);border:none;font-family:'Tajawal',sans-serif;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .25s;}
+  .modal-btn.primary{background:var(--deep-purple);color:#fff;} .modal-btn.primary:hover{background:#6B1FB0;} .modal-btn.secondary{background:rgba(219,181,238,.2);color:var(--deep-purple);} .modal-btn.secondary:hover{background:rgba(219,181,238,.3);} .modal-btn.danger{background:#FF4757;color:#fff;} .modal-btn.danger:hover{background:#FF6B81;}
+  .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(80px);padding:9px 24px;background:var(--deep-purple);color:#fff;border-radius:50px;font-family:'Tajawal',sans-serif;font-weight:600;font-size:.82rem;z-index:99999;opacity:0;transition:all .4s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-lg);} .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .scroll-top{position:fixed;bottom:84px;right:14px;width:38px;height:38px;border-radius:50%;background:var(--deep-purple);color:#fff;border:none;cursor:pointer;z-index:998;opacity:0;visibility:hidden;transform:translateY(16px);transition:all .3s;box-shadow:var(--shadow-md);display:flex;align-items:center;justify-content:center;} .scroll-top svg{width:16px;height:16px;} .scroll-top.show{opacity:1;visibility:visible;transform:translateY(0);} .scroll-top:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+  @media (max-width:600px){.settings-container{padding:14px 12px 24px;}.section-card{padding:16px;}.prompt-item{flex-wrap:wrap;}.prompt-actions{margin-right:auto;}.hc-name{max-width:90px;}}
 </style>
 </head>
 <body>
 
 <div class="top-float">
-  <nav class="navbar">
-    <a href="/" class="nav-logo">UFOQ</a>
-    <div class="nav-user">
-      {% if user %}
-        <span class="nav-user-name">{{ user.name }}</span>
-        {% if user.avatar_url %}
-        <img src="{{ user.avatar_url }}" alt="{{ user.name }}" class="nav-avatar">
-        {% else %}
-        <div class="nav-avatar nav-avatar-text">{{ user.name[0] if user.name else '؟' }}</div>
-        {% endif %}
-      {% endif %}
-    </div>
-  </nav>
+  <div class="header-capsule" id="headerCapsule" onclick="toggleAccountPopover(event)">
+    {% if user %}
+      {% if user.avatar_url %}<img src="{{ user.avatar_url }}" alt="{{ user.name }}" class="hc-avatar">{% else %}<span class="hc-avatar hc-avatar-text">{{ user.name[0] if user.name else '؟' }}</span>{% endif %}
+      <span class="hc-name">{{ user.name }}</span>
+      <svg class="hc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+    {% endif %}
+  </div>
+  {% if user %}
+  <div class="account-popover" id="accountPopover" onclick="event.stopPropagation()">
+    <form method="POST" action="/settings" class="ap-form">
+      <div class="ap-head">
+        <div class="ap-avatar-wrap" onclick="event.stopPropagation(); document.getElementById('avatarInput').click()">
+          {% if user.avatar_url %}<img src="{{ user.avatar_url }}" alt="{{ user.name }}" class="ap-avatar">{% else %}<div class="ap-avatar-ph">{{ user.name[0] if user.name else '؟' }}</div>{% endif %}
+          <div class="ap-cam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg></div>
+          <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="updateAvatar(this)">
+        </div>
+        <div class="ap-meta"><div class="ap-name">{{ user.name }}</div><div class="ap-email">{{ user.email }}</div></div>
+      </div>
+      <div class="ap-field"><label>الرابط الخاص بك</label><input type="url" name="profile_link" value="{{ user.profile_link or '' }}" placeholder="https://example.com"></div>
+      <div class="ap-field"><label>النبذة التعريفية</label><textarea name="bio" placeholder="اكتب نبذة قصيرة عنك...">{{ user.bio or '' }}</textarea></div>
+      <div class="ap-field"><label>عدد البطاقات في الصف الواحد</label>
+        <select id="cardsPerRowSelect" onchange="onCardsChange(this.value)"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
+        <input type="hidden" name="cards_per_row" id="cardsPerRowHidden">
+      </div>
+      <div class="ap-actions">
+        <button type="submit" class="ap-save">حفظ التغييرات</button>
+        <a href="/settings" class="ap-link" onclick="event.preventDefault()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg> برومبتاتي</a>
+      </div>
+    </form>
+    <a href="/logout" class="ap-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg> تسجيل الخروج</a>
+  </div>
+  {% endif %}
   <div class="search-panel" id="searchPanel">
     <div class="search-panel-inner">
       <div class="search-input-wrap">
@@ -175,37 +131,11 @@
 </div>
 
 <div class="settings-container">
-  <div class="settings-header">
-    <h1>الإعدادات</h1>
-    <p>إدارة حسابك وبرومبتاتك</p>
-    {% if user %}
-    <a href="/logout" class="logout-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg> تسجيل الخروج</a>
-    {% endif %}
-  </div>
+  <div class="settings-brand"><span class="sb-logo">UFOQ</span></div>
+  <div class="settings-header"><h1>الإعدادات</h1><p>إدارة مساهماتك وبرومبتاتك — تعديل بياناتك من بطاقة الحساب أعلاه</p></div>
 
   {% if user %}
-  <div class="profile-section">
-    <div class="profile-header">
-      <div class="profile-avatar-wrap" onclick="document.getElementById('avatarInput').click()">
-        {% if user.avatar_url %}
-        <img src="{{ user.avatar_url }}" alt="{{ user.name }}" class="profile-avatar">
-        {% else %}
-        <div class="profile-avatar-placeholder">{{ user.name[0] if user.name else '؟' }}</div>
-        {% endif %}
-        <div class="avatar-overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg></div>
-        <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="updateAvatar(this)">
-      </div>
-      <div class="profile-info"><h2>{{ user.name }}</h2><p>اضغط على الصورة لتغييرها</p></div>
-    </div>
-    <form method="POST" action="/settings">
-      <div class="form-group"><label>البريد الإلكتروني</label><input type="email" value="{{ user.email }}" readonly style="opacity:0.7;cursor:not-allowed;"></div>
-      <div class="form-group"><label>كلمة المرور</label><input type="password" value="••••••••" readonly style="opacity:0.7;cursor:not-allowed;"></div>
-      <div class="form-group"><label>الرابط الخاص بك</label><input type="url" name="profile_link" value="{{ user.profile_link or '' }}" placeholder="https://example.com"><div class="field-hint">يظهر عند الضغط على اسمك بجانب البرومبتات</div></div>
-      <div class="form-group"><label>النبذة التعريفية</label><textarea name="bio" placeholder="اكتب نبذة قصيرة عنك...">{{ user.bio or '' }}</textarea></div>
-      <button type="submit" class="submit-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> حفظ التغييرات</button>
-    </form>
-  </div>
-
+  <!-- Publish -->
   <div class="section-card">
     <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg> نشر برومبت جديد</h3>
     <form method="POST" action="/publish">
@@ -213,18 +143,25 @@
       <div class="form-group"><label>التصنيف</label><select name="category" required>{% for cat in categories %}<option value="{{ cat.name }}">{{ cat.display_name }}</option>{% endfor %}</select></div>
       <div class="form-group"><label>كلمات مفتاحية (اختياري)</label><input type="text" name="keywords" placeholder="افصل بين الكلمات بفاصلة"><div class="field-hint">تساعد في البحث والتصنيف</div></div>
       <div class="form-group"><label>رابط صورة توضيحية (اختياري)</label><input type="url" name="image_url" placeholder="https://example.com/image.jpg"></div>
-      <div class="form-group"><label>نص البرومبت</label><textarea name="prompt_text" required placeholder="اكتب نص البرومبت هنا..." style="min-height:120px;"></textarea></div>
+      <div class="form-group"><label>نص البرومبت</label><textarea name="prompt_text" required placeholder="اكتب نص البرومبت هنا..." style="min-height:120px;"></textarea><div class="field-hint">يراجع فريق الإدارة كل مساهمة قبل نشرها في المكتبة.</div></div>
       <button type="submit" class="submit-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="11" y1="2" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> إرسال المساهمة</button>
     </form>
   </div>
 
+  <!-- My prompts -->
   <div class="section-card">
     <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg> برومبتاتي المنشورة</h3>
     {% if my_prompts or my_pending or my_edit_requests or my_delete_requests %}
     <div class="prompt-list">
       {% for p in my_prompts %}
       <div class="prompt-item">
-        <div class="prompt-item-info"><h4>{{ p.title }}</h4><div class="prompt-stats"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> {{ p.copy_count or 0 }}</span><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line></svg> {{ p.share_count or 0 }}</span></div></div>
+        <div class="prompt-item-info">
+          <h4>{{ p.title }}</h4>
+          <div class="prompt-stats">
+            <span class="ps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> {{ p.copy_count or 0 }} نسخة</span>
+            <span class="ps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line></svg> {{ p.share_count or 0 }} مشاركة</span>
+          </div>
+        </div>
         <span class="prompt-status published">منشور</span>
         <div class="prompt-actions">
           <button class="prompt-action-btn" onclick="openEditModal('{{ p.id }}','{{ p.title|replace("'", "\\'") }}','{{ p.category }}','{{ p.keywords or "" }}','{{ p.image_url or "" }}','{{ p.prompt_text|replace("'", "\\'") }}')" title="تعديل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg></button>
@@ -232,9 +169,15 @@
         </div>
       </div>
       {% endfor %}
-      {% for c in my_pending %}<div class="prompt-item"><div class="prompt-item-info"><h4>{{ c.title }}</h4></div><span class="prompt-status pending">بانتظار المراجعة</span></div>{% endfor %}
-      {% for er in my_edit_requests %}<div class="prompt-item"><div class="prompt-item-info"><h4>{{ er.prompt.title }}</h4></div><span class="prompt-status editing">تعديل قيد المراجعة</span></div>{% endfor %}
-      {% for dr in my_delete_requests %}<div class="prompt-item"><div class="prompt-item-info"><h4>{{ dr.prompt.title }}</h4></div><span class="prompt-status deleting">حذف قيد المراجعة</span></div>{% endfor %}
+      {% for c in my_pending %}
+      <div class="prompt-item"><div class="prompt-item-info"><h4>{{ c.title }}</h4></div><span class="prompt-status pending">قيد المراجعة</span></div>
+      {% endfor %}
+      {% for er in my_edit_requests %}
+      <div class="prompt-item"><div class="prompt-item-info"><h4>{{ er.prompt.title }}</h4></div><span class="prompt-status editing">تعديل قيد المراجعة</span></div>
+      {% endfor %}
+      {% for dr in my_delete_requests %}
+      <div class="prompt-item"><div class="prompt-item-info"><h4>{{ dr.prompt.title }}</h4></div><span class="prompt-status deleting">حذف قيد المراجعة</span></div>
+      {% endfor %}
     </div>
     {% else %}
     <div class="empty-prompts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg><p>لم تنشر أي برومبت بعد</p></div>
@@ -243,6 +186,7 @@
   {% endif %}
 </div>
 
+<!-- Edit modal -->
 <div class="modal-overlay" id="editModal">
   <div class="modal-box">
     <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg> طلب تعديل برومبت</h3>
@@ -252,16 +196,17 @@
       <div class="form-group"><label>التصنيف</label><select name="category" id="editCategory" required>{% for cat in categories %}<option value="{{ cat.name }}">{{ cat.display_name }}</option>{% endfor %}</select></div>
       <div class="form-group"><label>كلمات مفتاحية</label><input type="text" name="keywords" id="editKeywords"></div>
       <div class="form-group"><label>رابط الصورة</label><input type="url" name="image_url" id="editImageUrl"></div>
-      <div class="form-group"><label>نص البرومبت</label><textarea name="prompt_text" id="editPromptText" required style="min-height:100px;"></textarea></div>
+      <div class="form-group"><label>نص البرومبت</label><textarea name="prompt_text" id="editPromptText" required style="min-height:100px;"></textarea><div class="field-hint">سيتم إرسال طلب التعديل إلى الإدارة للمراجعة قبل تطبيقه.</div></div>
       <div class="modal-actions"><button type="button" class="modal-btn secondary" onclick="closeEditModal()">إلغاء</button><button type="submit" class="modal-btn primary">إرسال طلب التعديل</button></div>
     </form>
   </div>
 </div>
 
+<!-- Delete modal -->
 <div class="modal-overlay" id="deleteModal">
   <div class="modal-box">
     <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#FF4757;"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg> تأكيد الحذف</h3>
-    <p style="color:rgba(76,5,133,0.7);margin-bottom:16px;line-height:1.7;font-size:0.84rem;">هل أنت متأكد من حذف هذا البرومبت؟<br><strong style="color:var(--deep-purple);" id="deletePromptTitle"></strong><br><br>سيُرسل طلب الحذف إلى الإدارة للمراجعة.</p>
+    <p style="color:rgba(76,5,133,.7);margin-bottom:16px;line-height:1.7;font-size:.84rem;">هل أنت متأكد من حذف هذا البرومبت؟<br><strong style="color:var(--deep-purple);" id="deletePromptTitle"></strong><br><br>سيتم إرسال طلب الحذف إلى الإدارة للمراجعة.</p>
     <form method="POST" action="/delete-request">
       <input type="hidden" name="prompt_id" id="deletePromptId">
       <div class="modal-actions"><button type="button" class="modal-btn secondary" onclick="closeDeleteModal()">إلغاء</button><button type="submit" class="modal-btn danger">تأكيد الحذف</button></div>
@@ -269,40 +214,39 @@
   </div>
 </div>
 
-<nav class="bottom-nav">
-  <a href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg> المكتبة</a>
-  <a href="/about"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg> عن الموقع</a>
-  {% if user %}
-  <a href="/settings" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg> الإعدادات</a>
-  {% endif %}
-  <button class="search-btn" id="searchToggle" aria-label="بحث">
-    <svg class="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
-    <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
-    <span>بحث</span><span class="badge" id="searchBadge">0</span>
-  </button>
+<nav class="bottom-nav" id="bottomNav">
+  <a href="/" class="bn-item"><span class="bn-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span>الرئيسية</a>
+  <a href="/settings" class="bn-item active"><span class="bn-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>الإعدادات</a>
+  <a href="/about" class="bn-item"><span class="bn-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg></span>حول</a>
+  <button class="bn-item search-btn" id="searchToggle" aria-label="بحث"><span class="bn-circle"><svg class="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg><svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></span>بحث<span class="badge" id="searchBadge">0</span></button>
 </nav>
 
 <div class="toast" id="toast">تم!</div>
 <button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"></path></svg></button>
 
 <script>
-let searchOpen=false;
+let searchOpen=false, currentSearchCategory='all', lastScroll=0;
+function toggleAccountPopover(e){ e.stopPropagation(); const p=document.getElementById('accountPopover'); if(!p) return; const c=document.getElementById('headerCapsule'); p.classList.toggle('open'); c.classList.toggle('open',p.classList.contains('open')); document.getElementById('searchCatDropdown').classList.remove('open'); }
+document.addEventListener('click',(e)=>{ const p=document.getElementById('accountPopover'), c=document.getElementById('headerCapsule'); if(p&&p.classList.contains('open')&&!p.contains(e.target)&&!c.contains(e.target)){ p.classList.remove('open'); c.classList.remove('open'); } });
+function initCardsSelect(){ const s=document.getElementById('cardsPerRowSelect'); if(!s) return; const v=localStorage.getItem('cardsPerRow')||'4'; s.value=v; const h=document.getElementById('cardsPerRowHidden'); if(h) h.value=v; }
+function onCardsChange(v){ localStorage.setItem('cardsPerRow',v); const h=document.getElementById('cardsPerRowHidden'); if(h) h.value=v; }
+function updateAvatar(input){ if(input.files&&input.files[0]){ const r=new FileReader(); r.onload=(e)=>{ fetch('/update-avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({avatar_url:e.target.result})}).then(()=>location.reload()).catch(()=>showToast('حدث خطأ في تحديث الصورة')); }; r.readAsDataURL(input.files[0]); } }
+function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
 const searchToggle=document.getElementById('searchToggle'), searchPanel=document.getElementById('searchPanel'), searchInput=document.getElementById('searchInput'), searchBadge=document.getElementById('searchBadge');
-searchToggle.addEventListener('click',()=>{ searchOpen=!searchOpen; searchToggle.classList.toggle('active',searchOpen); searchPanel.classList.toggle('open',searchOpen); if(searchOpen) setTimeout(()=>searchInput.focus(),300); else { searchInput.value=''; searchBadge.classList.remove('show'); } });
+searchToggle.addEventListener('click',()=>{ searchOpen=!searchOpen; searchToggle.classList.toggle('active',searchOpen); searchPanel.classList.toggle('open',searchOpen); if(searchOpen) setTimeout(()=>searchInput.focus(),300); else searchInput.value=''; });
+function setCategory(cat,label){ currentSearchCategory=cat; document.querySelectorAll('#searchCatDropdown a').forEach(a=>a.classList.toggle('active',a.dataset.cat===cat)); const l=document.getElementById('searchCatLabel'); if(l) l.textContent=(cat==='all'?'الكل':label); }
 const searchCatBtn=document.getElementById('searchCatBtn'), searchCatDropdown=document.getElementById('searchCatDropdown');
-function positionDropdown(){ const r=searchCatBtn.getBoundingClientRect(); searchCatDropdown.style.top=(r.bottom+6)+'px'; searchCatDropdown.style.left=r.left+'px'; }
+function positionDropdown(){ const r=searchCatBtn.getBoundingClientRect(); searchCatDropdown.style.top=(r.bottom+6)+'px'; searchCatDropdown.style.left=Math.max(8,r.left)+'px'; }
 searchCatBtn.addEventListener('click',(e)=>{ e.stopPropagation(); const w=!searchCatDropdown.classList.contains('open'); if(w) positionDropdown(); searchCatDropdown.classList.toggle('open'); });
 document.addEventListener('click',(e)=>{ if(!searchCatDropdown.contains(e.target)&&e.target!==searchCatBtn) searchCatDropdown.classList.remove('open'); });
-function selectSearchCategory(e,cat,label){ e.preventDefault(); document.getElementById('searchCatLabel').textContent=label; searchCatDropdown.querySelectorAll('a').forEach(a=>a.classList.remove('active')); e.currentTarget.classList.add('active'); searchCatDropdown.classList.remove('open'); }
-
+function selectSearchCategory(e,cat,label){ e.preventDefault(); setCategory(cat,label); searchCatDropdown.classList.remove('open'); }
 function openEditModal(id,title,category,keywords,imageUrl,promptText){ document.getElementById('editPromptId').value=id; document.getElementById('editTitle').value=title; document.getElementById('editCategory').value=category; document.getElementById('editKeywords').value=keywords; document.getElementById('editImageUrl').value=imageUrl; document.getElementById('editPromptText').value=promptText; document.getElementById('editModal').classList.add('open'); }
 function closeEditModal(){ document.getElementById('editModal').classList.remove('open'); }
 function openDeleteModal(id,title){ document.getElementById('deletePromptId').value=id; document.getElementById('deletePromptTitle').textContent=title; document.getElementById('deleteModal').classList.add('open'); }
 function closeDeleteModal(){ document.getElementById('deleteModal').classList.remove('open'); }
-function updateAvatar(input){ if(input.files&&input.files[0]){ const r=new FileReader(); r.onload=(e)=>{ fetch('/update-avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({avatar_url:e.target.result})}).then(()=>location.reload()).catch(()=>showToast('حدث خطأ في تحديث الصورة')); }; r.readAsDataURL(input.files[0]); } }
-function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
-window.addEventListener('scroll',()=>{ const b=document.getElementById('scrollTopBtn'); if(window.scrollY>400) b.classList.add('show'); else b.classList.remove('show'); });
+window.addEventListener('scroll',()=>{ const y=window.scrollY, n=document.getElementById('bottomNav'); if(n){ if(y>lastScroll&&y>140) n.classList.add('hidden'); else n.classList.remove('hidden'); } lastScroll=y; const s=document.getElementById('scrollTopBtn'); if(s) s.classList.toggle('show',y>400); });
 document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ closeEditModal(); closeDeleteModal(); } });
+document.addEventListener('DOMContentLoaded',initCardsSelect);
 </script>
 </body>
 </html>
