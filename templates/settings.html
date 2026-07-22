@@ -28,83 +28,6 @@
   .ap-link{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:9px;border-radius:var(--radius-sm);background:rgba(219,181,238,.22);color:var(--deep-purple);text-decoration:none;font-size:.78rem;font-weight:600;transition:all .25s;} .ap-link svg{width:14px;height:14px;} .ap-link:hover{background:rgba(219,181,238,.4);}
   .ap-logout{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;padding:8px;border-radius:var(--radius-sm);border:1.5px solid rgba(255,71,87,.3);background:rgba(255,71,87,.07);color:#FF4757;text-decoration:none;font-size:.76rem;font-weight:600;transition:all .25s;} .ap-logout svg{width:14px;height:14px;} .ap-logout:hover{background:rgba(255,71,87,.15);}
 
-  /* تم إزالة search-panel و search-cat-dropdown */
-
-  /* ===== Bottom Navigation (NEW GLASSMORPHISM) ===== */
-  .bottom-nav-wrapper {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    direction: ltr;
-  }
-  
-  .bottom-nav-main {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 6px 10px;
-    background: rgba(255, 248, 235, 0.55);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid rgba(255, 215, 140, 0.35);
-    border-radius: 40px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
-    transition: all 0.3s ease;
-  }
-  
-  .bn-item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    text-decoration: none;
-    color: var(--charcoal);
-    transition: all 0.25s cubic-bezier(.34,1.56,.64,1);
-    cursor: pointer;
-    background: transparent;
-    border: none;
-    font-family: 'Tajawal', sans-serif;
-    position: relative;
-  }
-  
-  .bn-item svg {
-    width: 18px;
-    height: 18px;
-    stroke: var(--charcoal);
-    stroke-width: 1.8;
-    fill: none;
-    transition: all 0.3s ease;
-  }
-  
-  .bn-item.active {
-    background: radial-gradient(circle at 40% 35%, #FCD34D, #F59E0B 70%, #D97706);
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.4), inset 0 0 8px rgba(255, 255, 255, 0.3);
-    transform: scale(1.05);
-  }
-  
-  .bn-item.active svg {
-    stroke: #FFFFFF;
-    stroke-width: 2.2;
-    fill: #FFFFFF;
-    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.1));
-  }
-  
-  .bn-item:not(.active):hover {
-    background: rgba(255, 215, 140, 0.2);
-    transform: translateY(-2px);
-  }
-  
-  .bn-item:not(.active):hover svg {
-    stroke: #D97706;
-  }
-
   .settings-container{max-width:760px;margin:0 auto;padding:18px 14px 30px;position:relative;z-index:1;}
   .settings-brand{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:6px;} .settings-brand .sb-logo{font-size:1.3rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.5px;}
   .settings-header{text-align:center;margin-bottom:22px;} .settings-header h1{font-size:1.4rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:5px;} .settings-header p{color:rgba(76,5,133,.6);font-size:.8rem;}
@@ -135,7 +58,16 @@
   .modal-btn.primary{background:var(--deep-purple);color:#fff;} .modal-btn.primary:hover{background:#6B1FB0;} .modal-btn.secondary{background:rgba(219,181,238,.2);color:var(--deep-purple);} .modal-btn.secondary:hover{background:rgba(219,181,238,.3);} .modal-btn.danger{background:#FF4757;color:#fff;} .modal-btn.danger:hover{background:#FF6B81;}
   .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(80px);padding:9px 24px;background:var(--deep-purple);color:#fff;border-radius:50px;font-family:'Tajawal',sans-serif;font-weight:600;font-size:.82rem;z-index:99999;opacity:0;transition:all .4s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-lg);} .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   .scroll-top{position:fixed;bottom:84px;right:14px;width:38px;height:38px;border-radius:50%;background:var(--deep-purple);color:#fff;border:none;cursor:pointer;z-index:998;opacity:0;visibility:hidden;transform:translateY(16px);transition:all .3s;box-shadow:var(--shadow-md);display:flex;align-items:center;justify-content:center;} .scroll-top svg{width:16px;height:16px;} .scroll-top.show{opacity:1;visibility:visible;transform:translateY(0);} .scroll-top:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
-  @media (max-width:600px){.settings-container{padding:14px 12px 24px;}.section-card{padding:16px;}.prompt-item{flex-wrap:wrap;}.prompt-actions{margin-right:auto;}.hc-name{max-width:90px;}}
+  @media (max-width:600px){.settings-container{padding:14px 12px 24px;}.section-card{padding:16px;}.prompt-item{flex-wrap:wrap;}.prompt-actions{margin-right:auto;}}
+  /* Bottom navigation style (same as index) */
+  .bottom-nav-wrapper{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;gap:8px;direction:ltr;}
+  .bottom-nav-main{display:flex;align-items:center;gap:4px;padding:6px 10px;background:rgba(255,248,235,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,215,140,0.35);border-radius:40px;box-shadow:0 8px 32px rgba(0,0,0,0.08),0 2px 8px rgba(0,0,0,0.04);transition:all .3s ease;}
+  .bn-item{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;text-decoration:none;color:var(--charcoal);transition:all .25s cubic-bezier(.34,1.56,.64,1);cursor:pointer;background:transparent;border:none;font-family:'Tajawal',sans-serif;position:relative;}
+  .bn-item svg{width:18px;height:18px;stroke:var(--charcoal);stroke-width:1.8;fill:none;transition:all .3s ease;}
+  .bn-item.active{background:radial-gradient(circle at 40% 35%,#FCD34D,#F59E0B 70%,#D97706);box-shadow:0 0 20px rgba(245,158,11,0.4),inset 0 0 8px rgba(255,255,255,0.3);transform:scale(1.05);}
+  .bn-item.active svg{stroke:#FFFFFF;stroke-width:2.2;fill:#FFFFFF;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.1));}
+  .bn-item:not(.active):hover{background:rgba(255,215,140,0.2);transform:translateY(-2px);}
+  .bn-item:not(.active):hover svg{stroke:#D97706;}
 </style>
 </head>
 <body>
@@ -179,7 +111,6 @@
     <a href="/logout" class="ap-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg> تسجيل الخروج</a>
   </div>
   {% endif %}
-  <!-- تم إزالة search-panel و search-cat-dropdown -->
 </div>
 
 <div class="settings-container">
@@ -191,6 +122,7 @@
   <div class="section-card">
     <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg> نشر برومبت جديد</h3>
     <form method="POST" action="/publish">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <div class="form-group"><label>عنوان البرومبت</label><input type="text" name="title" required placeholder="مثال: صورة قطة في غابة خيالية"></div>
       <div class="form-group"><label>التصنيف</label><select name="category" required>{% for cat in categories %}<option value="{{ cat.name }}">{{ cat.display_name }}</option>{% endfor %}</select></div>
       <div class="form-group"><label>كلمات مفتاحية (اختياري)</label><input type="text" name="keywords" placeholder="افصل بين الكلمات بفاصلة"><div class="field-hint">تساعد في البحث والتصنيف</div></div>
@@ -243,6 +175,7 @@
   <div class="modal-box">
     <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg> طلب تعديل برومبت</h3>
     <form method="POST" action="/edit-request">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <input type="hidden" name="prompt_id" id="editPromptId">
       <div class="form-group"><label>العنوان</label><input type="text" name="title" id="editTitle" required></div>
       <div class="form-group"><label>التصنيف</label><select name="category" id="editCategory" required>{% for cat in categories %}<option value="{{ cat.name }}">{{ cat.display_name }}</option>{% endfor %}</select></div>
@@ -260,13 +193,14 @@
     <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#FF4757;"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg> تأكيد الحذف</h3>
     <p style="color:rgba(76,5,133,.7);margin-bottom:16px;line-height:1.7;font-size:.84rem;">هل أنت متأكد من حذف هذا البرومبت؟<br><strong style="color:var(--deep-purple);" id="deletePromptTitle"></strong><br><br>سيتم إرسال طلب الحذف إلى الإدارة للمراجعة.</p>
     <form method="POST" action="/delete-request">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <input type="hidden" name="prompt_id" id="deletePromptId">
       <div class="modal-actions"><button type="button" class="modal-btn secondary" onclick="closeDeleteModal()">إلغاء</button><button type="submit" class="modal-btn danger">تأكيد الحذف</button></div>
     </form>
   </div>
 </div>
 
-<!-- ===== Bottom Navigation (بدون زر البحث) ===== -->
+<!-- ===== Bottom Navigation ===== -->
 <div class="bottom-nav-wrapper">
   <div class="bottom-nav-main">
     <a href="/" class="bn-item" aria-label="الرئيسية">
@@ -286,8 +220,6 @@
 
 <script>
 const isLoggedIn = {{ 'true' if user else 'false' }};
-const cachedAd = null;
-
 let lastScroll=0;
 
 function handleHeaderClick(e) {
@@ -307,7 +239,7 @@ function handleHeaderClick(e) {
 document.addEventListener('click',(e)=>{ const p=document.getElementById('accountPopover'), cap=document.getElementById('headerCapsule'); if(p&&p.classList.contains('open')&&!p.contains(e.target)&&!cap.contains(e.target)){ p.classList.remove('open'); cap.classList.remove('open'); } });
 function initCardsSelect(){ const s=document.getElementById('cardsPerRowSelect'); if(!s) return; const v=localStorage.getItem('cardsPerRow')||'4'; s.value=v; const h=document.getElementById('cardsPerRowHidden'); if(h) h.value=v; }
 function onCardsChange(v){ localStorage.setItem('cardsPerRow',v); const h=document.getElementById('cardsPerRowHidden'); if(h) h.value=v; }
-function updateAvatar(input){ if(input.files&&input.files[0]){ const r=new FileReader(); r.onload=(e)=>{ fetch('/update-avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({avatar_url:e.target.result})}).then(()=>location.reload()).catch(()=>showToast('حدث خطأ في تحديث الصورة')); }; r.readAsDataURL(input.files[0]); } }
+function updateAvatar(input){ if(input.files&&input.files[0]){ const r=new FileReader(); r.onload=(e)=>{ fetch('/update-avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({avatar_url:e.target.result, csrf_token: '{{ csrf_token }}'})}).then(()=>location.reload()).catch(()=>showToast('حدث خطأ في تحديث الصورة')); }; r.readAsDataURL(input.files[0]); } }
 function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
 function openEditModal(id,title,category,keywords,imageUrl,promptText){ document.getElementById('editPromptId').value=id; document.getElementById('editTitle').value=title; document.getElementById('editCategory').value=category; document.getElementById('editKeywords').value=keywords; document.getElementById('editImageUrl').value=imageUrl; document.getElementById('editPromptText').value=promptText; document.getElementById('editModal').classList.add('open'); }
 function closeEditModal(){ document.getElementById('editModal').classList.remove('open'); }
