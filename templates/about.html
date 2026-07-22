@@ -54,14 +54,14 @@
   .ap-logout:hover{background:rgba(255,71,87,.15);}
 
   /* Bottom Nav Compact */
-  .bottom-nav{position:fixed;bottom:8px;left:12px;right:12px;z-index:1000;display:flex;align-items:center;justify-content:space-around;gap:4px;padding:5px 8px;background:var(--glass-bg);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid var(--glass-border);border-radius:22px;box-shadow:var(--shadow-lg);overflow-x:auto;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--soft-lavender) transparent;transition:transform .45s cubic-bezier(.4,0,.2,1);}
-  .bottom-nav::-webkit-scrollbar{height:3px;}
+  .bottom-nav{position:fixed;bottom:6px;left:10px;right:10px;z-index:1000;display:flex;align-items:center;justify-content:space-around;gap:0;padding:3px 4px;background:var(--glass-bg);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid var(--glass-border);border-radius:16px;box-shadow:var(--shadow-lg);overflow-x:auto;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--soft-lavender) transparent;transition:transform .45s cubic-bezier(.4,0,.2,1);}
+  .bottom-nav::-webkit-scrollbar{height:2px;}
   .bottom-nav::-webkit-scrollbar-track{background:transparent;}
   .bottom-nav::-webkit-scrollbar-thumb{background:var(--soft-lavender);border-radius:4px;}
   .bottom-nav.hidden{transform:translateY(160%);}
-  .bn-item{display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:rgba(76,5,133,.55);font-size:.55rem;font-weight:600;padding:2px 5px;flex-shrink:0;cursor:pointer;background:none;border:none;font-family:'Tajawal',sans-serif;}
-  .bn-circle{width:36px;height:36px;border-radius:50%;background:rgba(219,181,238,.28);display:flex;align-items:center;justify-content:center;color:var(--deep-purple);transition:all .4s cubic-bezier(.34,1.56,.64,1);}
-  .bn-circle svg{width:16px;height:16px;}
+  .bn-item{display:flex;flex-direction:column;align-items:center;gap:0;text-decoration:none;color:rgba(76,5,133,.55);font-size:.46rem;font-weight:600;padding:1px 2px;flex-shrink:0;cursor:pointer;background:none;border:none;font-family:'Tajawal',sans-serif;}
+  .bn-circle{width:24px;height:24px;border-radius:50%;background:rgba(219,181,238,.28);display:flex;align-items:center;justify-content:center;color:var(--deep-purple);transition:all .4s cubic-bezier(.34,1.56,.64,1);}
+  .bn-circle svg{width:12px;height:12px;}
   .bn-item:hover .bn-circle{transform:translateY(-3px) scale(1.05);background:var(--soft-lavender);}
   .bn-item.active .bn-circle{background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;box-shadow:0 5px 14px rgba(76,5,133,.4);transform:translateY(-3px);}
   .bn-item.active{color:var(--deep-purple);}
@@ -134,14 +134,13 @@
 <!-- Header -->
 <div class="top-float">
   <div class="header-capsule" id="headerCapsule" onclick="toggleAccountPopover(event)">
+    <span class="hc-avatar-text" style="font-size:.7rem;">U</span>
+    <span class="hc-brand-logo">UFOQ</span>
     {% if user %}
-      {% if user.avatar_url %}<img src="{{ user.avatar_url }}" alt="{{ user.name }}" class="hc-avatar">{% else %}<span class="hc-avatar hc-avatar-text">{{ user.name[0] if user.name else '؟' }}</span>{% endif %}
-      <span class="hc-name">{{ user.name }}</span>
-      <svg class="hc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+      <span style="width:1px;height:18px;background:var(--glass-border);margin:0 4px;flex-shrink:0;"></span>
+      {% if user.avatar_url %}<img src="{{ user.avatar_url }}" alt="{{ user.name }}" class="hc-avatar" style="width:26px;height:26px;">{% else %}<span class="hc-avatar hc-avatar-text" style="width:26px;height:26px;font-size:.65rem;">{{ user.name[0] if user.name else '؟' }}</span>{% endif %}
     {% else %}
-      <span class="hc-avatar hc-avatar-text" style="font-size:.7rem;">U</span>
-      <span class="hc-brand-logo">UFOQ</span>
-      <a href="/sign" class="hc-login" onclick="event.stopPropagation()" style="margin-right:4px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" x2="3" y1="12" y2="12"></line></svg> دخول</a>
+      <a href="/sign" class="hc-login" onclick="event.stopPropagation()" style="margin-right:4px;padding:4px 12px;font-size:.72rem;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" x2="3" y1="12" y2="12"></line></svg> دخول</a>
     {% endif %}
   </div>
   {% if user %}
