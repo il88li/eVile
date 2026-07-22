@@ -185,7 +185,23 @@ db.init_app(app)
 migrate = Migrate(app, db)
 app.config['SESSION_SQLALCHEMY'] = db
 Session(app)  # was imported but never initialized -> sessions were never actually persisted server-side
-cache = Cache(app)
+
+# ====== Improved caching with Redis support ======
+if os.getenv('REDIS_URL'):
+    try:
+        from flask_caching.backends.redis import RedisCache
+        cache = Cache(app, config={
+            'CACHE_TYPE': 'RedisCache',
+            'CACHE_REDIS_URL': os.getenv('REDIS_URL'),
+            'CACHE_DEFAULT_TIMEOUT': 300
+        })
+        logger.info("Using Redis cache")
+    except Exception as e:
+        logger.warning(f"Redis cache failed: {e}, falling back to SimpleCache")
+        cache = Cache(app, config={'CACHE_TYPE': 'SimpleCache'})
+else:
+    cache = Cache(app, config={'CACHE_TYPE': 'SimpleCache'})
+
 limiter = Limiter(
     get_remote_address,
     app=app,
@@ -286,6 +302,16 @@ def admin_required(f):
             return redirect(url_for('admin_panel'))
         return f(*args, **kwargs)
     return decorated
+
+# ====== Safe redirect helper ======
+def safe_redirect(next_url, default='/'):
+    """Ensure redirect URL is internal (no open redirect vulnerability)"""
+    if not next_url:
+        return default
+    # Only allow relative paths starting with '/'
+    if next_url.startswith('/') and not next_url.startswith('//'):
+        return next_url
+    return default
 
 # ---------- Database initialization ----------
 _db_initialized = False
@@ -434,6 +460,7 @@ def auth_signup():
         name = (data.get('name') or '').strip()
         email = (data.get('email') or '').strip().lower()
         password = data.get('password') or ''
+        next_url = data.get('next')
 
         if not name or not email or not password:
             return jsonify({'success': False, 'message': 'يرجى ملء جميع الحقول'}), 400
@@ -449,7 +476,8 @@ def auth_signup():
         db.session.commit()
         session.permanent = True
         session['user_id'] = user.id
-        return jsonify({'success': True, 'message': 'تم إنشاء الحساب بنجاح', 'redirect': url_for('settings_page')})
+        redirect_to = safe_redirect(next_url, url_for('settings_page'))
+        return jsonify({'success': True, 'message': 'تم إنشاء الحساب بنجاح', 'redirect': redirect_to})
     except Exception as e:
         db.session.rollback()
         logger.error(f"Signup error: {e}\n{traceback.format_exc()}")
@@ -465,6 +493,7 @@ def auth_login():
 
         email = (data.get('email') or '').strip().lower()
         password = data.get('password') or ''
+        next_url = data.get('next')
         user = User.query.filter_by(email=email).first()
 
         if not user or not user.password_hash or not check_password_hash(user.password_hash, password):
@@ -474,7 +503,8 @@ def auth_login():
         session['user_id'] = user.id
         user.last_active = datetime.utcnow()
         db.session.commit()
-        return jsonify({'success': True, 'message': 'تم تسجيل الدخول بنجاح', 'redirect': url_for('settings_page')})
+        redirect_to = safe_redirect(next_url, url_for('settings_page'))
+        return jsonify({'success': True, 'message': 'تم تسجيل الدخول بنجاح', 'redirect': redirect_to})
     except Exception as e:
         db.session.rollback()
         logger.error(f"Login error: {e}\n{traceback.format_exc()}")
@@ -486,6 +516,7 @@ def auth_google():
     try:
         data = request.get_json() or {}
         token = data.get('credential')
+        next_url = data.get('next')
         if not token:
             return jsonify({'success': False, 'message': 'رمز جوجل مفقود'}), 400
 
@@ -513,7 +544,8 @@ def auth_google():
         session['user_id'] = user.id
         user.last_active = datetime.utcnow()
         db.session.commit()
-        return jsonify({'success': True, 'message': 'تم تسجيل الدخول عبر جوجل', 'redirect': url_for('settings_page')})
+        redirect_to = safe_redirect(next_url, url_for('settings_page'))
+        return jsonify({'success': True, 'message': 'تم تسجيل الدخول عبر جوجل', 'redirect': redirect_to})
     except Exception as e:
         db.session.rollback()
         logger.error(f"Google auth save error: {e}\n{traceback.format_exc()}")
@@ -663,7 +695,190 @@ def upload():
         logger.error(f"Upload GET error: {e}")
         return render_template('upload.html', categories=[], csrf_token=generate_csrf_token(), user=user)
 
-# ==================== Prompt Edit/Delete Requests ====================
+# ==================== New Routes for missing actions ====================
+
+@app.route('/publish', methods=['POST'])
+@login_required
+def publish_prompt():
+    try:
+        if not validate_csrf_token(request.form.get('csrf_token')):
+            flash('CSRF خطأ', 'error')
+            return redirect(url_for('settings_page'))
+        
+        user = current_user()
+        if not user:
+            flash('الرجاء تسجيل الدخول', 'error')
+            return redirect(url_for('sign_page'))
+        
+        title = request.form.get('title', '').strip()
+        category = request.form.get('category', 'general').strip()
+        prompt_text = request.form.get('prompt_text', '').strip()
+        image_url = request.form.get('image_url', '').strip()
+        keywords = request.form.get('keywords', '').strip()
+        
+        if not title or not prompt_text:
+            flash('يرجى ملء العنوان ونص البرومبت', 'error')
+            return redirect(url_for('settings_page'))
+        
+        contribution = UploadContribution(
+            title=title,
+            category=category,
+            prompt_text=prompt_text,
+            image_url=image_url or None,
+            publisher_name=user.name,
+            publisher_link=user.profile_link,
+            keywords=keywords or None,
+            user_id=user.id
+        )
+        db.session.add(contribution)
+        db.session.commit()
+        flash('تم إرسال مساهمتك بنجاح! سيتم مراجعتها قريباً.', 'success')
+        return redirect(url_for('settings_page'))
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Publish error: {e}\n{traceback.format_exc()}")
+        flash('حدث خطأ أثناء النشر', 'error')
+        return redirect(url_for('settings_page'))
+
+@app.route('/edit-request', methods=['POST'])
+@login_required
+def edit_request():
+    try:
+        if not validate_csrf_token(request.form.get('csrf_token')):
+            flash('CSRF خطأ', 'error')
+            return redirect(url_for('settings_page'))
+        
+        user = current_user()
+        if not user:
+            flash('الرجاء تسجيل الدخول', 'error')
+            return redirect(url_for('sign_page'))
+        
+        prompt_id = request.form.get('prompt_id')
+        prompt = PromptLibrary.query.get_or_404(prompt_id)
+        
+        if prompt.user_id != user.id:
+            flash('غير مصرح لك بتعديل هذا البرومبت', 'error')
+            return redirect(url_for('settings_page'))
+        
+        existing = PromptEditRequest.query.filter_by(prompt_id=prompt_id, status='pending').first()
+        if existing:
+            flash('يوجد طلب تعديل قيد المراجعة بالفعل', 'error')
+            return redirect(url_for('settings_page'))
+        
+        req = PromptEditRequest(
+            prompt_id=prompt_id,
+            user_id=user.id,
+            new_title=request.form.get('title', prompt.title),
+            new_category=request.form.get('category', prompt.category),
+            new_prompt_text=request.form.get('prompt_text', prompt.prompt_text),
+            new_image_url=request.form.get('image_url', prompt.image_url),
+            new_keywords=request.form.get('keywords', prompt.keywords)
+        )
+        db.session.add(req)
+        db.session.commit()
+        flash('تم إرسال طلب التعديل للمراجعة', 'success')
+        return redirect(url_for('settings_page'))
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Edit request error: {e}\n{traceback.format_exc()}")
+        flash('حدث خطأ في إرسال الطلب', 'error')
+        return redirect(url_for('settings_page'))
+
+@app.route('/delete-request', methods=['POST'])
+@login_required
+def delete_request():
+    try:
+        if not validate_csrf_token(request.form.get('csrf_token')):
+            flash('CSRF خطأ', 'error')
+            return redirect(url_for('settings_page'))
+        
+        user = current_user()
+        if not user:
+            flash('الرجاء تسجيل الدخول', 'error')
+            return redirect(url_for('sign_page'))
+        
+        prompt_id = request.form.get('prompt_id')
+        prompt = PromptLibrary.query.get_or_404(prompt_id)
+        
+        if prompt.user_id != user.id:
+            flash('غير مصرح لك بحذف هذا البرومبت', 'error')
+            return redirect(url_for('settings_page'))
+        
+        existing = PromptDeleteRequest.query.filter_by(prompt_id=prompt_id, status='pending').first()
+        if existing:
+            flash('يوجد طلب حذف قيد المراجعة بالفعل', 'error')
+            return redirect(url_for('settings_page'))
+        
+        req = PromptDeleteRequest(prompt_id=prompt_id, user_id=user.id)
+        db.session.add(req)
+        db.session.commit()
+        flash('تم إرسال طلب الحذف للمراجعة', 'success')
+        return redirect(url_for('settings_page'))
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Delete request error: {e}\n{traceback.format_exc()}")
+        flash('حدث خطأ في إرسال الطلب', 'error')
+        return redirect(url_for('settings_page'))
+
+@app.route('/update-avatar', methods=['POST'])
+@login_required
+def update_avatar():
+    try:
+        if not validate_csrf_token(request.json.get('csrf_token')):
+            return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
+        
+        user = current_user()
+        if not user:
+            return jsonify({'success': False, 'message': 'الجلسة منتهية'}), 401
+        
+        avatar_url = request.json.get('avatar_url', '').strip()
+        if avatar_url and not is_valid_publisher_link(avatar_url):
+            return jsonify({'success': False, 'message': 'رابط الصورة غير صالح'}), 400
+        
+        user.avatar_url = avatar_url or None
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'تم تحديث الصورة'})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Update avatar error: {e}\n{traceback.format_exc()}")
+        return jsonify({'success': False, 'message': 'حدث خطأ'}), 500
+
+@app.route('/admin/category/<int:category_id>/edit', methods=['POST'])
+@admin_required
+def edit_category(category_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        flash('CSRF خطأ', 'error')
+        return redirect(url_for('admin_panel'))
+    try:
+        cat = Category.query.get_or_404(category_id)
+        name = request.form.get('name', '').strip().lower().replace(' ', '_')
+        display_name = request.form.get('display_name', '').strip()
+        icon = request.form.get('icon', 'bi-tag').strip()
+        sort_order = int(request.form.get('sort_order', 0))
+        
+        if not name or not display_name:
+            flash('اسم التصنيف واسم العرض مطلوبان', 'error')
+            return redirect(url_for('admin_panel'))
+        
+        existing = Category.query.filter(Category.name == name, Category.id != category_id).first()
+        if existing:
+            flash('التصنيف موجود مسبقاً', 'error')
+            return redirect(url_for('admin_panel'))
+        
+        cat.name = name
+        cat.display_name = display_name
+        cat.icon = icon
+        cat.sort_order = sort_order
+        db.session.commit()
+        invalidate_library_cache()
+        flash('تم تحديث التصنيف', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Edit category error: {e}\n{traceback.format_exc()}")
+        flash('خطأ في تحديث التصنيف', 'error')
+    return redirect(url_for('admin_panel'))
+
+# ==================== Prompt Edit/Delete Requests (API) ====================
 @app.route('/api/prompt/edit-request', methods=['POST'])
 @login_required
 def prompt_edit_request():
