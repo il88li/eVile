@@ -118,6 +118,7 @@ class PromptLibrary(db.Model):
     keywords = db.Column(db.Text, nullable=True)
     copy_count = db.Column(db.Integer, default=0, nullable=False)
     share_count = db.Column(db.Integer, default=0, nullable=False)
+    likes = db.Column(db.Integer, default=0, nullable=False)   # <-- NEW
     user_id = db.Column(db.Integer, db.ForeignKey('app_user.id'), nullable=True)
     user = db.relationship('User', backref='prompts')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -297,6 +298,7 @@ def run_light_migrations():
             'copy_count': 'INTEGER NOT NULL DEFAULT 0',
             'share_count': 'INTEGER NOT NULL DEFAULT 0',
             'user_id': 'INTEGER',
+            'likes': 'INTEGER NOT NULL DEFAULT 0',   # <-- NEW
         },
         'upload_contribution': {
             'publisher_link': 'VARCHAR(500)',
@@ -1176,13 +1178,26 @@ def track_share(item_id):
         logger.error(f"Error tracking share: {e}")
         return jsonify({'success': False}), 500
 
+@app.route('/api/prompt/<int:item_id>/like', methods=['POST'])
+@limiter.limit("30 per minute")
+def track_like(item_id):
+    try:
+        item = PromptLibrary.query.get_or_404(item_id)
+        item.likes = (item.likes or 0) + 1
+        db.session.commit()
+        return jsonify({'success': True, 'likes': item.likes})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error tracking like: {e}")
+        return jsonify({'success': False}), 500
 
 @app.route('/api/mandatory-ad')
 def get_mandatory_ad():
     try:
-        ad = LibraryAd.query.filter_by(is_active=True, is_mandatory=True).order_by(LibraryAd.created_at.desc()).first()
+        # Return the first active ad (same as the one shown in the banner)
+        ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
         if not ad:
-            return jsonify({'success': False, 'message': 'No mandatory ad'}), 404
+            return jsonify({'success': False, 'message': 'No active ad'}), 404
         return jsonify({
             'success': True,
             'ad': {
