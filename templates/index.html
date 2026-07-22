@@ -477,7 +477,10 @@
   <div class="prompt-card" data-id="{{ item.id }}" data-keywords="{{ item.keywords or '' }}" data-category="{{ item.category }}" data-likes="{{ item.likes or 0 }}">
     <div class="card-image-wrap" onclick="openImageModal('{{ item.id }}','{{ item.image_url or '' }}','{{ item.title|replace("'", "\\'") }}',{{ item.copy_count or 0 }},{{ item.share_count or 0 }},{{ item.likes or 0 }})">
       {% if item.image_url %}
-      <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy">
+      <img src="{{ item.image_url }}" 
+           srcset="{{ item.image_url }}?w=300 300w, {{ item.image_url }}?w=600 600w, {{ item.image_url }}?w=900 900w"
+           sizes="(max-width: 600px) 90vw, (max-width: 900px) 45vw, 30vw"
+           alt="{{ item.title }}" loading="lazy">
       {% else %}
       <div style="width:100%;height:130px;background:linear-gradient(135deg,var(--soft-lavender),rgba(76,5,133,.15));display:flex;align-items:center;justify-content:center;opacity:.4;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg></div>
       {% endif %}
@@ -510,7 +513,12 @@
     <span style="color:var(--very-light);font-weight:600;font-size:.74rem;" id="modalTitle"></span>
     <div style="width:70px;"></div>
   </div>
-  <div class="modal-image-container"><img id="modalImage" src="" alt=""></div>
+  <div class="modal-image-container">
+    <img id="modalImage" src="" 
+         srcset="" 
+         sizes="(max-width: 600px) 95vw, (max-width: 1200px) 70vw, 50vw"
+         alt="">
+  </div>
   <div class="modal-action-bar">
     <div class="modal-action-item" id="modalCopyBtn" onclick="copyFromModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg><span>نسخ</span><span class="action-count" id="modalCopyCount">0</span></div>
     <div class="modal-action-separator"></div>
@@ -604,7 +612,7 @@ function applyCardsPerRow(){ const g=document.getElementById('masonryGrid'); if(
 window.addEventListener('resize',applyCardsPerRow);
 
 /* ===== Avatar ===== */
-function updateAvatar(input){ if(input.files&&input.files[0]){ const r=new FileReader(); r.onload=(e)=>{ fetch('/update-avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({avatar_url:e.target.result})}).then(()=>location.reload()).catch(()=>showToast('حدث خطأ في تحديث الصورة')); }; r.readAsDataURL(input.files[0]); } }
+function updateAvatar(input){ if(input.files&&input.files[0]){ const r=new FileReader(); r.onload=(e)=>{ fetch('/update-avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({avatar_url:e.target.result, csrf_token: '{{ csrf_token }}'})}).then(()=>location.reload()).catch(()=>showToast('حدث خطأ في تحديث الصورة')); }; r.readAsDataURL(input.files[0]); } }
 
 /* ===== Search toggle ===== */
 const searchToggle=document.getElementById('searchToggle'), searchPanel=document.getElementById('searchPanel'), searchInput=document.getElementById('searchInput'), searchBadge=document.getElementById('searchBadge');
@@ -702,7 +710,9 @@ function closePublisherModal(e) {
 /* ===== Image modal ===== */
 function openImageModal(id,url,title,cc,sc,likes){
   if(!url) return;
-  document.getElementById('modalImage').src=url;
+  const img = document.getElementById('modalImage');
+  img.src = url;
+  img.srcset = url + '?w=600 600w, ' + url + '?w=900 900w, ' + url + '?w=1200 1200w';
   document.getElementById('modalTitle').textContent=title;
   document.getElementById('modalCopyCount').textContent=cc;
   document.getElementById('modalShareCount').textContent=sc;
