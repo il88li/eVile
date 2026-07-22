@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -16,11 +17,10 @@
   html{scroll-behavior:smooth;}
   body{font-family:'Tajawal',sans-serif;background:var(--very-light);color:var(--deep-purple);min-height:100vh;overflow-x:hidden;padding-top:74px;padding-bottom:96px;}
 
-  /* ===== Floating Top (centered header + search) ===== */
+  /* ===== Floating Header Pill ===== */
   .top-float{position:fixed;top:10px;left:12px;right:12px;z-index:1000;display:flex;flex-direction:column;align-items:stretch;gap:8px;pointer-events:none;}
   .top-float>*{pointer-events:auto;}
-
-  /* Centered account capsule */
+  
   .header-capsule{align-self:center;display:flex;align-items:center;gap:8px;padding:5px 8px 5px 14px;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:50px;box-shadow:var(--shadow-md);cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);max-width:92vw;}
   .header-capsule:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--soft-lavender);}
   .hc-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--soft-lavender);flex-shrink:0;}
@@ -31,7 +31,7 @@
   .hc-login{display:flex;align-items:center;gap:6px;padding:6px 16px;border-radius:50px;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;text-decoration:none;font-size:.78rem;font-weight:700;}
   .hc-login svg{width:14px;height:14px;}
 
-  /* Account popover */
+  /* Account Popover */
   .account-popover{position:fixed;top:62px;left:50%;transform:translateX(-50%) translateY(-10px) scale(.96);width:330px;max-width:calc(100vw - 24px);background:var(--glass-bg);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:18px;z-index:1200;opacity:0;visibility:hidden;transition:all .3s cubic-bezier(.34,1.56,.64,1);}
   .account-popover.open{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0) scale(1);}
   .ap-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--glass-border);}
