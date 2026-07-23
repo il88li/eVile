@@ -471,7 +471,7 @@ def get_mandatory_ad():
         logger.error(f"Mandatory ad error: {e}")
         return jsonify({'success': False}), 500
 
-# ==================== Static Files (favicon, robots) ====================
+# ==================== Static Files ====================
 @app.route('/robots.txt')
 def robots_txt():
     return """User-agent: *
@@ -483,8 +483,6 @@ Sitemap: https://ufoq.vercel.app/sitemap.xml
 
 @app.route('/favicon.ico')
 def favicon():
-    # يمكنك وضع ملف favicon.ico في مجلد static وسيتم خدمته تلقائياً
-    # هذا المسار يعيد استجابة 204 (لا محتوى) لمنع ظهور 404
     return '', 204
 
 # ==================== Admin ====================
