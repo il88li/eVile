@@ -3,9 +3,10 @@ import re
 import logging
 import secrets
 import traceback
+import requests
 from datetime import datetime, timedelta
 from functools import wraps
-from urllib.parse import urlparse, urlencode
+from urllib.parse import urlparse
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -14,8 +15,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
 from flask_session import Session
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import inspect, text, func, or_
+from sqlalchemy import inspect, text, func
 from sqlalchemy.orm import joinedload
 from werkzeug.security import generate_password_hash, check_password_hash
 from google.oauth2 import id_token as google_id_token
@@ -24,7 +24,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ==================== Production Logging ====================
+# ==================== Logging ====================
 _log_handlers = [logging.StreamHandler()]
 if not os.getenv('VERCEL') and not os.getenv('RENDER'):
     try:
@@ -48,6 +48,9 @@ class Config:
 
     ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
     GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '1066865562137-k509114e44npk13n5n78gb32b3meldrk.apps.googleusercontent.com')
+    
+    # Telegram Bot
+    TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', '8785192184:AAEoTBaUV1RWqhDVjBfyYLoovnjm1g5qzYw')
 
     DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///ufoq.db')
     if DATABASE_URL.startswith('postgres://'):
@@ -96,8 +99,10 @@ class User(db.Model):
     avatar_url = db.Column(db.String(500), nullable=True)
     bio = db.Column(db.Text, nullable=True)
     profile_link = db.Column(db.String(500), nullable=True)
+    telegram_id = db.Column(db.String(100), nullable=True, unique=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_active = db.Column(db.DateTime, default=datetime.utcnow)
+    ad_free_until = db.Column(db.DateTime, nullable=True)  # <-- NEW: Ad-free expiration
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -177,7 +182,6 @@ class PromptDeleteRequest(db.Model):
     status = db.Column(db.String(20), default='pending')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# ===== NEW: Error Log Model for 404 & Image tracking =====
 class ErrorLog(db.Model):
     __tablename__ = 'error_logs'
     id = db.Column(db.Integer, primary_key=True)
@@ -186,7 +190,7 @@ class ErrorLog(db.Model):
     referer = db.Column(db.String(500), nullable=True)
     user_agent = db.Column(db.String(300), nullable=True)
     ip_address = db.Column(db.String(50), nullable=True)
-    details = db.Column(db.Text, nullable=True)  # e.g., "Image: /img/missing.png"
+    details = db.Column(db.Text, nullable=True)
     count = db.Column(db.Integer, default=1, nullable=False)
     ignored = db.Column(db.Boolean, default=False)
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
@@ -205,6 +209,32 @@ class ErrorLog(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
 
+# ===== Telegram Channel Model =====
+class TelegramChannel(db.Model):
+    __tablename__ = 'telegram_channels'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    username = db.Column(db.String(100), nullable=False, unique=True)
+    link = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    icon_url = db.Column(db.String(500), nullable=True)
+    member_count = db.Column(db.Integer, default=0)
+    required_members = db.Column(db.Integer, default=0)  # <-- NEW: minimum subscribers needed
+    is_active = db.Column(db.Boolean, default=True)
+    sort_order = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class ChannelSubscription(db.Model):
+    __tablename__ = 'channel_subscriptions'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('app_user.id'), nullable=False)
+    user = db.relationship('User', backref='channel_subscriptions')
+    channel_id = db.Column(db.Integer, db.ForeignKey('telegram_channels.id'), nullable=False)
+    channel = db.relationship('TelegramChannel', backref='subscriptions')
+    is_verified = db.Column(db.Boolean, default=False)
+    verified_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 # ==================== App Factory ====================
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
 app.config.from_object(Config)
@@ -214,7 +244,7 @@ migrate = Migrate(app, db)
 app.config['SESSION_SQLALCHEMY'] = db
 Session(app)
 
-# ====== Improved caching with Redis support ======
+# ====== Caching ======
 if os.getenv('REDIS_URL'):
     try:
         from flask_caching.backends.redis import RedisCache
@@ -245,17 +275,15 @@ csp = {
     'script-src': ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://accounts.google.com"],
     'font-src': ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net"],
     'img-src': ["'self'", "data:", "https:", "blob:"],
-    'connect-src': ["'self'", "https://accounts.google.com"],
+    'connect-src': ["'self'", "https://accounts.google.com", "https://api.telegram.org"],
     'frame-src': ["https://accounts.google.com"],
     'frame-ancestors': ["'none'"],
 }
 Talisman(app, force_https=False, content_security_policy=csp)
 
-# ==================== Error Handlers (Enhanced with DB logging) ====================
-def log_error(error_type, url, details=None, status_code=404):
-    """Helper to log errors into the database with aggregation."""
+# ==================== Error Handlers ====================
+def log_error(error_type, url, details=None):
     try:
-        # Check if we already have this error (by url and details if provided)
         query = ErrorLog.query.filter_by(error_type=error_type, url=url)
         if details:
             query = query.filter_by(details=details)
@@ -266,7 +294,6 @@ def log_error(error_type, url, details=None, status_code=404):
         if existing:
             existing.count += 1
             existing.last_seen = datetime.utcnow()
-            # If it was ignored, but we see it again, maybe un-ignore? No, keep user choice.
         else:
             new_log = ErrorLog(
                 error_type=error_type,
@@ -286,8 +313,6 @@ def log_error(error_type, url, details=None, status_code=404):
 @app.errorhandler(404)
 def not_found(e):
     logger.warning(f"404: {request.url} - {request.remote_addr}")
-    
-    # Determine details based on path
     details = None
     path = request.path.lower()
     if path.endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.ico')):
@@ -297,7 +322,6 @@ def not_found(e):
     else:
         details = f"Page not found: {request.path}"
     
-    # Log to database (ignore admin requests to avoid clutter)
     if not request.path.startswith('/admin') and not request.path.startswith('/api'):
         log_error('404', request.url, details)
     
@@ -392,7 +416,6 @@ def ensure_db_initialized():
         if 'app_user' not in inspector.get_table_names():
             logger.info("Database tables not found, creating...")
             db.create_all()
-            # Run light migrations (including error_logs)
             required_columns = {
                 'prompt_library': {
                     'publisher_link': 'VARCHAR(500)',
@@ -412,6 +435,11 @@ def ensure_db_initialized():
                 },
                 'app_user': {
                     'last_active': 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+                    'telegram_id': 'VARCHAR(100)',
+                    'ad_free_until': 'TIMESTAMP',  # <-- NEW
+                },
+                'telegram_channels': {
+                    'required_members': 'INTEGER NOT NULL DEFAULT 0',  # <-- NEW
                 },
             }
             for table_name, columns in required_columns.items():
@@ -428,7 +456,6 @@ def ensure_db_initialized():
                     except Exception as e:
                         db.session.rollback()
                         logger.warning(f"Migration skipped for {table_name}.{col_name}: {e}")
-            # Create default site setting
             if not SiteSetting.query.first():
                 db.session.add(SiteSetting())
                 db.session.commit()
@@ -474,7 +501,7 @@ def index():
                 'image_url': active_ad.image_url,
                 'button_text': active_ad.button_text,
                 'button_link': active_ad.button_link,
-                'duration_seconds': active_ad.duration_seconds
+                'duration_seconds': active_ad.duration_seconds,
             }
 
         return render_template('index.html',
@@ -501,6 +528,148 @@ def about_page():
     except Exception as e:
         logger.error(f"About error: {e}\n{traceback.format_exc()}")
         return render_template('about.html', prompt_count=0, user_count=0, total_copies=0, total_shares=0)
+
+# ==================== Events ====================
+@app.route('/events')
+def events_page():
+    try:
+        channels = TelegramChannel.query.filter_by(is_active=True).order_by(TelegramChannel.sort_order).all()
+        user = current_user()
+        return render_template('events.html', channels=channels, user=user, csrf_token=generate_csrf_token())
+    except Exception as e:
+        logger.error(f"Events page error: {e}\n{traceback.format_exc()}")
+        return render_template('events.html', channels=[], user=None)
+
+# ==================== Telegram Verification ====================
+def verify_telegram_subscription(user_telegram_id, channel_username):
+    if not user_telegram_id or not channel_username:
+        return False
+    
+    channel_username = channel_username.lstrip('@')
+    
+    try:
+        url = f"https://api.telegram.org/bot{Config.TELEGRAM_BOT_TOKEN}/getChatMember"
+        params = {
+            'chat_id': f'@{channel_username}',
+            'user_id': user_telegram_id
+        }
+        response = requests.get(url, params=params, timeout=10)
+        data = response.json()
+        
+        if data.get('ok'):
+            status = data.get('result', {}).get('status')
+            return status in ['member', 'creator', 'administrator', 'restricted']
+        else:
+            logger.warning(f"Telegram API error: {data}")
+            return False
+    except Exception as e:
+        logger.error(f"Telegram verification error: {e}")
+        return False
+
+@app.route('/api/verify-channel/<int:channel_id>', methods=['POST'])
+@login_required
+def verify_channel_subscription(channel_id):
+    try:
+        if not validate_csrf_token(request.json.get('csrf_token')):
+            return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
+        
+        user = current_user()
+        if not user:
+            return jsonify({'success': False, 'message': 'الجلسة منتهية'}), 401
+        
+        if not user.telegram_id:
+            return jsonify({
+                'success': False, 
+                'message': '⚠️ يرجى إضافة معرف تيليجرام الخاص بك في الإعدادات أولاً.',
+                'need_telegram': True
+            }), 400
+        
+        channel = TelegramChannel.query.get_or_404(channel_id)
+        if not channel.is_active:
+            return jsonify({'success': False, 'message': 'هذه القناة غير نشطة حالياً'}), 400
+        
+        # Check if already verified
+        existing = ChannelSubscription.query.filter_by(
+            user_id=user.id,
+            channel_id=channel_id
+        ).first()
+        
+        if existing and existing.is_verified:
+            # Check if user completed 10 channels and grant ad-free if not already
+            await_grant_ad_free(user)
+            return jsonify({
+                'success': True,
+                'message': '✅ تم التحقق مسبقاً!',
+                'already_verified': True,
+                'ad_free': is_user_ad_free(user)
+            })
+        
+        # Verify with Telegram
+        is_member = verify_telegram_subscription(user.telegram_id, channel.username)
+        
+        if is_member:
+            if not existing:
+                existing = ChannelSubscription(
+                    user_id=user.id,
+                    channel_id=channel_id
+                )
+                db.session.add(existing)
+            
+            existing.is_verified = True
+            existing.verified_at = datetime.utcnow()
+            db.session.commit()
+            
+            # Check if user completed 10 channels
+            granted = await_grant_ad_free(user)
+            
+            return jsonify({
+                'success': True,
+                'message': '✅ تم التحقق!',
+                'verified': True,
+                'ad_free': is_user_ad_free(user),
+                'completed': granted
+            })
+        else:
+            if not existing:
+                existing = ChannelSubscription(
+                    user_id=user.id,
+                    channel_id=channel_id
+                )
+                db.session.add(existing)
+            db.session.commit()
+            
+            return jsonify({
+                'success': False,
+                'message': '❌ لم يتم العثور على اشتراكك في القناة. تأكد من الاشتراك ثم حاول مرة أخرى.',
+                'verified': False
+            }), 400
+            
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Verify channel error: {e}\n{traceback.format_exc()}")
+        return jsonify({'success': False, 'message': 'حدث خطأ'}), 500
+
+def is_user_ad_free(user):
+    """Check if user has active ad-free status."""
+    if not user or not user.ad_free_until:
+        return False
+    return user.ad_free_until > datetime.utcnow()
+
+def await_grant_ad_free(user):
+    """Check if user has 10 verified subscriptions and grant ad-free if not."""
+    if is_user_ad_free(user):
+        return False
+    
+    verified_count = ChannelSubscription.query.filter_by(
+        user_id=user.id,
+        is_verified=True
+    ).count()
+    
+    if verified_count >= 10:
+        user.ad_free_until = datetime.utcnow() + timedelta(days=30)
+        db.session.commit()
+        return True
+    return False
 
 # ==================== Auth ====================
 @app.route('/signup')
@@ -694,6 +863,10 @@ def update_settings():
             if existing and existing.id != user.id:
                 return jsonify({'success': False, 'message': 'هذا البريد مستخدم بالفعل'}), 400
             user.email = value
+        elif field == 'telegram_id':
+            if value and not value.lstrip('@').replace('_', '').isalnum():
+                return jsonify({'success': False, 'message': 'معرف تيليجرام غير صالح'}), 400
+            user.telegram_id = value or None
         elif field == 'password':
             if len(value) < 6:
                 return jsonify({'success': False, 'message': 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'}), 400
@@ -708,6 +881,7 @@ def update_settings():
         logger.error(f"Settings update error: {e}\n{traceback.format_exc()}")
         return jsonify({'success': False, 'message': 'خطأ في التحديث'}), 500
 
+# ==================== Upload / Publish ====================
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload():
@@ -756,7 +930,6 @@ def upload():
         logger.error(f"Upload GET error: {e}")
         return render_template('upload.html', categories=[], csrf_token=generate_csrf_token(), user=user)
 
-# ==================== Publish, Edit, Delete Requests ====================
 @app.route('/publish', methods=['POST'])
 @login_required
 def publish_prompt():
@@ -780,6 +953,13 @@ def publish_prompt():
             flash('يرجى ملء العنوان ونص البرومبت', 'error')
             return redirect(url_for('settings_page'))
         
+        existing_prompt = PromptLibrary.query.filter(
+            func.lower(PromptLibrary.prompt_text) == func.lower(prompt_text)
+        ).first()
+        if existing_prompt:
+            flash('⚠️ هذا النص موجود مسبقاً في المكتبة! يرجى التأكد من عدم تكرار المحتوى.', 'error')
+            return redirect(url_for('settings_page'))
+        
         contribution = UploadContribution(
             title=title,
             category=category,
@@ -800,6 +980,7 @@ def publish_prompt():
         flash('حدث خطأ أثناء النشر', 'error')
         return redirect(url_for('settings_page'))
 
+# ==================== Edit / Delete Requests ====================
 @app.route('/edit-request', methods=['POST'])
 @login_required
 def edit_request():
@@ -935,7 +1116,6 @@ def update_avatar():
 @app.route('/admin/errors')
 @admin_required
 def admin_get_errors():
-    """Return all error logs as JSON (excluding ignored ones by default)."""
     show_ignored = request.args.get('show_ignored', 'false').lower() == 'true'
     query = ErrorLog.query
     if not show_ignored:
@@ -994,7 +1174,6 @@ def admin_clear_all_errors():
     if not validate_csrf_token(request.form.get('csrf_token')):
         return jsonify({'success': False, 'message': 'CSRF خطأ'}), 400
     try:
-        # Only delete non-ignored errors to be safe
         ErrorLog.query.filter_by(ignored=False).delete()
         db.session.commit()
         return jsonify({'success': True, 'message': 'تم حذف جميع الأخطاء'})
@@ -1048,6 +1227,14 @@ def approve_contribution(contrib_id):
         return redirect(url_for('admin_panel'))
     try:
         contrib = UploadContribution.query.get_or_404(contrib_id)
+        
+        existing_prompt = PromptLibrary.query.filter(
+            func.lower(PromptLibrary.prompt_text) == func.lower(contrib.prompt_text)
+        ).first()
+        if existing_prompt:
+            flash('⚠️ هذا النص موجود مسبقاً في المكتبة! قم برفض المساهمة أو تعديل النص.', 'error')
+            return redirect(url_for('admin_panel'))
+        
         item = PromptLibrary(
             title=contrib.title,
             category=contrib.category,
@@ -1201,6 +1388,7 @@ def admin_panel():
             contributions = UploadContribution.query.order_by(UploadContribution.created_at.desc()).all()
             edit_requests = PromptEditRequest.query.filter_by(status='pending').order_by(PromptEditRequest.created_at.desc()).all()
             delete_requests = PromptDeleteRequest.query.filter_by(status='pending').order_by(PromptDeleteRequest.created_at.desc()).all()
+            channels = TelegramChannel.query.order_by(TelegramChannel.sort_order).all()
 
             fifteen_days_ago = datetime.utcnow() - timedelta(days=15)
             inactive_users_raw = User.query.filter(
@@ -1227,6 +1415,7 @@ def admin_panel():
                                    contributions=contributions,
                                    edit_requests=edit_requests,
                                    delete_requests=delete_requests,
+                                   channels=channels,
                                    inactive_users=inactive_users,
                                    csrf_token=generate_csrf_token())
         return render_template('admin.html')
@@ -1428,7 +1617,103 @@ def toggle_library_ad(ad_id):
         flash('خطأ في تغيير حالة الإعلان', 'error')
     return redirect(url_for('admin_panel'))
 
-# ==================== Admin: User Management ====================
+# ==================== Admin: Telegram Channels ====================
+@app.route('/admin/channels')
+@admin_required
+def admin_get_channels():
+    channels = TelegramChannel.query.order_by(TelegramChannel.sort_order).all()
+    return jsonify([{
+        'id': c.id,
+        'name': c.name,
+        'username': c.username,
+        'link': c.link,
+        'description': c.description,
+        'icon_url': c.icon_url,
+        'member_count': c.member_count,
+        'required_members': c.required_members,
+        'is_active': c.is_active,
+        'sort_order': c.sort_order,
+        'subscription_count': ChannelSubscription.query.filter_by(channel_id=c.id, is_verified=True).count()
+    } for c in channels])
+
+@app.route('/admin/channel/add', methods=['POST'])
+@admin_required
+def admin_add_channel():
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        flash('CSRF خطأ', 'error')
+        return redirect(url_for('admin_panel'))
+    try:
+        username = request.form.get('username', '').strip()
+        if username and not username.startswith('@'):
+            username = '@' + username
+        
+        channel = TelegramChannel(
+            name=request.form.get('name', '').strip(),
+            username=username,
+            link=request.form.get('link', '').strip(),
+            description=request.form.get('description', '').strip(),
+            icon_url=request.form.get('icon_url', '').strip() or None,
+            member_count=int(request.form.get('member_count', 0) or 0),
+            required_members=int(request.form.get('required_members', 0) or 0),
+            is_active=request.form.get('is_active') == 'on',
+            sort_order=int(request.form.get('sort_order', 0) or 0)
+        )
+        db.session.add(channel)
+        db.session.commit()
+        flash('تمت إضافة القناة بنجاح', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding channel: {e}")
+        flash('خطأ في إضافة القناة', 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/channel/<int:channel_id>/edit', methods=['POST'])
+@admin_required
+def admin_edit_channel(channel_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        flash('CSRF خطأ', 'error')
+        return redirect(url_for('admin_panel'))
+    try:
+        channel = TelegramChannel.query.get_or_404(channel_id)
+        username = request.form.get('username', '').strip()
+        if username and not username.startswith('@'):
+            username = '@' + username
+        
+        channel.name = request.form.get('name', '').strip()
+        channel.username = username
+        channel.link = request.form.get('link', '').strip()
+        channel.description = request.form.get('description', '').strip()
+        channel.icon_url = request.form.get('icon_url', '').strip() or None
+        channel.member_count = int(request.form.get('member_count', 0) or 0)
+        channel.required_members = int(request.form.get('required_members', 0) or 0)
+        channel.is_active = request.form.get('is_active') == 'on'
+        channel.sort_order = int(request.form.get('sort_order', 0) or 0)
+        db.session.commit()
+        flash('تم تحديث القناة بنجاح', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error editing channel: {e}")
+        flash('خطأ في تحديث القناة', 'error')
+    return redirect(url_for('admin_panel'))
+
+@app.route('/admin/channel/<int:channel_id>/delete', methods=['POST'])
+@admin_required
+def admin_delete_channel(channel_id):
+    if not validate_csrf_token(request.form.get('csrf_token')):
+        flash('CSRF خطأ', 'error')
+        return redirect(url_for('admin_panel'))
+    try:
+        channel = TelegramChannel.query.get_or_404(channel_id)
+        db.session.delete(channel)
+        db.session.commit()
+        flash('تم حذف القناة', 'success')
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting channel: {e}")
+        flash('خطأ في حذف القناة', 'error')
+    return redirect(url_for('admin_panel'))
+
+# ==================== Admin: User Delete ====================
 @app.route('/admin/user/<int:user_id>/delete', methods=['POST'])
 @admin_required
 def delete_user(user_id):
@@ -1441,6 +1726,7 @@ def delete_user(user_id):
         UploadContribution.query.filter_by(user_id=user.id).delete()
         PromptEditRequest.query.filter_by(user_id=user.id).delete()
         PromptDeleteRequest.query.filter_by(user_id=user.id).delete()
+        ChannelSubscription.query.filter_by(user_id=user.id).delete()
         db.session.delete(user)
         db.session.commit()
         invalidate_library_cache()
@@ -1483,43 +1769,77 @@ def get_site_status():
 
 # ==================== Tracking API ====================
 @app.route('/api/prompt/<int:item_id>/copy', methods=['POST'])
+@login_required
 @limiter.limit("30 per minute")
 def track_copy(item_id):
     try:
+        user = current_user()
+        if not user:
+            return jsonify({'success': False, 'message': 'الرجاء تسجيل الدخول'}), 401
+        
         item = PromptLibrary.query.get_or_404(item_id)
         item.copy_count = (item.copy_count or 0) + 1
         db.session.commit()
-        return jsonify({'success': True, 'copy_count': item.copy_count})
+        
+        return jsonify({
+            'success': True,
+            'copy_count': item.copy_count,
+            'ad_free': is_user_ad_free(user)
+        })
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error tracking copy: {e}")
-        return jsonify({'success': False}), 500
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/api/prompt/<int:item_id>/share', methods=['POST'])
+@login_required
 @limiter.limit("30 per minute")
 def track_share(item_id):
     try:
+        user = current_user()
+        if not user:
+            return jsonify({'success': False, 'message': 'الرجاء تسجيل الدخول'}), 401
+        
         item = PromptLibrary.query.get_or_404(item_id)
         item.share_count = (item.share_count or 0) + 1
         db.session.commit()
-        return jsonify({'success': True, 'share_count': item.share_count})
+        
+        return jsonify({
+            'success': True,
+            'share_count': item.share_count,
+            'ad_free': is_user_ad_free(user)
+        })
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error tracking share: {e}")
-        return jsonify({'success': False}), 500
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/api/prompt/<int:item_id>/like', methods=['POST'])
+@login_required
 @limiter.limit("30 per minute")
 def track_like(item_id):
     try:
+        user = current_user()
+        if not user:
+            return jsonify({'success': False, 'message': 'الرجاء تسجيل الدخول'}), 401
+        
         item = PromptLibrary.query.get_or_404(item_id)
+        
+        if user.id == item.user_id:
+            return jsonify({'success': False, 'message': 'لا يمكنك الإعجاب ببرومبتك الخاص'}), 400
+        
         item.likes = (item.likes or 0) + 1
         db.session.commit()
-        return jsonify({'success': True, 'likes': item.likes})
+        
+        return jsonify({
+            'success': True,
+            'likes': item.likes,
+            'ad_free': is_user_ad_free(user)
+        })
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error tracking like: {e}")
-        return jsonify({'success': False}), 500
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @app.route('/api/mandatory-ad')
 def get_mandatory_ad():
@@ -1536,7 +1856,7 @@ def get_mandatory_ad():
                 'image_url': ad.image_url,
                 'button_text': ad.button_text,
                 'button_link': ad.button_link,
-                'duration_seconds': ad.duration_seconds
+                'duration_seconds': ad.duration_seconds,
             }
         })
     except Exception as e:
