@@ -138,7 +138,6 @@
             border: 1px solid var(--border-strong);
         }
         .btn-outline:hover { background: var(--primary-dim); }
-        .btn-sm { padding: 4px 10px; font-size: 0.7rem; }
         .btn:hover { transform: translateY(-1px); }
 
         .item-card {
@@ -163,9 +162,7 @@
         .status-pending { background: var(--warning-bg); color: var(--warning); }
         .status-approved { background: var(--success-bg); color: var(--success); }
         .status-rejected { background: var(--danger-bg); color: var(--danger); }
-        .status-ignored { background: rgba(100,100,100,0.2); color: #aaa; }
 
-        /* Error table */
         .error-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
         .error-table th { text-align: right; padding: 8px 6px; border-bottom: 1px solid var(--border); color: var(--text-dim); font-weight: 700; }
         .error-table td { padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
@@ -175,77 +172,9 @@
         .error-table .ignored-row { opacity: 0.4; }
         .error-table .ignored-row td { text-decoration: line-through; }
 
-        /* Inactive user card */
-        .inactive-user-card {
-            display: flex; align-items: center; gap: 14px;
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-            border-radius: 12px; padding: 14px; margin-bottom: 10px;
-            transition: border-color 0.2s;
-        }
-        .inactive-user-card:hover { border-color: var(--border-strong); }
-        .inactive-user-card .avatar {
-            width: 48px; height: 48px; border-radius: 50%;
-            background: linear-gradient(135deg, #3A0CA3 0%, #7209B7 100%);
-            display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 20px; flex-shrink: 0;
-        }
-        .inactive-user-card .user-info { flex: 1; }
-        .inactive-user-card .user-info .name { font-weight: 700; font-size: 0.9rem; }
-        .inactive-user-card .user-info .email { font-size: 0.78rem; color: var(--text-dim); }
-        .inactive-user-card .user-info .last-active { font-size: 0.72rem; color: var(--text-faint); margin-top: 2px; }
-        .inactive-user-card .actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .errors-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .errors-header .filter-group { display: flex; gap: 8px; align-items: center; }
 
-        /* Request cards */
-        .request-card {
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-            border-radius: 12px; padding: 14px; margin-bottom: 10px;
-            transition: border-color 0.2s;
-        }
-        .request-card:hover { border-color: var(--border-strong); }
-        .request-card .request-header {
-            display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
-        }
-        .request-card .request-type {
-            display: inline-flex; align-items: center; gap: 4px;
-            padding: 2px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700;
-        }
-        .request-type.edit { background: rgba(14,165,233,0.1); color: #0ea5e9; }
-        .request-type.delete { background: rgba(239,68,68,0.1); color: #ef4444; }
-        .request-card .request-details { font-size: 0.8rem; color: var(--text-dim); line-height: 1.6; }
-        .request-card .request-actions { display: flex; gap: 6px; margin-top: 10px; }
-
-        /* Edit category modal */
-        .edit-modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(12px);
-            z-index: 5500; display: none; align-items: center; justify-content: center; padding: 20px;
-        }
-        .edit-modal-overlay.show { display: flex; }
-        .edit-modal-box {
-            background: rgba(15,13,20,0.92);
-            backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%);
-            border-radius: 16px; max-width: 420px; width: 100%;
-            border: 1px solid var(--border-strong); box-shadow: var(--shadow-lg), var(--glow);
-            padding: 22px;
-        }
-        .edit-modal-header {
-            display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
-        }
-        .edit-modal-header span { font-size: 1rem; font-weight: 800; }
-        .edit-modal-header button {
-            background: rgba(255,255,255,0.06); border: none; color: var(--text-dim);
-            width: 28px; height: 28px; border-radius: 8px; cursor: pointer;
-        }
-        .edit-modal-body input, .edit-modal-body textarea, .edit-modal-body select {
-            width: 100%; padding: 11px 14px; background: rgba(255,255,255,0.05);
-            border: 1px solid var(--border); border-radius: 8px; color: var(--text);
-            font-family: 'Tajawal', sans-serif; font-size: 0.9rem; outline: none; margin-bottom: 14px;
-        }
-        .edit-modal-body input:focus, .edit-modal-body textarea:focus, .edit-modal-body select:focus {
-            border-color: var(--primary-light); box-shadow: 0 0 0 3px var(--primary-dim);
-        }
-        .btn-full { width: 100%; }
-
-        /* Toast */
         .toast {
             position: fixed; bottom: 100px; left: 50%;
             transform: translateX(-50%) translateY(100px);
@@ -262,7 +191,7 @@
         }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-        /* Bottom nav - Fixed, icons only */
+        /* Admin Bottom Nav */
         .admin-bottom-nav {
             position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
             z-index: 1000; padding: 10px 14px;
@@ -305,9 +234,6 @@
             border-color: var(--primary-light); box-shadow: 0 0 0 3px var(--primary-dim);
         }
 
-        .errors-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .errors-header .filter-group { display: flex; gap: 8px; align-items: center; }
-
         @media (max-width: 600px) {
             .admin-bottom-nav { padding: 8px 10px; gap: 6px; }
             .admin-nav-btn { width: 40px; height: 40px; font-size: 1rem; }
@@ -321,7 +247,6 @@
 <body>
     <div class="container">
         {% if session.get('logged_in') %}
-            <!-- Floating Header -->
             <header class="floating-header">
                 <a href="/" class="header-btn" title="الرئيسية"><i class="bi bi-house-door"></i></a>
                 <div class="header-center">UFOQ</div>
@@ -333,7 +258,7 @@
             </div>
 
             <!-- Categories -->
-            <div id="tab-categories" class="tab-content card">
+            <div id="tab-categories" class="tab-content active card">
                 <div class="section-title"><i class="bi bi-tags"></i> إدارة التصنيفات</div>
                 <form method="POST" action="/admin/category/add" style="margin-bottom:20px;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -402,111 +327,6 @@
                 </div>
             </div>
 
-            <!-- Contributions -->
-            <div id="tab-contributions" class="tab-content card">
-                <div class="section-title"><i class="bi bi-inbox"></i> مساهمات المستخدمين</div>
-                <div>
-                    {% for contrib in contributions %}
-                    <div class="item-card">
-                        <div class="info">
-                            <div class="title">{{ contrib.title }} <span class="status-badge status-{{ contrib.status }}">{{ contrib.status }}</span></div>
-                            <div class="meta">تصنيف: {{ contrib.category }} | تاريخ: {{ contrib.created_at.strftime('%Y-%m-%d') if contrib.created_at else '—' }}{% if contrib.publisher_name %} | من: {{ contrib.publisher_name }}{% endif %}</div>
-                            {% if contrib.publisher_link %}
-                            <div class="meta" style="margin-top:4px;">
-                                <i class="bi bi-link-45deg"></i> رابط الناشر —
-                                <a href="{{ contrib.publisher_link }}" target="_blank" rel="noopener noreferrer" style="color:var(--warning); font-weight:700;">{{ contrib.publisher_link }} <i class="bi bi-box-arrow-up-right"></i></a>
-                                <span style="color:var(--warning);">(افحص الرابط قبل الموافقة)</span>
-                            </div>
-                            {% endif %}
-                            {% if contrib.keywords %}
-                            <div class="meta" style="margin-top:2px;">كلمات مفتاحية: {{ contrib.keywords }}</div>
-                            {% endif %}
-                            <div style="margin-top:6px; font-size:0.8rem; color:var(--text-dim); background:rgba(255,255,255,0.03); padding:8px; border-radius:6px;">{{ contrib.prompt_text[:120] }}{% if contrib.prompt_text|length > 120 %}...{% endif %}</div>
-                        </div>
-                        <div class="actions">
-                            {% if contrib.status == 'pending' %}
-                            <form method="POST" action="/admin/contribution/{{ contrib.id }}/approve">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> موافقة</button>
-                            </form>
-                            <form method="POST" action="/admin/contribution/{{ contrib.id }}/reject">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-warning"><i class="bi bi-x-lg"></i> رفض</button>
-                            </form>
-                            {% endif %}
-                            <form method="POST" action="/admin/contribution/{{ contrib.id }}/delete" onsubmit="return confirm('حذف المساهمة؟')">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                    {% else %}
-                    <p style="color:var(--text-faint); text-align:center; padding:20px;">لا توجد مساهمات حالياً</p>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Edit/Delete Requests -->
-            <div id="tab-requests" class="tab-content card">
-                <div class="section-title"><i class="bi bi-git"></i> طلبات التعديل والحذف</div>
-                <div>
-                    {% for req in edit_requests %}
-                    <div class="request-card">
-                        <div class="request-header">
-                            <div>
-                                <span class="request-type edit"><i class="bi bi-pencil"></i> تعديل</span>
-                                <span style="font-weight:700; margin-right:8px;">{{ req.prompt.title }}</span>
-                            </div>
-                            <span style="font-size:0.72rem; color:var(--text-faint);">{{ req.created_at.strftime('%Y-%m-%d') }}</span>
-                        </div>
-                        <div class="request-details">
-                            <strong>العنوان الجديد:</strong> {{ req.new_title }}<br>
-                            <strong>التصنيف:</strong> {{ req.new_category }}<br>
-                            <strong>النص:</strong> {{ req.new_prompt_text[:100] }}{% if req.new_prompt_text|length > 100 %}...{% endif %}
-                        </div>
-                        <div class="request-actions">
-                            <form method="POST" action="/admin/edit-request/{{ req.id }}/approve">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> قبول</button>
-                            </form>
-                            <form method="POST" action="/admin/edit-request/{{ req.id }}/reject">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-warning"><i class="bi bi-x-lg"></i> رفض</button>
-                            </form>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    {% for req in delete_requests %}
-                    <div class="request-card">
-                        <div class="request-header">
-                            <div>
-                                <span class="request-type delete"><i class="bi bi-trash"></i> حذف</span>
-                                <span style="font-weight:700; margin-right:8px;">{{ req.prompt.title }}</span>
-                            </div>
-                            <span style="font-size:0.72rem; color:var(--text-faint);">{{ req.created_at.strftime('%Y-%m-%d') }}</span>
-                        </div>
-                        <div class="request-details">
-                            <strong>الناشر:</strong> {{ req.prompt.publisher or 'غير معروف' }}<br>
-                            <strong>تاريخ النشر:</strong> {{ req.prompt.created_at.strftime('%Y-%m-%d') if req.prompt.created_at else '—' }}
-                        </div>
-                        <div class="request-actions">
-                            <form method="POST" action="/admin/delete-request/{{ req.id }}/approve">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> قبول</button>
-                            </form>
-                            <form method="POST" action="/admin/delete-request/{{ req.id }}/reject">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-warning"><i class="bi bi-x-lg"></i> رفض</button>
-                            </form>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    {% if not edit_requests and not delete_requests %}
-                    <p style="color:var(--text-faint); text-align:center; padding:20px;">لا توجد طلبات حالياً</p>
-                    {% endif %}
-                </div>
-            </div>
-
             <!-- Ads -->
             <div id="tab-ads" class="tab-content card">
                 <div class="section-title"><i class="bi bi-badge-ad"></i> إدارة الإعلانات</div>
@@ -545,48 +365,9 @@
                 </div>
             </div>
 
-            <!-- Inactive Users -->
-            <div id="tab-inactive" class="tab-content card">
-                <div class="section-title"><i class="bi bi-person-x"></i> حسابات غير نشطة (15+ يوم)</div>
-                <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:16px;">
-                    <i class="bi bi-info-circle"></i> الحسابات التالية لم تسجل أي نشاط منذ 15 يوماً أو أكثر. يمكنك التواصل مع صاحب الحساب عبر بريده الإلكتروني أو حذفه نهائياً.
-                </p>
-                <div>
-                    {% for user in inactive_users %}
-                    <div class="inactive-user-card">
-                        <div class="avatar">
-                            {% if user.avatar_url %}
-                            <img src="{{ user.avatar_url }}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">
-                            {% else %}
-                            <i class="bi bi-person-fill"></i>
-                            {% endif %}
-                        </div>
-                        <div class="user-info">
-                            <div class="name">{{ user.name }}</div>
-                            <div class="email"><i class="bi bi-envelope"></i> {{ user.email }}</div>
-                            <div class="last-active">
-                                <i class="bi bi-clock-history"></i> آخر نشاط: {{ user.last_active_days }} يوم
-                                {% if user.last_prompt_date %}| آخر برومبت: {{ user.last_prompt_date.strftime('%Y-%m-%d') }}{% endif %}
-                            </div>
-                        </div>
-                        <div class="actions">
-                            <a href="mailto:{{ user.email }}" class="btn btn-primary" title="تواصل عبر البريد"><i class="bi bi-envelope-fill"></i></a>
-                            <form method="POST" action="/admin/user/{{ user.id }}/delete" onsubmit="return confirm('حذف الحساب نهائياً؟ لا يمكن التراجع عن هذا الإجراء.')" style="display:inline;">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-danger" title="حذف نهائي"><i class="bi bi-trash3"></i></button>
-                            </form>
-                        </div>
-                    </div>
-                    {% else %}
-                    <p style="color:var(--text-faint); text-align:center; padding:20px;">لا توجد حسابات غير نشطة حالياً</p>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- ===== NEW: Errors Tab ===== -->
+            <!-- Errors -->
             <div id="tab-errors" class="tab-content card">
-                <div class="section-title"><i class="bi bi-exclamation-triangle"></i> الأخطاء (404 & الصور المفقودة)</div>
-                
+                <div class="section-title"><i class="bi bi-exclamation-triangle"></i> الأخطاء (404)</div>
                 <div class="errors-header">
                     <div class="filter-group">
                         <button class="btn btn-outline btn-sm" id="toggleIgnoredBtn" onclick="toggleIgnoredErrors()">
@@ -598,7 +379,6 @@
                     </div>
                     <span style="font-size:0.75rem; color:var(--text-faint);" id="errorCount">0 خطأ</span>
                 </div>
-                
                 <div style="overflow-x:auto; margin-top:12px;">
                     <table class="error-table" id="errorTable">
                         <thead>
@@ -689,15 +469,12 @@
     <!-- Toast -->
     <div class="toast" id="toast"><i class="bi bi-check-lg"></i> <span id="toastMsg">تم!</span></div>
 
-    <!-- Admin Bottom Nav - Fixed, icons only -->
+    <!-- Admin Bottom Nav -->
     {% if session.get('logged_in') %}
     <nav class="admin-bottom-nav" id="adminBottomNav">
         <button class="admin-nav-btn active" onclick="showTab('categories')" data-tab="categories" title="التصنيفات"><i class="bi bi-tags-fill"></i></button>
         <button class="admin-nav-btn" onclick="showTab('library')" data-tab="library" title="المكتبة"><i class="bi bi-collection-fill"></i></button>
-        <button class="admin-nav-btn" onclick="showTab('contributions')" data-tab="contributions" title="المساهمات"><i class="bi bi-inbox-fill"></i></button>
-        <button class="admin-nav-btn" onclick="showTab('requests')" data-tab="requests" title="الطلبات"><i class="bi bi-git"></i></button>
         <button class="admin-nav-btn" onclick="showTab('ads')" data-tab="ads" title="الإعلانات"><i class="bi bi-badge-ad-fill"></i></button>
-        <button class="admin-nav-btn" onclick="showTab('inactive')" data-tab="inactive" title="غير نشط"><i class="bi bi-person-x-fill"></i></button>
         <button class="admin-nav-btn" onclick="showTab('errors')" data-tab="errors" title="الأخطاء"><i class="bi bi-exclamation-triangle-fill"></i></button>
         <button class="admin-nav-btn" onclick="showTab('settings')" data-tab="settings" title="الإعدادات"><i class="bi bi-power"></i></button>
     </nav>
@@ -705,7 +482,6 @@
 
     <script>
         let showIgnored = false;
-        let currentErrors = [];
 
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -763,7 +539,6 @@
                 const res = await fetch(url);
                 if (!res.ok) throw new Error('Failed to fetch');
                 const data = await res.json();
-                currentErrors = data;
                 renderErrors(data);
                 document.getElementById('errorCount').textContent = data.length + ' خطأ';
             } catch(e) {
@@ -864,9 +639,7 @@
             }
         }
 
-        // Load errors when tab is shown (auto-load on first visit)
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if errors tab is active initially
             const errorsTab = document.getElementById('tab-errors');
             if (errorsTab && errorsTab.classList.contains('active')) {
                 loadErrors();
