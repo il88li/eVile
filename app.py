@@ -6,7 +6,7 @@ import traceback
 from datetime import datetime, timedelta
 from functools import wraps
 from urllib.parse import urlparse
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_caching import Cache
@@ -409,7 +409,7 @@ def about_page():
         logger.error(f"About error: {e}\n{traceback.format_exc()}")
         return render_template('about.html', prompt_count=0, total_copies=0, total_shares=0)
 
-# ==================== API Routes (لعمل النسخ والإعجاب والمشاركة) ====================
+# ==================== API Routes ====================
 @app.route('/api/prompt/<int:item_id>/copy', methods=['POST'])
 @limiter.limit("30 per minute")
 def track_copy(item_id):
@@ -470,6 +470,22 @@ def get_mandatory_ad():
     except Exception as e:
         logger.error(f"Mandatory ad error: {e}")
         return jsonify({'success': False}), 500
+
+# ==================== Static Files (favicon, robots) ====================
+@app.route('/robots.txt')
+def robots_txt():
+    return """User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/admin
+Sitemap: https://ufoq.vercel.app/sitemap.xml
+""", 200, {'Content-Type': 'text/plain'}
+
+@app.route('/favicon.ico')
+def favicon():
+    # يمكنك وضع ملف favicon.ico في مجلد static وسيتم خدمته تلقائياً
+    # هذا المسار يعيد استجابة 204 (لا محتوى) لمنع ظهور 404
+    return '', 204
 
 # ==================== Admin ====================
 @app.route('/admin', methods=['GET', 'POST'])
@@ -835,16 +851,6 @@ def is_valid_publisher_link(url):
         return parsed.scheme in ('http', 'https') and bool(parsed.netloc)
     except Exception:
         return False
-
-# ==================== Robots.txt ====================
-@app.route('/robots.txt')
-def robots_txt():
-    return """User-agent: *
-Allow: /
-Disallow: /admin
-Disallow: /api/admin
-Sitemap: https://ufoq.vercel.app/sitemap.xml
-""", 200, {'Content-Type': 'text/plain'}
 
 # ==================== Health ====================
 @app.route('/health')
