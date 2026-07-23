@@ -409,6 +409,68 @@ def about_page():
         logger.error(f"About error: {e}\n{traceback.format_exc()}")
         return render_template('about.html', prompt_count=0, total_copies=0, total_shares=0)
 
+# ==================== API Routes (لعمل النسخ والإعجاب والمشاركة) ====================
+@app.route('/api/prompt/<int:item_id>/copy', methods=['POST'])
+@limiter.limit("30 per minute")
+def track_copy(item_id):
+    try:
+        item = PromptLibrary.query.get_or_404(item_id)
+        item.copy_count = (item.copy_count or 0) + 1
+        db.session.commit()
+        return jsonify({'success': True, 'copy_count': item.copy_count})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error tracking copy: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/prompt/<int:item_id>/like', methods=['POST'])
+@limiter.limit("30 per minute")
+def track_like(item_id):
+    try:
+        item = PromptLibrary.query.get_or_404(item_id)
+        item.likes = (item.likes or 0) + 1
+        db.session.commit()
+        return jsonify({'success': True, 'likes': item.likes})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error tracking like: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/prompt/<int:item_id>/share', methods=['POST'])
+@limiter.limit("30 per minute")
+def track_share(item_id):
+    try:
+        item = PromptLibrary.query.get_or_404(item_id)
+        item.share_count = (item.share_count or 0) + 1
+        db.session.commit()
+        return jsonify({'success': True, 'share_count': item.share_count})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error tracking share: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/api/mandatory-ad')
+def get_mandatory_ad():
+    try:
+        ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
+        if not ad:
+            return jsonify({'success': False, 'message': 'No active ad'}), 404
+        return jsonify({
+            'success': True,
+            'ad': {
+                'id': ad.id,
+                'title': ad.title,
+                'text': ad.text,
+                'image_url': ad.image_url,
+                'button_text': ad.button_text,
+                'button_link': ad.button_link,
+                'duration_seconds': ad.duration_seconds,
+            }
+        })
+    except Exception as e:
+        logger.error(f"Mandatory ad error: {e}")
+        return jsonify({'success': False}), 500
+
 # ==================== Admin ====================
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_panel():
@@ -773,6 +835,16 @@ def is_valid_publisher_link(url):
         return parsed.scheme in ('http', 'https') and bool(parsed.netloc)
     except Exception:
         return False
+
+# ==================== Robots.txt ====================
+@app.route('/robots.txt')
+def robots_txt():
+    return """User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/admin
+Sitemap: https://ufoq.vercel.app/sitemap.xml
+""", 200, {'Content-Type': 'text/plain'}
 
 # ==================== Health ====================
 @app.route('/health')
