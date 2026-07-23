@@ -48,80 +48,16 @@
   .ap-logout svg{width:14px;height:14px;}
   .ap-logout:hover{background:rgba(255,71,87,.15);}
 
-  /* ===== Bottom Navigation (NEW GLASSMORPHISM) ===== */
-  .bottom-nav-wrapper {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    direction: ltr;
-  }
-  
-  .bottom-nav-main {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 6px 10px;
-    background: rgba(255, 248, 235, 0.55);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid rgba(255, 215, 140, 0.35);
-    border-radius: 40px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
-    transition: all 0.3s ease;
-  }
-  
-  .bn-item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    text-decoration: none;
-    color: var(--charcoal);
-    transition: all 0.25s cubic-bezier(.34,1.56,.64,1);
-    cursor: pointer;
-    background: transparent;
-    border: none;
-    font-family: 'Tajawal', sans-serif;
-    position: relative;
-  }
-  
-  .bn-item svg {
-    width: 18px;
-    height: 18px;
-    stroke: var(--charcoal);
-    stroke-width: 1.8;
-    fill: none;
-    transition: all 0.3s ease;
-  }
-  
-  .bn-item.active {
-    background: radial-gradient(circle at 40% 35%, #FCD34D, #F59E0B 70%, #D97706);
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.4), inset 0 0 8px rgba(255, 255, 255, 0.3);
-    transform: scale(1.05);
-  }
-  
-  .bn-item.active svg {
-    stroke: #FFFFFF;
-    stroke-width: 2.2;
-    fill: #FFFFFF;
-    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.1));
-  }
-  
-  .bn-item:not(.active):hover {
-    background: rgba(255, 215, 140, 0.2);
-    transform: translateY(-2px);
-  }
-  
-  .bn-item:not(.active):hover svg {
-    stroke: #D97706;
-  }
+  /* Bottom Navigation */
+  .bottom-nav-wrapper{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;gap:8px;direction:ltr;}
+  .bottom-nav-main{display:flex;align-items:center;gap:4px;padding:6px 10px;background:rgba(255,248,235,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,215,140,0.35);border-radius:40px;box-shadow:0 8px 32px rgba(0,0,0,0.08),0 2px 8px rgba(0,0,0,0.04);transition:all 0.3s ease;}
+  .bn-item{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;text-decoration:none;color:var(--charcoal);transition:all 0.25s cubic-bezier(.34,1.56,.64,1);cursor:pointer;background:transparent;border:none;font-family:'Tajawal',sans-serif;position:relative;}
+  .bn-item svg{width:18px;height:18px;stroke:var(--charcoal);stroke-width:1.8;fill:none;transition:all 0.3s ease;}
+  .bn-item.active{background:radial-gradient(circle at 40% 35%,#FCD34D,#F59E0B 70%,#D97706);box-shadow:0 0 20px rgba(245,158,11,0.4),inset 0 0 8px rgba(255,255,255,0.3);transform:scale(1.05);}
+  .bn-item.active svg{stroke:#FFFFFF;stroke-width:2.2;fill:#FFFFFF;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.1));}
+  .bn-item:not(.active):hover{background:rgba(255,215,140,0.2);transform:translateY(-2px);}
+  .bn-item:not(.active):hover svg{stroke:#D97706;}
+  .bn-label{display:none;}
 
   /* Main Content */
   .about-container{max-width:720px;margin:0 auto;padding:16px 14px 30px;position:relative;z-index:1;}
@@ -145,43 +81,15 @@
   .section-card ul{padding-right:18px;margin-bottom:10px;}
   .section-card li{color:rgba(76,5,133,.7);font-size:.8rem;line-height:1.9;margin-bottom:4px;}
 
-  /* How to use steps */
-  .steps-list{display:flex;flex-direction:column;gap:12px;}
-  .step-item{display:flex;align-items:flex-start;gap:12px;padding:14px;background:rgba(219,181,238,.08);border:1px solid var(--glass-border);border-radius:var(--radius-md);transition:all .25s;}
-  .step-item:hover{border-color:var(--soft-lavender);background:rgba(219,181,238,.14);}
-  .step-num{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;flex-shrink:0;}
-  .step-content h4{font-size:.84rem;font-weight:700;margin-bottom:3px;}
-  .step-content p{font-size:.76rem;color:rgba(76,5,133,.6);line-height:1.6;margin:0;}
+  .ad-btn{display:inline-block;padding:8px 24px;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;border-radius:50px;text-decoration:none;font-size:.8rem;font-weight:700;transition:all .25s;box-shadow:0 3px 12px rgba(76,5,133,.25);}
+  .ad-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(76,5,133,.35);}
 
-  /* FAQ */
-  .faq-list{display:flex;flex-direction:column;gap:8px;}
-  .faq-item{border:1px solid var(--glass-border);border-radius:var(--radius-md);overflow:hidden;transition:all .25s;}
-  .faq-item:hover{border-color:var(--soft-lavender);}
-  .faq-question{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;background:rgba(219,181,238,.04);}
-  .faq-question h4{font-size:.82rem;font-weight:700;}
-  .faq-question .faq-icon{width:20px;height:20px;color:var(--deep-purple);opacity:.5;transition:transform .3s;}
-  .faq-item.open .faq-icon{transform:rotate(180deg);}
-  .faq-answer{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s ease;background:rgba(219,181,238,.04);}
-  .faq-item.open .faq-answer{max-height:200px;padding:0 14px 14px;}
-  .faq-answer p{font-size:.78rem;color:rgba(76,5,133,.65);line-height:1.7;margin:0;}
-
-  /* Ad Section */
-  .ad-section{background:linear-gradient(135deg,rgba(219,181,238,.2),rgba(76,5,133,.08));border:2px dashed var(--soft-lavender);border-radius:var(--radius-lg);padding:24px;text-align:center;position:relative;overflow:hidden;}
-  .ad-section::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);animation:shimmer 3s infinite;}
-  @keyframes shimmer{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
-  .ad-section-content{position:relative;z-index:1;}
-  .ad-section h3{font-size:1.1rem;font-weight:800;margin-bottom:8px;}
-  .ad-section p{font-size:.8rem;color:rgba(76,5,133,.7);margin-bottom:14px;}
-  .ad-section .ad-btn{display:inline-block;padding:8px 24px;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;border-radius:50px;text-decoration:none;font-size:.78rem;font-weight:700;transition:all .25s;box-shadow:0 3px 12px rgba(76,5,133,.25);}
-  .ad-section .ad-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(76,5,133,.35);}
-
+  .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(80px);padding:9px 24px;background:var(--deep-purple);color:#fff;border-radius:50px;font-family:'Tajawal',sans-serif;font-weight:600;font-size:.82rem;z-index:99999;opacity:0;transition:all .4s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-lg);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   .scroll-top{position:fixed;bottom:72px;right:14px;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;border:none;cursor:pointer;z-index:998;opacity:0;visibility:hidden;transform:translateY(16px);transition:all .3s;box-shadow:var(--shadow-md);display:flex;align-items:center;justify-content:center;}
   .scroll-top svg{width:14px;height:14px;}
   .scroll-top.show{opacity:1;visibility:visible;transform:translateY(0);}
   .scroll-top:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
-
-  .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(80px);padding:9px 24px;background:var(--deep-purple);color:#fff;border-radius:50px;font-family:'Tajawal',sans-serif;font-weight:600;font-size:.82rem;z-index:99999;opacity:0;transition:all .4s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-lg);}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
   @media(max-width:600px){.about-container{padding:12px 12px 24px;}.section-card{padding:16px;}.stat-card .stat-num{font-size:.95rem;}}
 </style>
@@ -216,6 +124,13 @@
       </div>
       <div class="ap-field"><label>الرابط الخاص بك</label><input type="url" name="profile_link" value="{{ user.profile_link or '' }}" placeholder="https://example.com"></div>
       <div class="ap-field"><label>النبذة التعريفية</label><textarea name="bio" placeholder="اكتب نبذة قصيرة عنك...">{{ user.bio or '' }}</textarea></div>
+      <div class="ap-field"><label>معرف تيليجرام</label><input type="text" name="telegram_id" value="{{ user.telegram_id or '' }}" placeholder="@username أو 123456789"><div class="hint" style="font-size:.6rem;color:rgba(76,5,133,.4);margin-top:3px;">للتحقق من الاشتراكات في الفعاليات</div></div>
+      <div class="ap-field"><label>عدد البطاقات في الصف الواحد</label>
+        <select id="cardsPerRowSelect" onchange="onCardsChange(this.value)">
+          <option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
+        </select>
+        <input type="hidden" name="cards_per_row" id="cardsPerRowHidden">
+      </div>
       <div class="ap-actions">
         <button type="submit" class="ap-save">حفظ التغييرات</button>
         <a href="/settings" class="ap-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg> برومبتاتي</a>
@@ -224,7 +139,6 @@
     <a href="/logout" class="ap-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></svg> تسجيل الخروج</a>
   </div>
   {% endif %}
-  <!-- تم إزالة search-panel و search-cat-dropdown -->
 </div>
 
 <div class="about-container">
@@ -237,6 +151,21 @@
       <div class="stat-card"><div class="stat-num">{{ user_count }}</div><div class="stat-label">مستخدم</div></div>
       <div class="stat-card"><div class="stat-num">{{ total_copies }}</div><div class="stat-label">نسخة</div></div>
       <div class="stat-card"><div class="stat-num">{{ total_shares }}</div><div class="stat-label">مشاركة</div></div>
+    </div>
+  </div>
+
+  <!-- ===== Promotion for Events ===== -->
+  <div class="section-card" style="background:linear-gradient(135deg, rgba(219,181,238,0.12), rgba(76,5,133,0.08)); border:2px solid var(--soft-lavender);">
+    <h2 style="font-size:1.1rem; font-weight:900; display:flex; align-items:center; gap:10px;">
+      <span style="font-size:1.4rem;">🎁</span> احصل على تجربة مجانية من الإعلانات!
+    </h2>
+    <p style="color:rgba(76,5,133,.7); font-size:.85rem; line-height:1.8; margin-bottom:12px;">
+      اشترك في <strong>10 قنوات تيليجرام</strong> التابعة للمجتمع واحصل على <strong>30 يوماً مجاناً</strong> بدون إعلانات مزعجة.
+      كل ما عليك فعله هو ربط حساب تيليجرام الخاص بك والتحقق من اشتراكك في القنوات.
+    </p>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <a href="/events" class="ad-btn">🚀 ابدأ الآن</a>
+      <a href="/settings" class="ad-btn" style="background:rgba(219,181,238,.2); color:var(--deep-purple); border:1.5px solid var(--soft-lavender); box-shadow:none;">ربط تيليجرام</a>
     </div>
   </div>
 
@@ -275,57 +204,6 @@
     </div>
   </div>
 
-  <!-- FAQ -->
-  <div class="section-card">
-    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></svg> الأسئلة الشائعة</h2>
-    <div class="faq-list">
-      <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <h4>هل استخدام الموقع مجاني؟</h4>
-          <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
-        </div>
-        <div class="faq-answer"><p>نعم، تصفح ونسخ البرومبتات مجاني بالكامل. كما أن المساهمة بالبرومبتات لا تتطلب أي رسوم.</p></div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <h4>هل يمكنني نشر برومبتاتي الخاصة؟</h4>
-          <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
-        </div>
-        <div class="faq-answer"><p>بالتأكيد! بعد تسجيل الدخول، يمكنك إرسال برومبتاتك من صفحة الإعدادات وسيتم مراجعتها قبل النشر.</p></div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <h4>ما هي أدوات الذكاء الاصطناعي المدعومة؟</h4>
-          <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
-        </div>
-        <div class="faq-answer"><p>البرومبتات تعمل مع معظم أدوات الذكاء الاصطناعي بما فيها ChatGPT، Midjourney، DALL-E، Stable Diffusion، Claude، وغيرها.</p></div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <h4>هل بياناتي آمنة؟</h4>
-          <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
-        </div>
-        <div class="faq-answer"><p>نعم، نستخدم تشفير قوي لكلمات المرور ولا نشارك بياناتك مع أي طرف خارجي. جلساتك محمية بتقنيات أمان متقدمة.</p></div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <h4>كيف يمكنني التواصل مع فريق الدعم؟</h4>
-          <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
-        </div>
-        <div class="faq-answer"><p>يمكنك التواصل معنا عبر تيليجرام على الرابط الموجود في قسم الإعلانات أدناه.</p></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Ad Section -->
-  <div class="ad-section">
-    <div class="ad-section-content">
-      <h3>📢 أعلن لدى UFOQ</h3>
-      <p>وصل لجمهور مبدعي الذكاء الاصطناعي – إعلانك هنا يصل لآلاف المستخدمين النشطين يومياً. أسعار تنافسية ونتائج مضمونة.</p>
-      <a href="https://t.me/OlIiIl7" class="ad-btn" target="_blank" rel="noopener noreferrer">تواصل معنا عبر تيليجرام</a>
-    </div>
-  </div>
-
   <!-- About us -->
   <div class="section-card">
     <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg> من نحن</h2>
@@ -334,7 +212,7 @@
   </div>
 </div>
 
-<!-- Bottom Nav (بدون زر البحث) -->
+<!-- Bottom Nav -->
 <div class="bottom-nav-wrapper">
   <div class="bottom-nav-main">
     <a href="/" class="bn-item" aria-label="الرئيسية">
@@ -346,6 +224,9 @@
     <a href="/about" class="bn-item active" aria-label="حول">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
     </a>
+    <a href="/events" class="bn-item" aria-label="فعاليات">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0116 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    </a>
   </div>
 </div>
 
@@ -354,8 +235,6 @@
 
 <script>
 const isLoggedIn = {{ 'true' if user else 'false' }};
-const cachedAd = null;
-
 function handleHeaderClick(e) {
     e.stopPropagation();
     if (isLoggedIn) {
@@ -370,9 +249,8 @@ function handleHeaderClick(e) {
     }
 }
 document.addEventListener('click',(e)=>{ const p=document.getElementById('accountPopover'), c=document.getElementById('headerCapsule'); if(p&&p.classList.contains('open')&&!p.contains(e.target)&&!c.contains(e.target)){ p.classList.remove('open'); c.classList.remove('open'); } });
-function updateAvatar(input){ if(input.files&&input.files[0]){ const r=new FileReader(); r.onload=(e)=>{ fetch('/update-avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({avatar_url:e.target.result})}).then(()=>location.reload()).catch(()=>showToast('حدث خطأ في تحديث الصورة')); }; r.readAsDataURL(input.files[0]); } }
+function updateAvatar(input){ if(input.files&&input.files[0]){ const r=new FileReader(); r.onload=(e)=>{ fetch('/update-avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({avatar_url:e.target.result, csrf_token: '{{ csrf_token }}'})}).then(()=>location.reload()).catch(()=>showToast('حدث خطأ في تحديث الصورة')); }; r.readAsDataURL(input.files[0]); } }
 function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
-function toggleFaq(el){ const item=el.closest('.faq-item'); const wasOpen=item.classList.contains('open'); document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open')); if(!wasOpen) item.classList.add('open'); }
 let lastScroll=0;
 window.addEventListener('scroll',()=>{ const y=window.scrollY, nav=document.querySelector('.bottom-nav-wrapper'); if(nav){ if(y>lastScroll&&y>140) nav.style.transform='translateX(-50%) translateY(120%)'; else nav.style.transform='translateX(-50%) translateY(0)'; } lastScroll=y; const st=document.getElementById('scrollTopBtn'); if(st) st.classList.toggle('show',y>400); });
 </script>
