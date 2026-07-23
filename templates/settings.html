@@ -15,8 +15,6 @@
   .hc-brand{font-size:1.1rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.5px;}
   .hc-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--soft-lavender);flex-shrink:0;cursor:pointer;}
   .hc-avatar-text{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;font-weight:800;font-size:.78rem;border:none;cursor:pointer;}
-  .hc-points{font-size:0.65rem;font-weight:700;color:var(--deep-purple);background:rgba(219,181,238,0.3);padding:2px 8px;border-radius:50px;display:flex;align-items:center;gap:3px;direction:ltr;}
-  
   .account-popover{position:fixed;top:62px;left:50%;transform:translateX(-50%) translateY(-10px) scale(.96);width:330px;max-width:calc(100vw - 24px);background:var(--glass-bg);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:18px;z-index:1200;opacity:0;visibility:hidden;transition:all .3s cubic-bezier(.34,1.56,.64,1);}
   .account-popover.open{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0) scale(1);}
   .ap-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--glass-border);} .ap-avatar-wrap{position:relative;cursor:pointer;flex-shrink:0;} .ap-avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2.5px solid var(--soft-lavender);}
@@ -40,7 +38,6 @@
   .form-group input,.form-group textarea,.form-group select{width:100%;padding:9px 13px;border:1.5px solid var(--glass-border);border-radius:var(--radius-sm);font-family:'Tajawal',sans-serif;font-size:.84rem;background:var(--very-light);color:var(--deep-purple);outline:none;transition:all .25s;}
   .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--deep-purple);box-shadow:0 0 0 3px rgba(76,5,133,.08);} .form-group textarea{resize:vertical;min-height:80px;} .form-group .field-hint{font-size:.68rem;color:rgba(76,5,133,.4);margin-top:4px;}
   .submit-btn{width:100%;padding:11px;border:none;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;font-family:'Tajawal',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:6px;} .submit-btn svg{width:15px;height:15px;} .submit-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-md);}
-  .submit-btn:disabled{opacity:.6;cursor:not-allowed;}
 
   .prompt-list{display:flex;flex-direction:column;gap:10px;}
   .prompt-item{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(219,181,238,.08);border:1px solid var(--glass-border);border-radius:var(--radius-md);transition:all .25s;}
@@ -64,7 +61,6 @@
   .scroll-top{position:fixed;bottom:84px;right:14px;width:38px;height:38px;border-radius:50%;background:var(--deep-purple);color:#fff;border:none;cursor:pointer;z-index:998;opacity:0;visibility:hidden;transform:translateY(16px);transition:all .3s;box-shadow:var(--shadow-md);display:flex;align-items:center;justify-content:center;} .scroll-top svg{width:16px;height:16px;} .scroll-top.show{opacity:1;visibility:visible;transform:translateY(0);} .scroll-top:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
   @media (max-width:600px){.settings-container{padding:14px 12px 24px;}.section-card{padding:16px;}.prompt-item{flex-wrap:wrap;}.prompt-actions{margin-right:auto;}}
   
-  /* Bottom navigation */
   .bottom-nav-wrapper{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;gap:8px;direction:ltr;}
   .bottom-nav-main{display:flex;align-items:center;gap:4px;padding:6px 10px;background:rgba(255,248,235,0.55);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(255,215,140,0.35);border-radius:40px;box-shadow:0 8px 32px rgba(0,0,0,0.08),0 2px 8px rgba(0,0,0,0.04);transition:all .3s ease;}
   .bn-item{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;text-decoration:none;color:var(--charcoal);transition:all .25s cubic-bezier(.34,1.56,.64,1);cursor:pointer;background:transparent;border:none;font-family:'Tajawal',sans-serif;position:relative;}
@@ -88,7 +84,6 @@
       {% else %}
         <span class="hc-avatar-text">{{ user.name[0] if user.name else '؟' }}</span>
       {% endif %}
-      <span class="hc-points">⭐ <span id="headerPoints">{{ user.points or 0 }}</span></span>
     {% else %}
       <span class="hc-avatar-text" style="font-size:.9rem;">👤</span>
     {% endif %}
@@ -119,7 +114,7 @@
       <div class="ap-field">
         <label>معرف تيليجرام (للتحقق من الاشتراكات)</label>
         <input type="text" name="telegram_id" value="{{ user.telegram_id or '' }}" placeholder="@username أو 123456789">
-        <div class="hint">أدخل معرفك الرقمي أو اسم المستخدم (مثال: @username) للتحقق من اشتراكك في القنوات والحصول على نقاط.</div>
+        <div class="hint">أدخل معرفك الرقمي أو اسم المستخدم (مثال: @username) للتحقق من اشتراكك في القنوات والحصول على مكافآت.</div>
       </div>
       
       <div class="ap-field">
@@ -149,32 +144,6 @@
 
   {% if user %}
   
-  <!-- ===== Daily Reward Section ===== -->
-  <div class="section-card" style="background:linear-gradient(135deg, rgba(219,181,238,0.12), rgba(76,5,133,0.08)); border:2px solid var(--soft-lavender);">
-    <h3 style="display:flex; align-items:center; gap:10px;">
-      <span style="font-size:1.5rem;">🎁</span> الهدية اليومية
-      <span style="font-size:0.7rem; font-weight:400; color:rgba(76,5,133,.5); margin-right:auto;">احصل على 5 نقاط مجاناً كل 24 ساعة</span>
-    </h3>
-    <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
-      <div style="flex:1; min-width:150px;">
-        <p style="font-size:0.85rem; color:rgba(76,5,133,.7); line-height:1.7;">
-          {% if reward_available %}
-          🎉 <strong>الهدية متاحة!</strong> اضغط على الزر للحصول على نقاطك اليومية.
-          {% else %}
-          ⏳ تم الحصول على الهدية اليومية. عُد غداً للحصول على المزيد!
-          {% endif %}
-        </p>
-      </div>
-      <button id="claimDailyRewardBtn" class="submit-btn" style="width:auto; padding:10px 28px; {% if not reward_available %}opacity:0.6; cursor:not-allowed;{% endif %}" 
-              {% if not reward_available %}disabled{% endif %}
-              onclick="claimDailyReward()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M6 6l2 2M18 6l-2 2M4 12h4M16 12h4M6 18l2-2M18 18l-2-2M12 22v-4M8 22h8"/><circle cx="12" cy="12" r="3"/></svg>
-        {% if reward_available %}احصل على الهدية{% else %}تم الاستلام ✅{% endif %}
-      </button>
-    </div>
-    <div id="rewardMessage" style="margin-top:10px; font-size:0.85rem; font-weight:600; color:var(--deep-purple);"></div>
-  </div>
-
   <!-- ===== Publish Section ===== -->
   <div class="section-card">
     <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg> نشر برومبت جديد</h3>
@@ -302,7 +271,6 @@ const isLoggedIn = {{ 'true' if user else 'false' }};
 const CSRF_TOKEN = "{{ csrf_token }}";
 let lastScroll=0;
 
-// ===== Header click =====
 function handleHeaderClick(e) {
     e.stopPropagation();
     if (isLoggedIn) {
@@ -326,7 +294,6 @@ document.addEventListener('click',(e)=>{
     } 
 });
 
-// ===== Cards per row =====
 function initCardsSelect(){ 
     const s=document.getElementById('cardsPerRowSelect'); 
     if(!s) return; 
@@ -341,7 +308,6 @@ function onCardsChange(v){
     if(h) h.value=v; 
 }
 
-// ===== Avatar =====
 function updateAvatar(input){ 
     if(input.files && input.files[0]){ 
         const r=new FileReader(); 
@@ -356,7 +322,6 @@ function updateAvatar(input){
     } 
 }
 
-// ===== Toast =====
 function showToast(msg, isError) {
     const t = document.getElementById('toast');
     t.textContent = msg;
@@ -365,44 +330,6 @@ function showToast(msg, isError) {
     t._timer = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ===== Daily Reward =====
-async function claimDailyReward() {
-    const btn = document.getElementById('claimDailyRewardBtn');
-    const msg = document.getElementById('rewardMessage');
-    btn.disabled = true;
-    btn.innerHTML = 'جاري...';
-    msg.textContent = '';
-    
-    try {
-        const res = await fetch('/api/claim-daily-reward', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ csrf_token: CSRF_TOKEN })
-        });
-        const data = await res.json();
-        if (data.success) {
-            msg.style.color = '#27AE60';
-            msg.textContent = data.message;
-            const pointsDisplay = document.getElementById('headerPoints');
-            if (pointsDisplay) pointsDisplay.textContent = data.points;
-            btn.innerHTML = 'تم الاستلام ✅';
-            btn.style.opacity = '0.6';
-            setTimeout(() => location.reload(), 2000);
-        } else {
-            msg.style.color = '#FF4757';
-            msg.textContent = data.message || 'حدث خطأ';
-            btn.innerHTML = 'حاول مجدداً';
-            btn.disabled = false;
-        }
-    } catch (e) {
-        msg.style.color = '#FF4757';
-        msg.textContent = 'خطأ في الاتصال';
-        btn.innerHTML = 'حاول مجدداً';
-        btn.disabled = false;
-    }
-}
-
-// ===== Settings Form =====
 document.getElementById('settingsForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     const btn = document.getElementById('settingsSaveBtn');
@@ -446,7 +373,6 @@ document.getElementById('settingsForm').addEventListener('submit', async functio
     btn.textContent = 'حفظ التغييرات';
 });
 
-// ===== Edit Modal =====
 function openEditModal(id, title, category, keywords, imageUrl, promptText) {
     document.getElementById('editPromptId').value = id;
     document.getElementById('editTitle').value = title;
@@ -456,23 +382,18 @@ function openEditModal(id, title, category, keywords, imageUrl, promptText) {
     document.getElementById('editPromptText').value = promptText;
     document.getElementById('editModal').classList.add('open');
 }
-
 function closeEditModal() {
     document.getElementById('editModal').classList.remove('open');
 }
-
-// ===== Delete Modal =====
 function openDeleteModal(id, title) {
     document.getElementById('deletePromptId').value = id;
     document.getElementById('deletePromptTitle').textContent = title;
     document.getElementById('deleteModal').classList.add('open');
 }
-
 function closeDeleteModal() {
     document.getElementById('deleteModal').classList.remove('open');
 }
 
-// ===== Scroll =====
 window.addEventListener('scroll', () => {
     const y = window.scrollY;
     const nav = document.querySelector('.bottom-nav-wrapper');
@@ -485,7 +406,6 @@ window.addEventListener('scroll', () => {
     if (s) s.classList.toggle('show', y > 400);
 });
 
-// ===== Keyboard shortcuts =====
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeEditModal();
@@ -493,30 +413,8 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ===== Init =====
 document.addEventListener('DOMContentLoaded', function() {
     initCardsSelect();
-    
-    // Close popovers on escape
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            const p = document.getElementById('accountPopover');
-            if (p) p.classList.remove('open');
-        }
-    });
-});
-
-// ===== Handle form submissions with CSRF =====
-document.getElementById('publishForm').addEventListener('submit', function(e) {
-    // CSRF token already in form
-});
-
-document.getElementById('editForm').addEventListener('submit', function(e) {
-    // CSRF token already in form
-});
-
-document.getElementById('deleteForm').addEventListener('submit', function(e) {
-    // CSRF token already in form
 });
 </script>
 </body>
