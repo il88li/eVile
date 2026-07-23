@@ -24,7 +24,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ==================== Logging ====================
+# ==================== Production Logging ====================
 _log_handlers = [logging.StreamHandler()]
 if not os.getenv('VERCEL') and not os.getenv('RENDER'):
     try:
@@ -247,6 +247,7 @@ Session(app)
 # ====== Caching ======
 if os.getenv('REDIS_URL'):
     try:
+        # محاولة استخدام Redis إذا كانت المكتبة مثبتة
         from flask_caching.backends.redis import RedisCache
         cache = Cache(app, config={
             'CACHE_TYPE': 'RedisCache',
@@ -284,6 +285,10 @@ Talisman(app, force_https=False, content_security_policy=csp)
 # ==================== Error Handlers ====================
 def log_error(error_type, url, details=None):
     try:
+        # التحقق من وجود الجدول قبل الاستعلام لتجنب الأخطاء إذا لم يُنشأ بعد
+        inspector = inspect(db.engine)
+        if 'error_logs' not in inspector.get_table_names():
+            return
         query = ErrorLog.query.filter_by(error_type=error_type, url=url)
         if details:
             query = query.filter_by(details=details)
@@ -429,6 +434,79 @@ def grant_ad_free_if_completed(user):
     return False
 
 # ---------- Database initialization ----------
+def run_light_migrations():
+    """تضيف الأعمدة المفقودة في الجداول الموجودة وتنشئ الجداول المفقودة."""
+    required_columns = {
+        'prompt_library': {
+            'publisher_link': 'VARCHAR(500)',
+            'keywords': 'TEXT',
+            'copy_count': 'INTEGER NOT NULL DEFAULT 0',
+            'share_count': 'INTEGER NOT NULL DEFAULT 0',
+            'user_id': 'INTEGER',
+            'likes': 'INTEGER NOT NULL DEFAULT 0',
+        },
+        'upload_contribution': {
+            'publisher_link': 'VARCHAR(500)',
+            'keywords': 'TEXT',
+            'user_id': 'INTEGER',
+        },
+        'library_ad': {
+            'is_mandatory': 'BOOLEAN DEFAULT FALSE',
+        },
+        'app_user': {
+            'last_active': 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+            'telegram_id': 'VARCHAR(100) UNIQUE',
+            'ad_free_until': 'TIMESTAMP',
+        },
+    }
+    try:
+        inspector = inspect(db.engine)
+        existing_tables = inspector.get_table_names()
+        
+        # التأكد من وجود جدول error_logs
+        if 'error_logs' not in existing_tables:
+            try:
+                db.session.execute(text("""
+                    CREATE TABLE IF NOT EXISTS error_logs (
+                        id SERIAL PRIMARY KEY,
+                        error_type VARCHAR(20) DEFAULT '404',
+                        url VARCHAR(500) NOT NULL,
+                        referer VARCHAR(500),
+                        user_agent VARCHAR(300),
+                        ip_address VARCHAR(50),
+                        details TEXT,
+                        count INTEGER DEFAULT 1 NOT NULL,
+                        ignored BOOLEAN DEFAULT FALSE,
+                        last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """))
+                db.session.commit()
+                logger.info("Created error_logs table")
+                # تحديث قائمة الجداول بعد الإنشاء
+                existing_tables = inspector.get_table_names()
+            except Exception as e:
+                db.session.rollback()
+                logger.warning(f"Could not create error_logs: {e}")
+
+        for table_name, columns in required_columns.items():
+            if table_name not in existing_tables:
+                continue
+            existing_columns = {col['name'] for col in inspector.get_columns(table_name)}
+            for col_name, col_def in columns.items():
+                if col_name in existing_columns:
+                    continue
+                try:
+                    db.session.execute(text(f'ALTER TABLE {table_name} ADD COLUMN IF NOT EXISTS {col_name} {col_def}'))
+                    db.session.commit()
+                    logger.info(f"Migration: added column {table_name}.{col_name}")
+                except Exception as e:
+                    db.session.rollback()
+                    logger.warning(f"Migration skipped for {table_name}.{col_name}: {e}")
+    except Exception as e:
+        logger.error(f"Migration error: {e}")
+        db.session.rollback()
+
 @app.before_request
 def ensure_db_initialized():
     try:
@@ -436,50 +514,15 @@ def ensure_db_initialized():
         if 'app_user' not in inspector.get_table_names():
             logger.info("Database tables not found, creating...")
             db.create_all()
-            required_columns = {
-                'prompt_library': {
-                    'publisher_link': 'VARCHAR(500)',
-                    'keywords': 'TEXT',
-                    'copy_count': 'INTEGER NOT NULL DEFAULT 0',
-                    'share_count': 'INTEGER NOT NULL DEFAULT 0',
-                    'user_id': 'INTEGER',
-                    'likes': 'INTEGER NOT NULL DEFAULT 0',
-                },
-                'upload_contribution': {
-                    'publisher_link': 'VARCHAR(500)',
-                    'keywords': 'TEXT',
-                    'user_id': 'INTEGER',
-                },
-                'library_ad': {
-                    'is_mandatory': 'BOOLEAN DEFAULT FALSE',
-                },
-                'app_user': {
-                    'last_active': 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
-                    'telegram_id': 'VARCHAR(100)',
-                    'ad_free_until': 'TIMESTAMP',
-                },
-                'telegram_channels': {
-                    'required_members': 'INTEGER NOT NULL DEFAULT 0',
-                },
-            }
-            for table_name, columns in required_columns.items():
-                if table_name not in inspector.get_table_names():
-                    continue
-                existing_columns = {col['name'] for col in inspector.get_columns(table_name)}
-                for col_name, col_def in columns.items():
-                    if col_name in existing_columns:
-                        continue
-                    try:
-                        db.session.execute(text(f'ALTER TABLE {table_name} ADD COLUMN IF NOT EXISTS {col_name} {col_def}'))
-                        db.session.commit()
-                        logger.info(f"Migration: added column {table_name}.{col_name}")
-                    except Exception as e:
-                        db.session.rollback()
-                        logger.warning(f"Migration skipped for {table_name}.{col_name}: {e}")
+            # تشغيل الترحيلات بعد الإنشاء
+            run_light_migrations()
             if not SiteSetting.query.first():
                 db.session.add(SiteSetting())
                 db.session.commit()
             logger.info("Database initialized successfully")
+        else:
+            # تشغيل الترحيلات في كل طلب للتأكد من وجود جميع الأعمدة
+            run_light_migrations()
     except Exception as e:
         logger.error(f"DB init error: {e}")
         db.session.rollback()
