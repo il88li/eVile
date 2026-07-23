@@ -102,7 +102,7 @@ class User(db.Model):
     telegram_id = db.Column(db.String(100), nullable=True, unique=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_active = db.Column(db.DateTime, default=datetime.utcnow)
-    ad_free_until = db.Column(db.DateTime, nullable=True)  # <-- NEW: Ad-free expiration
+    ad_free_until = db.Column(db.DateTime, nullable=True)
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -209,7 +209,7 @@ class ErrorLog(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
 
-# ===== Telegram Channel Model =====
+# ===== Telegram Models =====
 class TelegramChannel(db.Model):
     __tablename__ = 'telegram_channels'
     id = db.Column(db.Integer, primary_key=True)
@@ -219,7 +219,7 @@ class TelegramChannel(db.Model):
     description = db.Column(db.Text, nullable=True)
     icon_url = db.Column(db.String(500), nullable=True)
     member_count = db.Column(db.Integer, default=0)
-    required_members = db.Column(db.Integer, default=0)  # <-- NEW: minimum subscribers needed
+    required_members = db.Column(db.Integer, default=0)
     is_active = db.Column(db.Boolean, default=True)
     sort_order = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -408,6 +408,26 @@ def safe_redirect(next_url, default='/'):
         return next_url
     return default
 
+def is_user_ad_free(user):
+    if not user or not user.ad_free_until:
+        return False
+    return user.ad_free_until > datetime.utcnow()
+
+def grant_ad_free_if_completed(user):
+    if is_user_ad_free(user):
+        return False
+    
+    verified_count = ChannelSubscription.query.filter_by(
+        user_id=user.id,
+        is_verified=True
+    ).count()
+    
+    if verified_count >= 10:
+        user.ad_free_until = datetime.utcnow() + timedelta(days=30)
+        db.session.commit()
+        return True
+    return False
+
 # ---------- Database initialization ----------
 @app.before_request
 def ensure_db_initialized():
@@ -436,10 +456,10 @@ def ensure_db_initialized():
                 'app_user': {
                     'last_active': 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
                     'telegram_id': 'VARCHAR(100)',
-                    'ad_free_until': 'TIMESTAMP',  # <-- NEW
+                    'ad_free_until': 'TIMESTAMP',
                 },
                 'telegram_channels': {
-                    'required_members': 'INTEGER NOT NULL DEFAULT 0',  # <-- NEW
+                    'required_members': 'INTEGER NOT NULL DEFAULT 0',
                 },
             }
             for table_name, columns in required_columns.items():
@@ -529,18 +549,18 @@ def about_page():
         logger.error(f"About error: {e}\n{traceback.format_exc()}")
         return render_template('about.html', prompt_count=0, user_count=0, total_copies=0, total_shares=0)
 
-# ==================== Events ====================
 @app.route('/events')
 def events_page():
     try:
         channels = TelegramChannel.query.filter_by(is_active=True).order_by(TelegramChannel.sort_order).all()
         user = current_user()
-        return render_template('events.html', channels=channels, user=user, csrf_token=generate_csrf_token())
+        now = datetime.utcnow()
+        return render_template('events.html', channels=channels, user=user, now=now, csrf_token=generate_csrf_token())
     except Exception as e:
         logger.error(f"Events page error: {e}\n{traceback.format_exc()}")
-        return render_template('events.html', channels=[], user=None)
+        return render_template('events.html', channels=[], user=None, now=datetime.utcnow())
 
-# ==================== Telegram Verification ====================
+# ==================== API: Telegram Verification ====================
 def verify_telegram_subscription(user_telegram_id, channel_username):
     if not user_telegram_id or not channel_username:
         return False
@@ -595,8 +615,7 @@ def verify_channel_subscription(channel_id):
         ).first()
         
         if existing and existing.is_verified:
-            # Check if user completed 10 channels and grant ad-free if not already
-            await_grant_ad_free(user)
+            grant_ad_free_if_completed(user)
             return jsonify({
                 'success': True,
                 'message': '✅ تم التحقق مسبقاً!',
@@ -620,7 +639,7 @@ def verify_channel_subscription(channel_id):
             db.session.commit()
             
             # Check if user completed 10 channels
-            granted = await_grant_ad_free(user)
+            granted = grant_ad_free_if_completed(user)
             
             return jsonify({
                 'success': True,
@@ -649,27 +668,29 @@ def verify_channel_subscription(channel_id):
         logger.error(f"Verify channel error: {e}\n{traceback.format_exc()}")
         return jsonify({'success': False, 'message': 'حدث خطأ'}), 500
 
-def is_user_ad_free(user):
-    """Check if user has active ad-free status."""
-    if not user or not user.ad_free_until:
-        return False
-    return user.ad_free_until > datetime.utcnow()
-
-def await_grant_ad_free(user):
-    """Check if user has 10 verified subscriptions and grant ad-free if not."""
-    if is_user_ad_free(user):
-        return False
-    
-    verified_count = ChannelSubscription.query.filter_by(
-        user_id=user.id,
-        is_verified=True
-    ).count()
-    
-    if verified_count >= 10:
-        user.ad_free_until = datetime.utcnow() + timedelta(days=30)
-        db.session.commit()
-        return True
-    return False
+@app.route('/api/user/channels-status')
+@login_required
+def get_user_channels_status():
+    try:
+        user = current_user()
+        if not user:
+            return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+        
+        verified = ChannelSubscription.query.filter_by(
+            user_id=user.id,
+            is_verified=True
+        ).all()
+        
+        verified_ids = [v.channel_id for v in verified]
+        return jsonify({
+            'success': True,
+            'verified_channels': verified_ids,
+            'count': len(verified_ids),
+            'ad_free': is_user_ad_free(user)
+        })
+    except Exception as e:
+        logger.error(f"Channels status error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 # ==================== Auth ====================
 @app.route('/signup')
