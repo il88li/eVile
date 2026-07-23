@@ -17,17 +17,19 @@
   html{scroll-behavior:smooth;}
   body{font-family:'Tajawal',sans-serif;background:var(--very-light);color:var(--deep-purple);min-height:100vh;overflow-x:hidden;padding-top:74px;padding-bottom:80px;}
 
-  /* Header */
+  /* Header - باكتشاف نقرة لاختيار عدد البطاقات */
   .top-float{position:fixed;top:10px;left:12px;right:12px;z-index:1000;display:flex;flex-direction:column;align-items:stretch;gap:8px;pointer-events:none;}
   .top-float>*{pointer-events:auto;}
   .header-capsule{align-self:center;display:flex;align-items:center;gap:8px;padding:5px 14px;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:50px;box-shadow:var(--shadow-md);transition:all .3s;max-width:92vw;}
   .header-capsule:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--soft-lavender);}
   .hc-brand{font-size:1.1rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.5px;cursor:default;}
-  .hc-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--soft-lavender);flex-shrink:0;cursor:pointer;}
-  .hc-avatar-text{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;font-weight:800;font-size:.78rem;border:none;cursor:pointer;}
-  .hc-select{font-size:.65rem;padding:2px 6px;border-radius:6px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--deep-purple);font-family:'Tajawal',sans-serif;outline:none;cursor:pointer;}
-  .hc-login{font-size:.7rem;font-weight:600;color:var(--deep-purple);text-decoration:none;padding:3px 10px;border-radius:50px;background:rgba(219,181,238,.2);border:1px solid var(--glass-border);transition:all .25s;}
-  .hc-login:hover{background:rgba(219,181,238,.4);}
+  .hc-select-trigger{font-size:.7rem;font-weight:600;color:var(--deep-purple);padding:3px 12px;border-radius:50px;background:rgba(219,181,238,.2);border:1px solid var(--glass-border);cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:4px;}
+  .hc-select-trigger:hover{background:rgba(219,181,238,.4);}
+  .hc-select-popup{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:12px;padding:8px;box-shadow:var(--shadow-lg);z-index:1001;min-width:120px;display:none;}
+  .hc-select-popup.open{display:block;}
+  .hc-select-popup button{display:block;width:100%;padding:6px 12px;border:none;background:transparent;color:var(--deep-purple);font-family:'Tajawal',sans-serif;font-size:.75rem;font-weight:600;cursor:pointer;border-radius:6px;transition:all .2s;text-align:center;}
+  .hc-select-popup button:hover{background:rgba(219,181,238,.2);}
+  .hc-select-popup button.active{background:var(--deep-purple);color:#fff;}
 
   /* Search panel */
   .search-panel{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .35s,opacity .3s;}
@@ -52,9 +54,9 @@
 
   /* Bottom Navigation */
   .bottom-nav-wrapper{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;gap:8px;direction:ltr;}
-  .bottom-nav-main{display:flex;align-items:center;gap:4px;padding:6px 10px;background:rgba(76,5,133,0.85);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(219,181,238,0.3);border-radius:40px;box-shadow:0 8px 32px rgba(76,5,133,0.4);transition:all 0.3s ease;}
+  .bottom-nav-main{display:flex;align-items:center;gap:4px;padding:6px 10px;background:rgba(76,5,133,0.85);backdrop-filter:blur(16px) saturate(180%);-webkit-backdrop-filter:blur(16px) saturate(180%);border:1px solid rgba(219,181,238,0.3);border-radius:40px;box-shadow:0 8px 32px rgba(76,5,133,0.4);}
   .bn-item{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;text-decoration:none;color:rgba(255,255,255,0.6);transition:all 0.25s cubic-bezier(.34,1.56,.64,1);cursor:pointer;background:transparent;border:none;}
-  .bn-item svg{width:18px;height:18px;stroke:rgba(255,255,255,0.7);stroke-width:2;fill:none;transition:all 0.3s ease;}
+  .bn-item svg{width:18px;height:18px;stroke:rgba(255,255,255,0.7);stroke-width:2;fill:none;transition:all 0.3s;}
   .bn-item.active{background:radial-gradient(circle at 40% 35%,#FCD34D,#F59E0B 70%,#D97706);box-shadow:0 0 20px rgba(245,158,11,0.4);transform:scale(1.05);}
   .bn-item.active svg{stroke:#FFFFFF;stroke-width:2.5;fill:#FFFFFF;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.1));}
   .bn-item:not(.active):hover{background:rgba(219,181,238,0.2);transform:translateY(-3px);}
@@ -68,7 +70,7 @@
   .bn-search .badge.show{opacity:1;transform:scale(1);}
 
   /* Hero */
-  .hero{text-align:center;padding:14px 16px 10px;position:relative;z-index:1;}
+  .hero{text-align:center;padding:14px 16px 10px;}
   .hero h1{font-size:1.35rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:5px;}
   .hero p{font-size:.78rem;color:rgba(76,5,133,.6);max-width:460px;margin:0 auto;line-height:1.6;}
   .hero .count-badge{display:inline-block;margin-top:8px;padding:4px 14px;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;border-radius:50px;font-weight:700;font-size:.7rem;}
@@ -81,15 +83,25 @@
   .categories-bar{display:flex;align-items:center;gap:8px;padding:5px 16px;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--soft-lavender) transparent;}
   .categories-bar::-webkit-scrollbar{height:3px;}
   .categories-bar::-webkit-scrollbar-thumb{background:var(--soft-lavender);border-radius:4px;}
-  .cat-chip{display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:50px;border:1.5px solid var(--glass-border);background:rgba(255,253,254,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--deep-purple);font-family:'Tajawal',sans-serif;font-size:.74rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .35s cubic-bezier(.34,1.56,.64,1);text-decoration:none;flex-shrink:0;}
+  .cat-chip{display:flex;align-items:center;gap:5px;padding:6px 14px;border-radius:50px;border:1.5px solid var(--glass-border);background:rgba(255,253,254,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--deep-purple);font-family:'Tajawal',sans-serif;font-size:.74rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .35s;text-decoration:none;flex-shrink:0;}
   .cat-chip .chip-dot{width:6px;height:6px;border-radius:50%;background:var(--soft-lavender);transition:all .3s;}
   .cat-chip:hover{transform:translateY(-2px);border-color:var(--soft-lavender);box-shadow:var(--shadow-sm);}
   .cat-chip.active{background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(76,5,133,.32);transform:translateY(-2px);}
   .cat-chip.active .chip-dot{background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.25);}
 
+  /* Ad Banner (محسّن) */
+  .ad-banner{margin:10px 12px;padding:12px 16px;background:linear-gradient(135deg,rgba(219,181,238,.18),rgba(76,5,133,.06));border:1.5px dashed var(--soft-lavender);border-radius:var(--radius-md);text-align:center;position:relative;z-index:1;overflow:hidden;}
+  .ad-banner::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shimmer 3s infinite;}
+  @keyframes shimmer{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+  .ad-banner-content{position:relative;z-index:1;}
+  .ad-banner .ad-title{font-size:.8rem;font-weight:800;color:var(--deep-purple);margin-bottom:4px;}
+  .ad-banner .ad-text{font-size:.72rem;color:rgba(76,5,133,.7);margin-bottom:8px;line-height:1.5;}
+  .ad-banner .ad-btn{display:inline-block;padding:5px 16px;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;border-radius:50px;text-decoration:none;font-size:.68rem;font-weight:700;transition:all .25s;box-shadow:0 2px 8px rgba(76,5,133,.2);}
+  .ad-banner .ad-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(76,5,133,.3);}
+
   /* Masonry */
-  .masonry-grid{column-gap:10px;padding:0 12px 26px;position:relative;z-index:1;}
-  .prompt-card{break-inside:avoid;margin-bottom:10px;border-radius:var(--radius-md);overflow:hidden;background:var(--very-light);border:1px solid var(--glass-border);box-shadow:var(--shadow-sm);transition:all .3s cubic-bezier(.4,0,.2,1);cursor:pointer;position:relative;}
+  .masonry-grid{column-gap:10px;padding:0 12px 26px;}
+  .prompt-card{break-inside:avoid;margin-bottom:10px;border-radius:var(--radius-md);overflow:hidden;background:var(--very-light);border:1px solid var(--glass-border);box-shadow:var(--shadow-sm);transition:all .3s;cursor:pointer;}
   .prompt-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:var(--soft-lavender);}
   .prompt-card .card-image-wrap{position:relative;overflow:hidden;width:100%;}
   .prompt-card .card-image-wrap img{width:100%;height:auto;display:block;transition:transform .5s;}
@@ -110,64 +122,42 @@
   .empty-state .empty-icon{margin-bottom:10px;opacity:.4;display:flex;justify-content:center;}
   .empty-state .empty-icon svg{width:44px;height:44px;}
 
-  /* Image Modal */
-  .image-modal{position:fixed;inset:0;z-index:9999;background:rgba(10,2,20,.92);backdrop-filter:blur(12px);display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:all .4s cubic-bezier(.4,0,.2,1);overflow-y:auto;}
+  /* Image Modal (مبسّط بدون تفاعل مستخدم) */
+  .image-modal{position:fixed;inset:0;z-index:9999;background:rgba(10,2,20,.92);backdrop-filter:blur(12px);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all .4s;padding:20px;}
   .image-modal.open{opacity:1;visibility:visible;}
-  .modal-top-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;position:sticky;top:0;z-index:10;background:rgba(10,2,20,.6);backdrop-filter:blur(10px);}
-  .modal-back-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:50px;border:1.5px solid rgba(219,181,238,.3);background:rgba(255,253,254,.08);color:var(--very-light);font-family:'Tajawal',sans-serif;font-size:.76rem;font-weight:600;cursor:pointer;transition:all .25s;}
-  .modal-back-btn svg{width:14px;height:14px;}
-  .modal-back-btn:hover{background:rgba(219,181,238,.2);border-color:var(--soft-lavender);}
-  .modal-image-container{display:flex;justify-content:center;align-items:center;padding:14px 18px;flex:1;}
-  .modal-image-container img{max-width:100%;max-height:66vh;border-radius:var(--radius-md);object-fit:contain;box-shadow:0 16px 50px rgba(0,0,0,.4);}
-  .modal-action-bar{display:flex;align-items:center;justify-content:center;gap:10px;padding:9px 16px;margin:0 18px;background:rgba(255,253,254,.1);border:1px solid rgba(219,181,238,.2);border-radius:50px;backdrop-filter:blur(10px);}
-  .modal-action-item{display:flex;align-items:center;gap:5px;color:var(--very-light);font-size:.72rem;font-weight:600;padding:6px 12px;border-radius:50px;background:rgba(255,253,254,.06);border:1px solid rgba(219,181,238,.15);cursor:pointer;transition:all .25s;user-select:none;}
-  .modal-action-item svg{width:14px;height:14px;}
-  .modal-action-item:hover{background:rgba(219,181,238,.15);}
-  .modal-action-item.liked{background:rgba(255,71,87,.2);border-color:rgba(255,71,87,.4);color:#FF6B81;}
-  .modal-action-item .action-count{font-size:.68rem;opacity:.8;}
-  .modal-action-separator{width:1px;height:18px;background:rgba(219,181,238,.2);}
-  .modal-similar-section{padding:20px 18px 36px;}
-  .modal-similar-title{color:var(--very-light);font-size:.9rem;font-weight:700;margin-bottom:12px;text-align:center;}
-  .modal-similar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;}
-  .similar-card{border-radius:var(--radius-sm);overflow:hidden;background:rgba(255,253,254,.06);border:1px solid rgba(219,181,238,.12);cursor:pointer;transition:all .3s;}
-  .similar-card:hover{transform:translateY(-2px);border-color:var(--soft-lavender);background:rgba(255,253,254,.1);}
-  .similar-card img{width:100%;height:90px;object-fit:cover;}
-  .similar-card .similar-info{padding:6px;}
-  .similar-card .similar-info h4{color:var(--very-light);font-size:.68rem;font-weight:600;line-height:1.4;margin-bottom:2px;}
-  .similar-card .similar-info span{color:rgba(219,181,238,.6);font-size:.58rem;}
+  .image-modal img{max-width:100%;max-height:80vh;border-radius:var(--radius-md);object-fit:contain;box-shadow:0 16px 50px rgba(0,0,0,.4);}
+  .image-modal .close-btn{position:fixed;top:20px;left:20px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 16px;border-radius:50px;font-size:.8rem;cursor:pointer;transition:all .3s;font-family:'Tajawal',sans-serif;}
+  .image-modal .close-btn:hover{background:rgba(255,255,255,.2);}
 
-  .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(80px);padding:9px 24px;background:var(--deep-purple);color:#fff;border-radius:50px;font-family:'Tajawal',sans-serif;font-weight:600;font-size:.82rem;z-index:99999;opacity:0;transition:all .4s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-lg);}
+  .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(80px);padding:9px 24px;background:var(--deep-purple);color:#fff;border-radius:50px;font-weight:600;font-size:.82rem;z-index:99999;opacity:0;transition:all .4s;box-shadow:var(--shadow-lg);}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   .scroll-top{position:fixed;bottom:72px;right:14px;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;border:none;cursor:pointer;z-index:998;opacity:0;visibility:hidden;transform:translateY(16px);transition:all .3s;box-shadow:var(--shadow-md);display:flex;align-items:center;justify-content:center;}
   .scroll-top svg{width:14px;height:14px;}
   .scroll-top.show{opacity:1;visibility:visible;transform:translateY(0);}
   .scroll-top:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
 
-  @media(max-width:600px){.modal-action-bar{flex-wrap:wrap;gap:6px;margin:0 12px;}.modal-similar-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:600px){.masonry-grid{column-count:2 !important;}}
 </style>
 </head>
 <body>
 
 <!-- ===== Floating Top ===== -->
 <div class="top-float">
-  <div class="header-capsule">
+  <div class="header-capsule" style="position:relative;">
     <span class="hc-brand">UFOQ</span>
-    {% if user %}
-      <span style="width:1px;height:18px;background:var(--glass-border);margin:0 4px;flex-shrink:0;"></span>
-      {% if user.avatar_url %}
-        <img src="{{ user.avatar_url }}" alt="{{ user.name }}" class="hc-avatar">
-      {% else %}
-        <span class="hc-avatar-text">{{ user.name[0] if user.name else '؟' }}</span>
-      {% endif %}
-      <select class="hc-select" id="cardsPerRowSelect" onchange="onCardsChange(this.value)">
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-      </select>
-      <a href="/logout" style="font-size:.65rem;color:var(--deep-purple);text-decoration:none;padding:2px 8px;border-radius:50px;background:rgba(219,181,238,.2);">خروج</a>
-    {% else %}
-      <a href="/sign" class="hc-login">تسجيل الدخول</a>
+    <span class="hc-select-trigger" onclick="toggleSelectPopup(event)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>
+      <span id="colsLabel">4</span>
+    </span>
+    <div class="hc-select-popup" id="colsPopup">
+      <button data-cols="1" onclick="setCols(1)">1</button>
+      <button data-cols="2" onclick="setCols(2)">2</button>
+      <button data-cols="3" onclick="setCols(3)">3</button>
+      <button data-cols="4" onclick="setCols(4)" class="active">4</button>
+      <button data-cols="5" onclick="setCols(5)">5</button>
+    </div>
+    {% if session.get('logged_in') %}
+    <a href="/admin" style="font-size:.65rem;color:var(--deep-purple);text-decoration:none;padding:2px 10px;border-radius:50px;background:rgba(219,181,238,.2);">👤</a>
     {% endif %}
   </div>
 
@@ -210,7 +200,7 @@
   </div>
 </div>
 
-<!-- ===== Ad Banner ===== -->
+<!-- ===== Ad Banner (محسّن) ===== -->
 {% if active_ad %}
 <div class="ad-banner">
   <div class="ad-banner-content">
@@ -222,9 +212,9 @@
 {% else %}
 <div class="ad-banner">
   <div class="ad-banner-content">
-    <div class="ad-title">أعلن لدى UFOQ</div>
+    <div class="ad-title">📢 أعلن لدى UFOQ</div>
     <div class="ad-text">وصل لجمهور مبدعي الذكاء الاصطناعي – إعلانك هنا يصل لآلاف المستخدمين.</div>
-    <a href="https://t.me/OlIiIl7" class="ad-btn" target="_blank" rel="noopener noreferrer">تواصل معنا</a>
+    <a href="#" class="ad-btn">تواصل معنا</a>
   </div>
 </div>
 {% endif %}
@@ -232,8 +222,8 @@
 <!-- ===== Masonry ===== -->
 <div class="masonry-grid" id="masonryGrid">
   {% for item in library_items %}
-  <div class="prompt-card" data-id="{{ item.id }}" data-keywords="{{ item.keywords or '' }}" data-category="{{ item.category }}" data-likes="{{ item.likes or 0 }}">
-    <div class="card-image-wrap" onclick="openImageModal('{{ item.id }}','{{ item.image_url or '' }}','{{ item.title|replace("'", "\\'") }}',{{ item.copy_count or 0 }},{{ item.share_count or 0 }},{{ item.likes or 0 }})">
+  <div class="prompt-card" data-id="{{ item.id }}" data-keywords="{{ item.keywords or '' }}" data-category="{{ item.category }}">
+    <div class="card-image-wrap" onclick="openImage('{{ item.image_url or '' }}')">
       {% if item.image_url %}
       <img src="{{ item.image_url }}" 
            srcset="{{ item.image_url }}?w=300 300w, {{ item.image_url }}?w=600 600w, {{ item.image_url }}?w=900 900w"
@@ -248,14 +238,11 @@
       <div class="card-title">{{ item.title }}</div>
       <div class="card-footer">
         <div class="card-author">
-          {% if item.user and (item.user.bio or item.user.profile_link) %}
-            {% if item.user.avatar_url %}<img src="{{ item.user.avatar_url }}" class="author-avatar" alt="{{ item.user.name }}">{% endif %}
-            <span class="publisher-name">{{ item.user.name }}</span>
-          {% elif item.publisher %}
+          {% if item.publisher %}
             <span class="publisher-name">{{ item.publisher }}</span>
           {% endif %}
         </div>
-        <button class="card-copy-btn" onclick="copyPrompt(this,'{{ item.prompt_text|replace("'", "\\'") }}', {{ item.id }})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> نسخ</button>
+        <button class="card-copy-btn" onclick="copyPrompt(this,'{{ item.prompt_text|replace("'", "\\'") }}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> نسخ</button>
       </div>
     </div>
   </div>
@@ -264,27 +251,10 @@
   {% endfor %}
 </div>
 
-<!-- ===== Image Modal ===== -->
-<div class="image-modal" id="imageModal">
-  <div class="modal-top-bar">
-    <button class="modal-back-btn" onclick="closeImageModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"></path></svg> رجوع</button>
-    <span style="color:var(--very-light);font-weight:600;font-size:.74rem;" id="modalTitle"></span>
-    <div style="width:70px;"></div>
-  </div>
-  <div class="modal-image-container">
-    <img id="modalImage" src="" 
-         srcset="" 
-         sizes="(max-width: 600px) 95vw, (max-width: 1200px) 70vw, 50vw"
-         alt="" decoding="async">
-  </div>
-  <div class="modal-action-bar">
-    <div class="modal-action-item" id="modalCopyBtn" onclick="copyFromModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg><span>نسخ</span><span class="action-count" id="modalCopyCount">0</span></div>
-    <div class="modal-action-separator"></div>
-    <div class="modal-action-item" id="modalLikeBtn" onclick="toggleLike()"><svg id="modalLikeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg><span>إعجاب</span><span class="action-count" id="modalLikesCount">0</span></div>
-    <div class="modal-action-separator"></div>
-    <div class="modal-action-item" onclick="sharePrompt()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line></svg><span>مشاركة</span><span class="action-count" id="modalShareCount">0</span></div>
-  </div>
-  <div class="modal-similar-section"><div class="modal-similar-title">برومبتات مشابهة</div><div class="modal-similar-grid" id="similarGrid"></div></div>
+<!-- ===== Image Modal (مبسّط) ===== -->
+<div class="image-modal" id="imageModal" onclick="closeImage(event)">
+  <button class="close-btn" onclick="closeImage(event)">✕ إغلاق</button>
+  <img id="modalImage" src="" alt="" onclick="event.stopPropagation()">
 </div>
 
 <!-- ===== Bottom Navigation ===== -->
@@ -312,33 +282,32 @@
 <button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"></path></svg></button>
 
 <script>
-const isLoggedIn = {{ 'true' if user else 'false' }};
-const cachedAd = {{ active_ad|tojson|safe if active_ad else 'null' }};
+let currentSearchCategory='all', currentSearchQuery='', allPrompts=[];
+let searchOpen=false;
 
-let searchOpen=false, currentSearchCategory='all', currentSearchQuery='', allPrompts=[], currentModalPrompt=null, lastScroll=0, currentLikeCount=0, currentPromptId=null;
-
-// ===== Cards per row =====
-function initCardsSelect(){
-    const s = document.getElementById('cardsPerRowSelect');
-    if(!s) return;
-    const v = localStorage.getItem('cardsPerRow')||'4';
-    s.value = v;
-    applyCardsPerRow();
+// ===== تحديد عدد البطاقات =====
+function toggleSelectPopup(e) {
+  e.stopPropagation();
+  const popup = document.getElementById('colsPopup');
+  popup.classList.toggle('open');
 }
-function onCardsChange(v){
-    localStorage.setItem('cardsPerRow', v);
-    applyCardsPerRow();
+function setCols(n) {
+  localStorage.setItem('cardsPerRow', n);
+  document.getElementById('colsLabel').textContent = n;
+  document.querySelectorAll('#colsPopup button').forEach(b => b.classList.toggle('active', parseInt(b.dataset.cols) === n));
+  document.getElementById('colsPopup').classList.remove('open');
+  applyCardsPerRow();
 }
-function applyCardsPerRow(){
-    const g = document.getElementById('masonryGrid');
-    if(!g) return;
-    const u = parseInt(localStorage.getItem('cardsPerRow')||'4', 10);
-    const w = window.innerWidth;
-    g.style.columns = (w <= 600 ? Math.min(u, 2) : w <= 900 ? Math.min(u, 3) : u);
+function applyCardsPerRow() {
+  const g = document.getElementById('masonryGrid');
+  if (!g) return;
+  const u = parseInt(localStorage.getItem('cardsPerRow') || '4', 10);
+  const w = window.innerWidth;
+  g.style.columns = (w <= 600 ? Math.min(u, 2) : w <= 900 ? Math.min(u, 3) : u);
 }
 window.addEventListener('resize', applyCardsPerRow);
 
-// ===== Search toggle =====
+// ===== البحث =====
 const searchToggle=document.getElementById('searchToggle'), searchPanel=document.getElementById('searchPanel'), searchInput=document.getElementById('searchInput'), searchBadge=document.getElementById('searchBadge');
 searchToggle.addEventListener('click',()=>{
     searchOpen=!searchOpen;
@@ -348,7 +317,6 @@ searchToggle.addEventListener('click',()=>{
     else { searchInput.value=''; currentSearchQuery=''; filterPrompts(); }
 });
 
-// ===== Category logic =====
 function setCategory(cat,label){
     currentSearchCategory=cat;
     document.querySelectorAll('.cat-chip').forEach(c=>c.classList.toggle('active',c.dataset.cat===cat));
@@ -382,10 +350,8 @@ function filterPrompts(){
     if(currentSearchQuery||currentSearchCategory!=='all'){ searchBadge.textContent=count; searchBadge.classList.add('show'); } else searchBadge.classList.remove('show');
 }
 
-// ===== Copy =====
-let pendingCopyBtn=null;
-
-function copyPrompt(btn, text, promptId) {
+// ===== نسخ =====
+function copyPrompt(btn, text) {
     copyTextToClipboard(text);
     if (btn) {
         btn.classList.add('copied');
@@ -393,14 +359,6 @@ function copyPrompt(btn, text, promptId) {
         btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;"><polyline points="20 6 9 17 4 12"></polyline></svg> تم';
         showToast('تم النسخ!');
         setTimeout(()=>{ btn.classList.remove('copied'); btn.innerHTML=o; },1500);
-        // تحديث العداد
-        fetch('/api/prompt/' + promptId + '/copy', { method: 'POST' }).catch(()=>{});
-        // تحديث العداد في المودال إذا كان مفتوحاً
-        const modalCount = document.getElementById('modalCopyCount');
-        if (modalCount) {
-            const current = parseInt(modalCount.textContent) || 0;
-            modalCount.textContent = current + 1;
-        }
     }
 }
 
@@ -419,115 +377,25 @@ function fallbackCopy(text) {
     document.execCommand('copy');
     document.body.removeChild(t);
 }
-
-function copyFromModal() {
-    if (!currentModalPrompt) return;
-    const b = currentModalPrompt.element.querySelector('.card-copy-btn');
-    if (b) {
-        const m = b.getAttribute('onclick').match(/'([^']+)'/);
-        if (m) {
-            const pid = currentModalPrompt.id;
-            copyPrompt(b, m[1], pid);
-        }
-    }
-}
-
 function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
 
-// ===== Image modal =====
-function openImageModal(id, url, title, cc, sc, likes) {
+// ===== عرض الصورة =====
+function openImage(url) {
     if (!url) return;
     const img = document.getElementById('modalImage');
     img.src = url;
-    img.srcset = url + '?w=600 600w, ' + url + '?w=900 900w, ' + url + '?w=1200 1200w';
-    document.getElementById('modalTitle').textContent = title;
-    document.getElementById('modalCopyCount').textContent = cc;
-    document.getElementById('modalShareCount').textContent = sc;
-    document.getElementById('modalLikesCount').textContent = likes;
-    currentLikeCount = likes;
-    currentPromptId = id;
-    currentModalPrompt = allPrompts.find(p => p.id === id);
-    loadSimilarPrompts(currentModalPrompt);
     document.getElementById('imageModal').classList.add('open');
     document.body.style.overflow = 'hidden';
 }
-function closeImageModal() {
+function closeImage(e) {
+    if (e && e.target !== e.currentTarget && e.target.tagName !== 'BUTTON') return;
     document.getElementById('imageModal').classList.remove('open');
     document.body.style.overflow = '';
-    currentModalPrompt = null;
 }
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeImageModal(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeImage(e); });
 
-function loadSimilarPrompts(p) {
-    const g = document.getElementById('similarGrid');
-    g.innerHTML = '';
-    if (!p) return;
-    const pk = p.keywords.split(',').map(k => k.trim().toLowerCase()).filter(k => k);
-    const sim = allPrompts.filter(x => {
-        if (x.id === p.id) return false;
-        const sk = x.keywords.split(',').map(k => k.trim().toLowerCase()).filter(k => k);
-        return sk.some(k => pk.includes(k)) || x.category === p.category;
-    }).slice(0, 8);
-    if (!sim.length) {
-        g.innerHTML = '<p style="color:rgba(255,253,254,.4);grid-column:1/-1;text-align:center;font-size:.78rem;">لا توجد برومبتات مشابهة</p>';
-        return;
-    }
-    sim.forEach(x => {
-        const c = document.createElement('div');
-        c.className = 'similar-card';
-        c.onclick = () => {
-            const i = x.element.querySelector('.card-image-wrap img');
-            if (i) openImageModal(x.id, i.src, x.element.querySelector('.card-title').textContent, 0, 0, parseInt(x.element.dataset.likes || 0));
-        };
-        const i = x.element.querySelector('.card-image-wrap img');
-        const t = x.element.querySelector('.card-title').textContent;
-        c.innerHTML = `${i ? `<img src="${i.src}" alt="${t}" loading="lazy" decoding="async">` : '<div style="width:100%;height:90px;background:linear-gradient(135deg,rgba(219,181,238,.3),rgba(76,5,133,.1));display:flex;align-items:center;justify-content:center;opacity:.4;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"></rect><circle cx="9" cy="9" r="2"></circle></svg></div>'}<div class="similar-info"><h4>${t}</h4><span>${x.category}</span></div>`;
-        g.appendChild(c);
-    });
-}
-
-// ===== Like =====
-async function toggleLike() {
-    if (!currentPromptId) return;
-    const btn = document.getElementById('modalLikeBtn');
-    const icon = document.getElementById('modalLikeIcon');
-    const countEl = document.getElementById('modalLikesCount');
-    if (btn.classList.contains('liked')) return;
-    try {
-        const res = await fetch('/api/prompt/' + currentPromptId + '/like', { method: 'POST' });
-        const data = await res.json();
-        if (data.success) {
-            countEl.textContent = data.likes;
-            btn.classList.add('liked');
-            icon.innerHTML = '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" fill="currentColor"></path>';
-            showToast('تم الإعجاب!');
-            const card = document.querySelector(`.prompt-card[data-id="${currentPromptId}"]`);
-            if (card) card.dataset.likes = data.likes;
-        }
-    } catch (e) {
-        showToast('حدث خطأ', true);
-    }
-}
-
-// ===== Share =====
-function sharePrompt() {
-    if (navigator.share) {
-        navigator.share({
-            title: currentModalPrompt ? currentModalPrompt.element.querySelector('.card-title').textContent : 'UFOQ',
-            url: window.location.href
-        }).catch(() => {});
-    } else {
-        navigator.clipboard.writeText(window.location.href);
-        showToast('تم نسخ الرابط!');
-    }
-    if (currentPromptId) {
-        fetch('/api/prompt/' + currentPromptId + '/share', { method: 'POST' }).catch(()=>{});
-        const shareEl = document.getElementById('modalShareCount');
-        if (shareEl) shareEl.textContent = parseInt(shareEl.textContent) + 1;
-    }
-}
-
-// ===== Scroll =====
+// ===== سكرول =====
+let lastScroll=0;
 window.addEventListener('scroll', () => {
     const y = window.scrollY, nav = document.querySelector('.bottom-nav-wrapper');
     if (nav) {
@@ -539,24 +407,7 @@ window.addEventListener('scroll', () => {
     if (st) st.classList.toggle('show', y > 400);
 });
 
-// ===== Lazy load images =====
-if ('IntersectionObserver' in window) {
-    const o = new IntersectionObserver(es => {
-        es.forEach(en => {
-            if (en.isIntersecting) {
-                const i = en.target;
-                if (i.dataset.src) {
-                    i.src = i.dataset.src;
-                    i.removeAttribute('data-src');
-                }
-                o.unobserve(i);
-            }
-        });
-    }, { rootMargin: '200px' });
-    document.querySelectorAll('img[loading="lazy"]').forEach(i => o.observe(i));
-}
-
-// ===== Init =====
+// ===== تهيئة =====
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.prompt-card').forEach(c => allPrompts.push({
         id: c.dataset.id,
@@ -566,8 +417,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
     const ac = document.querySelector('.cat-chip.active');
     if (ac) currentSearchCategory = ac.dataset.cat;
-    initCardsSelect();
+    const savedCols = localStorage.getItem('cardsPerRow') || '4';
+    document.getElementById('colsLabel').textContent = savedCols;
+    document.querySelectorAll('#colsPopup button').forEach(b => b.classList.toggle('active', parseInt(b.dataset.cols) === parseInt(savedCols)));
     applyCardsPerRow();
+});
+
+// ===== إغلاق البوب أب عند النقر خارجها =====
+document.addEventListener('click', (e) => {
+    const popup = document.getElementById('colsPopup');
+    const trigger = document.querySelector('.hc-select-trigger');
+    if (!popup.contains(e.target) && !trigger.contains(e.target)) {
+        popup.classList.remove('open');
+    }
 });
 </script>
 </body>
