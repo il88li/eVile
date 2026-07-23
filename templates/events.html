@@ -21,25 +21,35 @@
   /* Header */
   .top-float{position:fixed;top:10px;left:12px;right:12px;z-index:1000;display:flex;flex-direction:column;align-items:stretch;gap:8px;pointer-events:none;}
   .top-float>*{pointer-events:auto;}
-  .header-capsule{align-self:center;display:flex;align-items:center;gap:8px;padding:5px 14px;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:50px;box-shadow:var(--shadow-md);cursor:pointer;transition:all .3s cubic-bezier(.34,1.56,.64,1);max-width:92vw;}
+  .header-capsule{align-self:center;display:flex;align-items:center;gap:8px;padding:5px 14px;background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:50px;box-shadow:var(--shadow-md);cursor:pointer;transition:all .3s;max-width:92vw;}
   .header-capsule:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--soft-lavender);}
-  .hc-brand{font-size:1.1rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.5px;}
+  .hc-brand{font-size:1.1rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
   .hc-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--soft-lavender);flex-shrink:0;cursor:pointer;}
   .hc-avatar-text{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;font-weight:800;font-size:.78rem;border:none;cursor:pointer;}
-  .hc-points{font-size:0.65rem;font-weight:700;color:var(--deep-purple);background:rgba(219,181,238,0.3);padding:2px 8px;border-radius:50px;display:flex;align-items:center;gap:3px;direction:ltr;}
+  .hc-badge{font-size:0.6rem;font-weight:700;color:var(--deep-purple);background:rgba(219,181,238,0.3);padding:2px 8px;border-radius:50px;display:flex;align-items:center;gap:3px;direction:ltr;}
+  .hc-badge.ad-free{background:rgba(39,174,96,0.2);color:#27AE60;}
 
-  /* Main Content */
   .events-container{max-width:900px;margin:0 auto;padding:16px 14px 30px;}
   .events-header{text-align:center;margin-bottom:24px;}
   .events-header h1{font-size:1.5rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
   .events-header p{color:rgba(76,5,133,.6);font-size:.85rem;line-height:1.7;}
+
+  /* Progress Bar */
+  .progress-card{background:var(--glass-bg);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:20px;box-shadow:var(--shadow-sm);}
+  .progress-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;}
+  .progress-label{font-weight:700;font-size:.9rem;color:var(--deep-purple);}
+  .progress-count{font-size:.8rem;color:rgba(76,5,133,.6);font-weight:600;}
+  .progress-bar-bg{width:100%;height:8px;background:rgba(219,181,238,.25);border-radius:4px;overflow:hidden;}
+  .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--deep-purple),#7B2FBE,var(--soft-lavender));border-radius:4px;transition:width .6s ease;width:0%;}
+  .progress-status{margin-top:8px;font-size:.75rem;color:rgba(76,5,133,.5);text-align:center;}
+  .progress-status .highlight{font-weight:700;color:var(--deep-purple);}
 
   .telegram-warning{background:rgba(219,181,238,.12);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:14px 18px;margin-bottom:20px;text-align:center;}
   .telegram-warning .highlight{font-weight:700;color:var(--deep-purple);}
   .telegram-warning .btn-link{display:inline-block;padding:6px 18px;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;border-radius:50px;text-decoration:none;font-size:.75rem;font-weight:700;transition:all .25s;margin-right:8px;}
   .telegram-warning .btn-link:hover{transform:translateY(-1px);box-shadow:var(--shadow-md);}
 
-  /* Channel Cards - Horizontal Scroll */
+  /* Channel Cards */
   .channels-scroll-wrapper{position:relative;overflow:hidden;padding:4px 0;}
   .channels-scroll{display:flex;gap:12px;overflow-x:auto;padding:4px 12px 12px 12px;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--soft-lavender) transparent;}
   .channels-scroll::-webkit-scrollbar{height:4px;}
@@ -48,6 +58,7 @@
 
   .channel-card{flex:0 0 220px;background:var(--glass-bg);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:14px;box-shadow:var(--shadow-sm);transition:all .3s;display:flex;flex-direction:column;gap:8px;min-width:200px;}
   .channel-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--soft-lavender);}
+  .channel-card.verified{border-color:#27AE60;background:rgba(39,174,96,.04);}
   .channel-icon{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--soft-lavender);flex-shrink:0;}
   .channel-icon-placeholder{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--soft-lavender),rgba(76,5,133,.2));display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:var(--deep-purple);flex-shrink:0;}
   .channel-name{font-weight:800;font-size:.9rem;color:var(--deep-purple);}
@@ -62,12 +73,13 @@
   .btn-verify:hover{background:rgba(219,181,238,.4);transform:translateY(-1px);}
   .btn-verify.verified{background:rgba(39,174,96,.2);border-color:#27AE60;color:#27AE60;cursor:default;}
   .btn-verify:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-verify.loading{opacity:.7;cursor:wait;}
 
   .status-badge{display:inline-block;padding:2px 8px;border-radius:50px;font-size:.55rem;font-weight:700;}
   .status-verified{background:rgba(39,174,96,.15);color:#27AE60;}
   .status-pending{background:rgba(245,176,65,.15);color:#D68910;}
 
-  .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(80px);padding:9px 24px;background:var(--deep-purple);color:#fff;border-radius:50px;font-family:'Tajawal',sans-serif;font-weight:600;font-size:.82rem;z-index:99999;opacity:0;transition:all .4s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-lg);}
+  .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(80px);padding:9px 24px;background:var(--deep-purple);color:#fff;border-radius:50px;font-family:'Tajawal',sans-serif;font-weight:600;font-size:.82rem;z-index:99999;opacity:0;transition:all .4s;box-shadow:var(--shadow-lg);}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   .toast.error{background:#FF4757;}
   .toast.success{background:#27AE60;}
@@ -75,10 +87,10 @@
   /* Bottom Nav */
   .bottom-nav-wrapper{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;gap:12px;direction:ltr;}
   .bottom-nav-main{display:flex;align-items:center;gap:8px;padding:10px 18px;background:rgba(76,5,133,0.85);backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(219,181,238,0.3);border-radius:50px;box-shadow:0 8px 32px rgba(76,5,133,0.4),0 2px 8px rgba(0,0,0,0.2);}
-  .bn-item{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;text-decoration:none;color:rgba(255,255,255,0.6);transition:all .25s cubic-bezier(.34,1.56,.64,1);cursor:pointer;background:transparent;border:none;}
+  .bn-item{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;text-decoration:none;color:rgba(255,255,255,0.6);transition:all .25s;cursor:pointer;background:transparent;border:none;}
   .bn-item svg{width:22px;height:22px;stroke:rgba(255,255,255,0.7);stroke-width:2;fill:none;transition:all .3s;}
-  .bn-item.active{background:radial-gradient(circle at 40% 35%,#FCD34D,#F59E0B 70%,#D97706);box-shadow:0 0 30px rgba(245,158,11,0.5),inset 0 0 12px rgba(255,255,255,0.3);transform:scale(1.08);}
-  .bn-item.active svg{stroke:#FFFFFF;stroke-width:2.5;fill:#FFFFFF;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2));}
+  .bn-item.active{background:radial-gradient(circle at 40% 35%,#FCD34D,#F59E0B 70%,#D97706);box-shadow:0 0 30px rgba(245,158,11,0.5);transform:scale(1.08);}
+  .bn-item.active svg{stroke:#FFFFFF;stroke-width:2.5;fill:#FFFFFF;}
   .bn-item:not(.active):hover{background:rgba(219,181,238,0.2);transform:translateY(-3px);}
   .bn-item:not(.active):hover svg{stroke:#DBB5EE;}
 
@@ -88,7 +100,7 @@
 <body>
 
 <div class="top-float">
-  <div class="header-capsule" id="headerCapsule" onclick="handleHeaderClick(event)">
+  <div class="header-capsule" onclick="window.location.href='/settings'">
     <span class="hc-brand">UFOQ</span>
     {% if user %}
       <span style="width:1px;height:18px;background:var(--glass-border);margin:0 4px;flex-shrink:0;"></span>
@@ -97,7 +109,13 @@
       {% else %}
         <span class="hc-avatar-text">{{ user.name[0] if user.name else '؟' }}</span>
       {% endif %}
-      <span class="hc-points">⭐ <span id="userPointsDisplay">{{ user.points or 0 }}</span></span>
+      <span class="hc-badge {% if user.ad_free_until and user.ad_free_until > now %}ad-free{% endif %}">
+        {% if user.ad_free_until and user.ad_free_until > now %}
+          🚀 خالٍ من الإعلانات
+        {% else %}
+          ⭐ اشترك في 10 قنوات
+        {% endif %}
+      </span>
     {% else %}
       <span class="hc-avatar-text" style="font-size:.9rem;">👤</span>
     {% endif %}
@@ -107,18 +125,36 @@
 <div class="events-container">
   <div class="events-header">
     <h1>📢 فعاليات UFOQ</h1>
-    <p>اشترك في قنوات تيليجرام التابعة للمجتمع واحصل على نقاط إضافية لكل اشتراك يتم التحقق منه!</p>
+    <p>اشترك في قنوات تيليجرام التابعة للمجتمع وأكمل 10 قنوات للحصول على <strong>تجربة مجانية من الإعلانات لمدة 30 يوماً!</strong></p>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-card">
+    <div class="progress-header">
+      <span class="progress-label">🎯 تقدمك نحو 10 قنوات</span>
+      <span class="progress-count" id="progressCount">0 / 10</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%;"></div>
+    </div>
+    <div class="progress-status" id="progressStatus">
+      {% if user and user.ad_free_until and user.ad_free_until > now %}
+        ✅ <span class="highlight">مبروك! أنت في وضع خالٍ من الإعلانات حتى {{ user.ad_free_until.strftime('%Y-%m-%d') }}</span>
+      {% else %}
+        اشترك في <span class="highlight">10 قنوات</span> واحصل على 30 يوماً مجاناً بدون إعلانات!
+      {% endif %}
+    </div>
   </div>
 
   {% if user and user.telegram_id %}
   <div class="telegram-warning" style="background:rgba(39,174,96,.08); border-color:#27AE60;">
-    ✅ <span class="highlight">مرحباً {{ user.name }}!</span> تم ربط حساب تيليجرام الخاص بك (<strong>{{ user.telegram_id }}</strong>). اضغط "تحقق" بعد الاشتراك في أي قناة للحصول على <strong>5 نقاط</strong> لكل قناة.
+    ✅ <span class="highlight">مرحباً {{ user.name }}!</span> تم ربط حساب تيليجرام الخاص بك (<strong>{{ user.telegram_id }}</strong>). اضغط "تحقق" بعد الاشتراك في أي قناة لتسجيل التقدم.
   </div>
   {% else %}
   <div class="telegram-warning">
     ⚠️ <span class="highlight">لم تقم بربط حساب تيليجرام بعد!</span>
     <a href="/settings" class="btn-link">الذهاب إلى الإعدادات</a>
-    <span style="font-size:.75rem; color:rgba(76,5,133,.5);">للاستفادة من مكافآت الاشتراكات.</span>
+    <span style="font-size:.75rem; color:rgba(76,5,133,.5);">لتتمكن من التحقق من اشتراكاتك.</span>
   </div>
   {% endif %}
 
@@ -126,7 +162,7 @@
   <div class="channels-scroll-wrapper">
     <div class="channels-scroll" id="channelsScroll">
       {% for channel in channels %}
-      <div class="channel-card" id="channel-{{ channel.id }}">
+      <div class="channel-card" id="channel-{{ channel.id }}" data-channel-id="{{ channel.id }}">
         <div style="display:flex; align-items:center; gap:10px;">
           {% if channel.icon_url %}
           <img src="{{ channel.icon_url }}" alt="{{ channel.name }}" class="channel-icon" loading="lazy">
@@ -142,6 +178,9 @@
           </div>
         </div>
         <div class="channel-desc">{{ channel.description or 'قناة تيليجرام مفيدة' }}</div>
+        {% if channel.required_members > 0 %}
+        <div style="font-size:.55rem; color:rgba(76,5,133,.4);">👥 يحتاج {{ channel.required_members }} مشترك</div>
+        {% endif %}
         <div class="channel-actions">
           <a href="{{ channel.link }}" target="_blank" rel="noopener noreferrer" class="btn btn-subscribe">اشترك</a>
           <button class="btn btn-verify" id="verifyBtn-{{ channel.id }}" onclick="verifySubscription({{ channel.id }})" 
@@ -188,6 +227,8 @@
 
 <script>
 const CSRF_TOKEN = "{{ csrf_token }}";
+let verifiedChannels = [];
+let adFreeStatus = {{ 'true' if user and user.ad_free_until and user.ad_free_until > now else 'false' }};
 
 function handleHeaderClick(e) {
   e.stopPropagation();
@@ -206,9 +247,61 @@ function showToast(msg, type) {
   t._timer = setTimeout(() => t.classList.remove('show'), 4000);
 }
 
-function updatePointsDisplay(points) {
-  const el = document.getElementById('userPointsDisplay');
-  if (el) el.textContent = points;
+function updateProgress(verifiedCount) {
+  const countEl = document.getElementById('progressCount');
+  const fillEl = document.getElementById('progressFill');
+  const statusEl = document.getElementById('progressStatus');
+  
+  const total = 10;
+  const progress = Math.min(verifiedCount / total, 1) * 100;
+  
+  if (countEl) countEl.textContent = verifiedCount + ' / ' + total;
+  if (fillEl) fillEl.style.width = progress + '%';
+  
+  if (adFreeStatus) {
+    if (statusEl) {
+      const user = {{ user|tojson|safe if user else 'null' }};
+      const until = user && user.ad_free_until ? new Date(user.ad_free_until).toLocaleDateString('ar') : '';
+      statusEl.innerHTML = '✅ <span class="highlight">مبروك! أنت في وضع خالٍ من الإعلانات حتى ' + until + '</span>';
+    }
+  } else if (verifiedCount >= 10) {
+    adFreeStatus = true;
+    if (statusEl) statusEl.innerHTML = '✅ <span class="highlight">تم! حصلت على 30 يوماً بدون إعلانات! 🎉</span>';
+    // Refresh ad-free badge
+    const badge = document.querySelector('.hc-badge');
+    if (badge) {
+      badge.textContent = '🚀 خالٍ من الإعلانات';
+      badge.classList.add('ad-free');
+    }
+  } else {
+    if (statusEl) statusEl.innerHTML = 'اشترك في <span class="highlight">10 قنوات</span> واحصل على 30 يوماً مجاناً بدون إعلانات!';
+  }
+}
+
+async function loadVerificationStatus() {
+  if (!{{ 'true' if user else 'false' }}) return;
+  
+  try {
+    const res = await fetch('/api/user/channels-status');
+    const data = await res.json();
+    if (data.success) {
+      verifiedChannels = data.verified_channels || [];
+      const count = verifiedChannels.length;
+      updateProgress(count);
+      
+      // Update UI for each channel
+      verifiedChannels.forEach(channelId => {
+        const card = document.getElementById('channel-' + channelId);
+        const btn = document.getElementById('verifyBtn-' + channelId);
+        const statusEl = document.getElementById('verifyStatus-' + channelId);
+        if (card) card.classList.add('verified');
+        if (btn) { btn.textContent = '✅ تحقق'; btn.classList.add('verified'); btn.disabled = true; }
+        if (statusEl) statusEl.innerHTML = '✅ تم التحقق';
+      });
+    }
+  } catch(e) {
+    console.error('Failed to load verification status', e);
+  }
 }
 
 async function verifySubscription(channelId) {
@@ -222,6 +315,7 @@ async function verifySubscription(channelId) {
   
   btn.disabled = true;
   btn.textContent = 'جاري...';
+  btn.classList.add('loading');
   statusEl.textContent = '⏳ جاري التحقق...';
   
   try {
@@ -239,13 +333,18 @@ async function verifySubscription(channelId) {
         btn.classList.add('verified');
         showToast('✅ ' + data.message, 'success');
       } else if (data.verified) {
-        statusEl.innerHTML = '✅ تم التحقق! +5 نقاط';
+        statusEl.innerHTML = '✅ تم التحقق!';
         btn.textContent = '✅ تحقق';
         btn.classList.add('verified');
-        updatePointsDisplay(data.points);
-        showToast('🎉 ' + data.message, 'success');
+        document.getElementById('channel-' + channelId).classList.add('verified');
+        verifiedChannels.push(channelId);
+        updateProgress(verifiedChannels.length);
+        showToast('✅ ' + data.message, 'success');
+        if (data.completed) {
+          showToast('🎉 أكملت 10 قنوات! حصلت على 30 يوماً بدون إعلانات!', 'success');
+        }
       } else {
-        statusEl.innerHTML = '✅ تم التحقق (بدون نقاط إضافية)';
+        statusEl.innerHTML = '✅ تم التحقق';
         btn.textContent = '✅ تحقق';
         btn.classList.add('verified');
         showToast(data.message, 'success');
@@ -256,10 +355,12 @@ async function verifySubscription(channelId) {
         showToast('⚠️ ' + data.message, 'error');
         btn.textContent = 'تحقق';
         btn.disabled = false;
+        btn.classList.remove('loading');
       } else {
         statusEl.innerHTML = '❌ ' + (data.message || 'فشل التحقق');
         btn.textContent = 'تحقق';
         btn.disabled = false;
+        btn.classList.remove('loading');
         showToast('❌ ' + (data.message || 'فشل التحقق'), 'error');
       }
     }
@@ -267,13 +368,13 @@ async function verifySubscription(channelId) {
     statusEl.innerHTML = '❌ خطأ في الاتصال';
     btn.textContent = 'تحقق';
     btn.disabled = false;
+    btn.classList.remove('loading');
     showToast('❌ خطأ في الاتصال بالخادم', 'error');
   }
 }
 
-// Load initial verification statuses (if any)
 document.addEventListener('DOMContentLoaded', function() {
-  // Any pre-verification status could be loaded here
+  loadVerificationStatus();
 });
 </script>
 </body>
