@@ -75,10 +75,6 @@
   .btn-verify:disabled{opacity:.5;cursor:not-allowed;}
   .btn-verify.loading{opacity:.7;cursor:wait;}
 
-  .status-badge{display:inline-block;padding:2px 8px;border-radius:50px;font-size:.55rem;font-weight:700;}
-  .status-verified{background:rgba(39,174,96,.15);color:#27AE60;}
-  .status-pending{background:rgba(245,176,65,.15);color:#D68910;}
-
   .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(80px);padding:9px 24px;background:var(--deep-purple);color:#fff;border-radius:50px;font-family:'Tajawal',sans-serif;font-weight:600;font-size:.82rem;z-index:99999;opacity:0;transition:all .4s;box-shadow:var(--shadow-lg);}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   .toast.error{background:#FF4757;}
@@ -93,6 +89,7 @@
   .bn-item.active svg{stroke:#FFFFFF;stroke-width:2.5;fill:#FFFFFF;}
   .bn-item:not(.active):hover{background:rgba(219,181,238,0.2);transform:translateY(-3px);}
   .bn-item:not(.active):hover svg{stroke:#DBB5EE;}
+  .bn-label{display:none;}
 
   @media(max-width:600px){.channel-card{flex:0 0 180px;min-width:160px;padding:12px;}}
 </style>
@@ -267,7 +264,6 @@ function updateProgress(verifiedCount) {
   } else if (verifiedCount >= 10) {
     adFreeStatus = true;
     if (statusEl) statusEl.innerHTML = '✅ <span class="highlight">تم! حصلت على 30 يوماً بدون إعلانات! 🎉</span>';
-    // Refresh ad-free badge
     const badge = document.querySelector('.hc-badge');
     if (badge) {
       badge.textContent = '🚀 خالٍ من الإعلانات';
@@ -289,7 +285,6 @@ async function loadVerificationStatus() {
       const count = verifiedChannels.length;
       updateProgress(count);
       
-      // Update UI for each channel
       verifiedChannels.forEach(channelId => {
         const card = document.getElementById('channel-' + channelId);
         const btn = document.getElementById('verifyBtn-' + channelId);
