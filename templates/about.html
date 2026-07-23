@@ -17,7 +17,7 @@
   html{scroll-behavior:smooth;}
   body{font-family:'Tajawal',sans-serif;background:var(--very-light);color:var(--deep-purple);min-height:100vh;overflow-x:hidden;padding-top:84px;padding-bottom:96px;}
 
-  /* ===== Header ===== */
+  /* Header */
   .top-float{position:fixed;top:10px;left:12px;right:12px;z-index:1000;display:flex;flex-direction:column;align-items:stretch;gap:8px;pointer-events:none;}
   .top-float>*{pointer-events:auto;}
   .header-capsule{align-self:center;display:flex;align-items:center;gap:10px;padding:8px 18px;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:50px;box-shadow:var(--shadow-md);transition:all .3s;max-width:92vw;position:relative;}
@@ -26,7 +26,7 @@
   .hc-select-trigger{font-size:.75rem;font-weight:600;color:var(--deep-purple);padding:4px 14px;border-radius:50px;background:rgba(219,181,238,.2);border:1px solid var(--glass-border);cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:4px;}
   .hc-select-trigger:hover{background:rgba(219,181,238,.4);}
 
-  /* ===== نافذة اختيار عدد البطاقات ===== */
+  /* Cols Modal */
   .cols-modal-overlay{position:fixed;inset:0;z-index:9999;background:rgba(10,2,20,.75);backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all .4s;padding:20px;}
   .cols-modal-overlay.open{opacity:1;visibility:visible;}
   .cols-modal-box{background:var(--glass-bg);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:30px 24px 28px;max-width:480px;width:100%;box-shadow:var(--shadow-lg);text-align:center;position:relative;}
@@ -44,10 +44,8 @@
   .cols-modal-close{position:absolute;top:12px;left:12px;background:rgba(219,181,238,.2);border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;color:var(--deep-purple);font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:all .2s;}
   .cols-modal-close:hover{background:rgba(219,181,238,.4);}
 
-  /* ===== Main Content ===== */
+  /* Main Content */
   .about-container{max-width:820px;margin:0 auto;padding:16px 14px 30px;}
-  
-  /* Stats Hero */
   .stats-hero{text-align:center;padding:20px 16px 24px;}
   .stats-hero h1{font-size:1.5rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
   .stats-hero p{color:rgba(76,5,133,.6);font-size:.85rem;line-height:1.7;max-width:500px;margin:0 auto 18px;}
@@ -58,7 +56,6 @@
   .stat-card .stat-label{font-size:.62rem;color:rgba(76,5,133,.6);font-weight:600;margin-top:4px;}
   @media(max-width:500px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
 
-  /* ===== Glass Cards ===== */
   .section-card{background:var(--glass-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow-sm);transition:border-color .3s, box-shadow .3s;}
   .section-card:hover{border-color:var(--soft-lavender);box-shadow:var(--shadow-md);}
   .section-card h2{font-size:1rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--deep-purple);}
@@ -67,7 +64,6 @@
   .section-card ul{padding-right:20px;margin-bottom:10px;}
   .section-card li{color:rgba(76,5,133,.75);font-size:.82rem;line-height:2;margin-bottom:4px;}
 
-  /* ===== Steps ===== */
   .steps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:8px;}
   .step-item{background:rgba(219,181,238,.08);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:14px;text-align:center;transition:all .3s;}
   .step-item:hover{transform:translateY(-3px);border-color:var(--soft-lavender);background:rgba(219,181,238,.14);}
@@ -75,7 +71,6 @@
   .step-item h4{font-size:.82rem;font-weight:700;margin-bottom:4px;color:var(--deep-purple);}
   .step-item p{font-size:.7rem;color:rgba(76,5,133,.6);line-height:1.6;margin:0;}
 
-  /* ===== FAQ ===== */
   .faq-list{display:flex;flex-direction:column;gap:8px;}
   .faq-item{border:1px solid var(--glass-border);border-radius:var(--radius-md);overflow:hidden;transition:all .25s;}
   .faq-item:hover{border-color:var(--soft-lavender);}
@@ -88,15 +83,16 @@
   .faq-item.open .faq-answer{max-height:300px;padding:0 16px 16px 16px;}
   .faq-answer p{font-size:.8rem;color:rgba(76,5,133,.7);line-height:1.9;margin:0;}
 
-  /* ===== Contact Cards ===== */
-  .contact-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:8px;}
-  .contact-card{background:rgba(219,181,238,.06);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:16px;text-align:center;transition:all .3s;text-decoration:none;color:var(--deep-purple);display:block;}
-  .contact-card:hover{transform:translateY(-3px);border-color:var(--soft-lavender);background:rgba(219,181,238,.14);box-shadow:var(--shadow-md);}
-  .contact-card .contact-icon{font-size:2rem;margin-bottom:6px;display:block;}
-  .contact-card .contact-label{font-size:.78rem;font-weight:700;}
-  .contact-card .contact-desc{font-size:.65rem;color:rgba(76,5,133,.5);margin-top:2px;}
+  /* Contact Cards - horizontal small */
+  .contact-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;}
+  .contact-card{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(219,181,238,.06);border:1px solid var(--glass-border);border-radius:var(--radius-md);transition:all .3s;text-decoration:none;color:var(--deep-purple);flex:1 1 auto;min-width:140px;}
+  .contact-card:hover{transform:translateY(-2px);border-color:var(--soft-lavender);background:rgba(219,181,238,.14);box-shadow:var(--shadow-md);}
+  .contact-card .contact-icon{font-size:1.4rem;flex-shrink:0;}
+  .contact-card .contact-info{display:flex;flex-direction:column;}
+  .contact-card .contact-label{font-size:.75rem;font-weight:700;}
+  .contact-card .contact-desc{font-size:.65rem;color:rgba(76,5,133,.5);}
 
-  /* ===== Bottom Navigation (بدون Admin) ===== */
+  /* Bottom Navigation (بدون Admin) */
   .bottom-nav-wrapper{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;gap:12px;direction:ltr;}
   .bottom-nav-main{display:flex;align-items:center;gap:6px;padding:10px 18px;background:rgba(76,5,133,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(219,181,238,0.3);border-radius:50px;box-shadow:0 8px 32px rgba(76,5,133,0.4);}
   .bn-item{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;text-decoration:none;color:rgba(255,255,255,0.5);transition:all 0.25s cubic-bezier(.34,1.56,.64,1);cursor:pointer;background:transparent;border:none;}
@@ -113,7 +109,7 @@
   .scroll-top.show{opacity:1;visibility:visible;transform:translateY(0);}
   .scroll-top:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
 
-  @media(max-width:600px){.about-container{padding:12px;}.section-card{padding:16px;}.stat-card .stat-num{font-size:.95rem;}.steps-grid{grid-template-columns:repeat(2,1fr);}.contact-grid{grid-template-columns:repeat(2,1fr);}.bottom-nav-main{padding:8px 12px;gap:4px;}.bn-item{width:38px;height:38px;}.bn-item svg{width:18px;height:18px;}}
+  @media(max-width:600px){.about-container{padding:12px;}.section-card{padding:16px;}.stat-card .stat-num{font-size:.95rem;}.steps-grid{grid-template-columns:repeat(2,1fr);}.contact-card{min-width:100%;}}
 </style>
 </head>
 <body>
@@ -129,7 +125,7 @@
   </div>
 </div>
 
-<!-- ===== نافذة اختيار عدد البطاقات ===== -->
+<!-- ===== Cols Modal ===== -->
 <div class="cols-modal-overlay" id="colsModal">
   <div class="cols-modal-box">
     <button class="cols-modal-close" onclick="closeColsModal()">✕</button>
@@ -161,104 +157,74 @@
     </div>
   </div>
 
-  <!-- ===== شرح الاستخدام ===== -->
+  <!-- Steps -->
   <div class="section-card">
     <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h10"/><path d="M9 4v16"/><path d="m3 9 3 3-3 3"/><path d="M14 8V4h8v4"/><path d="M14 12h8"/><path d="M18 16v4"/><path d="M18 20h-4"/></svg> كيفية الاستخدام</h2>
     <div class="steps-grid">
-      <div class="step-item">
-        <div class="step-num">1</div>
-        <h4>تصفح المكتبة</h4>
-        <p>استخدم شريط التصنيفات أو البحث للعثور على البرومبت المناسب.</p>
-      </div>
-      <div class="step-item">
-        <div class="step-num">2</div>
-        <h4>معاينة الصورة</h4>
-        <p>اضغط على الصورة لعرضها بحجم أكبر.</p>
-      </div>
-      <div class="step-item">
-        <div class="step-num">3</div>
-        <h4>نسخ البرومبت</h4>
-        <p>اضغط زر "نسخ" وسيتم نسخ النص إلى الحافظة.</p>
-      </div>
-      <div class="step-item">
-        <div class="step-num">4</div>
-        <h4>مشاركة</h4>
-        <p>انقر على أيقونة المشاركة لمشاركة البرومبت مع الآخرين.</p>
-      </div>
+      <div class="step-item"><div class="step-num">1</div><h4>تصفح المكتبة</h4><p>استخدم شريط التصنيفات أو البحث للعثور على البرومبت المناسب.</p></div>
+      <div class="step-item"><div class="step-num">2</div><h4>معاينة الصورة</h4><p>اضغط على الصورة لعرضها بحجم أكبر.</p></div>
+      <div class="step-item"><div class="step-num">3</div><h4>نسخ البرومبت</h4><p>اضغط زر "نسخ" وسيتم نسخ النص إلى الحافظة.</p></div>
+      <div class="step-item"><div class="step-num">4</div><h4>مشاركة</h4><p>انقر على أيقونة المشاركة لمشاركة البرومبت مع الآخرين.</p></div>
     </div>
   </div>
 
-  <!-- ===== الأسئلة الشائعة ===== -->
+  <!-- FAQ -->
   <div class="section-card">
     <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg> الأسئلة الشائعة</h2>
     <div class="faq-list">
       <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <h4>ما هو UFOQ؟</h4>
-          <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-        </div>
+        <div class="faq-question" onclick="toggleFaq(this)"><h4>ما هو UFOQ؟</h4><svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
         <div class="faq-answer"><p>UFOQ هي مكتبة عربية مفتوحة للبرومبتات (النصوص التوجيهية) المستخدمة مع أدوات الذكاء الاصطناعي مثل ChatGPT و Midjourney وغيرها.</p></div>
       </div>
       <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <h4>هل الاستخدام مجاني؟</h4>
-          <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-        </div>
+        <div class="faq-question" onclick="toggleFaq(this)"><h4>هل الاستخدام مجاني؟</h4><svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
         <div class="faq-answer"><p>نعم، تصفح ونسخ البرومبتات مجاني بالكامل. لا توجد أي رسوم أو اشتراكات مدفوعة.</p></div>
       </div>
       <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <h4>كيف يمكنني المساهمة؟</h4>
-          <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-        </div>
+        <div class="faq-question" onclick="toggleFaq(this)"><h4>كيف يمكنني المساهمة؟</h4><svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
         <div class="faq-answer"><p>يمكنك التواصل معنا عبر قنوات التواصل أدناه لإرسال برومبتاتك، وسيتم مراجعتها وإضافتها إلى المكتبة.</p></div>
       </div>
       <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <h4>ما هي أدوات الذكاء الاصطناعي المدعومة؟</h4>
-          <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-        </div>
+        <div class="faq-question" onclick="toggleFaq(this)"><h4>ما هي أدوات الذكاء الاصطناعي المدعومة؟</h4><svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
         <div class="faq-answer"><p>البرومبتات تعمل مع معظم أدوات الذكاء الاصطناعي بما فيها ChatGPT، Midjourney، DALL-E، Stable Diffusion، Claude، Gemini وغيرها.</p></div>
       </div>
       <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)">
-          <h4>كيف يتم التحقق من جودة البرومبتات؟</h4>
-          <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-        </div>
+        <div class="faq-question" onclick="toggleFaq(this)"><h4>كيف يتم التحقق من جودة البرومبتات؟</h4><svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
         <div class="faq-answer"><p>يتم مراجعة جميع البرومبتات قبل النشر للتأكد من جودتها وخلوها من المحتوى غير المناسب.</p></div>
       </div>
     </div>
   </div>
 
-  <!-- ===== تواصل معنا ===== -->
+  <!-- ===== تواصل معنا (محدث) ===== -->
   <div class="section-card">
     <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> تواصل معنا</h2>
-    <p style="color:rgba(76,5,133,.6);font-size:.82rem;margin-bottom:12px;">لديك استفسار أو تريد المساهمة؟ تواصل معنا عبر إحدى القنوات التالية:</p>
+    <p style="color:rgba(76,5,133,.6);font-size:.82rem;margin-bottom:12px;">تابع أحدث التحديثات أو تواصل مع فريق المطورين:</p>
     <div class="contact-grid">
+      <a href="https://t.me/Evile_Prompts" target="_blank" rel="noopener noreferrer" class="contact-card">
+        <span class="contact-icon">📢</span>
+        <div class="contact-info">
+          <span class="contact-label">قناة التحديثات</span>
+          <span class="contact-desc">@Evile_Prompts</span>
+        </div>
+      </a>
       <a href="https://t.me/OlIiIl7" target="_blank" rel="noopener noreferrer" class="contact-card">
-        <span class="contact-icon">📱</span>
-        <span class="contact-label">تيليجرام</span>
-        <span class="contact-desc">@OlIiIl7</span>
+        <span class="contact-icon">👨‍💻</span>
+        <div class="contact-info">
+          <span class="contact-label">المطور</span>
+          <span class="contact-desc">@OlIiIl7</span>
+        </div>
       </a>
-      <a href="mailto:info@ufoq.com" class="contact-card">
-        <span class="contact-icon">✉️</span>
-        <span class="contact-label">البريد الإلكتروني</span>
-        <span class="contact-desc">info@ufoq.com</span>
-      </a>
-      <a href="#" class="contact-card">
-        <span class="contact-icon">🐦</span>
-        <span class="contact-label">تويتر / X</span>
-        <span class="contact-desc">@UFOQ</span>
-      </a>
-      <a href="#" class="contact-card">
+      <a href="https://instagram.com/ufoq7" target="_blank" rel="noopener noreferrer" class="contact-card">
         <span class="contact-icon">📷</span>
-        <span class="contact-label">إنستغرام</span>
-        <span class="contact-desc">@UFOQ</span>
+        <div class="contact-info">
+          <span class="contact-label">إنستغرام</span>
+          <span class="contact-desc">@ufoq7</span>
+        </div>
       </a>
     </div>
   </div>
 
-  <!-- ===== من نحن ===== -->
+  <!-- من نحن -->
   <div class="section-card">
     <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> من نحن</h2>
     <p>UFOQ هو مشروع عربي مستقل يهدف إلى بناء أكبر مكتبة عربية للبرومبتات. نؤمن بأن الذكاء الاصطناعي يجب أن يكون متاحاً للجميع، والبرومبت الجيد هو مفتاح الحصول على نتائج احترافية.</p>
@@ -266,7 +232,7 @@
   </div>
 </div>
 
-<!-- ===== Bottom Navigation (بدون Admin) ===== -->
+<!-- ===== Bottom Navigation ===== -->
 <div class="bottom-nav-wrapper">
   <div class="bottom-nav-main">
     <a href="/" class="bn-item" aria-label="الرئيسية">
@@ -282,7 +248,6 @@
 <button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg></button>
 
 <script>
-// ===== نافذة اختيار عدد البطاقات =====
 function openColsModal() {
     document.getElementById('colsModal').classList.add('open');
     const selected = parseInt(localStorage.getItem('cardsPerRow') || '4', 10);
@@ -303,7 +268,6 @@ function setCols(n) {
 }
 function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
 
-// ===== FAQ =====
 function toggleFaq(el) {
     const item = el.closest('.faq-item');
     const wasOpen = item.classList.contains('open');
@@ -311,7 +275,6 @@ function toggleFaq(el) {
     if (!wasOpen) item.classList.add('open');
 }
 
-// ===== سكرول =====
 let lastScroll=0;
 window.addEventListener('scroll', () => {
     const y = window.scrollY, nav = document.querySelector('.bottom-nav-wrapper');
@@ -324,7 +287,6 @@ window.addEventListener('scroll', () => {
     if (st) st.classList.toggle('show', y > 400);
 });
 
-// ===== تهيئة =====
 document.addEventListener('DOMContentLoaded', function() {
     const savedCols = localStorage.getItem('cardsPerRow') || '4';
     document.getElementById('colsLabel').textContent = savedCols;
@@ -333,7 +295,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// إغلاق نافذة اختيار البطاقات عند النقر خارجها
 document.addEventListener('click', (e) => {
     const modal = document.getElementById('colsModal');
     const box = modal.querySelector('.cols-modal-box');
