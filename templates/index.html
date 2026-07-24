@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UFOQ – مكتبة البرومبتات</title>
 <link rel="stylesheet" href="/static/style.css">
-<!-- Font Awesome 6 – مكتبة أيقونات مختلفة -->
+<!-- Font Awesome 6 -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
@@ -35,7 +35,7 @@
   </div>
 </div>
 
-<!-- Cols Modal (لتحديد عدد البطاقات في الصف – لكننا الآن نستخدم التمرير الأفقي، لذا سنخفيها أو نعدل وظيفتها) -->
+<!-- Cols Modal -->
 <div class="cols-modal-overlay" id="colsModal">
   <div class="cols-modal-box">
     <button class="cols-modal-close" onclick="closeColsModal()">✕</button>
@@ -100,41 +100,51 @@
 </div>
 {% endif %}
 
-<!-- ===== نظام البطاقات 3D (التمرير الأفقي) ===== -->
-<div class="cards-container">
-  <div class="cards-track" id="promptTrack">
-    {% for item in library_items %}
-    <div class="prompt-card-item" data-id="{{ item.id }}" data-prompt="{{ item.prompt_text|replace('"', '&quot;') }}" data-category="{{ item.category }}">
-      <div class="card-header">
-        <span class="card-category">{{ item.category }}</span>
-        <span class="card-time">{{ item.created_at.strftime('%H:%M') if item.created_at else '' }}</span>
+<!-- ===== شبكة البطاقات (Masonry Grid) مع الصور والأزرار النصية ===== -->
+<div class="masonry-grid" id="masonryGrid">
+  {% for item in library_items %}
+  <div class="prompt-card" data-id="{{ item.id }}" data-keywords="{{ item.keywords or '' }}" data-category="{{ item.category }}">
+    <!-- صورة البرومبت -->
+    <div class="card-image-wrap">
+      {% if item.image_url %}
+      <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy">
+      {% else %}
+      <div class="no-image-placeholder">
+        <i class="fas fa-image"></i>
       </div>
-      <div class="card-body">
-        <h3 class="card-title">{{ item.title }}</h3>
-        {% if item.publisher %}
-        <div class="card-publisher"><i class="fas fa-user"></i> {{ item.publisher }}</div>
-        {% endif %}
-        <!-- يمكن إضافة صورة مصغرة إذا وجدت، لكننا نعرض النص فقط -->
+      {% endif %}
+    </div>
+    <!-- محتوى البطاقة -->
+    <div class="card-body">
+      <div class="card-cat">{{ item.category }}</div>
+      <div class="card-title">{{ item.title }}</div>
+      {% if item.publisher %}
+      <div class="card-author">
+        <i class="fas fa-user"></i> {{ item.publisher }}
       </div>
-      <div class="card-footer">
-        <button class="card-action-btn like-btn" data-id="{{ item.id }}" title="إعجاب">
-          <i class="fas fa-heart"></i> <span class="like-count">{{ item.likes or 0 }}</span>
+      {% endif %}
+      <div class="card-actions">
+        <!-- زر نسخ (نصي) -->
+        <button class="card-btn copy-btn" data-prompt="{{ item.prompt_text|replace('"', '&quot;') }}" data-id="{{ item.id }}">
+          <i class="fas fa-copy"></i> نسخ <span class="count">({{ item.copy_count or 0 }})</span>
         </button>
-        <button class="card-action-btn share-btn" data-id="{{ item.id }}" title="مشاركة">
-          <i class="fas fa-share-alt"></i> <span class="share-count">{{ item.share_count or 0 }}</span>
+        <!-- زر إعجاب (نصي) -->
+        <button class="card-btn like-btn" data-id="{{ item.id }}">
+          <i class="fas fa-heart"></i> إعجاب <span class="count">({{ item.likes or 0 }})</span>
         </button>
-        <button class="card-action-btn copy-btn" data-prompt="{{ item.prompt_text|replace('"', '&quot;') }}" title="نسخ">
-          <i class="fas fa-copy"></i> <span class="copy-count">{{ item.copy_count or 0 }}</span>
+        <!-- زر مشاركة (نصي) -->
+        <button class="card-btn share-btn" data-id="{{ item.id }}">
+          <i class="fas fa-share-alt"></i> مشاركة <span class="count">({{ item.share_count or 0 }})</span>
         </button>
       </div>
     </div>
-    {% else %}
-    <div class="empty-state">لا توجد برومبتات في المكتبة حالياً</div>
-    {% endfor %}
   </div>
+  {% else %}
+  <div class="empty-state">لا توجد برومبتات في المكتبة حالياً</div>
+  {% endfor %}
 </div>
 
-<!-- ===== شريط التنقل السفلي الجديد (متطابق في index و about) ===== -->
+<!-- ===== شريط التنقل السفلي ===== -->
 <div class="bottom-nav-wrapper">
   <div class="bottom-nav-main">
     <a href="/" class="bn-item active" aria-label="الرئيسية">
@@ -156,7 +166,7 @@
   <i class="fas fa-chevron-up"></i>
 </button>
 
-<!-- Mandatory Ad Modal (نحتفظ بها كما هي) -->
+<!-- Mandatory Ad Modal -->
 <div class="mandatory-ad-modal" id="mandatoryAdModal">
   <div class="mad-box">
     <div class="mad-timer-bar" id="madTimerBar" style="width:100%;"></div>
@@ -180,48 +190,10 @@ const cachedAd = {{ active_ad|tojson|safe if active_ad else 'null' }};
 // ===== متغيرات عامة =====
 let currentSearchCategory = 'all';
 let currentSearchQuery = '';
-let allPrompts = [];
 let searchOpen = false;
 let madInterval = null;
 let pendingCopyText = null;
 let pendingCopyBtn = null;
-
-// ===== دوال البطاقات =====
-function updateActiveCard() {
-  const track = document.getElementById('promptTrack');
-  if (!track) return;
-  const cards = Array.from(track.querySelectorAll('.prompt-card-item'));
-  if (!cards.length) return;
-  const trackRect = track.getBoundingClientRect();
-  const center = trackRect.left + trackRect.width / 2;
-  let closest = null, closestDist = Infinity;
-  cards.forEach(c => {
-    const r = c.getBoundingClientRect();
-    const cCenter = r.left + r.width / 2;
-    const dist = Math.abs(cCenter - center);
-    if (dist < closestDist) { closestDist = dist; closest = c; }
-  });
-  cards.forEach(c => c.classList.remove('active'));
-  if (closest) closest.classList.add('active');
-}
-
-// ===== تهيئة التمرير =====
-document.addEventListener('DOMContentLoaded', function() {
-  const track = document.getElementById('promptTrack');
-  if (track) {
-    track.addEventListener('scroll', function() {
-      requestAnimationFrame(updateActiveCard);
-    });
-    // تمرير البطاقة النشطة (الأولى) إلى المنتصف
-    const firstActive = track.querySelector('.prompt-card-item.active') || track.querySelector('.prompt-card-item');
-    if (firstActive) {
-      const trackRect = track.getBoundingClientRect();
-      const target = firstActive.offsetLeft - (trackRect.width / 2) + (firstActive.offsetWidth / 2);
-      track.scrollLeft = target;
-    }
-    setTimeout(updateActiveCard, 100);
-  }
-});
 
 // ===== البحث والتصفية =====
 const searchToggle = document.getElementById('searchToggle');
@@ -288,7 +260,7 @@ searchInput.addEventListener('input', function() {
 });
 
 function filterPrompts() {
-  const cards = document.querySelectorAll('.prompt-card-item');
+  const cards = document.querySelectorAll('.prompt-card');
   if (!cards.length) return;
   let count = 0;
   cards.forEach(card => {
@@ -312,19 +284,33 @@ function filterPrompts() {
   }
 }
 
+// ===== عدد الأعمدة =====
+function applyCardsPerRow() {
+  const g = document.getElementById('masonryGrid');
+  if (!g) return;
+  const u = parseInt(localStorage.getItem('cardsPerRow') || '4', 10);
+  const w = window.innerWidth;
+  let cols = u;
+  if (w <= 600) cols = Math.min(u, 2);
+  else if (w <= 900) cols = Math.min(u, 3);
+  g.style.columns = cols;
+}
+window.addEventListener('resize', applyCardsPerRow);
+
 // ===== إدارة الإعجاب والمشاركة والنسخ =====
 document.addEventListener('click', function(e) {
+  // زر إعجاب
   const likeBtn = e.target.closest('.like-btn');
   if (likeBtn) {
     e.preventDefault();
     const id = likeBtn.dataset.id;
-    const countSpan = likeBtn.querySelector('.like-count');
+    const countSpan = likeBtn.querySelector('.count');
     if (!countSpan) return;
     fetch('/api/prompt/' + id + '/like', { method: 'POST' })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          countSpan.textContent = data.likes;
+          countSpan.textContent = '(' + data.likes + ')';
           likeBtn.classList.add('liked');
           showToast('تم الإعجاب!');
         }
@@ -333,20 +319,18 @@ document.addEventListener('click', function(e) {
     return;
   }
 
+  // زر مشاركة
   const shareBtn = e.target.closest('.share-btn');
   if (shareBtn) {
     e.preventDefault();
     const id = shareBtn.dataset.id;
-    const countSpan = shareBtn.querySelector('.share-count');
-    // زيادة العداد محلياً
+    const countSpan = shareBtn.querySelector('.count');
     if (countSpan) {
-      const old = parseInt(countSpan.textContent) || 0;
-      countSpan.textContent = old + 1;
+      const old = parseInt(countSpan.textContent.replace(/[()]/g, '')) || 0;
+      countSpan.textContent = '(' + (old + 1) + ')';
     }
-    // إرسال طلب المشاركة
     fetch('/api/prompt/' + id + '/share', { method: 'POST' }).catch(() => {});
-    // مشاركة عبر API
-    const card = shareBtn.closest('.prompt-card-item');
+    const card = shareBtn.closest('.prompt-card');
     const title = card?.querySelector('.card-title')?.textContent || 'برومبت';
     const shareUrl = window.location.origin + window.location.pathname + '?prompt_id=' + id;
     if (navigator.share) {
@@ -359,6 +343,7 @@ document.addEventListener('click', function(e) {
     return;
   }
 
+  // زر نسخ
   const copyBtn = e.target.closest('.copy-btn');
   if (copyBtn) {
     e.preventDefault();
@@ -426,17 +411,15 @@ function executeCopy() {
   if (!text) return;
   copyTextToClipboard(text);
   if (btn) {
-    const countSpan = btn.querySelector('.copy-count');
+    const countSpan = btn.querySelector('.count');
     if (countSpan) {
-      const old = parseInt(countSpan.textContent) || 0;
-      countSpan.textContent = old + 1;
+      const old = parseInt(countSpan.textContent.replace(/[()]/g, '')) || 0;
+      countSpan.textContent = '(' + (old + 1) + ')';
     }
     btn.classList.add('copied');
-    btn.innerHTML = '<i class="fas fa-check"></i> <span class="copy-count">' + (parseInt(btn.querySelector('.copy-count')?.textContent || 0) + 1) + '</span>';
     showToast('تم النسخ!');
     setTimeout(function() {
       btn.classList.remove('copied');
-      btn.innerHTML = '<i class="fas fa-copy"></i> <span class="copy-count">' + (parseInt(btn.querySelector('.copy-count')?.textContent || 0)) + '</span>';
     }, 1500);
   }
 }
@@ -467,7 +450,7 @@ function showToast(msg, isError) {
   setTimeout(function() { t.classList.remove('show'); }, 2500);
 }
 
-// ===== إدارة الأعمدة (متبقي من القديم لكن يمكن إخفاؤه) =====
+// ===== إدارة مودال الأعمدة =====
 function openColsModal() {
   document.getElementById('colsModal').classList.add('open');
   const selected = parseInt(localStorage.getItem('cardsPerRow') || '4', 10);
@@ -485,10 +468,10 @@ function setCols(n) {
     el.classList.toggle('active', parseInt(el.dataset.cols) === n);
   });
   setTimeout(closeColsModal, 300);
-  // لا نطبق تغيير الأعمدة لأن النظام يعتمد على التمرير الأفقي
+  applyCardsPerRow();
 }
 
-// ===== تمرير الصفحة وإظهار زر العودة للأعلى =====
+// ===== تمرير الصفحة =====
 let lastScroll = 0;
 window.addEventListener('scroll', function() {
   const y = window.scrollY;
@@ -505,7 +488,7 @@ window.addEventListener('scroll', function() {
   if (st) st.classList.toggle('show', y > 350);
 });
 
-// ===== إغلاق المودال عند الضغط خارجها =====
+// ===== إغلاق المودال =====
 document.addEventListener('click', function(e) {
   const modal = document.getElementById('colsModal');
   const box = modal.querySelector('.cols-modal-box');
@@ -514,52 +497,30 @@ document.addEventListener('click', function(e) {
   }
 });
 
-// ===== معاينة البرومبت من الرابط المباشر =====
+// ===== معاينة البرومبت من الرابط =====
 function openPromptFromURL() {
   const params = new URLSearchParams(window.location.search);
   const promptId = params.get('prompt_id');
   if (promptId) {
-    const card = document.querySelector(`.prompt-card-item[data-id="${promptId}"]`);
+    const card = document.querySelector(`.prompt-card[data-id="${promptId}"]`);
     if (card) {
-      // التمرير إلى البطاقة
-      const track = document.getElementById('promptTrack');
-      if (track) {
-        const trackRect = track.getBoundingClientRect();
-        const target = card.offsetLeft - (trackRect.width / 2) + (card.offsetWidth / 2);
-        track.scrollLeft = target;
-        setTimeout(updateActiveCard, 100);
-      }
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.style.border = '2px solid #4C0585';
+      setTimeout(() => { card.style.border = ''; }, 3000);
     }
   }
 }
 
 // ===== التهيئة =====
 document.addEventListener('DOMContentLoaded', function() {
-  // تخزين بيانات البطاقات للبحث
-  document.querySelectorAll('.prompt-card-item').forEach(c => {
-    allPrompts.push({
-      id: c.dataset.id,
-      category: c.dataset.category,
-      keywords: c.dataset.keywords || '',
-      element: c
-    });
-    // إضافة data-keywords للاستخدام في التصفية
-  });
-
-  // تهيئة شريط التنقل
   const savedCols = localStorage.getItem('cardsPerRow') || '4';
   document.getElementById('colsLabel').textContent = savedCols;
   document.querySelectorAll('#colsScroll .cols-option').forEach(el => {
     el.classList.toggle('active', parseInt(el.dataset.cols) === parseInt(savedCols));
   });
-
-  // فتح البرومبت من الرابط
+  applyCardsPerRow();
   openPromptFromURL();
-
-  // تحديث البطاقة النشطة بعد تحميل الصور
-  setTimeout(updateActiveCard, 300);
 });
 </script>
-
 </body>
 </html>
