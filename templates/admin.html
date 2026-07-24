@@ -5,23 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم – UFOQ</title>
     <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- استخدام Font Awesome فقط لتوحيد الأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body class="admin-body">
     <div class="container">
         {% if session.get('logged_in') %}
             <header class="floating-header">
-                <a href="/" class="header-btn" title="الرئيسية"><i class="bi bi-house-door"></i></a>
+                <a href="/" class="header-btn" title="الرئيسية"><i class="fas fa-home"></i></a>
                 <div class="header-center">UFOQ</div>
-                <a href="/admin/logout" class="header-btn" title="خروج"><i class="bi bi-box-arrow-right"></i></a>
+                <a href="/admin/logout" class="header-btn" title="خروج"><i class="fas fa-sign-out-alt"></i></a>
             </header>
 
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; margin-top:20px;">
-                <h2 style="font-size:22px; font-weight:900;"><i class="bi bi-shield-lock" style="color:var(--primary-light);"></i> لوحة التحكم</h2>
+                <h2 style="font-size:22px; font-weight:900;"><i class="fas fa-shield-alt" style="color:var(--primary-light);"></i> لوحة التحكم</h2>
             </div>
 
             <div id="tab-categories" class="tab-content active card">
-                <div class="section-title"><i class="bi bi-tags"></i> إدارة التصنيفات</div>
+                <div class="section-title"><i class="fas fa-tags"></i> إدارة التصنيفات</div>
                 <form method="POST" action="/admin/category/add" style="margin-bottom:20px;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <div class="form-grid">
@@ -30,7 +31,7 @@
                         <div class="form-group"><label>الأيقونة</label><input type="text" name="icon" value="bi-tag"></div>
                         <div class="form-group"><label>الترتيب</label><input type="number" name="sort_order" value="0"></div>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="margin-top:10px;"><i class="bi bi-plus-lg"></i> إضافة تصنيف</button>
+                    <button type="submit" class="btn btn-primary" style="margin-top:10px;"><i class="fas fa-plus"></i> إضافة تصنيف</button>
                 </form>
                 <div>
                     {% for cat in categories %}
@@ -40,10 +41,10 @@
                             <div class="meta">ترتيب: {{ cat.sort_order }} | أيقونة: {{ cat.icon }}</div>
                         </div>
                         <div class="actions">
-                            <button type="button" class="btn btn-warning" onclick="openEditCategoryModal({{ cat.id }}, '{{ cat.name }}', '{{ cat.display_name }}', '{{ cat.icon }}', {{ cat.sort_order }})"><i class="bi bi-pencil"></i> تعديل</button>
+                            <button type="button" class="btn btn-warning" onclick="openEditCategoryModal({{ cat.id }}, '{{ cat.name }}', '{{ cat.display_name }}', '{{ cat.icon }}', {{ cat.sort_order }})"><i class="fas fa-pen"></i> تعديل</button>
                             <form method="POST" action="/admin/category/{{ cat.id }}/delete" onsubmit="return confirm('حذف التصنيف؟')" style="display:inline;">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i></button>
+                                <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i></button>
                             </form>
                         </div>
                     </div>
@@ -52,7 +53,7 @@
             </div>
 
             <div id="tab-library" class="tab-content card">
-                <div class="section-title"><i class="bi bi-collection"></i> إدارة المكتبة</div>
+                <div class="section-title"><i class="fas fa-book-open"></i> إدارة المكتبة</div>
                 <form method="POST" action="/admin/library/add">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <div class="form-grid">
@@ -68,19 +69,19 @@
                         <div class="form-group"><label>الناشر</label><input type="text" name="publisher" placeholder="اختياري"></div>
                         <div class="form-group"><label>رابط الناشر</label><input type="url" name="publisher_link" placeholder="https:// — يُفحص تلقائياً"></div>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="margin-top:10px;"><i class="bi bi-plus-lg"></i> إضافة برومبت</button>
+                    <button type="submit" class="btn btn-primary" style="margin-top:10px;"><i class="fas fa-plus"></i> إضافة برومبت</button>
                 </form>
                 <div style="margin-top:24px;">
                     {% for item in library_items %}
                     <div class="item-card">
                         <div class="info">
                             <div class="title">{{ item.title }}</div>
-                            <div class="meta">تصنيف: {{ item.category }} | نسخ: {{ item.copy_count or 0 }}{% if item.publisher %} | ناشر: {{ item.publisher }}{% endif %}{% if item.publisher_link %} | <a href="{{ item.publisher_link }}" target="_blank" rel="noopener noreferrer" style="color:var(--primary-light);">رابط الناشر <i class="bi bi-box-arrow-up-right"></i></a>{% endif %}{% if item.keywords %} | كلمات: {{ item.keywords }}{% endif %}</div>
+                            <div class="meta">تصنيف: {{ item.category }} | نسخ: {{ item.copy_count or 0 }}{% if item.publisher %} | ناشر: {{ item.publisher }}{% endif %}{% if item.publisher_link %} | <a href="{{ item.publisher_link }}" target="_blank" rel="noopener noreferrer" style="color:var(--primary-light);">رابط الناشر <i class="fas fa-external-link-alt"></i></a>{% endif %}{% if item.keywords %} | كلمات: {{ item.keywords }}{% endif %}</div>
                         </div>
                         <div class="actions">
                             <form method="POST" action="/admin/library/{{ item.id }}/delete" onsubmit="return confirm('حذف البرومبت؟')">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i></button>
+                                <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i></button>
                             </form>
                         </div>
                     </div>
@@ -89,7 +90,7 @@
             </div>
 
             <div id="tab-ads" class="tab-content card">
-                <div class="section-title"><i class="bi bi-badge-ad"></i> إدارة الإعلانات</div>
+                <div class="section-title"><i class="fas fa-ad"></i> إدارة الإعلانات</div>
                 <form method="POST" action="/admin/library_ad/add">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <div class="form-grid">
@@ -101,7 +102,7 @@
                         <div class="form-group"><label>المدة (ثانية)</label><input type="number" name="duration_seconds" value="5"></div>
                         <div class="form-group"><label><input type="checkbox" name="is_active" checked> نشط</label></div>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="margin-top:10px;"><i class="bi bi-plus-lg"></i> إضافة إعلان</button>
+                    <button type="submit" class="btn btn-primary" style="margin-top:10px;"><i class="fas fa-plus"></i> إضافة إعلان</button>
                 </form>
                 <div style="margin-top:24px;">
                     {% for ad in library_ads %}
@@ -113,11 +114,11 @@
                         <div class="actions">
                             <form method="POST" action="/admin/library_ad/{{ ad.id }}/toggle">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-warning"><i class="bi bi-toggle-on"></i></button>
+                                <button type="submit" class="btn btn-warning"><i class="fas fa-toggle-on"></i></button>
                             </form>
                             <form method="POST" action="/admin/library_ad/{{ ad.id }}/delete" onsubmit="return confirm('حذف الإعلان؟')">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i></button>
+                                <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i></button>
                             </form>
                         </div>
                     </div>
@@ -126,14 +127,14 @@
             </div>
 
             <div id="tab-errors" class="tab-content card">
-                <div class="section-title"><i class="bi bi-exclamation-triangle"></i> الأخطاء (404)</div>
+                <div class="section-title"><i class="fas fa-exclamation-triangle"></i> الأخطاء (404)</div>
                 <div class="errors-header">
                     <div class="filter-group">
                         <button class="btn btn-outline btn-sm" id="toggleIgnoredBtn" onclick="toggleIgnoredErrors()">
-                            <i class="bi bi-eye"></i> إظهار المتجاهل
+                            <i class="fas fa-eye"></i> إظهار المتجاهل
                         </button>
                         <button class="btn btn-danger btn-sm" onclick="clearAllErrors()">
-                            <i class="bi bi-trash3"></i> حذف الكل
+                            <i class="fas fa-trash"></i> حذف الكل
                         </button>
                     </div>
                     <span style="font-size:0.75rem; color:var(--text-faint);" id="errorCount">0 خطأ</span>
@@ -158,7 +159,7 @@
             </div>
 
             <div id="tab-settings" class="tab-content card">
-                <div class="section-title"><i class="bi bi-power"></i> إعدادات الموقع</div>
+                <div class="section-title"><i class="fas fa-power-off"></i> إعدادات الموقع</div>
                 <div style="display:flex; flex-direction:column; gap:16px; max-width:400px;">
                     <div>
                         <label style="display:block; font-weight:700; font-size:0.85rem; margin-bottom:4px; color:var(--text-dim);">حالة الموقع</label>
@@ -171,7 +172,7 @@
                         <label style="display:block; font-weight:700; font-size:0.85rem; margin-bottom:4px; color:var(--text-dim);">رسالة التوقف</label>
                         <textarea id="offlineMsg" rows="3" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:var(--text); font-family:'Tajawal',sans-serif;">{{ site_settings.offline_message if site_settings else 'الموقع تحت الصيانة' }}</textarea>
                     </div>
-                    <button class="btn btn-primary" onclick="saveSiteSettings()" style="width:fit-content;"><i class="bi bi-floppy"></i> حفظ</button>
+                    <button class="btn btn-primary" onclick="saveSiteSettings()" style="width:fit-content;"><i class="fas fa-save"></i> حفظ</button>
                 </div>
             </div>
 
@@ -179,13 +180,13 @@
             <div class="card login-card">
                 <div class="top-brand" style="margin-bottom:20px;">
                     <div style="width:56px; height:56px; border-radius:16px; margin:0 auto 12px; background:linear-gradient(135deg, var(--primary) 0%, #7209B7 100%); display:flex; align-items:center; justify-content:center; font-size:26px; color:#fff; box-shadow:var(--glow);">
-                        <i class="bi bi-shield-lock"></i>
+                        <i class="fas fa-shield-alt"></i>
                     </div>
                     <h2 style="font-weight:900;">لوحة التحكم</h2>
                 </div>
                 <form method="POST" action="/admin">
                     <input type="password" name="password" placeholder="كلمة المرور" required style="width:100%; padding:11px 14px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:'Tajawal',sans-serif; font-size:0.9rem; outline:none; margin-bottom:12px;">
-                    <button type="submit" class="btn btn-primary" style="width:100%;"><i class="bi bi-box-arrow-in-left"></i> دخول</button>
+                    <button type="submit" class="btn btn-primary" style="width:100%;"><i class="fas fa-sign-in-alt"></i> دخول</button>
                 </form>
             </div>
         {% endif %}
@@ -195,7 +196,7 @@
         <div class="edit-modal-box">
             <div class="edit-modal-header">
                 <span>تعديل التصنيف</span>
-                <button onclick="closeEditCategoryModal()"><i class="bi bi-x-lg"></i></button>
+                <button onclick="closeEditCategoryModal()"><i class="fas fa-times"></i></button>
             </div>
             <form method="POST" action="" id="editCategoryForm">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -218,20 +219,20 @@
                         <input type="number" name="sort_order" id="editCatSortOrder" required>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary btn-full"><i class="bi bi-check-lg"></i> حفظ التعديلات</button>
+                <button type="submit" class="btn btn-primary btn-full"><i class="fas fa-check"></i> حفظ التعديلات</button>
             </form>
         </div>
     </div>
 
-    <div class="toast" id="toast"><i class="bi bi-check-lg"></i> <span id="toastMsg">تم!</span></div>
+    <div class="toast" id="toast"><i class="fas fa-check"></i> <span id="toastMsg">تم!</span></div>
 
     {% if session.get('logged_in') %}
     <nav class="admin-bottom-nav" id="adminBottomNav">
-        <button class="admin-nav-btn active" onclick="showTab('categories')" data-tab="categories" title="التصنيفات"><i class="bi bi-tags-fill"></i></button>
-        <button class="admin-nav-btn" onclick="showTab('library')" data-tab="library" title="المكتبة"><i class="bi bi-collection-fill"></i></button>
-        <button class="admin-nav-btn" onclick="showTab('ads')" data-tab="ads" title="الإعلانات"><i class="bi bi-badge-ad-fill"></i></button>
-        <button class="admin-nav-btn" onclick="showTab('errors')" data-tab="errors" title="الأخطاء"><i class="bi bi-exclamation-triangle-fill"></i></button>
-        <button class="admin-nav-btn" onclick="showTab('settings')" data-tab="settings" title="الإعدادات"><i class="bi bi-power"></i></button>
+        <button class="admin-nav-btn active" onclick="showTab('categories')" data-tab="categories" title="التصنيفات"><i class="fas fa-tags"></i></button>
+        <button class="admin-nav-btn" onclick="showTab('library')" data-tab="library" title="المكتبة"><i class="fas fa-book-open"></i></button>
+        <button class="admin-nav-btn" onclick="showTab('ads')" data-tab="ads" title="الإعلانات"><i class="fas fa-ad"></i></button>
+        <button class="admin-nav-btn" onclick="showTab('errors')" data-tab="errors" title="الأخطاء"><i class="fas fa-exclamation-triangle"></i></button>
+        <button class="admin-nav-btn" onclick="showTab('settings')" data-tab="settings" title="الإعدادات"><i class="fas fa-power-off"></i></button>
     </nav>
     {% endif %}
 
@@ -318,11 +319,11 @@
                         <td>${lastSeen}</td>
                         <td>
                             <button class="btn btn-warning btn-sm" onclick="toggleIgnoreError(${e.id}, ${!isIgnored})">
-                                <i class="bi ${isIgnored ? 'bi-eye' : 'bi-eye-slash'}"></i>
+                                <i class="fas ${isIgnored ? 'fa-eye' : 'fa-eye-slash'}"></i>
                                 ${isIgnored ? 'إلغاء التجاهل' : 'تجاهل'}
                             </button>
                             <button class="btn btn-danger btn-sm" onclick="deleteError(${e.id})">
-                                <i class="bi bi-trash3"></i>
+                                <i class="fas fa-trash"></i>
                             </button>
                         </td>
                     </tr>
@@ -333,8 +334,8 @@
         function toggleIgnoredErrors() {
             showIgnored = !showIgnored;
             document.getElementById('toggleIgnoredBtn').innerHTML = showIgnored ? 
-                '<i class="bi bi-eye-slash"></i> إخفاء المتجاهل' : 
-                '<i class="bi bi-eye"></i> إظهار المتجاهل';
+                '<i class="fas fa-eye-slash"></i> إخفاء المتجاهل' : 
+                '<i class="fas fa-eye"></i> إظهار المتجاهل';
             loadErrors();
         }
 
