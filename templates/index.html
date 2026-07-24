@@ -7,6 +7,558 @@
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-<!-- كامل المحتوى الأصلي للـ index.html (بدون أي <style>) -->
+
+<!-- ===== Floating Top ===== -->
+<div class="top-float">
+  <div class="header-capsule">
+    <span class="hc-brand">UFOQ</span>
+    <span class="hc-select-trigger" onclick="openColsModal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>
+      <span id="colsLabel">4</span>
+    </span>
+    {% if session.get('logged_in') %}
+    <a href="/admin" class="hc-admin-link">👤</a>
+    {% endif %}
+  </div>
+
+  <div class="search-panel" id="searchPanel">
+    <div class="search-panel-inner">
+      <div class="search-input-wrap">
+        <span class="search-icon-inside"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg></span>
+        <input type="text" id="searchInput" placeholder="ابحث عن برومبت..." autocomplete="off">
+        <button class="search-cat-chip" id="searchCatBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg>
+          <span id="searchCatLabel">الكل</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cols Modal -->
+<div class="cols-modal-overlay" id="colsModal">
+  <div class="cols-modal-box">
+    <button class="cols-modal-close" onclick="closeColsModal()">✕</button>
+    <h2>📐 عدد البطاقات</h2>
+    <p>اختر عدد البطاقات في كل سطر. يتغير التخطيط تلقائياً حسب الشاشة.</p>
+    <div class="cols-scroll-wrapper">
+      <div class="cols-scroll" id="colsScroll">
+        <div class="cols-option" data-cols="1" onclick="setCols(1)">1<span class="label">عمود</span></div>
+        <div class="cols-option" data-cols="2" onclick="setCols(2)">2<span class="label">عمودان</span></div>
+        <div class="cols-option" data-cols="3" onclick="setCols(3)">3<span class="label">3 أعمدة</span></div>
+        <div class="cols-option active" data-cols="4" onclick="setCols(4)">4<span class="label">4 أعمدة</span></div>
+        <div class="cols-option" data-cols="5" onclick="setCols(5)">5<span class="label">5 أعمدة</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Search Cat Dropdown -->
+<div class="search-cat-dropdown" id="searchCatDropdown">
+  <a href="#" class="active" data-cat="all" onclick="selectSearchCategory(event,'all','الكل')"><span class="dot"></span> الكل</a>
+  {% for cat in categories %}
+  <a href="#" data-cat="{{ cat.name }}" onclick="selectSearchCategory(event,'{{ cat.name }}','{{ cat.display_name }}')"><span class="dot"></span> {{ cat.display_name }}</a>
+  {% endfor %}
+</div>
+
+<!-- Hero -->
+<section class="hero">
+  <h1>مرحباً بك في UFOQ</h1>
+  <p>مكتبة ضخمة من البرومبتات الجاهزة – اختر، انسخ، وابدأ الإبداع فوراً.</p>
+  <div class="count-badge">أكثر من {{ library_items|length }} برومبت</div>
+</section>
+
+<!-- Categories -->
+<div class="categories-wrap">
+  <div class="categories-bar" id="categoriesBar">
+    <a href="/?cat=all" data-cat="all" class="cat-chip {% if not current_cat or current_cat == 'all' %}active{% endif %}" onclick="chipSelect(event,'all','الكل')"><span class="chip-dot"></span> الكل</a>
+    {% for cat in categories %}
+    <a href="/?cat={{ cat.name }}" data-cat="{{ cat.name }}" class="cat-chip {% if current_cat == cat.name %}active{% endif %}" onclick="chipSelect(event,'{{ cat.name }}','{{ cat.display_name }}')"><span class="chip-dot"></span> {{ cat.display_name }}</a>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Ad Banner -->
+{% if active_ad %}
+<div class="ad-banner">
+  <div class="ad-banner-content">
+    {% if active_ad.image_url %}
+    <img src="{{ active_ad.image_url }}" alt="{{ active_ad.title }}" class="ad-image" loading="lazy">
+    {% endif %}
+    <div class="ad-title">{{ active_ad.title }}</div>
+    <div class="ad-text">{{ active_ad.text }}</div>
+    <a href="{{ active_ad.button_link }}" class="ad-btn" target="_blank" rel="noopener noreferrer">{{ active_ad.button_text }}</a>
+  </div>
+</div>
+{% else %}
+<div class="ad-banner">
+  <div class="ad-banner-content">
+    <div class="ad-title">📢 أعلن لدى UFOQ</div>
+    <div class="ad-text">وصل لجمهور مبدعي الذكاء الاصطناعي</div>
+    <a href="#" class="ad-btn">تواصل معنا</a>
+  </div>
+</div>
+{% endif %}
+
+<!-- Masonry -->
+<div class="masonry-grid" id="masonryGrid">
+  {% for item in library_items %}
+  <div class="prompt-card" data-id="{{ item.id }}" data-keywords="{{ item.keywords or '' }}" data-category="{{ item.category }}">
+    <div class="card-image-wrap" onclick="openImageModal('{{ item.id }}','{{ item.image_url or '' }}','{{ item.title|replace("'", "\\'") }}',{{ item.copy_count or 0 }},{{ item.share_count or 0 }},{{ item.likes or 0 }})">
+      {% if item.image_url %}
+      <img src="{{ item.image_url }}" 
+           srcset="{{ item.image_url }}?w=300 300w, {{ item.image_url }}?w=600 600w, {{ item.image_url }}?w=900 900w"
+           sizes="(max-width: 600px) 90vw, (max-width: 900px) 45vw, 30vw"
+           alt="{{ item.title }}" loading="lazy" decoding="async">
+      {% else %}
+      <div style="width:100%;height:120px;background:linear-gradient(135deg,var(--soft-lavender),rgba(76,5,133,.1));display:flex;align-items:center;justify-content:center;opacity:.4;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></div>
+      {% endif %}
+    </div>
+    <div class="card-body">
+      <div class="card-cat">{{ item.category }}</div>
+      <div class="card-title">{{ item.title }}</div>
+      <div class="card-footer">
+        <div class="card-author">
+          {% if item.publisher %}
+            <span class="publisher-name">{{ item.publisher }}</span>
+          {% endif %}
+        </div>
+        <button class="card-copy-btn" data-prompt="{{ item.prompt_text|replace('"', '&quot;') }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> نسخ</button>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg></div>لا توجد برومبتات في المكتبة حالياً</div>
+  {% endfor %}
+</div>
+
+<!-- ===== Image Modal ===== -->
+<div class="image-modal" id="imageModal" onclick="closeImageModal(event)">
+  <div class="image-modal-content" onclick="event.stopPropagation()">
+    <button class="modal-close-btn" onclick="closeImageModal(event)">✕ إغلاق</button>
+    <div class="modal-image-wrap">
+      <img id="modalImage" src="" alt="">
+    </div>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-action-bar">
+      <button class="modal-action-btn" id="modalCopyBtn" onclick="copyFromModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg> نسخ <span class="count" id="modalCopyCount">0</span></button>
+      <button class="modal-action-btn" id="modalLikeBtn" onclick="toggleLike()"><svg id="modalLikeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg> إعجاب <span class="count" id="modalLikesCount">0</span></button>
+      <button class="modal-action-btn" onclick="sharePrompt()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line></svg> مشاركة <span class="count" id="modalShareCount">0</span></button>
+    </div>
+    <div class="modal-similar-section">
+      <div class="modal-similar-title">🔄 برومبتات مشابهة</div>
+      <div class="modal-similar-grid" id="similarGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Mandatory Ad Modal -->
+<div class="mandatory-ad-modal" id="mandatoryAdModal">
+  <div class="mad-box">
+    <div class="mad-timer-bar" id="madTimerBar" style="width:100%;"></div>
+    <div class="mad-header">
+      <span class="mad-title">📢 إعلان</span>
+      <span class="mad-timer" id="madTimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> <span id="madTimerText">5</span>ث</span>
+    </div>
+    <img class="mad-image" id="madImage" src="" alt="">
+    <div class="mad-body">
+      <div class="mad-ad-title" id="madTitle"></div>
+      <div class="mad-ad-text" id="madText"></div>
+      <a href="#" class="mad-btn" id="madBtn" target="_blank" rel="noopener noreferrer">زيارة</a>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav-wrapper">
+  <div class="bottom-nav-main">
+    <a href="/" class="bn-item active" aria-label="الرئيسية">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </a>
+    <a href="/about" class="bn-item" aria-label="حول">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+    </a>
+  </div>
+  <button class="bn-search" id="searchToggle" aria-label="بحث">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <span class="badge" id="searchBadge">0</span>
+  </button>
+</div>
+
+<div class="toast" id="toast">تم النسخ!</div>
+<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg></button>
+
+<script>
+const cachedAd = {{ active_ad|tojson|safe if active_ad else 'null' }};
+
+let currentSearchCategory='all', currentSearchQuery='', allPrompts=[];
+let searchOpen=false, madInterval=null, pendingCopyText=null, pendingCopyBtn=null;
+let currentPromptId=null, currentModalPrompt=null, currentLikeCount=0;
+
+function openColsModal() {
+    document.getElementById('colsModal').classList.add('open');
+    const selected = parseInt(localStorage.getItem('cardsPerRow') || '4', 10);
+    document.querySelectorAll('#colsScroll .cols-option').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.cols) === selected);
+    });
+}
+function closeColsModal() {
+    document.getElementById('colsModal').classList.remove('open');
+}
+function setCols(n) {
+    localStorage.setItem('cardsPerRow', n);
+    document.getElementById('colsLabel').textContent = n;
+    document.querySelectorAll('#colsScroll .cols-option').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.cols) === n);
+    });
+    setTimeout(closeColsModal, 300);
+    applyCardsPerRow();
+}
+function applyCardsPerRow() {
+    const g = document.getElementById('masonryGrid');
+    if (!g) return;
+    const u = parseInt(localStorage.getItem('cardsPerRow') || '4', 10);
+    const w = window.innerWidth;
+    g.style.columns = (w <= 600 ? Math.min(u, 2) : w <= 900 ? Math.min(u, 3) : u);
+}
+window.addEventListener('resize', applyCardsPerRow);
+
+const searchToggle = document.getElementById('searchToggle'), searchPanel = document.getElementById('searchPanel'), searchInput = document.getElementById('searchInput'), searchBadge = document.getElementById('searchBadge');
+searchToggle.addEventListener('click', () => {
+    searchOpen = !searchOpen;
+    searchToggle.classList.toggle('active', searchOpen);
+    searchPanel.classList.toggle('open', searchOpen);
+    if (searchOpen) setTimeout(() => searchInput.focus(), 300);
+    else { searchInput.value = ''; currentSearchQuery = ''; filterPrompts(); }
+});
+
+function setCategory(cat, label) {
+    currentSearchCategory = cat;
+    document.querySelectorAll('.cat-chip').forEach(c => c.classList.toggle('active', c.dataset.cat === cat));
+    document.querySelectorAll('#searchCatDropdown a').forEach(a => a.classList.toggle('active', a.dataset.cat === cat));
+    document.getElementById('searchCatLabel').textContent = (cat === 'all' ? 'الكل' : label);
+    filterPrompts();
+}
+function chipSelect(e, cat, label) { e.preventDefault(); setCategory(cat, label); const bar = document.getElementById('categoriesBar'); if (bar && e.currentTarget) bar.scrollTo({ left: e.currentTarget.offsetLeft - bar.offsetWidth / 2, behavior: 'smooth' }); }
+const searchCatBtn = document.getElementById('searchCatBtn'), searchCatDropdown = document.getElementById('searchCatDropdown');
+function positionDropdown() { const r = searchCatBtn.getBoundingClientRect(); searchCatDropdown.style.top = (r.bottom + 6) + 'px'; searchCatDropdown.style.left = Math.max(8, r.left) + 'px'; }
+searchCatBtn.addEventListener('click', (e) => { e.stopPropagation(); const w = !searchCatDropdown.classList.contains('open'); if (w) positionDropdown(); searchCatDropdown.classList.toggle('open'); });
+document.addEventListener('click', (e) => { if (!searchCatDropdown.contains(e.target) && e.target !== searchCatBtn) searchCatDropdown.classList.remove('open'); });
+function selectSearchCategory(e, cat, label) { e.preventDefault(); setCategory(cat, label); searchCatDropdown.classList.remove('open'); }
+
+let searchTimeout;
+searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => { currentSearchQuery = searchInput.value.trim().toLowerCase(); filterPrompts(); }, 200);
+});
+
+function filterPrompts() {
+    const cards = document.querySelectorAll('.prompt-card');
+    if (!cards.length) return;
+    let count = 0;
+    cards.forEach(card => {
+        const kw = (card.dataset.keywords || '').toLowerCase(), cat = card.dataset.category, title = (card.querySelector('.card-title')?.textContent || '').toLowerCase();
+        const mq = !currentSearchQuery || kw.includes(currentSearchQuery) || title.includes(currentSearchQuery);
+        const mc = currentSearchCategory === 'all' || cat === currentSearchCategory;
+        if (mq && mc) { card.style.display = ''; count++; } else card.style.display = 'none';
+    });
+    if (currentSearchQuery || currentSearchCategory !== 'all') { searchBadge.textContent = count; searchBadge.classList.add('show'); } else searchBadge.classList.remove('show');
+}
+
+function copyPrompt(btn, text) {
+    pendingCopyText = text;
+    pendingCopyBtn = btn;
+    if (cachedAd) {
+        showMandatoryAd(cachedAd);
+    } else {
+        executeCopy();
+    }
+}
+
+function showMandatoryAd(ad) {
+    const m = document.getElementById('mandatoryAdModal');
+    const img = document.getElementById('madImage');
+    const title = document.getElementById('madTitle');
+    const txt = document.getElementById('madText');
+    const btn = document.getElementById('madBtn');
+    const timer = document.getElementById('madTimerText');
+    const bar = document.getElementById('madTimerBar');
+    
+    if (ad.image_url) {
+        img.src = ad.image_url;
+        img.style.display = 'block';
+    } else {
+        img.style.display = 'none';
+    }
+    title.textContent = ad.title;
+    txt.textContent = ad.text;
+    btn.textContent = ad.button_text || 'زيارة';
+    btn.href = ad.button_link;
+    m.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    let sec = ad.duration_seconds || 5, total = sec;
+    timer.textContent = sec;
+    bar.style.width = '100%';
+    if (madInterval) clearInterval(madInterval);
+    madInterval = setInterval(() => {
+        sec--;
+        timer.textContent = sec;
+        bar.style.width = ((sec / total) * 100) + '%';
+        if (sec <= 0) {
+            clearInterval(madInterval);
+            closeMandatoryAd();
+            executeCopy();
+        }
+    }, 1000);
+}
+
+function closeMandatoryAd() {
+    document.getElementById('mandatoryAdModal').classList.remove('open');
+    document.body.style.overflow = '';
+    if (madInterval) clearInterval(madInterval);
+}
+
+function executeCopy() {
+    const text = pendingCopyText, btn = pendingCopyBtn;
+    if (!text) return;
+    copyTextToClipboard(text);
+    if (btn) {
+        btn.classList.add('copied');
+        const o = btn.innerHTML;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:10px;height:10px;"><polyline points="20 6 9 17 4 12"></polyline></svg> تم';
+        showToast('تم النسخ!');
+        setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = o; }, 1500);
+    }
+}
+
+function copyTextToClipboard(text) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+    } else {
+        fallbackCopy(text);
+    }
+}
+function fallbackCopy(text) {
+    const t = document.createElement('textarea');
+    t.value = text;
+    document.body.appendChild(t);
+    t.select();
+    document.execCommand('copy');
+    document.body.removeChild(t);
+}
+function showToast(m) {
+    const t = document.getElementById('toast');
+    t.textContent = m;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function openImageModal(id, url, title, cc, sc, likes) {
+    if (!url) return;
+    document.getElementById('modalImage').src = url;
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalCopyCount').textContent = cc;
+    document.getElementById('modalShareCount').textContent = sc;
+    document.getElementById('modalLikesCount').textContent = likes;
+    currentLikeCount = likes;
+    currentPromptId = id;
+    currentModalPrompt = allPrompts.find(p => p.id === id);
+    loadSimilarPrompts(currentModalPrompt);
+    document.getElementById('imageModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    if (window.history && window.history.pushState) {
+        const newUrl = window.location.pathname + '?prompt_id=' + id;
+        window.history.pushState({ prompt_id: id }, title, newUrl);
+    }
+}
+function closeImageModal(e) {
+    if (e && e.target !== e.currentTarget && e.target.tagName !== 'BUTTON') return;
+    document.getElementById('imageModal').classList.remove('open');
+    document.body.style.overflow = '';
+    currentModalPrompt = null;
+    if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, '', window.location.pathname);
+    }
+}
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeImageModal(e); });
+
+function loadSimilarPrompts(p) {
+    const g = document.getElementById('similarGrid');
+    g.innerHTML = '';
+    if (!p) return;
+    const pk = p.keywords.split(',').map(k => k.trim().toLowerCase()).filter(k => k);
+    const sim = allPrompts.filter(x => {
+        if (x.id === p.id) return false;
+        const sk = x.keywords.split(',').map(k => k.trim().toLowerCase()).filter(k => k);
+        return sk.some(k => pk.includes(k)) || x.category === p.category;
+    }).slice(0, 8);
+    if (!sim.length) {
+        g.innerHTML = '<p style="color:rgba(76,5,133,.4);grid-column:1/-1;text-align:center;font-size:.7rem;">لا توجد برومبتات مشابهة</p>';
+        return;
+    }
+    sim.forEach(x => {
+        const c = document.createElement('div');
+        c.className = 'similar-card';
+        const card = x.element;
+        const img = card.querySelector('.card-image-wrap img');
+        const title = card.querySelector('.card-title').textContent;
+        const cat = x.category;
+        c.onclick = () => {
+            if (img) openImageModal(x.id, img.src, title, 0, 0, 0);
+        };
+        c.innerHTML = `${img ? `<img src="${img.src}" alt="${title}" loading="lazy">` : '<div style="width:100%;height:65px;background:rgba(219,181,238,.08);display:flex;align-items:center;justify-content:center;color:var(--deep-purple);font-size:.5rem;opacity:.4;">لا توجد صورة</div>'}<div class="similar-info"><h4>${title}</h4><span>${cat}</span></div>`;
+        g.appendChild(c);
+    });
+}
+
+function copyFromModal() {
+    if (!currentModalPrompt) return;
+    const card = currentModalPrompt.element;
+    const btn = card.querySelector('.card-copy-btn');
+    if (btn) {
+        const prompt = btn.dataset.prompt;
+        if (prompt) copyPrompt(btn, prompt);
+    }
+}
+
+async function toggleLike() {
+    if (!currentPromptId) return;
+    const btn = document.getElementById('modalLikeBtn');
+    const icon = document.getElementById('modalLikeIcon');
+    const countEl = document.getElementById('modalLikesCount');
+    if (btn.classList.contains('liked')) return;
+    try {
+        const res = await fetch('/api/prompt/' + currentPromptId + '/like', { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+            countEl.textContent = data.likes;
+            btn.classList.add('liked');
+            icon.innerHTML = '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" fill="currentColor"></path>';
+            showToast('تم الإعجاب!');
+        }
+    } catch (e) {
+        showToast('حدث خطأ', true);
+    }
+}
+
+function sharePrompt() {
+    if (!currentModalPrompt) return;
+    const card = currentModalPrompt.element;
+    const title = card.querySelector('.card-title')?.textContent || 'برومبت';
+    const img = card.querySelector('.card-image-wrap img');
+    const shareUrl = window.location.origin + window.location.pathname + '?prompt_id=' + currentPromptId;
+    const shareText = `🔮 برومبت مميز من UFOQ\n📌 ${title}\n🔗 ${shareUrl}`;
+    
+    if (navigator.share) {
+        const shareData = {
+            title: title,
+            text: `🔮 برومبت مميز من UFOQ - ${title}`,
+            url: shareUrl
+        };
+        if (img && img.src) {
+            fetch(img.src)
+                .then(res => res.blob())
+                .then(blob => {
+                    const file = new File([blob], 'prompt.jpg', { type: blob.type });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        shareData.files = [file];
+                    }
+                    navigator.share(shareData).catch(() => {});
+                })
+                .catch(() => {
+                    navigator.share({ title: title, text: shareText }).catch(() => {});
+                });
+        } else {
+            navigator.share({ title: title, text: shareText }).catch(() => {});
+        }
+    } else {
+        navigator.clipboard.writeText(shareText).then(() => {
+            showToast('تم نسخ رابط البرومبت مع النص الترويجي!');
+        }).catch(() => {
+            showToast('حدث خطأ في المشاركة', true);
+        });
+    }
+    
+    if (currentPromptId) {
+        fetch('/api/prompt/' + currentPromptId + '/share', { method: 'POST' }).catch(()=>{});
+        const shareEl = document.getElementById('modalShareCount');
+        if (shareEl) shareEl.textContent = parseInt(shareEl.textContent) + 1;
+    }
+}
+
+function openPromptFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    const promptId = params.get('prompt_id');
+    if (promptId) {
+        const card = document.querySelector(`.prompt-card[data-id="${promptId}"]`);
+        if (card) {
+            const img = card.querySelector('.card-image-wrap img');
+            const title = card.querySelector('.card-title')?.textContent || '';
+            const copyCount = parseInt(card.dataset.copyCount) || 0;
+            const shareCount = parseInt(card.dataset.shareCount) || 0;
+            const likes = parseInt(card.dataset.likes) || 0;
+            if (img) {
+                setTimeout(() => {
+                    openImageModal(promptId, img.src, title, copyCount, shareCount, likes);
+                }, 300);
+            }
+        }
+    }
+}
+
+let lastScroll = 0;
+window.addEventListener('scroll', () => {
+    const y = window.scrollY, nav = document.querySelector('.bottom-nav-wrapper');
+    if (nav) {
+        if (y > lastScroll && y > 120) nav.style.transform = 'translateX(-50%) translateY(120%)';
+        else nav.style.transform = 'translateX(-50%) translateY(0)';
+    }
+    lastScroll = y;
+    const st = document.getElementById('scrollTopBtn');
+    if (st) st.classList.toggle('show', y > 350);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.prompt-card').forEach(c => {
+        allPrompts.push({
+            id: c.dataset.id,
+            keywords: (c.dataset.keywords || '').toLowerCase(),
+            category: c.dataset.category,
+            element: c
+        });
+    });
+    const ac = document.querySelector('.cat-chip.active');
+    if (ac) currentSearchCategory = ac.dataset.cat;
+    const savedCols = localStorage.getItem('cardsPerRow') || '4';
+    document.getElementById('colsLabel').textContent = savedCols;
+    document.querySelectorAll('#colsScroll .cols-option').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.cols) === parseInt(savedCols));
+    });
+    applyCardsPerRow();
+
+    document.querySelectorAll('.card-copy-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const text = this.dataset.prompt;
+            if (text) {
+                copyPrompt(this, text);
+            } else {
+                console.warn('No prompt data found on button');
+            }
+        });
+    });
+
+    openPromptFromURL();
+});
+
+document.addEventListener('click', (e) => {
+    const modal = document.getElementById('colsModal');
+    const box = modal.querySelector('.cols-modal-box');
+    if (modal.classList.contains('open') && !box.contains(e.target) && !e.target.closest('.hc-select-trigger')) {
+        closeColsModal();
+    }
+});
+</script>
 </body>
 </html>
