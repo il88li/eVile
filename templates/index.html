@@ -186,7 +186,7 @@
 <button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg></button>
 
 <script>
-// (السكريبت نفسه كما هو – لم يتغير)
+// (نفس السكريبت السابق – لم يتغير)
 const cachedAd = {{ active_ad|tojson|safe if active_ad else 'null' }};
 
 let currentSearchCategory='all', currentSearchQuery='', allPrompts=[];
@@ -404,7 +404,7 @@ function loadSimilarPrompts(p) {
         c.onclick = () => {
             if (img) openImageModal(x.id, img.src, title, 0, 0, 0);
         };
-        c.innerHTML = `${img ? `<img src="${img.src}" alt="${title}" loading="lazy">` : '<div style="width:100%;height:120px;background:rgba(219,181,238,.08);display:flex;align-items:center;justify-content:center;color:var(--deep-purple);font-size:.5rem;opacity:.4;">لا توجد صورة</div>'}<div class="similar-info"><h4>${title}</h4><span>${cat}</span></div>`;
+        c.innerHTML = `${img ? `<img src="${img.src}" alt="${title}" loading="lazy">` : '<div style="width:100%;height:150px;background:rgba(219,181,238,.08);display:flex;align-items:center;justify-content:center;color:var(--deep-purple);font-size:.5rem;opacity:.4;">لا توجد صورة</div>'}<div class="similar-info"><h4>${title}</h4><span>${cat}</span></div>`;
         g.appendChild(c);
     });
 }
