@@ -6,6 +6,7 @@ import traceback
 from datetime import datetime, timedelta
 from functools import wraps
 from urllib.parse import urlparse
+
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -77,9 +78,20 @@ class Config:
     RATELIMIT_STRATEGY = 'fixed-window'
     RATELIMIT_DEFAULT = "200 per minute"
 
-# ==================== Models ====================
+# ==================== Extensions ====================
 db = SQLAlchemy()
+migrate = Migrate()
+cache = Cache()
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["200 per minute"],
+    storage_uri=os.getenv('REDIS_URL', 'memory://'),
+    strategy='fixed-window'
+)
+talisman = Talisman()
+session_ext = Session()
 
+# ==================== Models ====================
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False, unique=True)
@@ -146,52 +158,32 @@ class ErrorLog(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
 
-# ==================== App Factory ====================
-app = Flask(__name__, template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates'))
-app.config.from_object(Config)
+# ==================== Helper Functions ====================
+def generate_csrf_token():
+    if 'csrf_token' not in session:
+        session['csrf_token'] = secrets.token_urlsafe(32)
+    return session['csrf_token']
 
-db.init_app(app)
-migrate = Migrate(app, db)
-app.config['SESSION_SQLALCHEMY'] = db
-Session(app)
+def validate_csrf_token(token):
+    return token == session.get('csrf_token')
 
-# ====== Caching ======
-if os.getenv('REDIS_URL'):
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('logged_in'):
+            return redirect(url_for('admin.admin_panel'))
+        return f(*args, **kwargs)
+    return decorated
+
+def is_valid_publisher_link(url):
+    if not url:
+        return True
     try:
-        from flask_caching.backends.redis import RedisCache
-        cache = Cache(app, config={
-            'CACHE_TYPE': 'RedisCache',
-            'CACHE_REDIS_URL': os.getenv('REDIS_URL'),
-            'CACHE_DEFAULT_TIMEOUT': 300
-        })
-        logger.info("Using Redis cache")
-    except Exception as e:
-        logger.warning(f"Redis cache failed: {e}, falling back to SimpleCache")
-        cache = Cache(app, config={'CACHE_TYPE': 'SimpleCache'})
-else:
-    cache = Cache(app, config={'CACHE_TYPE': 'SimpleCache'})
+        parsed = urlparse(url.strip())
+        return parsed.scheme in ('http', 'https') and bool(parsed.netloc)
+    except Exception:
+        return False
 
-limiter = Limiter(
-    get_remote_address,
-    app=app,
-    default_limits=["200 per minute"],
-    storage_uri=app.config['RATELIMIT_STORAGE_URI'],
-    strategy='fixed-window'
-)
-
-# Production CSP
-csp = {
-    'default-src': ["'self'"],
-    'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
-    'script-src': ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
-    'font-src': ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net"],
-    'img-src': ["'self'", "data:", "https:", "blob:"],
-    'connect-src': ["'self'"],
-    'frame-ancestors': ["'none'"],
-}
-Talisman(app, force_https=False, content_security_policy=csp)
-
-# ==================== Error Handlers ====================
 def log_error(error_type, url, details=None):
     try:
         inspector = inspect(db.engine)
@@ -223,62 +215,6 @@ def log_error(error_type, url, details=None):
         db.session.rollback()
         logger.error(f"Failed to log error to DB: {e}")
 
-@app.errorhandler(404)
-def not_found(e):
-    logger.warning(f"404: {request.url} - {request.remote_addr}")
-    details = None
-    path = request.path.lower()
-    if path.endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.ico')):
-        details = f"Image missing: {request.path}"
-    elif path.endswith(('.css', '.js', '.json')):
-        details = f"Asset missing: {request.path}"
-    else:
-        details = f"Page not found: {request.path}"
-    
-    if not request.path.startswith('/admin') and not request.path.startswith('/api'):
-        log_error('404', request.url, details)
-    
-    if request.path.startswith('/api/'):
-        return jsonify({'success': False, 'message': 'الصفحة غير موجودة'}), 404
-    return render_template('index.html', site_status='on', categories=[], library_items=[], active_ad=None), 404
-
-@app.errorhandler(500)
-def internal_error(e):
-    logger.error(f"500 ERROR: {str(e)}\n{traceback.format_exc()}")
-    db.session.rollback()
-    if request.path.startswith('/api/'):
-        return jsonify({'success': False, 'message': 'خطأ داخلي في الخادم'}), 500
-    return render_template('index.html', site_status='on', categories=[], library_items=[], active_ad=None), 500
-
-@app.errorhandler(Exception)
-def handle_exception(e):
-    from werkzeug.exceptions import HTTPException
-    if isinstance(e, HTTPException):
-        return e
-    logger.error(f"UNHANDLED: {str(e)}\n{traceback.format_exc()}")
-    db.session.rollback()
-    if request.path.startswith('/api/'):
-        return jsonify({'success': False, 'message': 'حدث خطأ غير متوقع'}), 500
-    return render_template('index.html', site_status='on', categories=[], library_items=[], active_ad=None), 500
-
-# ---------- Helper functions ----------
-def generate_csrf_token():
-    if 'csrf_token' not in session:
-        session['csrf_token'] = secrets.token_urlsafe(32)
-    return session['csrf_token']
-
-def validate_csrf_token(token):
-    return token == session.get('csrf_token')
-
-def admin_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if not session.get('logged_in'):
-            return redirect(url_for('admin_panel'))
-        return f(*args, **kwargs)
-    return decorated
-
-# ---------- Database initialization ----------
 def run_light_migrations():
     try:
         engine = db.engine
@@ -329,25 +265,7 @@ def run_light_migrations():
     except Exception as e:
         logger.error(f"Migration error: {e}")
 
-@app.before_request
-def ensure_db_initialized():
-    try:
-        inspector = inspect(db.engine)
-        if 'category' not in inspector.get_table_names():
-            logger.info("Database tables not found, creating...")
-            db.create_all()
-            run_light_migrations()
-            if not SiteSetting.query.first():
-                db.session.add(SiteSetting())
-                db.session.commit()
-            logger.info("Database initialized successfully")
-        else:
-            run_light_migrations()
-    except Exception as e:
-        logger.error(f"DB init error: {e}")
-        db.session.rollback()
-
-# ---------- Cached read helpers ----------
+# ==================== Caching Helpers ====================
 @cache.memoize(timeout=60)
 def get_categories_cached():
     return Category.query.order_by(Category.sort_order).all()
@@ -362,8 +280,13 @@ def invalidate_library_cache():
     cache.delete_memoized(get_categories_cached)
     cache.delete_memoized(get_library_items_cached)
 
-# ==================== Public Routes ====================
-@app.route('/')
+# ==================== Blueprints ====================
+from flask import Blueprint
+
+# ----- Main Blueprint -----
+main_bp = Blueprint('main', __name__)
+
+@main_bp.route('/')
 def index():
     try:
         site = SiteSetting.query.first()
@@ -395,7 +318,7 @@ def index():
         logger.error(f"Index error: {e}\n{traceback.format_exc()}")
         return render_template('index.html', site_status='on', categories=[], library_items=[], active_ad=None)
 
-@app.route('/about')
+@main_bp.route('/about')
 def about_page():
     try:
         prompt_count = PromptLibrary.query.count()
@@ -409,8 +332,32 @@ def about_page():
         logger.error(f"About error: {e}\n{traceback.format_exc()}")
         return render_template('about.html', prompt_count=0, total_copies=0, total_shares=0)
 
-# ==================== API Routes ====================
-@app.route('/api/prompt/<int:item_id>/copy', methods=['POST'])
+@main_bp.route('/robots.txt')
+def robots_txt():
+    return """User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/admin
+Sitemap: https://ufoq.vercel.app/sitemap.xml
+""", 200, {'Content-Type': 'text/plain'}
+
+@main_bp.route('/favicon.ico')
+def favicon():
+    return '', 204
+
+@main_bp.route('/health')
+def health_check():
+    try:
+        db.session.execute(text('SELECT 1'))
+        return jsonify({'status': 'ok', 'db': 'connected', 'timestamp': datetime.utcnow().isoformat()})
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        return jsonify({'status': 'error', 'db': 'disconnected', 'timestamp': datetime.utcnow().isoformat()}), 503
+
+# ----- API Blueprint -----
+api_bp = Blueprint('api', __name__, url_prefix='/api')
+
+@api_bp.route('/prompt/<int:item_id>/copy', methods=['POST'])
 @limiter.limit("30 per minute")
 def track_copy(item_id):
     try:
@@ -423,7 +370,7 @@ def track_copy(item_id):
         logger.error(f"Error tracking copy: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
-@app.route('/api/prompt/<int:item_id>/like', methods=['POST'])
+@api_bp.route('/prompt/<int:item_id>/like', methods=['POST'])
 @limiter.limit("30 per minute")
 def track_like(item_id):
     try:
@@ -436,7 +383,7 @@ def track_like(item_id):
         logger.error(f"Error tracking like: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
-@app.route('/api/prompt/<int:item_id>/share', methods=['POST'])
+@api_bp.route('/prompt/<int:item_id>/share', methods=['POST'])
 @limiter.limit("30 per minute")
 def track_share(item_id):
     try:
@@ -449,7 +396,7 @@ def track_share(item_id):
         logger.error(f"Error tracking share: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
-@app.route('/api/mandatory-ad')
+@api_bp.route('/mandatory-ad')
 def get_mandatory_ad():
     try:
         ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
@@ -471,28 +418,16 @@ def get_mandatory_ad():
         logger.error(f"Mandatory ad error: {e}")
         return jsonify({'success': False}), 500
 
-# ==================== Static Files ====================
-@app.route('/robots.txt')
-def robots_txt():
-    return """User-agent: *
-Allow: /
-Disallow: /admin
-Disallow: /api/admin
-Sitemap: https://ufoq.vercel.app/sitemap.xml
-""", 200, {'Content-Type': 'text/plain'}
+# ----- Admin Blueprint -----
+admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
-@app.route('/favicon.ico')
-def favicon():
-    return '', 204
-
-# ==================== Admin ====================
-@app.route('/admin', methods=['GET', 'POST'])
+@admin_bp.route('/', methods=['GET', 'POST'])
 def admin_panel():
     try:
         if request.method == 'POST' and request.form.get('password') == Config.ADMIN_PASSWORD:
             session.permanent = True
             session['logged_in'] = True
-            return redirect(url_for('admin_panel'))
+            return redirect(url_for('admin.admin_panel'))
 
         if session.get('logged_in'):
             categories = Category.query.order_by(Category.sort_order).all()
@@ -512,18 +447,18 @@ def admin_panel():
         db.session.rollback()
         return render_template('admin.html'), 500
 
-@app.route('/admin/logout')
+@admin_bp.route('/logout')
 def admin_logout():
     session.pop('logged_in', None)
-    return redirect(url_for('admin_panel'))
+    return redirect(url_for('admin.admin_panel'))
 
 # ---------- Admin: Categories ----------
-@app.route('/admin/category/add', methods=['POST'])
+@admin_bp.route('/category/add', methods=['POST'])
 @admin_required
 def add_category():
     if not validate_csrf_token(request.form.get('csrf_token')):
         flash('CSRF خطأ', 'error')
-        return redirect(url_for('admin_panel'))
+        return redirect(url_for('admin.admin_panel'))
     try:
         name = request.form.get('name', '').strip().lower().replace(' ', '_')
         display_name = request.form.get('display_name', '').strip()
@@ -531,10 +466,10 @@ def add_category():
         sort_order = int(request.form.get('sort_order', 0))
         if not name or not display_name:
             flash('اسم التصنيف واسم العرض مطلوبان', 'error')
-            return redirect(url_for('admin_panel'))
+            return redirect(url_for('admin.admin_panel'))
         if Category.query.filter_by(name=name).first():
             flash('التصنيف موجود مسبقاً', 'error')
-            return redirect(url_for('admin_panel'))
+            return redirect(url_for('admin.admin_panel'))
         cat = Category(name=name, display_name=display_name, icon=icon, sort_order=sort_order)
         db.session.add(cat)
         db.session.commit()
@@ -544,14 +479,14 @@ def add_category():
         db.session.rollback()
         logger.error(f"Error adding category: {e}")
         flash('خطأ في إضافة التصنيف', 'error')
-    return redirect(url_for('admin_panel'))
+    return redirect(url_for('admin.admin_panel'))
 
-@app.route('/admin/category/<int:category_id>/delete', methods=['POST'])
+@admin_bp.route('/category/<int:category_id>/delete', methods=['POST'])
 @admin_required
 def delete_category(category_id):
     if not validate_csrf_token(request.form.get('csrf_token')):
         flash('CSRF خطأ', 'error')
-        return redirect(url_for('admin_panel'))
+        return redirect(url_for('admin.admin_panel'))
     try:
         cat = Category.query.get_or_404(category_id)
         PromptLibrary.query.filter_by(category=cat.name).update({'category': 'general'})
@@ -563,14 +498,14 @@ def delete_category(category_id):
         db.session.rollback()
         logger.error(f"Error deleting category: {e}")
         flash('خطأ في حذف التصنيف', 'error')
-    return redirect(url_for('admin_panel'))
+    return redirect(url_for('admin.admin_panel'))
 
-@app.route('/admin/category/<int:category_id>/edit', methods=['POST'])
+@admin_bp.route('/category/<int:category_id>/edit', methods=['POST'])
 @admin_required
 def edit_category(category_id):
     if not validate_csrf_token(request.form.get('csrf_token')):
         flash('CSRF خطأ', 'error')
-        return redirect(url_for('admin_panel'))
+        return redirect(url_for('admin.admin_panel'))
     try:
         cat = Category.query.get_or_404(category_id)
         name = request.form.get('name', '').strip().lower().replace(' ', '_')
@@ -580,12 +515,12 @@ def edit_category(category_id):
         
         if not name or not display_name:
             flash('اسم التصنيف واسم العرض مطلوبان', 'error')
-            return redirect(url_for('admin_panel'))
+            return redirect(url_for('admin.admin_panel'))
         
         existing = Category.query.filter(Category.name == name, Category.id != category_id).first()
         if existing:
             flash('التصنيف موجود مسبقاً', 'error')
-            return redirect(url_for('admin_panel'))
+            return redirect(url_for('admin.admin_panel'))
         
         cat.name = name
         cat.display_name = display_name
@@ -598,19 +533,19 @@ def edit_category(category_id):
         db.session.rollback()
         logger.error(f"Edit category error: {e}\n{traceback.format_exc()}")
         flash('خطأ في تحديث التصنيف', 'error')
-    return redirect(url_for('admin_panel'))
+    return redirect(url_for('admin.admin_panel'))
 
 # ---------- Admin: Library ----------
-@app.route('/admin/library/add', methods=['POST'])
+@admin_bp.route('/library/add', methods=['POST'])
 @admin_required
 def add_library_item():
     if not validate_csrf_token(request.form.get('csrf_token')):
         flash('CSRF خطأ', 'error')
-        return redirect(url_for('admin_panel'))
+        return redirect(url_for('admin.admin_panel'))
     publisher_link = request.form.get('publisher_link', '').strip()
     if publisher_link and not is_valid_publisher_link(publisher_link):
         flash('رابط الناشر غير صالح', 'error')
-        return redirect(url_for('admin_panel'))
+        return redirect(url_for('admin.admin_panel'))
     try:
         item = PromptLibrary(
             title=request.form.get('title'),
@@ -629,14 +564,14 @@ def add_library_item():
         db.session.rollback()
         logger.error(f"Error adding library item: {e}")
         flash('خطأ في إضافة البرومبت', 'error')
-    return redirect(url_for('admin_panel'))
+    return redirect(url_for('admin.admin_panel'))
 
-@app.route('/admin/library/<int:item_id>/delete', methods=['POST'])
+@admin_bp.route('/library/<int:item_id>/delete', methods=['POST'])
 @admin_required
 def delete_library_item(item_id):
     if not validate_csrf_token(request.form.get('csrf_token')):
         flash('CSRF خطأ', 'error')
-        return redirect(url_for('admin_panel'))
+        return redirect(url_for('admin.admin_panel'))
     try:
         item = PromptLibrary.query.get_or_404(item_id)
         db.session.delete(item)
@@ -647,14 +582,14 @@ def delete_library_item(item_id):
         db.session.rollback()
         logger.error(f"Error deleting library item: {e}")
         flash('خطأ', 'error')
-    return redirect(url_for('admin_panel'))
+    return redirect(url_for('admin.admin_panel'))
 
-@app.route('/admin/library/<int:item_id>/update', methods=['POST'])
+@admin_bp.route('/library/<int:item_id>/update', methods=['POST'])
 @admin_required
 def update_library_item(item_id):
     if not validate_csrf_token(request.form.get('csrf_token')):
         flash('CSRF خطأ', 'error')
-        return redirect(url_for('admin_panel'))
+        return redirect(url_for('admin.admin_panel'))
     try:
         item = PromptLibrary.query.get_or_404(item_id)
         publisher_link = request.form.get('publisher_link')
@@ -662,7 +597,7 @@ def update_library_item(item_id):
             publisher_link = publisher_link.strip()
             if publisher_link and not is_valid_publisher_link(publisher_link):
                 flash('رابط الناشر غير صالح', 'error')
-                return redirect(url_for('admin_panel'))
+                return redirect(url_for('admin.admin_panel'))
             item.publisher_link = publisher_link or None
         item.title = request.form.get('title', item.title)
         item.category = request.form.get('category', item.category)
@@ -677,15 +612,15 @@ def update_library_item(item_id):
         db.session.rollback()
         logger.error(f"Error updating library item: {e}")
         flash('خطأ', 'error')
-    return redirect(url_for('admin_panel'))
+    return redirect(url_for('admin.admin_panel'))
 
 # ---------- Admin: Ads ----------
-@app.route('/admin/library_ad/add', methods=['POST'])
+@admin_bp.route('/library_ad/add', methods=['POST'])
 @admin_required
 def add_library_ad():
     if not validate_csrf_token(request.form.get('csrf_token')):
         flash('CSRF خطأ', 'error')
-        return redirect(url_for('admin_panel'))
+        return redirect(url_for('admin.admin_panel'))
     try:
         ad = LibraryAd(
             title=request.form.get('title'),
@@ -704,14 +639,14 @@ def add_library_ad():
         db.session.rollback()
         logger.error(f"Error adding library ad: {e}")
         flash('خطأ في إضافة الإعلان', 'error')
-    return redirect(url_for('admin_panel'))
+    return redirect(url_for('admin.admin_panel'))
 
-@app.route('/admin/library_ad/<int:ad_id>/delete', methods=['POST'])
+@admin_bp.route('/library_ad/<int:ad_id>/delete', methods=['POST'])
 @admin_required
 def delete_library_ad(ad_id):
     if not validate_csrf_token(request.form.get('csrf_token')):
         flash('CSRF خطأ', 'error')
-        return redirect(url_for('admin_panel'))
+        return redirect(url_for('admin.admin_panel'))
     try:
         ad = LibraryAd.query.get_or_404(ad_id)
         db.session.delete(ad)
@@ -721,14 +656,14 @@ def delete_library_ad(ad_id):
         db.session.rollback()
         logger.error(f"Error deleting library ad: {e}")
         flash('خطأ في حذف الإعلان', 'error')
-    return redirect(url_for('admin_panel'))
+    return redirect(url_for('admin.admin_panel'))
 
-@app.route('/admin/library_ad/<int:ad_id>/toggle', methods=['POST'])
+@admin_bp.route('/library_ad/<int:ad_id>/toggle', methods=['POST'])
 @admin_required
 def toggle_library_ad(ad_id):
     if not validate_csrf_token(request.form.get('csrf_token')):
         flash('CSRF خطأ', 'error')
-        return redirect(url_for('admin_panel'))
+        return redirect(url_for('admin.admin_panel'))
     try:
         ad = LibraryAd.query.get_or_404(ad_id)
         ad.is_active = not ad.is_active
@@ -738,10 +673,10 @@ def toggle_library_ad(ad_id):
         db.session.rollback()
         logger.error(f"Error toggling library ad: {e}")
         flash('خطأ في تغيير حالة الإعلان', 'error')
-    return redirect(url_for('admin_panel'))
+    return redirect(url_for('admin.admin_panel'))
 
-# ---------- Admin: Site Settings ----------
-@app.route('/api/admin/update_site_settings', methods=['POST'])
+# ---------- Admin: Site Settings (API) ----------
+@admin_bp.route('/api/admin/update_site_settings', methods=['POST'])
 @admin_required
 def update_site_settings():
     try:
@@ -757,7 +692,7 @@ def update_site_settings():
         logger.error(f"Site settings error: {e}")
         return jsonify({'success': False}), 500
 
-@app.route('/api/admin/get_site_status')
+@admin_bp.route('/api/admin/get_site_status')
 @admin_required
 def get_site_status():
     try:
@@ -771,7 +706,7 @@ def get_site_status():
         return jsonify({'status': 'on', 'offline_message': 'الموقع تحت الصيانة حالياً.'})
 
 # ---------- Admin: Errors ----------
-@app.route('/admin/errors')
+@admin_bp.route('/errors')
 @admin_required
 def admin_get_errors():
     show_ignored = request.args.get('show_ignored', 'false').lower() == 'true'
@@ -781,7 +716,7 @@ def admin_get_errors():
     errors = query.order_by(ErrorLog.last_seen.desc()).all()
     return jsonify([e.to_dict() for e in errors])
 
-@app.route('/admin/error/<int:error_id>/ignore', methods=['POST'])
+@admin_bp.route('/error/<int:error_id>/ignore', methods=['POST'])
 @admin_required
 def admin_ignore_error(error_id):
     if not validate_csrf_token(request.form.get('csrf_token')):
@@ -796,7 +731,7 @@ def admin_ignore_error(error_id):
         logger.error(f"Error ignoring error: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
-@app.route('/admin/error/<int:error_id>/unignore', methods=['POST'])
+@admin_bp.route('/error/<int:error_id>/unignore', methods=['POST'])
 @admin_required
 def admin_unignore_error(error_id):
     if not validate_csrf_token(request.form.get('csrf_token')):
@@ -811,7 +746,7 @@ def admin_unignore_error(error_id):
         logger.error(f"Error unignoring error: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
-@app.route('/admin/error/<int:error_id>/delete', methods=['POST'])
+@admin_bp.route('/error/<int:error_id>/delete', methods=['POST'])
 @admin_required
 def admin_delete_error(error_id):
     if not validate_csrf_token(request.form.get('csrf_token')):
@@ -826,7 +761,7 @@ def admin_delete_error(error_id):
         logger.error(f"Error deleting error: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
-@app.route('/admin/errors/clear-all', methods=['POST'])
+@admin_bp.route('/errors/clear-all', methods=['POST'])
 @admin_required
 def admin_clear_all_errors():
     if not validate_csrf_token(request.form.get('csrf_token')):
@@ -840,25 +775,88 @@ def admin_clear_all_errors():
         logger.error(f"Error clearing errors: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
-# ---------- Helper ----------
-def is_valid_publisher_link(url):
-    if not url:
-        return True
-    try:
-        parsed = urlparse(url.strip())
-        return parsed.scheme in ('http', 'https') and bool(parsed.netloc)
-    except Exception:
-        return False
+# ==================== Application Factory ====================
+def create_app():
+    app = Flask(__name__, template_folder='templates')
+    app.config.from_object(Config)
 
-# ==================== Health ====================
-@app.route('/health')
-def health_check():
-    try:
-        db.session.execute(text('SELECT 1'))
-        return jsonify({'status': 'ok', 'db': 'connected', 'timestamp': datetime.utcnow().isoformat()})
-    except Exception as e:
-        logger.error(f"Health check failed: {e}")
-        return jsonify({'status': 'error', 'db': 'disconnected', 'timestamp': datetime.utcnow().isoformat()}), 503
+    # Initialize extensions
+    db.init_app(app)
+    migrate.init_app(app, db)
+    cache.init_app(app)
+    limiter.init_app(app)
+    talisman.init_app(app, force_https=False, content_security_policy={
+        'default-src': ["'self'"],
+        'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
+        'script-src': ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+        'font-src': ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net"],
+        'img-src': ["'self'", "data:", "https:", "blob:"],
+        'connect-src': ["'self'"],
+        'frame-ancestors': ["'none'"],
+    })
+    app.config['SESSION_SQLALCHEMY'] = db
+    session_ext.init_app(app)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    # Register blueprints
+    app.register_blueprint(main_bp)
+    app.register_blueprint(api_bp)
+    app.register_blueprint(admin_bp)
+
+    # ---------- Error Handlers ----------
+    @app.errorhandler(404)
+    def not_found(e):
+        logger.warning(f"404: {request.url} - {request.remote_addr}")
+        details = None
+        path = request.path.lower()
+        if path.endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.ico')):
+            details = f"Image missing: {request.path}"
+        elif path.endswith(('.css', '.js', '.json')):
+            details = f"Asset missing: {request.path}"
+        else:
+            details = f"Page not found: {request.path}"
+        
+        if not request.path.startswith('/admin') and not request.path.startswith('/api'):
+            log_error('404', request.url, details)
+        
+        if request.path.startswith('/api/'):
+            return jsonify({'success': False, 'message': 'الصفحة غير موجودة'}), 404
+        return render_template('index.html', site_status='on', categories=[], library_items=[], active_ad=None), 404
+
+    @app.errorhandler(500)
+    def internal_error(e):
+        logger.error(f"500 ERROR: {str(e)}\n{traceback.format_exc()}")
+        db.session.rollback()
+        if request.path.startswith('/api/'):
+            return jsonify({'success': False, 'message': 'خطأ داخلي في الخادم'}), 500
+        return render_template('index.html', site_status='on', categories=[], library_items=[], active_ad=None), 500
+
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        from werkzeug.exceptions import HTTPException
+        if isinstance(e, HTTPException):
+            return e
+        logger.error(f"UNHANDLED: {str(e)}\n{traceback.format_exc()}")
+        db.session.rollback()
+        if request.path.startswith('/api/'):
+            return jsonify({'success': False, 'message': 'حدث خطأ غير متوقع'}), 500
+        return render_template('index.html', site_status='on', categories=[], library_items=[], active_ad=None), 500
+
+    @app.before_request
+    def ensure_db_initialized():
+        try:
+            inspector = inspect(db.engine)
+            if 'category' not in inspector.get_table_names():
+                logger.info("Database tables not found, creating...")
+                db.create_all()
+                run_light_migrations()
+                if not SiteSetting.query.first():
+                    db.session.add(SiteSetting())
+                    db.session.commit()
+                logger.info("Database initialized successfully")
+            else:
+                run_light_migrations()
+        except Exception as e:
+            logger.error(f"DB init error: {e}")
+            db.session.rollback()
+
+    return app
