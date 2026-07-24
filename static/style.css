@@ -446,6 +446,7 @@ body {
     cursor: pointer;
     background: transparent;
     border: none;
+    flex-shrink: 0;
 }
 .bn-item svg {
     width: 17px;
@@ -488,6 +489,7 @@ body {
     padding: 0;
     backdrop-filter: blur(4px);
     position: relative;
+    flex-shrink: 0;
 }
 .bn-search svg {
     width: 18px;
@@ -2004,6 +2006,98 @@ body {
     border-color: #8B5CF6;
     box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
 }
+
+/* ===== Admin Edit Modal Improvements ===== */
+.admin-body .edit-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    padding: 16px;
+}
+.admin-body .edit-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+.admin-body .edit-modal-box {
+    background: #0d0d0d;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    transform: scale(0.95) translateY(10px);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+}
+.admin-body .edit-modal-overlay.show .edit-modal-box {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+.admin-body .edit-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #F1EEFA;
+}
+.admin-body .edit-modal-header button {
+    background: transparent;
+    border: none;
+    color: #B4ACC9;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+.admin-body .edit-modal-header button:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+.admin-body .edit-modal-body .form-group {
+    margin-bottom: 12px;
+}
+.admin-body .edit-modal-body .form-group label {
+    color: #B4ACC9;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+.admin-body .edit-modal-body .form-group input {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 8px;
+    color: #F1EEFA;
+    font-family: 'Tajawal', sans-serif;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.admin-body .edit-modal-body .form-group input:focus {
+    border-color: #8B5CF6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+}
+.admin-body .btn-full {
+    width: 100%;
+    justify-content: center;
+    margin-top: 8px;
+}
+.admin-body .top-brand {
+    margin-bottom: 20px;
+}
+
 .admin-body .admin-bottom-nav {
     position: fixed;
     bottom: 16px;
@@ -2045,63 +2139,6 @@ body {
     background: linear-gradient(135deg, #3A0CA3 0%, #7209B7 100%);
     color: #fff;
     box-shadow: 0 2px 12px rgba(58, 12, 163, 0.4);
-}
-.admin-body .edit-modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: all .3s;
-    padding: 16px;
-}
-.admin-body .edit-modal-overlay.show {
-    opacity: 1;
-    visibility: visible;
-}
-.admin-body .edit-modal-box {
-    background: #0d0d0d;
-    border: 1px solid rgba(139, 92, 246, 0.3);
-    border-radius: 16px;
-    padding: 24px;
-    max-width: 500px;
-    width: 100%;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-}
-.admin-body .edit-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    font-weight: 800;
-    font-size: 1.1rem;
-    color: #F1EEFA;
-}
-.admin-body .edit-modal-header button {
-    background: transparent;
-    border: none;
-    color: #B4ACC9;
-    font-size: 1.2rem;
-    cursor: pointer;
-}
-.admin-body .edit-modal-body .form-group {
-    margin-bottom: 12px;
-}
-.admin-body .edit-modal-body .form-group label {
-    color: #B4ACC9;
-}
-.admin-body .btn-full {
-    width: 100%;
-    justify-content: center;
-    margin-top: 8px;
-}
-.admin-body .top-brand {
-    margin-bottom: 20px;
 }
 
 @media (max-width: 600px) {
