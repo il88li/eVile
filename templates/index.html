@@ -17,14 +17,12 @@
 </head>
 <body>
 
-<!-- ===== الهيدر العائم (معدل) ===== -->
+<!-- ===== الهيدر العائم ===== -->
 <div class="top-float">
   <div class="header-capsule">
-    <!-- رابط إلى Telegram عند النقر على UFOQ -->
     <a href="https://t.me/Evile_Prompts" target="_blank" rel="noopener noreferrer" class="hc-brand">
       UFOQ
     </a>
-    <!-- تم حذف زر تغيير الأعمدة من هنا -->
   </div>
 
   <div class="search-panel" id="searchPanel">
@@ -42,7 +40,7 @@
   </div>
 </div>
 
-<!-- مودال اختيار عدد الأعمدة (نفسه مع تعديل طفيف) -->
+<!-- مودال اختيار عدد الأعمدة -->
 <div class="cols-modal-overlay" id="colsModal" role="dialog" aria-modal="true">
   <div class="cols-modal-box">
     <button class="cols-modal-close" onclick="closeColsModal()" aria-label="إغلاق">✕</button>
@@ -152,8 +150,9 @@
   {% endfor %}
 </div>
 
-<!-- ===== شريط التنقل السفلي + زر الأعمدة الجديد ===== -->
+<!-- ===== شريط التنقل السفلي + زر الأعمدة (منفصل) ===== -->
 <div class="bottom-nav-wrapper">
+  <!-- شريط التنقل الأساسي -->
   <div class="bottom-nav-main">
     <a href="/" class="bn-item active" aria-label="الرئيسية">
       <i class="fas fa-home"></i>
@@ -165,11 +164,11 @@
       <i class="fas fa-search"></i>
       <span class="badge" id="searchBadge">0</span>
     </button>
-    <!-- زر تغيير عدد الأعمدة (عائم في الأسفل) -->
-    <button class="bn-cols" onclick="openColsModal()" aria-label="تغيير عدد الأعمدة">
-      <i class="fas fa-grip-lines"></i>
-    </button>
   </div>
+  <!-- زر تغيير الأعمدة (منفصل) -->
+  <button class="bn-cols" onclick="openColsModal()" aria-label="تغيير عدد الأعمدة">
+    <i class="fas fa-grip-lines"></i>
+  </button>
 </div>
 
 <!-- Toast -->
