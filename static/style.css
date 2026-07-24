@@ -170,7 +170,7 @@ a:hover {
 }
 
 /* ========================================================
-   رأس الصفحة العائم (معدل)
+   رأس الصفحة العائم
    ======================================================== */
 .top-float {
     position: fixed;
@@ -211,7 +211,6 @@ a:hover {
     border-color: var(--primary-300);
 }
 
-/* رابط UFOQ إلى Telegram */
 .hc-brand {
     font-size: var(--font-size-xl);
     font-weight: var(--weight-black);
@@ -525,7 +524,7 @@ a:hover {
 }
 
 /* ========================================================
-   التنقل السفلي + زر تغيير الأعمدة
+   التنقل السفلي + زر الأعمدة (منفصل)
    ======================================================== */
 .bottom-nav-wrapper {
     position: fixed;
@@ -535,9 +534,11 @@ a:hover {
     z-index: 1000;
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
+    gap: 12px;
     direction: ltr;
 }
+
+/* شريط التنقل الأساسي */
 .bottom-nav-main {
     display: flex;
     align-items: center;
@@ -551,6 +552,7 @@ a:hover {
     box-shadow: 0 8px 32px rgba(26, 10, 46, 0.3);
     min-height: 52px;
 }
+
 .bn-item {
     display: flex;
     align-items: center;
@@ -585,6 +587,7 @@ a:hover {
 .bn-item.active i {
     transform: scale(1.05);
 }
+
 .bn-search {
     width: 42px;
     height: 42px;
@@ -636,30 +639,30 @@ a:hover {
     transform: scale(1);
 }
 
-/* ===== زر تغيير عدد الأعمدة (في شريط التنقل السفلي) ===== */
+/* ===== زر تغيير عدد الأعمدة (منفصل) ===== */
 .bn-cols {
-    width: 42px;
-    height: 42px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
+    border: 2px solid rgba(255, 255, 255, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all var(--transition-base);
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-white);
     padding: 0;
-    backdrop-filter: blur(4px);
-    font-size: var(--font-size-lg);
+    box-shadow: 0 4px 16px rgba(123, 47, 190, 0.35);
+    font-size: var(--font-size-xl);
 }
 .bn-cols:hover {
-    background: rgba(255, 255, 255, 0.12);
-    transform: translateY(-2px) scale(1.04);
-    color: var(--primary-200);
+    transform: translateY(-3px) scale(1.06);
+    box-shadow: 0 6px 28px rgba(123, 47, 190, 0.5);
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-400));
 }
 .bn-cols:active {
-    transform: scale(0.94);
+    transform: scale(0.92);
 }
 
 /* ===== تنقل الصفحة السفلي (للصفحات الأخرى) ===== */
@@ -1007,6 +1010,7 @@ a:hover {
     padding: var(--space-md) var(--space-md) var(--space-xl);
 }
 
+/* ===== تحسين عرض البطاقات في الجوال ===== */
 /* البطاقة */
 .prompt-card {
     break-inside: avoid;
@@ -1024,7 +1028,7 @@ a:hover {
     border-color: var(--primary-200);
 }
 
-/* ===== تحسين عرض الصور ===== */
+/* غلاف الصورة */
 .prompt-card .card-image-wrap {
     background: var(--primary-50);
     position: relative;
@@ -2101,7 +2105,7 @@ a:hover {
    استجابة الشاشات
    ======================================================== */
 
-/* شاشات متوسطة وصغيرة */
+/* شاشات متوسطة وصغيرة (جوال) */
 @media (max-width: 768px) {
     :root {
         --body-padding-top: 70px;
@@ -2132,39 +2136,65 @@ a:hover {
         font-size: var(--font-size-base);
     }
 
+    /* ===== تحسين عرض البطاقات في الجوال (عمودين) ===== */
     .masonry-grid {
         column-count: 2 !important;
         padding: var(--space-sm) var(--space-sm) var(--space-md);
-        column-gap: 12px;
+        column-gap: 10px;
+    }
+    
+    .prompt-card {
+        margin-bottom: 12px;
+        border-radius: var(--radius-sm);
     }
     .prompt-card .no-image-placeholder {
-        height: 120px;
+        height: 100px;
+        font-size: 2rem;
     }
     .prompt-card .card-body {
-        padding: var(--space-sm) var(--space-sm) var(--space-md);
+        padding: 10px 10px 14px;
     }
     .prompt-card .card-title {
         font-size: var(--font-size-base);
     }
+    .prompt-card .card-cat {
+        font-size: 0.55rem;
+    }
+    .prompt-card .card-author {
+        font-size: 0.6rem;
+        margin-bottom: 4px;
+    }
     .prompt-card .card-btn {
-        font-size: var(--font-size-xs);
-        padding: 4px 10px;
+        font-size: 0.6rem;
+        padding: 5px 8px;
         flex: 1 1 auto;
+        gap: 4px;
+    }
+    .prompt-card .card-btn i {
+        font-size: 0.65rem;
+    }
+    .prompt-card .card-actions {
+        gap: 6px;
     }
 
     .bottom-nav-wrapper {
         bottom: 14px;
+        gap: 10px;
     }
     .bottom-nav-main {
         padding: 4px 14px;
         min-height: 44px;
     }
     .bn-item,
-    .bn-search,
-    .bn-cols {
+    .bn-search {
         width: 36px;
         height: 36px;
         font-size: var(--font-size-md);
+    }
+    .bn-cols {
+        width: 44px;
+        height: 44px;
+        font-size: var(--font-size-lg);
     }
 
     .admin-body .admin-bottom-nav {
@@ -2209,10 +2239,26 @@ a:hover {
     }
 }
 
-/* شاشات صغيرة جداً */
+/* شاشات صغيرة جداً (عرض أقل من 400px) */
 @media (max-width: 400px) {
     .masonry-grid {
         column-count: 1 !important;
+        padding: var(--space-xs) var(--space-xs) var(--space-md);
+        column-gap: 8px;
+    }
+    .prompt-card .no-image-placeholder {
+        height: 80px;
+        font-size: 1.5rem;
+    }
+    .prompt-card .card-body {
+        padding: 8px 8px 12px;
+    }
+    .prompt-card .card-title {
+        font-size: var(--font-size-sm);
+    }
+    .prompt-card .card-btn {
+        font-size: 0.55rem;
+        padding: 4px 6px;
     }
     .steps-grid {
         grid-template-columns: 1fr;
@@ -2239,6 +2285,25 @@ a:hover {
     }
     .admin-body .header-center {
         font-size: var(--font-size-base);
+    }
+    .bottom-nav-wrapper {
+        gap: 6px;
+        bottom: 10px;
+    }
+    .bottom-nav-main {
+        padding: 3px 10px;
+        min-height: 38px;
+    }
+    .bn-item,
+    .bn-search {
+        width: 32px;
+        height: 32px;
+        font-size: var(--font-size-base);
+    }
+    .bn-cols {
+        width: 38px;
+        height: 38px;
+        font-size: var(--font-size-md);
     }
 }
 
