@@ -6,7 +6,7 @@
 <title>UFOQ – مكتبة البرومبتات العربية للذكاء الاصطناعي</title>
 <meta name="description" content="أكبر مكتبة عربية للبرومبتات الاحترافية. تصفح، انسخ، وابدأ الإبداع مع أدوات الذكاء الاصطناعي.">
 <link rel="stylesheet" href="/static/style.css">
-<!-- Font Awesome 6 – الإصدار الأحدث مع رابط احتياطي -->
+<!-- Font Awesome 6 -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
       integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" 
       crossorigin="anonymous" referrerpolicy="no-referrer" 
@@ -17,14 +17,14 @@
 </head>
 <body>
 
-<!-- ===== Floating Top ===== -->
+<!-- ===== الهيدر العائم (معدل) ===== -->
 <div class="top-float">
   <div class="header-capsule">
-    <span class="hc-brand">UFOQ</span>
-    <span class="hc-select-trigger" onclick="openColsModal()" aria-label="اختر عدد الأعمدة">
-      <i class="fas fa-grip-lines"></i>
-      <span id="colsLabel">4</span>
-    </span>
+    <!-- رابط إلى Telegram عند النقر على UFOQ -->
+    <a href="https://t.me/Evile_Prompts" target="_blank" rel="noopener noreferrer" class="hc-brand">
+      UFOQ
+    </a>
+    <!-- تم حذف زر تغيير الأعمدة من هنا -->
   </div>
 
   <div class="search-panel" id="searchPanel">
@@ -42,7 +42,7 @@
   </div>
 </div>
 
-<!-- Cols Modal -->
+<!-- مودال اختيار عدد الأعمدة (نفسه مع تعديل طفيف) -->
 <div class="cols-modal-overlay" id="colsModal" role="dialog" aria-modal="true">
   <div class="cols-modal-box">
     <button class="cols-modal-close" onclick="closeColsModal()" aria-label="إغلاق">✕</button>
@@ -107,13 +107,16 @@
 </div>
 {% endif %}
 
-<!-- ===== Masonry Grid ===== -->
+<!-- ===== شبكة البطاقات ===== -->
 <div class="masonry-grid" id="masonryGrid">
   {% for item in library_items %}
   <div class="prompt-card" data-id="{{ item.id }}" data-keywords="{{ item.keywords or '' }}" data-category="{{ item.category }}">
     <div class="card-image-wrap">
       {% if item.image_url %}
-      <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy">
+      <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="no-image-placeholder" style="display:none;">
+        <i class="fas fa-image"></i>
+      </div>
       {% else %}
       <div class="no-image-placeholder">
         <i class="fas fa-image"></i>
@@ -149,7 +152,7 @@
   {% endfor %}
 </div>
 
-<!-- ===== Bottom Navigation ===== -->
+<!-- ===== شريط التنقل السفلي + زر الأعمدة الجديد ===== -->
 <div class="bottom-nav-wrapper">
   <div class="bottom-nav-main">
     <a href="/" class="bn-item active" aria-label="الرئيسية">
@@ -161,6 +164,10 @@
     <button class="bn-search" id="searchToggle" aria-label="بحث">
       <i class="fas fa-search"></i>
       <span class="badge" id="searchBadge">0</span>
+    </button>
+    <!-- زر تغيير عدد الأعمدة (عائم في الأسفل) -->
+    <button class="bn-cols" onclick="openColsModal()" aria-label="تغيير عدد الأعمدة">
+      <i class="fas fa-grip-lines"></i>
     </button>
   </div>
 </div>
@@ -289,14 +296,14 @@ function filterPrompts() {
   }
 }
 
-// ===== عدد الأعمدة =====
+// ===== عدد الأعمدة (مع دعم التكيف) =====
 function applyCardsPerRow() {
   const g = document.getElementById('masonryGrid');
   if (!g) return;
   const u = parseInt(localStorage.getItem('cardsPerRow') || '4', 10);
   const w = window.innerWidth;
   let cols = u;
-  if (w <= 600) cols = Math.min(u, 2);
+  if (w <= 600) cols = Math.min(u, 2);   // للهواتف: حد أقصى 2
   else if (w <= 900) cols = Math.min(u, 3);
   g.style.columns = cols;
 }
@@ -465,7 +472,6 @@ function closeColsModal() {
 }
 function setCols(n) {
   localStorage.setItem('cardsPerRow', n);
-  document.getElementById('colsLabel').textContent = n;
   document.querySelectorAll('#colsScroll .cols-option').forEach(el => {
     el.classList.toggle('active', parseInt(el.dataset.cols) === n);
   });
@@ -494,7 +500,7 @@ window.addEventListener('scroll', function() {
 document.addEventListener('click', function(e) {
   const modal = document.getElementById('colsModal');
   const box = modal.querySelector('.cols-modal-box');
-  if (modal.classList.contains('open') && !box.contains(e.target) && !e.target.closest('.hc-select-trigger')) {
+  if (modal.classList.contains('open') && !box.contains(e.target) && !e.target.closest('.bn-cols')) {
     closeColsModal();
   }
 });
@@ -517,7 +523,6 @@ function openPromptFromURL() {
 // ===== التهيئة =====
 document.addEventListener('DOMContentLoaded', function() {
   const savedCols = localStorage.getItem('cardsPerRow') || '4';
-  document.getElementById('colsLabel').textContent = savedCols;
   document.querySelectorAll('#colsScroll .cols-option').forEach(el => {
     el.classList.toggle('active', parseInt(el.dataset.cols) === parseInt(savedCols));
   });
