@@ -787,9 +787,9 @@ def create_app():
     limiter.init_app(app)
     talisman.init_app(app, force_https=False, content_security_policy={
         'default-src': ["'self'"],
-        'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
-        'script-src': ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
-        'font-src': ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net"],
+        'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
+        'script-src': ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com", "https://accounts.google.com"],
+        'font-src': ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
         'img-src': ["'self'", "data:", "https:", "blob:"],
         'connect-src': ["'self'"],
         'frame-ancestors': ["'none'"],
@@ -805,7 +805,7 @@ def create_app():
     # ---------- Error Handlers ----------
     @app.errorhandler(404)
     def not_found(e):
-        logger.warning(f"404: {request.url} - {request.remote_addr}")
+        logger.warning(f"404 ERROR: {request.url} - {request.remote_addr}")
         details = None
         path = request.path.lower()
         if path.endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.ico')):
@@ -835,7 +835,7 @@ def create_app():
         from werkzeug.exceptions import HTTPException
         if isinstance(e, HTTPException):
             return e
-        logger.error(f"UNHANDLED: {str(e)}\n{traceback.format_exc()}")
+        logger.error(f"UNHANDLED EXCEPTION: {str(e)}\n{traceback.format_exc()}")
         db.session.rollback()
         if request.path.startswith('/api/'):
             return jsonify({'success': False, 'message': 'حدث خطأ غير متوقع'}), 500
@@ -860,3 +860,7 @@ def create_app():
             db.session.rollback()
 
     return app
+
+# ==================== Vercel Entry Point ====================
+# هذا السطر ضروري لكي يتعرف Vercel على التطبيق
+app = create_app()
