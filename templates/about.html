@@ -4,117 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>حول UFOQ – مكتبة البرومبتات</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap');
-  :root{
-    --very-light:#FFFDFE; --soft-lavender:#DBB5EE; --deep-purple:#4C0585;
-    --glass-bg:rgba(255,253,254,0.80); --glass-border:rgba(219,181,238,0.38);
-    --shadow-sm:0 2px 8px rgba(76,5,133,0.06); --shadow-md:0 6px 24px rgba(76,5,133,0.12); --shadow-lg:0 14px 40px rgba(76,5,133,0.18);
-    --radius-sm:10px; --radius-md:14px; --radius-lg:20px;
-    --charcoal:#1F2937;
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{font-family:'Tajawal',sans-serif;background:var(--very-light);color:var(--deep-purple);min-height:100vh;overflow-x:hidden;padding-top:84px;padding-bottom:96px;}
-
-  /* Header */
-  .top-float{position:fixed;top:10px;left:12px;right:12px;z-index:1000;display:flex;flex-direction:column;align-items:stretch;gap:8px;pointer-events:none;}
-  .top-float>*{pointer-events:auto;}
-  .header-capsule{align-self:center;display:flex;align-items:center;gap:10px;padding:8px 18px;background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:50px;box-shadow:var(--shadow-md);transition:all .3s;max-width:92vw;position:relative;}
-  .header-capsule:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--soft-lavender);}
-  .hc-brand{font-size:1.2rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.5px;cursor:default;}
-  .hc-select-trigger{font-size:.75rem;font-weight:600;color:var(--deep-purple);padding:4px 14px;border-radius:50px;background:rgba(219,181,238,.2);border:1px solid var(--glass-border);cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:4px;}
-  .hc-select-trigger:hover{background:rgba(219,181,238,.4);}
-
-  /* Cols Modal */
-  .cols-modal-overlay{position:fixed;inset:0;z-index:9999;background:rgba(10,2,20,.75);backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all .4s;padding:20px;}
-  .cols-modal-overlay.open{opacity:1;visibility:visible;}
-  .cols-modal-box{background:var(--glass-bg);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:30px 24px 28px;max-width:480px;width:100%;box-shadow:var(--shadow-lg);text-align:center;position:relative;}
-  .cols-modal-box h2{font-size:1.2rem;font-weight:900;color:var(--deep-purple);margin-bottom:6px;}
-  .cols-modal-box p{font-size:.8rem;color:rgba(76,5,133,.6);margin-bottom:18px;line-height:1.6;}
-  .cols-scroll-wrapper{position:relative;overflow:hidden;padding:4px 0;}
-  .cols-scroll{display:flex;gap:10px;overflow-x:auto;padding:6px 4px 12px 4px;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--soft-lavender) transparent;}
-  .cols-scroll::-webkit-scrollbar{height:4px;}
-  .cols-scroll::-webkit-scrollbar-thumb{background:var(--soft-lavender);border-radius:4px;}
-  .cols-scroll::-webkit-scrollbar-track{background:transparent;}
-  .cols-option{flex:0 0 60px;padding:12px 8px;border-radius:var(--radius-sm);border:2px solid var(--glass-border);background:var(--very-light);cursor:pointer;transition:all .25s;text-align:center;font-weight:700;font-size:1.1rem;color:var(--deep-purple);}
-  .cols-option:hover{transform:translateY(-3px);border-color:var(--soft-lavender);box-shadow:var(--shadow-md);}
-  .cols-option.active{border-color:var(--deep-purple);background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;box-shadow:0 4px 16px rgba(76,5,133,.3);}
-  .cols-option .label{display:block;font-size:.55rem;font-weight:600;opacity:.6;margin-top:4px;}
-  .cols-modal-close{position:absolute;top:12px;left:12px;background:rgba(219,181,238,.2);border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;color:var(--deep-purple);font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:all .2s;}
-  .cols-modal-close:hover{background:rgba(219,181,238,.4);}
-
-  /* Main Content */
-  .about-container{max-width:820px;margin:0 auto;padding:16px 14px 30px;}
-  .stats-hero{text-align:center;padding:20px 16px 24px;}
-  .stats-hero h1{font-size:1.5rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
-  .stats-hero p{color:rgba(76,5,133,.6);font-size:.85rem;line-height:1.7;max-width:500px;margin:0 auto 18px;}
-  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
-  .stat-card{background:var(--glass-bg);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:14px 8px;text-align:center;transition:all .3s;}
-  .stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--soft-lavender);}
-  .stat-card .stat-num{font-size:1.1rem;font-weight:900;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-  .stat-card .stat-label{font-size:.62rem;color:rgba(76,5,133,.6);font-weight:600;margin-top:4px;}
-  @media(max-width:500px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
-
-  .section-card{background:var(--glass-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow-sm);transition:border-color .3s, box-shadow .3s;}
-  .section-card:hover{border-color:var(--soft-lavender);box-shadow:var(--shadow-md);}
-  .section-card h2{font-size:1rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--deep-purple);}
-  .section-card h2 svg{width:20px;height:20px;color:var(--deep-purple);}
-  .section-card p{color:rgba(76,5,133,.75);font-size:.85rem;line-height:1.9;margin-bottom:10px;}
-  .section-card ul{padding-right:20px;margin-bottom:10px;}
-  .section-card li{color:rgba(76,5,133,.75);font-size:.82rem;line-height:2;margin-bottom:4px;}
-
-  .steps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:8px;}
-  .step-item{background:rgba(219,181,238,.08);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:14px;text-align:center;transition:all .3s;}
-  .step-item:hover{transform:translateY(-3px);border-color:var(--soft-lavender);background:rgba(219,181,238,.14);}
-  .step-item .step-num{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;margin:0 auto 8px;}
-  .step-item h4{font-size:.82rem;font-weight:700;margin-bottom:4px;color:var(--deep-purple);}
-  .step-item p{font-size:.7rem;color:rgba(76,5,133,.6);line-height:1.6;margin:0;}
-
-  .faq-list{display:flex;flex-direction:column;gap:8px;}
-  .faq-item{border:1px solid var(--glass-border);border-radius:var(--radius-md);overflow:hidden;transition:all .25s;}
-  .faq-item:hover{border-color:var(--soft-lavender);}
-  .faq-item.open{border-color:var(--soft-lavender);background:rgba(219,181,238,.06);}
-  .faq-question{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;background:rgba(219,181,238,.04);}
-  .faq-question h4{font-size:.85rem;font-weight:700;color:var(--deep-purple);}
-  .faq-question .faq-icon{width:20px;height:20px;color:var(--deep-purple);opacity:.4;transition:transform .3s;flex-shrink:0;}
-  .faq-item.open .faq-icon{transform:rotate(180deg);opacity:.7;}
-  .faq-answer{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s ease;background:rgba(219,181,238,.04);}
-  .faq-item.open .faq-answer{max-height:300px;padding:0 16px 16px 16px;}
-  .faq-answer p{font-size:.8rem;color:rgba(76,5,133,.7);line-height:1.9;margin:0;}
-
-  /* Contact Cards - horizontal small */
-  .contact-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;}
-  .contact-card{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(219,181,238,.06);border:1px solid var(--glass-border);border-radius:var(--radius-md);transition:all .3s;text-decoration:none;color:var(--deep-purple);flex:1 1 auto;min-width:140px;}
-  .contact-card:hover{transform:translateY(-2px);border-color:var(--soft-lavender);background:rgba(219,181,238,.14);box-shadow:var(--shadow-md);}
-  .contact-card .contact-icon{font-size:1.4rem;flex-shrink:0;}
-  .contact-card .contact-info{display:flex;flex-direction:column;}
-  .contact-card .contact-label{font-size:.75rem;font-weight:700;}
-  .contact-card .contact-desc{font-size:.65rem;color:rgba(76,5,133,.5);}
-
-  /* Bottom Navigation (بدون Admin) */
-  .bottom-nav-wrapper{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;align-items:center;gap:12px;direction:ltr;}
-  .bottom-nav-main{display:flex;align-items:center;gap:6px;padding:10px 18px;background:rgba(76,5,133,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(219,181,238,0.3);border-radius:50px;box-shadow:0 8px 32px rgba(76,5,133,0.4);}
-  .bn-item{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;text-decoration:none;color:rgba(255,255,255,0.5);transition:all 0.25s cubic-bezier(.34,1.56,.64,1);cursor:pointer;background:transparent;border:none;}
-  .bn-item svg{width:22px;height:22px;stroke:rgba(255,255,255,0.6);stroke-width:2;fill:none;transition:all 0.3s;}
-  .bn-item.active{background:radial-gradient(circle at 40% 35%,#FCD34D,#F59E0B 70%,#D97706);box-shadow:0 0 24px rgba(245,158,11,0.3);transform:scale(1.08);}
-  .bn-item.active svg{stroke:#FFFFFF;stroke-width:2.5;fill:#FFFFFF;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.2));}
-  .bn-item:not(.active):hover{background:rgba(219,181,238,0.2);transform:translateY(-3px);}
-  .bn-item:not(.active):hover svg{stroke:#DBB5EE;}
-
-  .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(80px);padding:9px 24px;background:var(--deep-purple);color:#fff;border-radius:50px;font-weight:600;font-size:.82rem;z-index:99999;opacity:0;transition:all .4s;box-shadow:var(--shadow-lg);}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-  .scroll-top{position:fixed;bottom:84px;right:14px;width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--deep-purple),#7B2FBE);color:#fff;border:none;cursor:pointer;z-index:998;opacity:0;visibility:hidden;transform:translateY(16px);transition:all .3s;box-shadow:var(--shadow-md);display:flex;align-items:center;justify-content:center;}
-  .scroll-top svg{width:18px;height:18px;}
-  .scroll-top.show{opacity:1;visibility:visible;transform:translateY(0);}
-  .scroll-top:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
-
-  @media(max-width:600px){.about-container{padding:12px;}.section-card{padding:16px;}.stat-card .stat-num{font-size:.95rem;}.steps-grid{grid-template-columns:repeat(2,1fr);}.contact-card{min-width:100%;}}
-</style>
+<link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-<!-- ===== Header ===== -->
 <div class="top-float">
   <div class="header-capsule">
     <span class="hc-brand">UFOQ</span>
@@ -125,7 +18,6 @@
   </div>
 </div>
 
-<!-- ===== Cols Modal ===== -->
 <div class="cols-modal-overlay" id="colsModal">
   <div class="cols-modal-box">
     <button class="cols-modal-close" onclick="closeColsModal()">✕</button>
@@ -143,9 +35,7 @@
   </div>
 </div>
 
-<!-- ===== Main ===== -->
 <div class="about-container">
-  <!-- Stats -->
   <div class="stats-hero">
     <h1>حول UFOQ</h1>
     <p>منصة عربية متخصصة في جمع ومشاركة البرومبتات الاحترافية لأدوات الذكاء الاصطناعي.</p>
@@ -157,7 +47,6 @@
     </div>
   </div>
 
-  <!-- Steps -->
   <div class="section-card">
     <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h10"/><path d="M9 4v16"/><path d="m3 9 3 3-3 3"/><path d="M14 8V4h8v4"/><path d="M14 12h8"/><path d="M18 16v4"/><path d="M18 20h-4"/></svg> كيفية الاستخدام</h2>
     <div class="steps-grid">
@@ -168,7 +57,6 @@
     </div>
   </div>
 
-  <!-- FAQ -->
   <div class="section-card">
     <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg> الأسئلة الشائعة</h2>
     <div class="faq-list">
@@ -195,7 +83,6 @@
     </div>
   </div>
 
-  <!-- ===== تواصل معنا (محدث) ===== -->
   <div class="section-card">
     <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> تواصل معنا</h2>
     <p style="color:rgba(76,5,133,.6);font-size:.82rem;margin-bottom:12px;">تابع أحدث التحديثات أو تواصل مع فريق المطورين:</p>
@@ -224,7 +111,6 @@
     </div>
   </div>
 
-  <!-- من نحن -->
   <div class="section-card">
     <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> من نحن</h2>
     <p>UFOQ هو مشروع عربي مستقل يهدف إلى بناء أكبر مكتبة عربية للبرومبتات. نؤمن بأن الذكاء الاصطناعي يجب أن يكون متاحاً للجميع، والبرومبت الجيد هو مفتاح الحصول على نتائج احترافية.</p>
@@ -232,7 +118,6 @@
   </div>
 </div>
 
-<!-- ===== Bottom Navigation ===== -->
 <div class="bottom-nav-wrapper">
   <div class="bottom-nav-main">
     <a href="/" class="bn-item" aria-label="الرئيسية">
@@ -267,14 +152,12 @@ function setCols(n) {
     setTimeout(closeColsModal, 300);
 }
 function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
-
 function toggleFaq(el) {
     const item = el.closest('.faq-item');
     const wasOpen = item.classList.contains('open');
     document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
     if (!wasOpen) item.classList.add('open');
 }
-
 let lastScroll=0;
 window.addEventListener('scroll', () => {
     const y = window.scrollY, nav = document.querySelector('.bottom-nav-wrapper');
@@ -286,7 +169,6 @@ window.addEventListener('scroll', () => {
     const st = document.getElementById('scrollTopBtn');
     if (st) st.classList.toggle('show', y > 400);
 });
-
 document.addEventListener('DOMContentLoaded', function() {
     const savedCols = localStorage.getItem('cardsPerRow') || '4';
     document.getElementById('colsLabel').textContent = savedCols;
@@ -294,7 +176,6 @@ document.addEventListener('DOMContentLoaded', function() {
         el.classList.toggle('active', parseInt(el.dataset.cols) === parseInt(savedCols));
     });
 });
-
 document.addEventListener('click', (e) => {
     const modal = document.getElementById('colsModal');
     const box = modal.querySelector('.cols-modal-box');
