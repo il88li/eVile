@@ -406,7 +406,7 @@ body {
     background: rgba(219, 181, 238, .4);
 }
 
-/* ===== Bottom Navigation – موحّد ===== */
+/* ===== Bottom Navigation – باستخدام الألوان المحددة فقط ===== */
 .bottom-nav-wrapper {
     position: fixed;
     bottom: 16px;
@@ -423,10 +423,10 @@ body {
     align-items: center;
     gap: 4px;
     padding: 6px 12px;
-    background: rgba(76, 5, 133, 0.88);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(219, 181, 238, 0.3);
+    background: #4C0585; /* DEEP PURPLE */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid #DBB5EE; /* SOFT LAVENDER */
     border-radius: 50px;
     box-shadow: 0 6px 24px rgba(76, 5, 133, 0.3);
     min-height: 48px;
@@ -440,7 +440,7 @@ body {
     height: 34px;
     border-radius: 50%;
     text-decoration: none;
-    color: rgba(255, 253, 254, 0.5);
+    color: rgba(255, 253, 254, 0.6);
     transition: all 0.25s cubic-bezier(.34, 1.56, .64, 1);
     cursor: pointer;
     background: transparent;
@@ -450,21 +450,20 @@ body {
 .bn-item svg {
     width: 17px;
     height: 17px;
-    stroke: rgba(255, 253, 254, 0.6);
+    stroke: #FFFDFE;
     stroke-width: 2;
     fill: none;
     transition: all 0.3s;
 }
 .bn-item.active {
-    background: radial-gradient(circle at 40% 35%, #FCD34D, #F59E0B 70%, #D97706);
-    box-shadow: 0 0 16px rgba(245, 158, 11, 0.25);
+    background: #DBB5EE; /* SOFT LAVENDER */
+    box-shadow: 0 0 12px rgba(219, 181, 238, 0.3);
     transform: scale(1.06);
 }
 .bn-item.active svg {
-    stroke: #FFFFFF;
+    stroke: #4C0585; /* DEEP PURPLE */
     stroke-width: 2.5;
-    fill: #FFFFFF;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+    fill: #4C0585;
 }
 .bn-item:not(.active):hover {
     background: rgba(219, 181, 238, 0.2);
@@ -477,14 +476,14 @@ body {
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: rgba(219, 181, 238, 0.2);
-    border: 1px solid rgba(219, 181, 238, 0.3);
+    background: rgba(219, 181, 238, 0.15);
+    border: 1px solid #DBB5EE;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    color: rgba(255, 253, 254, 0.7);
+    color: #FFFDFE;
     padding: 0;
     backdrop-filter: blur(4px);
     position: relative;
@@ -493,30 +492,29 @@ body {
 .bn-search svg {
     width: 17px;
     height: 17px;
-    stroke: rgba(255, 253, 254, 0.7);
+    stroke: #FFFDFE;
     stroke-width: 2;
     fill: none;
     transition: all 0.3s;
 }
 .bn-search:hover {
-    background: rgba(219, 181, 238, 0.35);
+    background: rgba(219, 181, 238, 0.3);
     transform: translateY(-2px) scale(1.04);
 }
 .bn-search.active {
-    background: radial-gradient(circle at 40% 35%, #FCD34D, #F59E0B 70%, #D97706);
-    border-color: transparent;
-    box-shadow: 0 0 16px rgba(245, 158, 11, 0.2);
+    background: #DBB5EE;
+    border-color: #DBB5EE;
 }
 .bn-search.active svg {
-    stroke: #FFFFFF;
-    fill: #FFFFFF;
+    stroke: #4C0585;
+    fill: #4C0585;
 }
 .bn-search .badge {
     position: absolute;
     top: -3px;
     right: -3px;
-    background: #EF4444;
-    color: #fff;
+    background: #4C0585;
+    color: #FFFDFE;
     font-size: .45rem;
     font-weight: 700;
     min-width: 14px;
@@ -535,15 +533,15 @@ body {
     transform: scale(1);
 }
 
-/* ===== Toast & Scroll Top ===== */
+/* ===== Toast & Scroll Top – باستخدام الألوان المحددة ===== */
 .toast {
     position: fixed;
     bottom: 76px;
     left: 50%;
     transform: translateX(-50%) translateY(80px);
     padding: 8px 20px;
-    background: var(--deep-purple);
-    color: #fff;
+    background: #4C0585;
+    color: #FFFDFE;
     border-radius: 50px;
     font-weight: 600;
     font-size: .78rem;
@@ -560,7 +558,8 @@ body {
     transform: translateX(-50%) translateY(0);
 }
 .toast.error {
-    background: #FF4757;
+    background: #4C0585;
+    color: #FFFDFE;
 }
 
 .scroll-top {
@@ -570,9 +569,9 @@ body {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--deep-purple), #7B2FBE);
-    color: #fff;
-    border: none;
+    background: #4C0585;
+    color: #FFFDFE;
+    border: 1px solid #DBB5EE;
     cursor: pointer;
     z-index: 998;
     opacity: 0;
@@ -587,6 +586,7 @@ body {
 .scroll-top svg {
     width: 14px;
     height: 14px;
+    stroke: #FFFDFE;
 }
 .scroll-top.show {
     opacity: 1;
@@ -594,14 +594,12 @@ body {
     transform: translateY(0);
 }
 
-/* ===== Image Modal – بألوان الباليت وعرض الصور الكامل ===== */
+/* ===== Image Modal – بدون شفافية، بألوان الباليت فقط ===== */
 .image-modal {
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: rgba(76, 5, 133, 0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: #4C0585; /* DEEP PURPLE – صلبة */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -615,9 +613,7 @@ body {
     visibility: visible;
 }
 .image-modal-content {
-    background: #FFFDFE;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: #FFFDFE; /* VERYLIGHT */
     border: 2px solid #DBB5EE;
     border-radius: var(--radius-lg);
     max-width: 92vw;
@@ -648,7 +644,6 @@ body {
     transition: all .3s;
     font-family: 'Tajawal', sans-serif;
     z-index: 10;
-    backdrop-filter: blur(4px);
 }
 .modal-close-btn:hover {
     background: rgba(76, 5, 133, 0.2);
@@ -667,7 +662,7 @@ body {
 }
 .modal-image-wrap img {
     max-width: 100%;
-    max-height: 70vh;
+    max-height: 75vh;
     width: auto;
     height: auto;
     object-fit: contain;
@@ -719,9 +714,9 @@ body {
     transform: translateY(-2px);
 }
 .modal-action-btn.liked {
-    background: rgba(255, 71, 87, 0.15);
-    border-color: rgba(255, 71, 87, 0.3);
-    color: #FF4757;
+    background: rgba(76, 5, 133, 0.1);
+    border-color: #4C0585;
+    color: #4C0585;
 }
 .modal-action-btn .count {
     font-size: .6rem;
@@ -779,13 +774,12 @@ body {
     color: rgba(76, 5, 133, 0.5);
 }
 
-/* ===== Mandatory Ad Modal ===== */
+/* ===== Mandatory Ad Modal – باستخدام الألوان المحددة ===== */
 .mandatory-ad-modal {
     position: fixed;
     inset: 0;
     z-index: 99999;
-    background: rgba(76, 5, 133, 0.7);
-    backdrop-filter: blur(16px);
+    background: #4C0585;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -802,11 +796,11 @@ body {
     position: relative;
     width: 100%;
     max-width: 400px;
-    background: var(--very-light);
+    background: #FFFDFE;
     border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: var(--shadow-lg);
-    border: 1px solid var(--glass-border);
+    border: 1px solid #DBB5EE;
 }
 .mad-timer-bar {
     position: absolute;
@@ -814,7 +808,7 @@ body {
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, var(--deep-purple), #7B2FBE);
+    background: #4C0585;
     z-index: 10;
     transition: width 1s linear;
 }
@@ -827,7 +821,7 @@ body {
 .mad-title {
     font-size: .8rem;
     font-weight: 800;
-    color: var(--deep-purple);
+    color: #4C0585;
 }
 .mad-timer {
     display: flex;
@@ -835,7 +829,7 @@ body {
     gap: 4px;
     font-size: .68rem;
     font-weight: 700;
-    color: var(--deep-purple);
+    color: #4C0585;
     background: rgba(219, 181, 238, .2);
     padding: 3px 8px;
     border-radius: 50px;
@@ -843,6 +837,7 @@ body {
 .mad-timer svg {
     width: 12px;
     height: 12px;
+    stroke: #4C0585;
 }
 .mad-image {
     width: 100%;
@@ -852,17 +847,17 @@ body {
 }
 .mad-body {
     padding: 12px 16px 16px;
-    background: #f8f6ff;
+    background: #FFFDFE;
 }
 .mad-ad-title {
     font-size: .85rem;
     font-weight: 900;
-    color: #1a1a2e;
+    color: #4C0585;
     margin-bottom: 4px;
 }
 .mad-ad-text {
     font-size: .78rem;
-    color: #2d2d44;
+    color: #4C0585;
     line-height: 1.7;
     margin-bottom: 12px;
 }
@@ -872,8 +867,8 @@ body {
     justify-content: center;
     width: 100%;
     padding: 10px;
-    background: linear-gradient(135deg, var(--deep-purple), #7B2FBE);
-    color: #fff;
+    background: #4C0585;
+    color: #FFFDFE;
     border-radius: 8px;
     text-decoration: none;
     font-size: .9rem;
@@ -1993,7 +1988,6 @@ body {
     box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
 }
 
-/* ===== Admin Edit Modal ===== */
 .admin-body .edit-modal-overlay {
     position: fixed;
     inset: 0;
