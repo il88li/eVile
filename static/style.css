@@ -1003,7 +1003,7 @@ a:hover {
 }
 
 /* ========================================================
-   شبكة البطاقات (Masonry Grid) – مع تحسين الصور والأعمدة
+   شبكة البطاقات (Masonry Grid) – مع تناغم تام بين البطاقة والصورة
    ======================================================== */
 .masonry-grid {
     column-gap: 18px;
@@ -1020,6 +1020,8 @@ a:hover {
     border: 1px solid var(--border-light);
     box-shadow: var(--shadow-sm);
     transition: all var(--transition-base);
+    display: flex;
+    flex-direction: column;
 }
 .prompt-card:hover {
     transform: translateY(-6px);
@@ -1027,30 +1029,34 @@ a:hover {
     border-color: var(--primary-200);
 }
 
-/* ===== غلاف الصورة – مع ضمان ظهور الصورة كاملة ===== */
+/* ===== غلاف الصورة – يتكيف مع عرض العمود ===== */
 .prompt-card .card-image-wrap {
     background: var(--primary-50);
     position: relative;
-    min-height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    width: 100%;
 }
+
+/* ===== الصورة – تأخذ العرض الكامل، وارتفاعها يتناسب مع العرض ===== */
 .prompt-card .card-image-wrap img {
     width: 100%;
     height: auto;
     display: block;
     transition: transform 0.6s ease;
-    object-fit: contain;      /* ضمان ظهور الصورة كاملة دون قص */
-    max-height: 400px;        /* حد أقصى معقول مع الحفاظ على النسبة */
+    object-fit: contain;     /* الصورة كاملة دون قص */
+    aspect-ratio: auto;      /* يحافظ على نسبة الأبعاد الأصلية */
 }
 .prompt-card:hover .card-image-wrap img {
     transform: scale(1.02);
 }
+
+/* ===== مكان الصورة الاحتياطي (بدون صورة) ===== */
 .prompt-card .no-image-placeholder {
     width: 100%;
-    height: 160px;
+    aspect-ratio: 16 / 9;    /* نسبة ثابتة للاحتياطي */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1062,6 +1068,9 @@ a:hover {
 /* ===== محتوى البطاقة ===== */
 .prompt-card .card-body {
     padding: var(--space-md) var(--space-md) var(--space-lg);
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
 }
 .prompt-card .card-cat {
     font-size: var(--font-size-xs);
@@ -1095,7 +1104,8 @@ a:hover {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-sm);
-    margin-top: var(--space-xs);
+    margin-top: auto;       /* تدفع الأزرار إلى أسفل البطاقة */
+    padding-top: var(--space-xs);
 }
 .prompt-card .card-btn {
     flex: 1 0 auto;
@@ -2101,7 +2111,7 @@ a:hover {
 }
 
 /* ========================================================
-   استجابة الشاشات – نظام الأعمدة المحسّن
+   استجابة الشاشات – نظام الأعمدة المحسّن مع تناغم البطاقات
    ======================================================== */
 
 /* شاشات متوسطة وصغيرة (جوال) */
@@ -2142,17 +2152,10 @@ a:hover {
         column-gap: 10px;
     }
     /* إذا اختار المستخدم 1 عمود، سيتم تطبيقه عبر JavaScript */
-    
+
     .prompt-card {
         margin-bottom: 12px;
         border-radius: var(--radius-sm);
-    }
-    .prompt-card .no-image-placeholder {
-        height: 100px;
-        font-size: 2rem;
-    }
-    .prompt-card .card-image-wrap img {
-        max-height: 200px; /* تقليل أقصى ارتفاع للصورة في الجوال */
     }
     .prompt-card .card-body {
         padding: 10px 10px 14px;
@@ -2242,19 +2245,12 @@ a:hover {
     }
 }
 
-/* شاشات صغيرة جداً (عرض أقل من 400px) – تطبيق عمود واحد */
+/* شاشات صغيرة جداً (عرض أقل من 400px) – عمود واحد */
 @media (max-width: 400px) {
     .masonry-grid {
-        column-count: 1 !important; /* عمود واحد للشاشات الصغيرة جداً */
+        column-count: 1 !important;
         padding: var(--space-xs) var(--space-xs) var(--space-md);
         column-gap: 8px;
-    }
-    .prompt-card .no-image-placeholder {
-        height: 80px;
-        font-size: 1.5rem;
-    }
-    .prompt-card .card-image-wrap img {
-        max-height: 160px;
     }
     .prompt-card .card-body {
         padding: 8px 8px 12px;
