@@ -1,6 +1,6 @@
 /* ========================================================
    UFOQ – مكتبة البرومبتات
-   التصميم العصري الشامل
+   التصميم العصري الشامل (الإصدار النهائي)
    ======================================================== */
 
 /* ===== استيراد الخط ===== */
@@ -170,7 +170,7 @@ a:hover {
 }
 
 /* ========================================================
-   رأس الصفحة العائم
+   رأس الصفحة العائم (معدل)
    ======================================================== */
 .top-float {
     position: fixed;
@@ -188,13 +188,13 @@ a:hover {
     pointer-events: auto;
 }
 
-/* كبسولة الرأس */
+/* كبسولة الرأس – بدون زر الأعمدة */
 .header-capsule {
     align-self: center;
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
-    padding: 6px 18px;
+    justify-content: center;
+    padding: 6px 24px;
     background: var(--bg-glass);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
@@ -211,40 +211,24 @@ a:hover {
     border-color: var(--primary-300);
 }
 
+/* رابط UFOQ إلى Telegram */
 .hc-brand {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-xl);
     font-weight: var(--weight-black);
     background: linear-gradient(135deg, var(--primary-700), var(--primary-500), var(--primary-300));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     letter-spacing: -0.5px;
-    cursor: default;
-    padding: 2px 0;
-}
-
-.hc-select-trigger {
-    font-size: var(--font-size-xs);
-    font-weight: var(--weight-bold);
-    color: var(--text-primary);
-    padding: 3px 12px;
-    border-radius: var(--radius-full);
-    background: var(--primary-50);
-    border: 1px solid var(--border-medium);
     cursor: pointer;
-    transition: all var(--transition-fast);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-family: var(--font-family);
+    padding: 2px 0;
+    text-decoration: none;
+    transition: transform var(--transition-fast);
+    display: inline-block;
 }
-.hc-select-trigger:hover {
-    background: var(--primary-100);
-    border-color: var(--primary-300);
+.hc-brand:hover {
     transform: scale(1.04);
-}
-.hc-select-trigger i {
-    font-size: var(--font-size-sm);
+    filter: brightness(1.1);
 }
 
 /* ===== لوحة البحث ===== */
@@ -541,7 +525,7 @@ a:hover {
 }
 
 /* ========================================================
-   التنقل السفلي
+   التنقل السفلي + زر تغيير الأعمدة
    ======================================================== */
 .bottom-nav-wrapper {
     position: fixed;
@@ -650,6 +634,32 @@ a:hover {
 .bn-search .badge.show {
     opacity: 1;
     transform: scale(1);
+}
+
+/* ===== زر تغيير عدد الأعمدة (في شريط التنقل السفلي) ===== */
+.bn-cols {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    color: rgba(255, 255, 255, 0.6);
+    padding: 0;
+    backdrop-filter: blur(4px);
+    font-size: var(--font-size-lg);
+}
+.bn-cols:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px) scale(1.04);
+    color: var(--primary-200);
+}
+.bn-cols:active {
+    transform: scale(0.94);
 }
 
 /* ===== تنقل الصفحة السفلي (للصفحات الأخرى) ===== */
@@ -1014,21 +1024,26 @@ a:hover {
     border-color: var(--primary-200);
 }
 
-/* غلاف الصورة */
+/* ===== تحسين عرض الصور ===== */
 .prompt-card .card-image-wrap {
-    width: 100%;
-    overflow: hidden;
     background: var(--primary-50);
     position: relative;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
 .prompt-card .card-image-wrap img {
     width: 100%;
     height: auto;
     display: block;
     transition: transform 0.6s ease;
+    object-fit: cover;
+    max-height: 300px;
 }
 .prompt-card:hover .card-image-wrap img {
-    transform: scale(1.04);
+    transform: scale(1.03);
 }
 .prompt-card .no-image-placeholder {
     width: 100%;
@@ -1398,7 +1413,7 @@ a:hover {
 }
 
 /* ========================================================
-   صفحة الخطأ (sign.html)
+   صفحة الخطأ
    ======================================================== */
 .error-body {
     background: linear-gradient(135deg, #0b0e1a 0%, #1a0a2e 100%);
@@ -1951,164 +1966,6 @@ a:hover {
 }
 
 /* ========================================================
-   استجابة الشاشات
-   ======================================================== */
-
-/* شاشات متوسطة وصغيرة */
-@media (max-width: 768px) {
-    :root {
-        --body-padding-top: 70px;
-        --body-padding-bottom: 70px;
-    }
-
-    .header-capsule {
-        padding: 4px 14px;
-        gap: var(--space-xs);
-    }
-    .hc-brand {
-        font-size: var(--font-size-md);
-    }
-    .hc-select-trigger {
-        font-size: var(--font-size-xs);
-        padding: 2px 10px;
-    }
-
-    .search-input-wrap input {
-        font-size: var(--font-size-sm);
-        padding: 8px 60px 8px 24px;
-    }
-    .search-cat-chip {
-        font-size: var(--font-size-xs);
-        padding: 2px 8px;
-    }
-
-    .hero h1 {
-        font-size: var(--font-size-2xl);
-    }
-    .hero p {
-        font-size: var(--font-size-base);
-    }
-
-    .masonry-grid {
-        column-count: 2 !important;
-        padding: var(--space-sm) var(--space-sm) var(--space-md);
-        column-gap: 12px;
-    }
-    .prompt-card .no-image-placeholder {
-        height: 120px;
-    }
-    .prompt-card .card-body {
-        padding: var(--space-sm) var(--space-sm) var(--space-md);
-    }
-    .prompt-card .card-title {
-        font-size: var(--font-size-base);
-    }
-    .prompt-card .card-btn {
-        font-size: var(--font-size-xs);
-        padding: 4px 10px;
-        flex: 1 1 auto;
-    }
-
-    .bottom-nav-wrapper {
-        bottom: 14px;
-    }
-    .bottom-nav-main {
-        padding: 4px 14px;
-        min-height: 44px;
-    }
-    .bn-item,
-    .bn-search {
-        width: 36px;
-        height: 36px;
-        font-size: var(--font-size-md);
-    }
-
-    .admin-body .admin-bottom-nav {
-        padding: 4px 10px;
-        gap: 4px;
-    }
-    .admin-body .admin-nav-btn {
-        width: 38px;
-        height: 38px;
-        font-size: var(--font-size-md);
-    }
-    .admin-body .form-grid {
-        grid-template-columns: 1fr;
-    }
-    .admin-body .error-table {
-        font-size: var(--font-size-xs);
-    }
-    .admin-body .error-table .url-cell,
-    .admin-body .error-table .details-cell {
-        max-width: 80px;
-    }
-    .admin-body .errors-header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .stats-hero h1 {
-        font-size: var(--font-size-2xl);
-    }
-    .section-card {
-        padding: var(--space-md);
-    }
-    .steps-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-    .contact-card {
-        min-width: 120px;
-        padding: var(--space-sm) var(--space-md);
-    }
-    .contact-card .contact-icon {
-        font-size: 1.2rem;
-    }
-}
-
-/* شاشات صغيرة جداً */
-@media (max-width: 400px) {
-    .masonry-grid {
-        column-count: 1 !important;
-    }
-    .steps-grid {
-        grid-template-columns: 1fr;
-    }
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .top-float {
-        top: 8px;
-        left: 8px;
-        right: 8px;
-    }
-    .header-capsule {
-        padding: 4px 12px;
-    }
-    .hc-brand {
-        font-size: var(--font-size-base);
-    }
-    .admin-body .card {
-        padding: var(--space-md);
-    }
-    .admin-body .floating-header {
-        padding: var(--space-xs) var(--space-sm);
-    }
-    .admin-body .header-center {
-        font-size: var(--font-size-base);
-    }
-}
-
-/* شاشات كبيرة */
-@media (min-width: 1200px) {
-    .masonry-grid {
-        column-count: 5;
-    }
-    .container {
-        padding: 0 var(--space-2xl);
-    }
-}
-
-/* ========================================================
    إعلان إجباري (Mandatory Ad)
    ======================================================== */
 .mandatory-ad-modal {
@@ -2238,4 +2095,159 @@ a:hover {
     font-size: 3rem;
     color: var(--primary-200);
     margin-bottom: var(--space-md);
+}
+
+/* ========================================================
+   استجابة الشاشات
+   ======================================================== */
+
+/* شاشات متوسطة وصغيرة */
+@media (max-width: 768px) {
+    :root {
+        --body-padding-top: 70px;
+        --body-padding-bottom: 70px;
+    }
+
+    .header-capsule {
+        padding: 4px 18px;
+        gap: var(--space-xs);
+    }
+    .hc-brand {
+        font-size: var(--font-size-lg);
+    }
+
+    .search-input-wrap input {
+        font-size: var(--font-size-sm);
+        padding: 8px 60px 8px 24px;
+    }
+    .search-cat-chip {
+        font-size: var(--font-size-xs);
+        padding: 2px 8px;
+    }
+
+    .hero h1 {
+        font-size: var(--font-size-2xl);
+    }
+    .hero p {
+        font-size: var(--font-size-base);
+    }
+
+    .masonry-grid {
+        column-count: 2 !important;
+        padding: var(--space-sm) var(--space-sm) var(--space-md);
+        column-gap: 12px;
+    }
+    .prompt-card .no-image-placeholder {
+        height: 120px;
+    }
+    .prompt-card .card-body {
+        padding: var(--space-sm) var(--space-sm) var(--space-md);
+    }
+    .prompt-card .card-title {
+        font-size: var(--font-size-base);
+    }
+    .prompt-card .card-btn {
+        font-size: var(--font-size-xs);
+        padding: 4px 10px;
+        flex: 1 1 auto;
+    }
+
+    .bottom-nav-wrapper {
+        bottom: 14px;
+    }
+    .bottom-nav-main {
+        padding: 4px 14px;
+        min-height: 44px;
+    }
+    .bn-item,
+    .bn-search,
+    .bn-cols {
+        width: 36px;
+        height: 36px;
+        font-size: var(--font-size-md);
+    }
+
+    .admin-body .admin-bottom-nav {
+        padding: 4px 10px;
+        gap: 4px;
+    }
+    .admin-body .admin-nav-btn {
+        width: 38px;
+        height: 38px;
+        font-size: var(--font-size-md);
+    }
+    .admin-body .form-grid {
+        grid-template-columns: 1fr;
+    }
+    .admin-body .error-table {
+        font-size: var(--font-size-xs);
+    }
+    .admin-body .error-table .url-cell,
+    .admin-body .error-table .details-cell {
+        max-width: 80px;
+    }
+    .admin-body .errors-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .stats-hero h1 {
+        font-size: var(--font-size-2xl);
+    }
+    .section-card {
+        padding: var(--space-md);
+    }
+    .steps-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .contact-card {
+        min-width: 120px;
+        padding: var(--space-sm) var(--space-md);
+    }
+    .contact-card .contact-icon {
+        font-size: 1.2rem;
+    }
+}
+
+/* شاشات صغيرة جداً */
+@media (max-width: 400px) {
+    .masonry-grid {
+        column-count: 1 !important;
+    }
+    .steps-grid {
+        grid-template-columns: 1fr;
+    }
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .top-float {
+        top: 8px;
+        left: 8px;
+        right: 8px;
+    }
+    .header-capsule {
+        padding: 4px 14px;
+    }
+    .hc-brand {
+        font-size: var(--font-size-md);
+    }
+    .admin-body .card {
+        padding: var(--space-md);
+    }
+    .admin-body .floating-header {
+        padding: var(--space-xs) var(--space-sm);
+    }
+    .admin-body .header-center {
+        font-size: var(--font-size-base);
+    }
+}
+
+/* شاشات كبيرة */
+@media (min-width: 1200px) {
+    .masonry-grid {
+        column-count: 5;
+    }
+    .container {
+        padding: 0 var(--space-2xl);
+    }
 }
