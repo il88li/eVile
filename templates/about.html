@@ -18,15 +18,13 @@
 
 <div class="top-float">
   <div class="header-capsule">
-    <!-- رابط إلى Telegram -->
     <a href="https://t.me/Evile_Prompts" target="_blank" rel="noopener noreferrer" class="hc-brand">
       UFOQ
     </a>
-    <!-- تم حذف زر تغيير الأعمدة -->
   </div>
 </div>
 
-<!-- مودال الأعمدة (نفسه) -->
+<!-- مودال الأعمدة -->
 <div class="cols-modal-overlay" id="colsModal">
   <div class="cols-modal-box">
     <button class="cols-modal-close" onclick="closeColsModal()">✕</button>
@@ -127,7 +125,7 @@
   </div>
 </div>
 
-<!-- ===== شريط التنقل السفلي + زر الأعمدة ===== -->
+<!-- ===== شريط التنقل السفلي + زر الأعمدة (منفصل) ===== -->
 <div class="bottom-nav-wrapper">
   <div class="bottom-nav-main">
     <a href="/" class="bn-item" aria-label="الرئيسية">
@@ -139,11 +137,10 @@
     <button class="bn-search" style="opacity:0; pointer-events:none;" aria-hidden="true">
       <i class="fas fa-search"></i>
     </button>
-    <!-- زر تغيير عدد الأعمدة -->
-    <button class="bn-cols" onclick="openColsModal()" aria-label="تغيير عدد الأعمدة">
-      <i class="fas fa-grip-lines"></i>
-    </button>
   </div>
+  <button class="bn-cols" onclick="openColsModal()" aria-label="تغيير عدد الأعمدة">
+    <i class="fas fa-grip-lines"></i>
+  </button>
 </div>
 
 <div class="toast" id="toast">تم!</div>
@@ -168,7 +165,6 @@ function setCols(n) {
     el.classList.toggle('active', parseInt(el.dataset.cols) === n);
   });
   setTimeout(closeColsModal, 300);
-  // إعادة تطبيق الأعمدة على شبكة البطاقات في الصفحة الرئيسية (إذا كانت موجودة)
   if (typeof applyCardsPerRow === 'function') applyCardsPerRow();
 }
 function showToast(m) {
