@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>حول UFOQ – مكتبة البرومبتات</title>
+<title>حول UFOQ – مكتبة البرومبتات العربية</title>
+<meta name="description" content="تعرف على UFOQ، أكبر مكتبة عربية للبرومبتات الاحترافية للذكاء الاصطناعي. إحصائيات، خطوات، أسئلة شائعة، وتواصل.">
 <link rel="stylesheet" href="/static/style.css">
-<!-- Font Awesome 6 -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
@@ -20,12 +20,12 @@
   </div>
 </div>
 
-<!-- Cols Modal (نفس الموجود في index) -->
+<!-- Cols Modal -->
 <div class="cols-modal-overlay" id="colsModal">
   <div class="cols-modal-box">
     <button class="cols-modal-close" onclick="closeColsModal()">✕</button>
     <h2>📐 عدد البطاقات</h2>
-    <p>اختر عدد البطاقات التي ترغب في عرضها في كل سطر. يتغير التخطيط تلقائياً حسب حجم الشاشة.</p>
+    <p>اختر عدد البطاقات في كل سطر. يتغير التخطيط تلقائياً حسب الشاشة.</p>
     <div class="cols-scroll-wrapper">
       <div class="cols-scroll" id="colsScroll">
         <div class="cols-option" data-cols="1" onclick="setCols(1)">1<span class="label">عمود</span></div>
@@ -41,7 +41,7 @@
 <div class="about-container">
   <div class="stats-hero">
     <h1>حول UFOQ</h1>
-    <p>منصة عربية متخصصة في جمع ومشاركة البرومبتات الاحترافية لأدوات الذكاء الاصطناعي.</p>
+    <p>منصة عربية متخصصة في جمع ومشاركة البرومبتات الاحترافية لأدوات الذكاء الاصطناعي. نهدف إلى تمكين المبدعين العرب من الوصول إلى أفضل النصوص التوجيهية.</p>
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-num">{{ prompt_count }}</div><div class="stat-label">برومبت</div></div>
       <div class="stat-card"><div class="stat-num">{{ total_copies }}</div><div class="stat-label">نسخة</div></div>
@@ -50,14 +50,13 @@
     </div>
   </div>
 
-  <!-- بقية المحتوى كما هو (خطوات، أسئلة، تواصل، من نحن) -->
   <div class="section-card">
-    <h2><i class="fas fa-play-circle"></i> كيفية الاستخدام</h2>
+    <h2><i class="fas fa-play-circle"></i> كيف تستخدم UFOQ</h2>
     <div class="steps-grid">
-      <div class="step-item"><div class="step-num">1</div><h4>تصفح المكتبة</h4><p>استخدم شريط التصنيفات أو البحث للعثور على البرومبت المناسب.</p></div>
-      <div class="step-item"><div class="step-num">2</div><h4>اختر البطاقة</h4><p>مرر بين البطاقات واختر ما يناسبك.</p></div>
-      <div class="step-item"><div class="step-num">3</div><h4>انسخ أو شارك</h4><p>استخدم الأزرار أسفل البطاقة لنسخ البرومبت أو مشاركته.</p></div>
-      <div class="step-item"><div class="step-num">4</div><h4>تفاعل</h4><p>أعجب بالبرومبتات المفضلة لديك وساعد في نشرها.</p></div>
+      <div class="step-item"><div class="step-num">1</div><h4>تصفح المكتبة</h4><p>استخدم شريط التصنيفات أو البحث للعثور على البرومبت المناسب لاحتياجاتك.</p></div>
+      <div class="step-item"><div class="step-num">2</div><h4>اختر البطاقة</h4><p>مرر بين البطاقات واكتشف البرومبتات المتنوعة في مختلف المجالات.</p></div>
+      <div class="step-item"><div class="step-num">3</div><h4>انسخ أو شارك</h4><p>استخدم الأزرار أسفل البطاقة لنسخ البرومبت أو مشاركته مع الآخرين.</p></div>
+      <div class="step-item"><div class="step-num">4</div><h4>تفاعل</h4><p>أعجب بالبرومبتات المفضلة لديك وساعد في نشر الإبداع.</p></div>
     </div>
   </div>
 
@@ -66,30 +65,30 @@
     <div class="faq-list">
       <div class="faq-item">
         <div class="faq-question" onclick="toggleFaq(this)"><h4>ما هو UFOQ؟</h4><i class="fas fa-chevron-down faq-icon"></i></div>
-        <div class="faq-answer"><p>UFOQ هي مكتبة عربية مفتوحة للبرومبتات (النصوص التوجيهية) المستخدمة مع أدوات الذكاء الاصطناعي مثل ChatGPT و Midjourney وغيرها.</p></div>
+        <div class="faq-answer"><p>UFOQ هي مكتبة عربية مفتوحة للبرومبتات – النصوص التوجيهية المستخدمة مع أدوات الذكاء الاصطناعي مثل ChatGPT و Midjourney و Claude وغيرها.</p></div>
       </div>
       <div class="faq-item">
         <div class="faq-question" onclick="toggleFaq(this)"><h4>هل الاستخدام مجاني؟</h4><i class="fas fa-chevron-down faq-icon"></i></div>
-        <div class="faq-answer"><p>نعم، تصفح ونسخ البرومبتات مجاني بالكامل. لا توجد أي رسوم أو اشتراكات مدفوعة.</p></div>
+        <div class="faq-answer"><p>نعم، تصفح ونسخ البرومبتات مجاني بالكامل. لا توجد أي رسوم أو اشتراكات مدفوعة. مهمتنا نشر الإبداع للجميع.</p></div>
       </div>
       <div class="faq-item">
         <div class="faq-question" onclick="toggleFaq(this)"><h4>كيف يمكنني المساهمة؟</h4><i class="fas fa-chevron-down faq-icon"></i></div>
-        <div class="faq-answer"><p>يمكنك التواصل معنا عبر قنوات التواصل أدناه لإرسال برومبتاتك، وسيتم مراجعتها وإضافتها إلى المكتبة.</p></div>
+        <div class="faq-answer"><p>يمكنك التواصل معنا عبر قنوات التواصل أدناه لإرسال برومبتاتك الخاصة. سيتم مراجعتها وإضافتها إلى المكتبة مع الإشارة إليك.</p></div>
       </div>
       <div class="faq-item">
         <div class="faq-question" onclick="toggleFaq(this)"><h4>ما هي أدوات الذكاء الاصطناعي المدعومة؟</h4><i class="fas fa-chevron-down faq-icon"></i></div>
-        <div class="faq-answer"><p>البرومبتات تعمل مع معظم أدوات الذكاء الاصطناعي بما فيها ChatGPT، Midjourney، DALL-E، Stable Diffusion، Claude، Gemini وغيرها.</p></div>
+        <div class="faq-answer"><p>البرومبتات تعمل مع معظم أدوات الذكاء الاصطناعي الشائعة: ChatGPT، Midjourney، DALL-E، Stable Diffusion، Claude، Gemini، Bing Image Creator، وغيرها.</p></div>
       </div>
       <div class="faq-item">
         <div class="faq-question" onclick="toggleFaq(this)"><h4>كيف يتم التحقق من جودة البرومبتات؟</h4><i class="fas fa-chevron-down faq-icon"></i></div>
-        <div class="faq-answer"><p>يتم مراجعة جميع البرومبتات قبل النشر للتأكد من جودتها وخلوها من المحتوى غير المناسب.</p></div>
+        <div class="faq-answer"><p>يتم مراجعة جميع البرومبتات قبل النشر للتأكد من جودتها، وخلوها من المحتوى غير المناسب، وفائدتها العملية للمستخدمين.</p></div>
       </div>
     </div>
   </div>
 
   <div class="section-card">
     <h2><i class="fas fa-envelope"></i> تواصل معنا</h2>
-    <p style="color:rgba(76,5,133,.6);font-size:.82rem;margin-bottom:12px;">تابع أحدث التحديثات أو تواصل مع فريق المطورين:</p>
+    <p style="color:var(--text-secondary);font-size:var(--font-size-md);margin-bottom:var(--space-md);">تابع أحدث التحديثات، أو تواصل مع فريق التطوير:</p>
     <div class="contact-grid">
       <a href="https://t.me/Evile_Prompts" target="_blank" rel="noopener noreferrer" class="contact-card">
         <span class="contact-icon"><i class="fab fa-telegram"></i></span>
@@ -117,12 +116,12 @@
 
   <div class="section-card">
     <h2><i class="fas fa-heart"></i> من نحن</h2>
-    <p>UFOQ هو مشروع عربي مستقل يهدف إلى بناء أكبر مكتبة عربية للبرومبتات. نؤمن بأن الذكاء الاصطناعي يجب أن يكون متاحاً للجميع، والبرومبت الجيد هو مفتاح الحصول على نتائج احترافية.</p>
-    <p>انضم لمجتمعنا وساهم في بناء مستقبل الإبداع الرقمي.</p>
+    <p>UFOQ هو مشروع عربي مستقل يهدف إلى بناء أكبر مكتبة عربية للبرومبتات. نؤمن بأن الذكاء الاصطناعي يجب أن يكون متاحاً للجميع، والبرومبت الجيد هو مفتاح الحصول على نتائج احترافية وإبداعية.</p>
+    <p>انضم إلى مجتمعنا وساهم في بناء مستقبل الإبداع الرقمي. معاً نصنع محتوى عربياً مميزاً يليق بجيل الذكاء الاصطناعي.</p>
   </div>
 </div>
 
-<!-- ===== شريط التنقل السفلي الجديد (متطابق مع index) ===== -->
+<!-- ===== Bottom Navigation ===== -->
 <div class="bottom-nav-wrapper">
   <div class="bottom-nav-main">
     <a href="/" class="bn-item" aria-label="الرئيسية">
@@ -131,7 +130,6 @@
     <a href="/about" class="bn-item active" aria-label="حول">
       <i class="fas fa-info-circle"></i>
     </a>
-    <!-- زر البحث موجود لكنه مخفي (نفس الحجم) -->
     <button class="bn-search" style="opacity:0; pointer-events:none;" aria-hidden="true">
       <i class="fas fa-search"></i>
     </button>
@@ -144,7 +142,6 @@
 </button>
 
 <script>
-// ===== دوال مودال الأعمدة =====
 function openColsModal() {
   document.getElementById('colsModal').classList.add('open');
   const selected = parseInt(localStorage.getItem('cardsPerRow') || '4', 10);
