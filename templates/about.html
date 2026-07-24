@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>حول UFOQ – مكتبة البرومبتات</title>
 <link rel="stylesheet" href="/static/style.css">
+<!-- Font Awesome 6 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
@@ -12,16 +14,17 @@
   <div class="header-capsule">
     <span class="hc-brand">UFOQ</span>
     <span class="hc-select-trigger" onclick="openColsModal()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 8h6"/><path d="M9 12h6"/><path d="M9 16h4"/></svg>
+      <i class="fas fa-grip-lines"></i>
       <span id="colsLabel">4</span>
     </span>
   </div>
 </div>
 
+<!-- Cols Modal (نفس الموجود في index) -->
 <div class="cols-modal-overlay" id="colsModal">
   <div class="cols-modal-box">
     <button class="cols-modal-close" onclick="closeColsModal()">✕</button>
-    <h2>📐 عدد البطاقات في الصف</h2>
+    <h2>📐 عدد البطاقات</h2>
     <p>اختر عدد البطاقات التي ترغب في عرضها في كل سطر. يتغير التخطيط تلقائياً حسب حجم الشاشة.</p>
     <div class="cols-scroll-wrapper">
       <div class="cols-scroll" id="colsScroll">
@@ -47,62 +50,63 @@
     </div>
   </div>
 
+  <!-- بقية المحتوى كما هو (خطوات، أسئلة، تواصل، من نحن) -->
   <div class="section-card">
-    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h10"/><path d="M9 4v16"/><path d="m3 9 3 3-3 3"/><path d="M14 8V4h8v4"/><path d="M14 12h8"/><path d="M18 16v4"/><path d="M18 20h-4"/></svg> كيفية الاستخدام</h2>
+    <h2><i class="fas fa-play-circle"></i> كيفية الاستخدام</h2>
     <div class="steps-grid">
       <div class="step-item"><div class="step-num">1</div><h4>تصفح المكتبة</h4><p>استخدم شريط التصنيفات أو البحث للعثور على البرومبت المناسب.</p></div>
-      <div class="step-item"><div class="step-num">2</div><h4>معاينة الصورة</h4><p>اضغط على الصورة لعرضها بحجم أكبر.</p></div>
-      <div class="step-item"><div class="step-num">3</div><h4>نسخ البرومبت</h4><p>اضغط زر "نسخ" وسيتم نسخ النص إلى الحافظة.</p></div>
-      <div class="step-item"><div class="step-num">4</div><h4>مشاركة</h4><p>انقر على أيقونة المشاركة لمشاركة البرومبت مع الآخرين.</p></div>
+      <div class="step-item"><div class="step-num">2</div><h4>اختر البطاقة</h4><p>مرر بين البطاقات واختر ما يناسبك.</p></div>
+      <div class="step-item"><div class="step-num">3</div><h4>انسخ أو شارك</h4><p>استخدم الأزرار أسفل البطاقة لنسخ البرومبت أو مشاركته.</p></div>
+      <div class="step-item"><div class="step-num">4</div><h4>تفاعل</h4><p>أعجب بالبرومبتات المفضلة لديك وساعد في نشرها.</p></div>
     </div>
   </div>
 
   <div class="section-card">
-    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg> الأسئلة الشائعة</h2>
+    <h2><i class="fas fa-question-circle"></i> الأسئلة الشائعة</h2>
     <div class="faq-list">
       <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)"><h4>ما هو UFOQ؟</h4><svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
+        <div class="faq-question" onclick="toggleFaq(this)"><h4>ما هو UFOQ؟</h4><i class="fas fa-chevron-down faq-icon"></i></div>
         <div class="faq-answer"><p>UFOQ هي مكتبة عربية مفتوحة للبرومبتات (النصوص التوجيهية) المستخدمة مع أدوات الذكاء الاصطناعي مثل ChatGPT و Midjourney وغيرها.</p></div>
       </div>
       <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)"><h4>هل الاستخدام مجاني؟</h4><svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
+        <div class="faq-question" onclick="toggleFaq(this)"><h4>هل الاستخدام مجاني؟</h4><i class="fas fa-chevron-down faq-icon"></i></div>
         <div class="faq-answer"><p>نعم، تصفح ونسخ البرومبتات مجاني بالكامل. لا توجد أي رسوم أو اشتراكات مدفوعة.</p></div>
       </div>
       <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)"><h4>كيف يمكنني المساهمة؟</h4><svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
+        <div class="faq-question" onclick="toggleFaq(this)"><h4>كيف يمكنني المساهمة؟</h4><i class="fas fa-chevron-down faq-icon"></i></div>
         <div class="faq-answer"><p>يمكنك التواصل معنا عبر قنوات التواصل أدناه لإرسال برومبتاتك، وسيتم مراجعتها وإضافتها إلى المكتبة.</p></div>
       </div>
       <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)"><h4>ما هي أدوات الذكاء الاصطناعي المدعومة؟</h4><svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
+        <div class="faq-question" onclick="toggleFaq(this)"><h4>ما هي أدوات الذكاء الاصطناعي المدعومة؟</h4><i class="fas fa-chevron-down faq-icon"></i></div>
         <div class="faq-answer"><p>البرومبتات تعمل مع معظم أدوات الذكاء الاصطناعي بما فيها ChatGPT، Midjourney، DALL-E، Stable Diffusion، Claude، Gemini وغيرها.</p></div>
       </div>
       <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)"><h4>كيف يتم التحقق من جودة البرومبتات؟</h4><svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
+        <div class="faq-question" onclick="toggleFaq(this)"><h4>كيف يتم التحقق من جودة البرومبتات؟</h4><i class="fas fa-chevron-down faq-icon"></i></div>
         <div class="faq-answer"><p>يتم مراجعة جميع البرومبتات قبل النشر للتأكد من جودتها وخلوها من المحتوى غير المناسب.</p></div>
       </div>
     </div>
   </div>
 
   <div class="section-card">
-    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> تواصل معنا</h2>
+    <h2><i class="fas fa-envelope"></i> تواصل معنا</h2>
     <p style="color:rgba(76,5,133,.6);font-size:.82rem;margin-bottom:12px;">تابع أحدث التحديثات أو تواصل مع فريق المطورين:</p>
     <div class="contact-grid">
       <a href="https://t.me/Evile_Prompts" target="_blank" rel="noopener noreferrer" class="contact-card">
-        <span class="contact-icon">📢</span>
+        <span class="contact-icon"><i class="fab fa-telegram"></i></span>
         <div class="contact-info">
           <span class="contact-label">قناة التحديثات</span>
           <span class="contact-desc">@Evile_Prompts</span>
         </div>
       </a>
       <a href="https://t.me/OlIiIl7" target="_blank" rel="noopener noreferrer" class="contact-card">
-        <span class="contact-icon">👨‍💻</span>
+        <span class="contact-icon"><i class="fas fa-user-astronaut"></i></span>
         <div class="contact-info">
           <span class="contact-label">المطور</span>
           <span class="contact-desc">@OlIiIl7</span>
         </div>
       </a>
       <a href="https://instagram.com/ufoq7" target="_blank" rel="noopener noreferrer" class="contact-card">
-        <span class="contact-icon">📷</span>
+        <span class="contact-icon"><i class="fab fa-instagram"></i></span>
         <div class="contact-info">
           <span class="contact-label">إنستغرام</span>
           <span class="contact-desc">@ufoq7</span>
@@ -112,80 +116,89 @@
   </div>
 
   <div class="section-card">
-    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> من نحن</h2>
+    <h2><i class="fas fa-heart"></i> من نحن</h2>
     <p>UFOQ هو مشروع عربي مستقل يهدف إلى بناء أكبر مكتبة عربية للبرومبتات. نؤمن بأن الذكاء الاصطناعي يجب أن يكون متاحاً للجميع، والبرومبت الجيد هو مفتاح الحصول على نتائج احترافية.</p>
     <p>انضم لمجتمعنا وساهم في بناء مستقبل الإبداع الرقمي.</p>
   </div>
 </div>
 
-<!-- Bottom Navigation – مطابق لـ index مع إخفاء زر البحث -->
+<!-- ===== شريط التنقل السفلي الجديد (متطابق مع index) ===== -->
 <div class="bottom-nav-wrapper">
   <div class="bottom-nav-main">
     <a href="/" class="bn-item" aria-label="الرئيسية">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <i class="fas fa-home"></i>
     </a>
     <a href="/about" class="bn-item active" aria-label="حول">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+      <i class="fas fa-info-circle"></i>
     </a>
+    <!-- زر البحث موجود لكنه مخفي (نفس الحجم) -->
+    <button class="bn-search" style="opacity:0; pointer-events:none;" aria-hidden="true">
+      <i class="fas fa-search"></i>
+    </button>
   </div>
-  <button class="bn-search" style="opacity:0; pointer-events:none;" aria-hidden="true">
-    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-  </button>
 </div>
 
 <div class="toast" id="toast">تم!</div>
-<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg></button>
+<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <i class="fas fa-chevron-up"></i>
+</button>
 
 <script>
+// ===== دوال مودال الأعمدة =====
 function openColsModal() {
-    document.getElementById('colsModal').classList.add('open');
-    const selected = parseInt(localStorage.getItem('cardsPerRow') || '4', 10);
-    document.querySelectorAll('#colsScroll .cols-option').forEach(el => {
-        el.classList.toggle('active', parseInt(el.dataset.cols) === selected);
-    });
+  document.getElementById('colsModal').classList.add('open');
+  const selected = parseInt(localStorage.getItem('cardsPerRow') || '4', 10);
+  document.querySelectorAll('#colsScroll .cols-option').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.cols) === selected);
+  });
 }
 function closeColsModal() {
-    document.getElementById('colsModal').classList.remove('open');
+  document.getElementById('colsModal').classList.remove('open');
 }
 function setCols(n) {
-    localStorage.setItem('cardsPerRow', n);
-    document.getElementById('colsLabel').textContent = n;
-    document.querySelectorAll('#colsScroll .cols-option').forEach(el => {
-        el.classList.toggle('active', parseInt(el.dataset.cols) === n);
-    });
-    setTimeout(closeColsModal, 300);
+  localStorage.setItem('cardsPerRow', n);
+  document.getElementById('colsLabel').textContent = n;
+  document.querySelectorAll('#colsScroll .cols-option').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.cols) === n);
+  });
+  setTimeout(closeColsModal, 300);
 }
-function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
+function showToast(m) {
+  const t = document.getElementById('toast');
+  t.textContent = m;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
 function toggleFaq(el) {
-    const item = el.closest('.faq-item');
-    const wasOpen = item.classList.contains('open');
-    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
-    if (!wasOpen) item.classList.add('open');
+  const item = el.closest('.faq-item');
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
 }
-let lastScroll=0;
-window.addEventListener('scroll', () => {
-    const y = window.scrollY, nav = document.querySelector('.bottom-nav-wrapper');
-    if (nav) {
-        if (y > lastScroll && y > 140) nav.style.transform = 'translateX(-50%) translateY(120%)';
-        else nav.style.transform = 'translateX(-50%) translateY(0)';
-    }
-    lastScroll = y;
-    const st = document.getElementById('scrollTopBtn');
-    if (st) st.classList.toggle('show', y > 400);
+let lastScroll = 0;
+window.addEventListener('scroll', function() {
+  const y = window.scrollY, nav = document.querySelector('.bottom-nav-wrapper');
+  if (nav) {
+    if (y > lastScroll && y > 140) nav.style.transform = 'translateX(-50%) translateY(120%)';
+    else nav.style.transform = 'translateX(-50%) translateY(0)';
+  }
+  lastScroll = y;
+  const st = document.getElementById('scrollTopBtn');
+  if (st) st.classList.toggle('show', y > 400);
 });
 document.addEventListener('DOMContentLoaded', function() {
-    const savedCols = localStorage.getItem('cardsPerRow') || '4';
-    document.getElementById('colsLabel').textContent = savedCols;
-    document.querySelectorAll('#colsScroll .cols-option').forEach(el => {
-        el.classList.toggle('active', parseInt(el.dataset.cols) === parseInt(savedCols));
-    });
+  const savedCols = localStorage.getItem('cardsPerRow') || '4';
+  document.getElementById('colsLabel').textContent = savedCols;
+  document.querySelectorAll('#colsScroll .cols-option').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.cols) === parseInt(savedCols));
+  });
 });
-document.addEventListener('click', (e) => {
-    const modal = document.getElementById('colsModal');
-    const box = modal.querySelector('.cols-modal-box');
-    if (modal.classList.contains('open') && !box.contains(e.target) && !e.target.closest('.hc-select-trigger')) {
-        closeColsModal();
-    }
+document.addEventListener('click', function(e) {
+  const modal = document.getElementById('colsModal');
+  const box = modal.querySelector('.cols-modal-box');
+  if (modal.classList.contains('open') && !box.contains(e.target) && !e.target.closest('.hc-select-trigger')) {
+    closeColsModal();
+  }
 });
 </script>
 </body>
