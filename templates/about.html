@@ -6,7 +6,6 @@
 <title>حول UFOQ – مكتبة البرومبتات العربية</title>
 <meta name="description" content="تعرف على UFOQ، أكبر مكتبة عربية للبرومبتات الاحترافية للذكاء الاصطناعي. إحصائيات، خطوات، أسئلة شائعة، وتواصل.">
 <link rel="stylesheet" href="/static/style.css">
-<!-- Font Awesome 6 – الإصدار الأحدث مع رابط احتياطي -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
       integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" 
       crossorigin="anonymous" referrerpolicy="no-referrer" 
@@ -19,15 +18,15 @@
 
 <div class="top-float">
   <div class="header-capsule">
-    <span class="hc-brand">UFOQ</span>
-    <span class="hc-select-trigger" onclick="openColsModal()">
-      <i class="fas fa-grip-lines"></i>
-      <span id="colsLabel">4</span>
-    </span>
+    <!-- رابط إلى Telegram -->
+    <a href="https://t.me/Evile_Prompts" target="_blank" rel="noopener noreferrer" class="hc-brand">
+      UFOQ
+    </a>
+    <!-- تم حذف زر تغيير الأعمدة -->
   </div>
 </div>
 
-<!-- Cols Modal -->
+<!-- مودال الأعمدة (نفسه) -->
 <div class="cols-modal-overlay" id="colsModal">
   <div class="cols-modal-box">
     <button class="cols-modal-close" onclick="closeColsModal()">✕</button>
@@ -128,7 +127,7 @@
   </div>
 </div>
 
-<!-- ===== Bottom Navigation ===== -->
+<!-- ===== شريط التنقل السفلي + زر الأعمدة ===== -->
 <div class="bottom-nav-wrapper">
   <div class="bottom-nav-main">
     <a href="/" class="bn-item" aria-label="الرئيسية">
@@ -139,6 +138,10 @@
     </a>
     <button class="bn-search" style="opacity:0; pointer-events:none;" aria-hidden="true">
       <i class="fas fa-search"></i>
+    </button>
+    <!-- زر تغيير عدد الأعمدة -->
+    <button class="bn-cols" onclick="openColsModal()" aria-label="تغيير عدد الأعمدة">
+      <i class="fas fa-grip-lines"></i>
     </button>
   </div>
 </div>
@@ -161,11 +164,12 @@ function closeColsModal() {
 }
 function setCols(n) {
   localStorage.setItem('cardsPerRow', n);
-  document.getElementById('colsLabel').textContent = n;
   document.querySelectorAll('#colsScroll .cols-option').forEach(el => {
     el.classList.toggle('active', parseInt(el.dataset.cols) === n);
   });
   setTimeout(closeColsModal, 300);
+  // إعادة تطبيق الأعمدة على شبكة البطاقات في الصفحة الرئيسية (إذا كانت موجودة)
+  if (typeof applyCardsPerRow === 'function') applyCardsPerRow();
 }
 function showToast(m) {
   const t = document.getElementById('toast');
@@ -192,7 +196,6 @@ window.addEventListener('scroll', function() {
 });
 document.addEventListener('DOMContentLoaded', function() {
   const savedCols = localStorage.getItem('cardsPerRow') || '4';
-  document.getElementById('colsLabel').textContent = savedCols;
   document.querySelectorAll('#colsScroll .cols-option').forEach(el => {
     el.classList.toggle('active', parseInt(el.dataset.cols) === parseInt(savedCols));
   });
@@ -200,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('click', function(e) {
   const modal = document.getElementById('colsModal');
   const box = modal.querySelector('.cols-modal-box');
-  if (modal.classList.contains('open') && !box.contains(e.target) && !e.target.closest('.hc-select-trigger')) {
+  if (modal.classList.contains('open') && !box.contains(e.target) && !e.target.closest('.bn-cols')) {
     closeColsModal();
   }
 });
