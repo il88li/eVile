@@ -1003,15 +1003,14 @@ a:hover {
 }
 
 /* ========================================================
-   شبكة البطاقات (Masonry Grid)
+   شبكة البطاقات (Masonry Grid) – مع تحسين الصور والأعمدة
    ======================================================== */
 .masonry-grid {
     column-gap: 18px;
     padding: var(--space-md) var(--space-md) var(--space-xl);
 }
 
-/* ===== تحسين عرض البطاقات في الجوال ===== */
-/* البطاقة */
+/* ===== البطاقة ===== */
 .prompt-card {
     break-inside: avoid;
     margin-bottom: 18px;
@@ -1028,7 +1027,7 @@ a:hover {
     border-color: var(--primary-200);
 }
 
-/* غلاف الصورة */
+/* ===== غلاف الصورة – مع ضمان ظهور الصورة كاملة ===== */
 .prompt-card .card-image-wrap {
     background: var(--primary-50);
     position: relative;
@@ -1043,11 +1042,11 @@ a:hover {
     height: auto;
     display: block;
     transition: transform 0.6s ease;
-    object-fit: cover;
-    max-height: 300px;
+    object-fit: contain;      /* ضمان ظهور الصورة كاملة دون قص */
+    max-height: 400px;        /* حد أقصى معقول مع الحفاظ على النسبة */
 }
 .prompt-card:hover .card-image-wrap img {
-    transform: scale(1.03);
+    transform: scale(1.02);
 }
 .prompt-card .no-image-placeholder {
     width: 100%;
@@ -1060,7 +1059,7 @@ a:hover {
     font-size: 3rem;
 }
 
-/* محتوى البطاقة */
+/* ===== محتوى البطاقة ===== */
 .prompt-card .card-body {
     padding: var(--space-md) var(--space-md) var(--space-lg);
 }
@@ -1091,7 +1090,7 @@ a:hover {
     font-size: var(--font-size-xs);
 }
 
-/* أزرار البطاقة */
+/* ===== أزرار البطاقة ===== */
 .prompt-card .card-actions {
     display: flex;
     flex-wrap: wrap;
@@ -2102,7 +2101,7 @@ a:hover {
 }
 
 /* ========================================================
-   استجابة الشاشات
+   استجابة الشاشات – نظام الأعمدة المحسّن
    ======================================================== */
 
 /* شاشات متوسطة وصغيرة (جوال) */
@@ -2136,12 +2135,13 @@ a:hover {
         font-size: var(--font-size-base);
     }
 
-    /* ===== تحسين عرض البطاقات في الجوال (عمودين) ===== */
+    /* ===== الأعمدة في الجوال: مرن حسب اختيار المستخدم ===== */
     .masonry-grid {
-        column-count: 2 !important;
+        column-count: 2 !important; /* افتراضي 2 عمود للهواتف */
         padding: var(--space-sm) var(--space-sm) var(--space-md);
         column-gap: 10px;
     }
+    /* إذا اختار المستخدم 1 عمود، سيتم تطبيقه عبر JavaScript */
     
     .prompt-card {
         margin-bottom: 12px;
@@ -2150,6 +2150,9 @@ a:hover {
     .prompt-card .no-image-placeholder {
         height: 100px;
         font-size: 2rem;
+    }
+    .prompt-card .card-image-wrap img {
+        max-height: 200px; /* تقليل أقصى ارتفاع للصورة في الجوال */
     }
     .prompt-card .card-body {
         padding: 10px 10px 14px;
@@ -2239,16 +2242,19 @@ a:hover {
     }
 }
 
-/* شاشات صغيرة جداً (عرض أقل من 400px) */
+/* شاشات صغيرة جداً (عرض أقل من 400px) – تطبيق عمود واحد */
 @media (max-width: 400px) {
     .masonry-grid {
-        column-count: 1 !important;
+        column-count: 1 !important; /* عمود واحد للشاشات الصغيرة جداً */
         padding: var(--space-xs) var(--space-xs) var(--space-md);
         column-gap: 8px;
     }
     .prompt-card .no-image-placeholder {
         height: 80px;
         font-size: 1.5rem;
+    }
+    .prompt-card .card-image-wrap img {
+        max-height: 160px;
     }
     .prompt-card .card-body {
         padding: 8px 8px 12px;
