@@ -295,15 +295,21 @@ function filterPrompts() {
   }
 }
 
-// ===== عدد الأعمدة (مع دعم التكيف) =====
+// ===== عدد الأعمدة (مع دعم التكيف والهواتف) =====
 function applyCardsPerRow() {
   const g = document.getElementById('masonryGrid');
   if (!g) return;
   const u = parseInt(localStorage.getItem('cardsPerRow') || '4', 10);
   const w = window.innerWidth;
   let cols = u;
-  if (w <= 600) cols = Math.min(u, 2);   // للهواتف: حد أقصى 2
-  else if (w <= 900) cols = Math.min(u, 3);
+  // للهواتف (عرض <= 600px): حد أقصى 2 عمود
+  if (w <= 400) {
+    cols = 1; // شاشات صغيرة جداً: عمود واحد
+  } else if (w <= 600) {
+    cols = Math.min(u, 2); // هواتف: 2 كحد أقصى
+  } else if (w <= 900) {
+    cols = Math.min(u, 3); // أجهزة لوحية صغيرة: 3 كحد أقصى
+  }
   g.style.columns = cols;
 }
 window.addEventListener('resize', applyCardsPerRow);
