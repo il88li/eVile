@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UFOQ – مكتبة البرومبتات</title>
+<title>UFOQ – مكتبة البرومبتات العربية للذكاء الاصطناعي</title>
+<meta name="description" content="أكبر مكتبة عربية للبرومبتات الاحترافية. تصفح، انسخ، وابدأ الإبداع مع أدوات الذكاء الاصطناعي.">
 <link rel="stylesheet" href="/static/style.css">
 <!-- Font Awesome 6 -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -14,7 +15,7 @@
 <div class="top-float">
   <div class="header-capsule">
     <span class="hc-brand">UFOQ</span>
-    <span class="hc-select-trigger" onclick="openColsModal()">
+    <span class="hc-select-trigger" onclick="openColsModal()" aria-label="اختر عدد الأعمدة">
       <i class="fas fa-grip-lines"></i>
       <span id="colsLabel">4</span>
     </span>
@@ -24,8 +25,8 @@
     <div class="search-panel-inner">
       <div class="search-input-wrap">
         <span class="search-icon-inside"><i class="fas fa-search"></i></span>
-        <input type="text" id="searchInput" placeholder="ابحث عن برومبت..." autocomplete="off">
-        <button class="search-cat-chip" id="searchCatBtn" type="button">
+        <input type="text" id="searchInput" placeholder="ابحث عن برومبت... مثلاً: تصميم، كتابة، برمجة" autocomplete="off">
+        <button class="search-cat-chip" id="searchCatBtn" type="button" aria-label="فلتر التصنيف">
           <i class="fas fa-th-large"></i>
           <span id="searchCatLabel">الكل</span>
           <i class="fas fa-chevron-down"></i>
@@ -36,11 +37,11 @@
 </div>
 
 <!-- Cols Modal -->
-<div class="cols-modal-overlay" id="colsModal">
+<div class="cols-modal-overlay" id="colsModal" role="dialog" aria-modal="true">
   <div class="cols-modal-box">
-    <button class="cols-modal-close" onclick="closeColsModal()">✕</button>
-    <h2>📐 عدد البطاقات</h2>
-    <p>اختر عدد البطاقات في كل سطر. يتغير التخطيط تلقائياً حسب الشاشة.</p>
+    <button class="cols-modal-close" onclick="closeColsModal()" aria-label="إغلاق">✕</button>
+    <h2>📐 عدد البطاقات في الصف</h2>
+    <p>اختر عدد البطاقات التي تناسب شاشتك. التخطيط يتكيف تلقائياً مع حجم الجهاز.</p>
     <div class="cols-scroll-wrapper">
       <div class="cols-scroll" id="colsScroll">
         <div class="cols-option" data-cols="1" onclick="setCols(1)">1<span class="label">عمود</span></div>
@@ -54,18 +55,18 @@
 </div>
 
 <!-- Search Cat Dropdown -->
-<div class="search-cat-dropdown" id="searchCatDropdown">
-  <a href="#" class="active" data-cat="all" onclick="selectSearchCategory(event,'all','الكل')"><span class="dot"></span> الكل</a>
+<div class="search-cat-dropdown" id="searchCatDropdown" role="menu">
+  <a href="#" class="active" data-cat="all" onclick="selectSearchCategory(event,'all','الكل')" role="menuitem"><span class="dot"></span> الكل</a>
   {% for cat in categories %}
-  <a href="#" data-cat="{{ cat.name }}" onclick="selectSearchCategory(event,'{{ cat.name }}','{{ cat.display_name }}')"><span class="dot"></span> {{ cat.display_name }}</a>
+  <a href="#" data-cat="{{ cat.name }}" onclick="selectSearchCategory(event,'{{ cat.name }}','{{ cat.display_name }}')" role="menuitem"><span class="dot"></span> {{ cat.display_name }}</a>
   {% endfor %}
 </div>
 
 <!-- Hero -->
 <section class="hero">
   <h1>مرحباً بك في UFOQ</h1>
-  <p>مكتبة ضخمة من البرومبتات الجاهزة – اختر، انسخ، وابدأ الإبداع فوراً.</p>
-  <div class="count-badge">أكثر من {{ library_items|length }} برومبت</div>
+  <p>مكتبة متخصصة في البرومبتات الاحترافية لأدوات الذكاء الاصطناعي. اختر، انسخ، وابدأ الإبداع فوراً.</p>
+  <div class="count-badge"><i class="fas fa-layer-group"></i> أكثر من {{ library_items|length }} برومبت</div>
 </section>
 
 <!-- Categories -->
@@ -93,18 +94,17 @@
 {% else %}
 <div class="ad-banner">
   <div class="ad-banner-content">
-    <div class="ad-title">📢 أعلن لدى UFOQ</div>
-    <div class="ad-text">وصل لجمهور مبدعي الذكاء الاصطناعي</div>
-    <a href="#" class="ad-btn">تواصل معنا</a>
+    <div class="ad-title">📢 أعلن في UFOQ</div>
+    <div class="ad-text">وصل إلى آلاف المبدعين في عالم الذكاء الاصطناعي</div>
+    <a href="/about" class="ad-btn">تواصل معنا</a>
   </div>
 </div>
 {% endif %}
 
-<!-- ===== شبكة البطاقات (Masonry Grid) مع الصور والأزرار النصية ===== -->
+<!-- ===== Masonry Grid ===== -->
 <div class="masonry-grid" id="masonryGrid">
   {% for item in library_items %}
   <div class="prompt-card" data-id="{{ item.id }}" data-keywords="{{ item.keywords or '' }}" data-category="{{ item.category }}">
-    <!-- صورة البرومبت -->
     <div class="card-image-wrap">
       {% if item.image_url %}
       <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy">
@@ -114,7 +114,6 @@
       </div>
       {% endif %}
     </div>
-    <!-- محتوى البطاقة -->
     <div class="card-body">
       <div class="card-cat">{{ item.category }}</div>
       <div class="card-title">{{ item.title }}</div>
@@ -124,27 +123,27 @@
       </div>
       {% endif %}
       <div class="card-actions">
-        <!-- زر نسخ (نصي) -->
-        <button class="card-btn copy-btn" data-prompt="{{ item.prompt_text|replace('"', '&quot;') }}" data-id="{{ item.id }}">
+        <button class="card-btn copy-btn" data-prompt="{{ item.prompt_text|replace('"', '&quot;') }}" data-id="{{ item.id }}" aria-label="نسخ البرومبت">
           <i class="fas fa-copy"></i> نسخ <span class="count">({{ item.copy_count or 0 }})</span>
         </button>
-        <!-- زر إعجاب (نصي) -->
-        <button class="card-btn like-btn" data-id="{{ item.id }}">
+        <button class="card-btn like-btn" data-id="{{ item.id }}" aria-label="إعجاب">
           <i class="fas fa-heart"></i> إعجاب <span class="count">({{ item.likes or 0 }})</span>
         </button>
-        <!-- زر مشاركة (نصي) -->
-        <button class="card-btn share-btn" data-id="{{ item.id }}">
+        <button class="card-btn share-btn" data-id="{{ item.id }}" aria-label="مشاركة">
           <i class="fas fa-share-alt"></i> مشاركة <span class="count">({{ item.share_count or 0 }})</span>
         </button>
       </div>
     </div>
   </div>
   {% else %}
-  <div class="empty-state">لا توجد برومبتات في المكتبة حالياً</div>
+  <div class="empty-state">
+    <i class="fas fa-inbox"></i>
+    لا توجد برومبتات في المكتبة حالياً
+  </div>
   {% endfor %}
 </div>
 
-<!-- ===== شريط التنقل السفلي ===== -->
+<!-- ===== Bottom Navigation ===== -->
 <div class="bottom-nav-wrapper">
   <div class="bottom-nav-main">
     <a href="/" class="bn-item active" aria-label="الرئيسية">
@@ -162,17 +161,17 @@
 
 <!-- Toast -->
 <div class="toast" id="toast">تم النسخ!</div>
-<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="العودة للأعلى">
   <i class="fas fa-chevron-up"></i>
 </button>
 
 <!-- Mandatory Ad Modal -->
-<div class="mandatory-ad-modal" id="mandatoryAdModal">
+<div class="mandatory-ad-modal" id="mandatoryAdModal" role="dialog" aria-modal="true">
   <div class="mad-box">
-    <div class="mad-timer-bar" id="madTimerBar" style="width:100%;"></div>
+    <div class="mad-timer-bar" id="madTimerBar"></div>
     <div class="mad-header">
-      <span class="mad-title">📢 إعلان</span>
-      <span class="mad-timer" id="madTimer"><i class="fas fa-clock"></i> <span id="madTimerText">5</span>ث</span>
+      <span class="mad-title">📢 إعلان مميز</span>
+      <span class="mad-timer"><i class="fas fa-clock"></i> <span id="madTimerText">5</span> ث</span>
     </div>
     <img class="mad-image" id="madImage" src="" alt="">
     <div class="mad-body">
@@ -299,7 +298,6 @@ window.addEventListener('resize', applyCardsPerRow);
 
 // ===== إدارة الإعجاب والمشاركة والنسخ =====
 document.addEventListener('click', function(e) {
-  // زر إعجاب
   const likeBtn = e.target.closest('.like-btn');
   if (likeBtn) {
     e.preventDefault();
@@ -312,14 +310,13 @@ document.addEventListener('click', function(e) {
         if (data.success) {
           countSpan.textContent = '(' + data.likes + ')';
           likeBtn.classList.add('liked');
-          showToast('تم الإعجاب!');
+          showToast('❤️ تم الإعجاب!');
         }
       })
-      .catch(() => showToast('حدث خطأ', true));
+      .catch(() => showToast('حدث خطأ، حاول مرة أخرى', true));
     return;
   }
 
-  // زر مشاركة
   const shareBtn = e.target.closest('.share-btn');
   if (shareBtn) {
     e.preventDefault();
@@ -337,13 +334,12 @@ document.addEventListener('click', function(e) {
       navigator.share({ title: title, text: '🔮 برومبت مميز من UFOQ', url: shareUrl }).catch(() => {});
     } else {
       navigator.clipboard.writeText('🔮 برومبت مميز من UFOQ\n' + title + '\n' + shareUrl)
-        .then(() => showToast('تم نسخ رابط المشاركة!'))
+        .then(() => showToast('✅ تم نسخ رابط المشاركة!'))
         .catch(() => showToast('حدث خطأ', true));
     }
     return;
   }
 
-  // زر نسخ
   const copyBtn = e.target.closest('.copy-btn');
   if (copyBtn) {
     e.preventDefault();
@@ -417,7 +413,7 @@ function executeCopy() {
       countSpan.textContent = '(' + (old + 1) + ')';
     }
     btn.classList.add('copied');
-    showToast('تم النسخ!');
+    showToast('✅ تم نسخ البرومبت!');
     setTimeout(function() {
       btn.classList.remove('copied');
     }, 1500);
@@ -505,8 +501,9 @@ function openPromptFromURL() {
     const card = document.querySelector(`.prompt-card[data-id="${promptId}"]`);
     if (card) {
       card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      card.style.border = '2px solid #4C0585';
-      setTimeout(() => { card.style.border = ''; }, 3000);
+      card.style.border = '3px solid #7B2FBE';
+      card.style.boxShadow = '0 0 30px rgba(123,47,190,0.2)';
+      setTimeout(() => { card.style.border = ''; card.style.boxShadow = ''; }, 4000);
     }
   }
 }
