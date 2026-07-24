@@ -251,7 +251,7 @@ body {
     opacity: 1;
 }
 
-/* ===== Columns Modal (محفوظ للتوافق) ===== */
+/* ===== Columns Modal ===== */
 .cols-modal-overlay {
     position: fixed;
     inset: 0;
@@ -371,7 +371,7 @@ body {
     background: rgba(219, 181, 238, .4);
 }
 
-/* ===== Bottom Navigation (تصميم جديد) ===== */
+/* ===== Bottom Navigation ===== */
 .bottom-nav-wrapper {
     position: fixed;
     bottom: 16px;
@@ -708,172 +708,163 @@ body {
     object-fit: contain;
 }
 
-/* ===== نظام البطاقات 3D (التمرير الأفقي) ===== */
-.cards-container {
-    padding: 10px 0 20px;
-    width: 100%;
-    overflow: hidden;
-}
-.cards-track {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 0 32px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-padding: 0 32px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-}
-.cards-track::-webkit-scrollbar {
-    display: none;
+/* ===== شبكة البطاقات (Masonry Grid) ===== */
+.masonry-grid {
+    column-gap: 16px;
+    padding: 12px 16px 20px;
 }
 
-.prompt-card-item {
-    flex: 0 0 200px;
-    scroll-snap-align: center;
-    background: #eceefc;
-    color: #5a5a80;
-    border-radius: 26px;
-    padding: 20px 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    opacity: 0.55;
-    transform: scale(0.86) translateY(14px);
-    transition: transform .35s ease, opacity .35s ease, box-shadow .35s ease, flex-basis .35s ease;
-    filter: saturate(0.7);
-    min-height: 280px;
+.prompt-card {
+    break-inside: avoid;
+    margin-bottom: 16px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--very-light);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-sm);
+    transition: all .3s ease;
+}
+.prompt-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--soft-lavender);
+}
+
+.prompt-card .card-image-wrap {
+    width: 100%;
+    overflow: hidden;
+    background: rgba(219, 181, 238, 0.1);
     position: relative;
 }
-.prompt-card-item.active {
-    flex: 0 0 260px;
-    background: #ffffff;
-    color: #2c2b4a;
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    box-shadow: 0 25px 45px rgba(20, 15, 60, 0.35);
-    filter: none;
-    z-index: 3;
+.prompt-card .card-image-wrap img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform .4s ease;
 }
-.prompt-card-item .card-header {
+.prompt-card:hover .card-image-wrap img {
+    transform: scale(1.03);
+}
+.prompt-card .no-image-placeholder {
+    width: 100%;
+    height: 140px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    font-size: 0.75rem;
-}
-.prompt-card-item .card-header .card-category {
-    background: rgba(76, 5, 133, 0.1);
-    padding: 2px 10px;
-    border-radius: 20px;
-    font-weight: 600;
-    color: var(--deep-purple);
-    font-size: 0.7rem;
-}
-.prompt-card-item .card-header .card-time {
-    font-weight: 600;
-    color: #8888aa;
-    font-size: 0.7rem;
-}
-.prompt-card-item .card-body {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
     justify-content: center;
-    gap: 6px;
+    background: rgba(219, 181, 238, 0.15);
+    color: var(--soft-lavender);
+    font-size: 2.5rem;
 }
-.prompt-card-item .card-title {
-    font-size: 1rem;
+
+.prompt-card .card-body {
+    padding: 12px 14px 14px;
+}
+.prompt-card .card-cat {
+    font-size: .6rem;
     font-weight: 700;
+    color: var(--deep-purple);
+    opacity: .5;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 4px;
+}
+.prompt-card .card-title {
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--deep-purple);
     line-height: 1.4;
-    margin: 0;
+    margin-bottom: 4px;
 }
-.prompt-card-item.active .card-title {
-    font-size: 1.2rem;
-}
-.prompt-card-item .card-publisher {
-    font-size: 0.7rem;
-    color: #8888aa;
-}
-.prompt-card-item .card-publisher i {
-    margin-left: 4px;
-}
-.prompt-card-item .card-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 6px;
-    margin-top: 4px;
-}
-.prompt-card-item .card-action-btn {
-    background: transparent;
-    border: none;
-    padding: 4px 8px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #5a5a80;
-    cursor: pointer;
-    transition: all .2s;
+.prompt-card .card-author {
+    font-size: .7rem;
+    color: rgba(76, 5, 133, .6);
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
     gap: 4px;
-    font-family: 'Tajawal', sans-serif;
 }
-.prompt-card-item .card-action-btn i {
-    font-size: 0.8rem;
-}
-.prompt-card-item .card-action-btn:hover {
-    background: rgba(76, 5, 133, 0.08);
-    color: var(--deep-purple);
-}
-.prompt-card-item .card-action-btn.liked {
-    color: #e74c3c;
-}
-.prompt-card-item .card-action-btn.copied {
-    color: #2ecc71;
-}
-.prompt-card-item .card-action-btn .count {
-    font-size: 0.65rem;
-    opacity: 0.7;
-}
-.prompt-card-item .card-action-btn .like-count,
-.prompt-card-item .card-action-btn .share-count,
-.prompt-card-item .card-action-btn .copy-count {
-    font-size: 0.65rem;
-    opacity: 0.7;
-}
-.empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: rgba(76, 5, 133, .4);
-    font-size: .85rem;
-    font-weight: 500;
-    flex: 1;
+.prompt-card .card-author i {
+    font-size: .6rem;
 }
 
+/* الأزرار النصية */
+.prompt-card .card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+}
+.prompt-card .card-btn {
+    flex: 1 0 auto;
+    padding: 6px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    color: var(--deep-purple);
+    font-family: 'Tajawal', sans-serif;
+    font-size: .7rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+.prompt-card .card-btn i {
+    font-size: .75rem;
+}
+.prompt-card .card-btn .count {
+    font-size: .65rem;
+    opacity: .6;
+}
+.prompt-card .card-btn:hover {
+    background: rgba(219, 181, 238, 0.2);
+    border-color: var(--soft-lavender);
+    transform: translateY(-1px);
+}
+.prompt-card .card-btn.liked {
+    background: rgba(231, 76, 60, 0.1);
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+.prompt-card .card-btn.copied {
+    background: rgba(46, 204, 113, 0.1);
+    border-color: #2ecc71;
+    color: #2ecc71;
+}
+.prompt-card .card-btn.share-btn:active {
+    transform: scale(0.95);
+}
+
+/* استجابة الشاشات الصغيرة */
 @media (max-width: 600px) {
-    .prompt-card-item {
-        flex: 0 0 150px;
-        min-height: 220px;
-        padding: 16px;
+    .masonry-grid {
+        column-count: 2 !important;
+        padding: 8px 10px 16px;
+        column-gap: 10px;
     }
-    .prompt-card-item.active {
-        flex: 0 0 200px;
+    .prompt-card .no-image-placeholder {
+        height: 100px;
     }
-    .prompt-card-item .card-title {
-        font-size: 0.85rem;
+    .prompt-card .card-body {
+        padding: 10px 12px 12px;
     }
-    .prompt-card-item.active .card-title {
-        font-size: 1rem;
+    .prompt-card .card-title {
+        font-size: .75rem;
     }
-    .prompt-card-item .card-action-btn {
-        font-size: 0.65rem;
-        padding: 2px 6px;
+    .prompt-card .card-btn {
+        font-size: .6rem;
+        padding: 4px 8px;
+        flex: 1 1 auto;
     }
-    .prompt-card-item .card-footer {
-        flex-wrap: wrap;
-        justify-content: center;
+}
+
+@media (max-width: 400px) {
+    .masonry-grid {
+        column-count: 1 !important;
     }
 }
 
