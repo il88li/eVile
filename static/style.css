@@ -406,7 +406,7 @@ body {
     background: rgba(219, 181, 238, .4);
 }
 
-/* ===== Bottom Navigation – باستخدام الألوان الجديدة ===== */
+/* ===== Bottom Navigation – موحّد ===== */
 .bottom-nav-wrapper {
     position: fixed;
     bottom: 16px;
@@ -423,12 +423,14 @@ body {
     align-items: center;
     gap: 4px;
     padding: 6px 12px;
-    background: rgba(76, 5, 133, 0.88);  /* DEEP PURPLE */
+    background: rgba(76, 5, 133, 0.88);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(219, 181, 238, 0.3);
     border-radius: 50px;
     box-shadow: 0 6px 24px rgba(76, 5, 133, 0.3);
+    min-height: 48px;
+    min-width: 100px;
 }
 .bn-item {
     display: flex;
@@ -472,8 +474,8 @@ body {
     stroke: #DBB5EE;
 }
 .bn-search {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     background: rgba(219, 181, 238, 0.2);
     border: 1px solid rgba(219, 181, 238, 0.3);
@@ -489,8 +491,8 @@ body {
     flex-shrink: 0;
 }
 .bn-search svg {
-    width: 18px;
-    height: 18px;
+    width: 17px;
+    height: 17px;
     stroke: rgba(255, 253, 254, 0.7);
     stroke-width: 2;
     fill: none;
@@ -592,13 +594,14 @@ body {
     transform: translateY(0);
 }
 
-/* ===== Image Modal – عرض الصورة بالحجم الكامل ===== */
+/* ===== Image Modal – بألوان الباليت وعرض الصور الكامل ===== */
 .image-modal {
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: rgba(76, 5, 133, 0.75); /* DEEP PURPLE شفاف */
-    backdrop-filter: blur(20px);
+    background: rgba(76, 5, 133, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -612,10 +615,10 @@ body {
     visibility: visible;
 }
 .image-modal-content {
-    background: var(--glass-bg);
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
-    border: 2px solid var(--soft-lavender);
+    background: #FFFDFE;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 2px solid #DBB5EE;
     border-radius: var(--radius-lg);
     max-width: 92vw;
     max-height: 92vh;
@@ -634,9 +637,9 @@ body {
     position: absolute;
     top: 12px;
     left: 12px;
-    background: rgba(76, 5, 133, 0.15);
-    border: 2px solid var(--soft-lavender);
-    color: var(--deep-purple);
+    background: rgba(76, 5, 133, 0.1);
+    border: 2px solid #DBB5EE;
+    color: #4C0585;
     padding: 5px 14px;
     border-radius: 50px;
     font-size: .7rem;
@@ -648,7 +651,7 @@ body {
     backdrop-filter: blur(4px);
 }
 .modal-close-btn:hover {
-    background: rgba(76, 5, 133, 0.25);
+    background: rgba(76, 5, 133, 0.2);
     transform: scale(1.05);
 }
 .modal-image-wrap {
@@ -657,10 +660,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 253, 254, 0.1);
+    background: rgba(219, 181, 238, 0.08);
     border-radius: var(--radius-sm);
     padding: 4px;
-    border: 1px solid rgba(219, 181, 238, 0.2);
+    border: 1px solid #DBB5EE;
 }
 .modal-image-wrap img {
     max-width: 100%;
@@ -675,7 +678,7 @@ body {
 .modal-title {
     font-size: 1rem;
     font-weight: 900;
-    color: var(--deep-purple);
+    color: #4C0585;
     margin: 8px 0 6px;
     text-align: center;
     background: rgba(219, 181, 238, 0.15);
@@ -683,7 +686,7 @@ body {
     border-radius: var(--radius-sm);
     display: inline-block;
     width: auto;
-    border: 1px solid rgba(219, 181, 238, 0.3);
+    border: 1px solid #DBB5EE;
 }
 .modal-action-bar {
     display: flex;
@@ -692,9 +695,9 @@ body {
     justify-content: center;
     margin-top: 8px;
     padding: 8px 12px;
-    background: rgba(219, 181, 238, 0.08);
+    background: rgba(219, 181, 238, 0.1);
     border-radius: var(--radius-md);
-    border: 1px solid rgba(219, 181, 238, 0.15);
+    border: 1px solid #DBB5EE;
 }
 .modal-action-btn {
     display: flex;
@@ -702,9 +705,9 @@ body {
     gap: 5px;
     padding: 5px 14px;
     border-radius: 50px;
-    border: 1px solid var(--glass-border);
+    border: 1px solid #DBB5EE;
     background: rgba(255, 255, 255, 0.1);
-    color: var(--deep-purple);
+    color: #4C0585;
     font-size: .72rem;
     font-weight: 700;
     cursor: pointer;
@@ -712,7 +715,7 @@ body {
     font-family: 'Tajawal', sans-serif;
 }
 .modal-action-btn:hover {
-    background: rgba(219, 181, 238, 0.2);
+    background: rgba(219, 181, 238, 0.25);
     transform: translateY(-2px);
 }
 .modal-action-btn.liked {
@@ -727,51 +730,52 @@ body {
 }
 .modal-similar-section {
     margin-top: 12px;
-    border-top: 1px solid rgba(219, 181, 238, 0.2);
+    border-top: 1px solid #DBB5EE;
     padding-top: 12px;
     width: 100%;
 }
 .modal-similar-title {
     font-size: .8rem;
     font-weight: 800;
-    color: var(--deep-purple);
+    color: #4C0585;
     margin-bottom: 8px;
     text-align: center;
 }
 .modal-similar-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 6px;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
 }
 .similar-card {
     border-radius: var(--radius-sm);
     overflow: hidden;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--glass-border);
+    border: 1px solid #DBB5EE;
     cursor: pointer;
     transition: all .25s;
 }
 .similar-card:hover {
     transform: translateY(-2px);
-    border-color: var(--soft-lavender);
-    box-shadow: var(--shadow-sm);
+    border-color: #4C0585;
+    box-shadow: 0 2px 8px rgba(76, 5, 133, 0.1);
 }
 .similar-card img {
     width: 100%;
-    height: 60px;
+    height: 120px;
     object-fit: cover;
+    display: block;
 }
 .similar-card .similar-info {
-    padding: 4px 6px;
+    padding: 6px 8px;
 }
 .similar-card .similar-info h4 {
-    font-size: .55rem;
+    font-size: .65rem;
     font-weight: 700;
-    color: var(--deep-purple);
+    color: #4C0585;
     line-height: 1.3;
 }
 .similar-card .similar-info span {
-    font-size: .45rem;
+    font-size: .5rem;
     color: rgba(76, 5, 133, 0.5);
 }
 
