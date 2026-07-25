@@ -14,6 +14,14 @@
 <noscript>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
 </noscript>
+
+<!-- ===== Vercel Analytics (لجمع بيانات الأداء والزوار) ===== -->
+<script>
+  window.vercelAnalytics = { id: '{{ VERCELL_ANALYTICS_ID or 'YOUR_PROJECT_ID' }}' };
+</script>
+<script src="https://vercel.live/analytics.js" defer></script>
+<!-- ====================================================== -->
+
 </head>
 <body>
 
