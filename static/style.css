@@ -1,6 +1,6 @@
 /* ========================================================
    UFOQ – مكتبة البرومبتات
-   التصميم العصري الشامل (الإصدار النهائي)
+   التصميم العصري الشامل (الإصدار المحسّن UI/UX)
    ======================================================== */
 
 /* ===== استيراد الخط ===== */
@@ -74,17 +74,17 @@
     --space-xl: 32px;
     --space-2xl: 48px;
 
-    /* الطباعة */
+    /* الطباعة – تحسين حجم الخط للقراءة */
     --font-family: 'Tajawal', sans-serif;
-    --font-size-xs: 0.6rem;    /* 9.6px */
-    --font-size-sm: 0.7rem;    /* 11.2px */
-    --font-size-base: 0.8rem;  /* 12.8px */
-    --font-size-md: 0.9rem;    /* 14.4px */
-    --font-size-lg: 1.0rem;    /* 16px */
-    --font-size-xl: 1.2rem;    /* 19.2px */
-    --font-size-2xl: 1.5rem;   /* 24px */
-    --font-size-3xl: 2.0rem;   /* 32px */
-    --font-size-4xl: 2.5rem;   /* 40px */
+    --font-size-xs: 0.65rem;    /* 10.4px */
+    --font-size-sm: 0.8rem;     /* 12.8px */
+    --font-size-base: 0.95rem;  /* 15.2px – تحسين للقراءة */
+    --font-size-md: 1.05rem;    /* 16.8px */
+    --font-size-lg: 1.2rem;     /* 19.2px */
+    --font-size-xl: 1.4rem;     /* 22.4px */
+    --font-size-2xl: 1.7rem;    /* 27.2px */
+    --font-size-3xl: 2.3rem;    /* 36.8px */
+    --font-size-4xl: 2.9rem;    /* 46.4px */
 
     /* الأوزان */
     --weight-light: 300;
@@ -1046,8 +1046,8 @@ a:hover {
     height: auto;
     display: block;
     transition: transform 0.6s ease;
-    object-fit: contain;     /* الصورة كاملة دون قص */
-    aspect-ratio: auto;      /* يحافظ على نسبة الأبعاد الأصلية */
+    object-fit: contain;
+    aspect-ratio: auto;
 }
 .prompt-card:hover .card-image-wrap img {
     transform: scale(1.02);
@@ -1056,7 +1056,7 @@ a:hover {
 /* ===== مكان الصورة الاحتياطي (بدون صورة) ===== */
 .prompt-card .no-image-placeholder {
     width: 100%;
-    aspect-ratio: 16 / 9;    /* نسبة ثابتة للاحتياطي */
+    aspect-ratio: 16 / 9;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1104,7 +1104,7 @@ a:hover {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-sm);
-    margin-top: auto;       /* تدفع الأزرار إلى أسفل البطاقة */
+    margin-top: auto;
     padding-top: var(--space-xs);
 }
 .prompt-card .card-btn {
@@ -1152,6 +1152,122 @@ a:hover {
 }
 .prompt-card .card-btn.share-btn:active {
     transform: scale(0.94);
+}
+
+/* ===== تحسينات الأزرار – ألوان مميزة ===== */
+.prompt-card .card-btn.copy-btn {
+    background: var(--primary-50);
+    border-color: var(--primary-300);
+    color: var(--primary-700);
+}
+.prompt-card .card-btn.copy-btn:hover {
+    background: var(--primary-100);
+    border-color: var(--primary-500);
+}
+.prompt-card .card-btn.like-btn {
+    background: var(--danger-bg);
+    border-color: var(--danger);
+    color: var(--danger);
+}
+.prompt-card .card-btn.like-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+.prompt-card .card-btn.share-btn {
+    background: var(--info-bg);
+    border-color: var(--info);
+    color: var(--info);
+}
+.prompt-card .card-btn.share-btn:hover {
+    background: rgba(59, 130, 246, 0.2);
+}
+
+/* ===== البطاقة الإعلانية ===== */
+.prompt-card.ad-card {
+    border: 2px solid var(--primary-300);
+    background: linear-gradient(135deg, #faf0ff, #f0e6ff);
+    position: relative;
+}
+.prompt-card.ad-card::before {
+    content: "مُدعَم";
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--danger);
+    color: #fff;
+    font-size: var(--font-size-xs);
+    font-weight: var(--weight-black);
+    padding: 2px 10px;
+    border-radius: var(--radius-full);
+    z-index: 2;
+    box-shadow: var(--shadow-sm);
+}
+.prompt-card.ad-card .card-btn {
+    background: var(--primary-500);
+    color: #fff;
+    border-color: var(--primary-500);
+}
+.prompt-card.ad-card .card-btn:hover {
+    background: var(--primary-600);
+    border-color: var(--primary-600);
+}
+
+/* ========================================================
+   شريط إعلاني عائم سفلي
+   ======================================================== */
+.floating-ad-bar {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-full);
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-lg);
+    direction: ltr;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.floating-ad-bar.hidden {
+    transform: translateX(-50%) translateY(120%);
+    opacity: 0;
+    pointer-events: none;
+}
+.floating-ad-bar .ad-text {
+    font-weight: var(--weight-bold);
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+.floating-ad-bar .ad-btn {
+    background: var(--primary-500);
+    color: #fff;
+    padding: 4px 16px;
+    border-radius: var(--radius-full);
+    font-weight: var(--weight-bold);
+    font-size: var(--font-size-sm);
+    text-decoration: none;
+    transition: background var(--transition-fast);
+}
+.floating-ad-bar .ad-btn:hover {
+    background: var(--primary-600);
+}
+.floating-ad-bar .close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: var(--font-size-md);
+    padding: 0 4px;
+    transition: color var(--transition-fast);
+}
+.floating-ad-bar .close-btn:hover {
+    color: var(--text-primary);
 }
 
 /* ========================================================
@@ -2119,6 +2235,8 @@ a:hover {
     :root {
         --body-padding-top: 70px;
         --body-padding-bottom: 70px;
+        --font-size-base: 0.85rem;
+        --font-size-md: 0.95rem;
     }
 
     .header-capsule {
@@ -2145,13 +2263,11 @@ a:hover {
         font-size: var(--font-size-base);
     }
 
-    /* ===== الأعمدة في الجوال: مرن حسب اختيار المستخدم ===== */
     .masonry-grid {
-        column-count: 2 !important; /* افتراضي 2 عمود للهواتف */
+        column-count: 2 !important;
         padding: var(--space-sm) var(--space-sm) var(--space-md);
         column-gap: 10px;
     }
-    /* إذا اختار المستخدم 1 عمود، سيتم تطبيقه عبر JavaScript */
 
     .prompt-card {
         margin-bottom: 12px;
@@ -2164,14 +2280,14 @@ a:hover {
         font-size: var(--font-size-base);
     }
     .prompt-card .card-cat {
-        font-size: 0.55rem;
+        font-size: 0.6rem;
     }
     .prompt-card .card-author {
-        font-size: 0.6rem;
+        font-size: 0.65rem;
         margin-bottom: 4px;
     }
     .prompt-card .card-btn {
-        font-size: 0.6rem;
+        font-size: 0.65rem;
         padding: 5px 8px;
         flex: 1 1 auto;
         gap: 4px;
@@ -2201,6 +2317,21 @@ a:hover {
         width: 44px;
         height: 44px;
         font-size: var(--font-size-lg);
+    }
+
+    .floating-ad-bar {
+        bottom: 70px;
+        padding: 6px 14px;
+        gap: 8px;
+        max-width: 90vw;
+        flex-wrap: nowrap;
+    }
+    .floating-ad-bar .ad-text {
+        font-size: var(--font-size-xs);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 120px;
     }
 
     .admin-body .admin-bottom-nav {
@@ -2243,6 +2374,10 @@ a:hover {
     .contact-card .contact-icon {
         font-size: 1.2rem;
     }
+    .prompt-card.ad-card::before {
+        font-size: 0.5rem;
+        padding: 1px 8px;
+    }
 }
 
 /* شاشات صغيرة جداً (عرض أقل من 400px) – عمود واحد */
@@ -2259,7 +2394,7 @@ a:hover {
         font-size: var(--font-size-sm);
     }
     .prompt-card .card-btn {
-        font-size: 0.55rem;
+        font-size: 0.6rem;
         padding: 4px 6px;
     }
     .steps-grid {
@@ -2306,6 +2441,13 @@ a:hover {
         width: 38px;
         height: 38px;
         font-size: var(--font-size-md);
+    }
+    .floating-ad-bar {
+        bottom: 60px;
+        padding: 4px 10px;
+    }
+    .floating-ad-bar .ad-text {
+        max-width: 80px;
     }
 }
 
