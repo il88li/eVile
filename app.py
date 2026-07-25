@@ -296,7 +296,7 @@ def index():
         categories = get_categories_cached()
         library_items = get_library_items_cached()
         
-        # جلب 3 إعلانات نشطة لعرضها في أماكن مختلفة
+        # جلب 3 إعلانات نشطة
         active_ads_query = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).limit(3).all()
         active_ads = []
         for ad in active_ads_query:
@@ -326,7 +326,6 @@ def about_page():
         total_copies = db.session.query(func.sum(PromptLibrary.copy_count)).scalar() or 0
         total_shares = db.session.query(func.sum(PromptLibrary.share_count)).scalar() or 0
         
-        # جلب إعلان واحد لعرضه في صفحة حول
         active_ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
         ad_dict = None
         if active_ad:
@@ -370,6 +369,16 @@ def health_check():
     except Exception as e:
         logger.error(f"Health check failed: {e}")
         return jsonify({'status': 'error', 'db': 'disconnected', 'timestamp': datetime.utcnow().isoformat()}), 503
+
+# ===== نقطة نهاية الإصدار (للتحديثات) =====
+@main_bp.route('/api/version')
+def version():
+    try:
+        with open('version.txt', 'r') as f:
+            ver = f.read().strip()
+    except:
+        ver = str(int(datetime.utcnow().timestamp()))
+    return jsonify({'version': ver})
 
 # ----- API Blueprint -----
 api_bp = Blueprint('api', __name__, url_prefix='/api')
