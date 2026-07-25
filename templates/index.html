@@ -83,16 +83,16 @@
   </div>
 </div>
 
-<!-- Ad Banner -->
-{% if active_ad %}
+<!-- Ad Banner (الإعلان الأول) -->
+{% if active_ads and active_ads|length > 0 %}
 <div class="ad-banner">
   <div class="ad-banner-content">
-    {% if active_ad.image_url %}
-    <img src="{{ active_ad.image_url }}" alt="{{ active_ad.title }}" class="ad-image" loading="lazy">
+    {% if active_ads[0].image_url %}
+    <img src="{{ active_ads[0].image_url }}" alt="{{ active_ads[0].title }}" class="ad-image" loading="lazy">
     {% endif %}
-    <div class="ad-title">{{ active_ad.title }}</div>
-    <div class="ad-text">{{ active_ad.text }}</div>
-    <a href="{{ active_ad.button_link }}" class="ad-btn" target="_blank" rel="noopener noreferrer">{{ active_ad.button_text }}</a>
+    <div class="ad-title">{{ active_ads[0].title }}</div>
+    <div class="ad-text">{{ active_ads[0].text }}</div>
+    <a href="{{ active_ads[0].button_link }}" class="ad-btn" target="_blank" rel="noopener noreferrer">{{ active_ads[0].button_text }}</a>
   </div>
 </div>
 {% else %}
@@ -105,54 +105,90 @@
 </div>
 {% endif %}
 
-<!-- ===== شبكة البطاقات ===== -->
+<!-- ===== شبكة البطاقات مع إعلانات بينية ===== -->
 <div class="masonry-grid" id="masonryGrid">
+  {% set ad_index = 0 %}
   {% for item in library_items %}
-  <div class="prompt-card" data-id="{{ item.id }}" data-keywords="{{ item.keywords or '' }}" data-category="{{ item.category }}">
-    <div class="card-image-wrap">
-      {% if item.image_url %}
-      <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-      <div class="no-image-placeholder" style="display:none;">
-        <i class="fas fa-image"></i>
+    <!-- إدراج بطاقة إعلانية كل 4 بطاقات (إذا توفر إعلان إضافي) -->
+    {% if loop.index0 > 0 and loop.index0 % 4 == 0 and active_ads and active_ads|length > 1 and ad_index < active_ads|length - 1 %}
+      {% set ad = active_ads[ad_index + 1] %}
+      <div class="prompt-card ad-card" data-ad-id="{{ ad.id }}">
+        <div class="card-image-wrap">
+          {% if ad.image_url %}
+          <img src="{{ ad.image_url }}" alt="{{ ad.title }}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <div class="no-image-placeholder" style="display:none;"><i class="fas fa-image"></i></div>
+          {% else %}
+          <div class="no-image-placeholder"><i class="fas fa-ad" style="color:var(--primary-500);"></i></div>
+          {% endif %}
+        </div>
+        <div class="card-body" style="text-align:center;">
+          <div class="card-cat" style="color:var(--danger);">📢 إعلان</div>
+          <div class="card-title" style="font-size:var(--font-size-md);">{{ ad.title }}</div>
+          <div class="card-author" style="color:var(--text-secondary);">{{ ad.text }}</div>
+          <div class="card-actions" style="justify-content:center;">
+            <a href="{{ ad.button_link }}" target="_blank" rel="noopener" class="card-btn" style="background:var(--primary-500); color:#fff; border-color:var(--primary-500); flex:0 1 auto; padding:8px 24px;">
+              {{ ad.button_text }} <i class="fas fa-arrow-left"></i>
+            </a>
+          </div>
+        </div>
       </div>
-      {% else %}
-      <div class="no-image-placeholder">
-        <i class="fas fa-image"></i>
+      {% set ad_index = ad_index + 1 %}
+    {% endif %}
+
+    <!-- البطاقة العادية -->
+    <div class="prompt-card" data-id="{{ item.id }}" data-keywords="{{ item.keywords or '' }}" data-category="{{ item.category }}">
+      <div class="card-image-wrap">
+        {% if item.image_url %}
+        <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="no-image-placeholder" style="display:none;">
+          <i class="fas fa-image"></i>
+        </div>
+        {% else %}
+        <div class="no-image-placeholder">
+          <i class="fas fa-image"></i>
+        </div>
+        {% endif %}
       </div>
-      {% endif %}
+      <div class="card-body">
+        <div class="card-cat">{{ item.category }}</div>
+        <div class="card-title">{{ item.title }}</div>
+        {% if item.publisher %}
+        <div class="card-author">
+          <i class="fas fa-user"></i> {{ item.publisher }}
+        </div>
+        {% endif %}
+        <div class="card-actions">
+          <button class="card-btn copy-btn" data-prompt="{{ item.prompt_text|replace('"', '&quot;') }}" data-id="{{ item.id }}" aria-label="نسخ البرومبت">
+            <i class="fas fa-copy"></i> نسخ <span class="count">({{ item.copy_count or 0 }})</span>
+          </button>
+          <button class="card-btn like-btn" data-id="{{ item.id }}" aria-label="إعجاب">
+            <i class="fas fa-heart"></i> إعجاب <span class="count">({{ item.likes or 0 }})</span>
+          </button>
+          <button class="card-btn share-btn" data-id="{{ item.id }}" aria-label="مشاركة">
+            <i class="fas fa-share-alt"></i> مشاركة <span class="count">({{ item.share_count or 0 }})</span>
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="card-body">
-      <div class="card-cat">{{ item.category }}</div>
-      <div class="card-title">{{ item.title }}</div>
-      {% if item.publisher %}
-      <div class="card-author">
-        <i class="fas fa-user"></i> {{ item.publisher }}
-      </div>
-      {% endif %}
-      <div class="card-actions">
-        <button class="card-btn copy-btn" data-prompt="{{ item.prompt_text|replace('"', '&quot;') }}" data-id="{{ item.id }}" aria-label="نسخ البرومبت">
-          <i class="fas fa-copy"></i> نسخ <span class="count">({{ item.copy_count or 0 }})</span>
-        </button>
-        <button class="card-btn like-btn" data-id="{{ item.id }}" aria-label="إعجاب">
-          <i class="fas fa-heart"></i> إعجاب <span class="count">({{ item.likes or 0 }})</span>
-        </button>
-        <button class="card-btn share-btn" data-id="{{ item.id }}" aria-label="مشاركة">
-          <i class="fas fa-share-alt"></i> مشاركة <span class="count">({{ item.share_count or 0 }})</span>
-        </button>
-      </div>
-    </div>
-  </div>
   {% else %}
-  <div class="empty-state">
-    <i class="fas fa-inbox"></i>
-    لا توجد برومبتات في المكتبة حالياً
-  </div>
+    <div class="empty-state">
+      <i class="fas fa-inbox"></i>
+      لا توجد برومبتات في المكتبة حالياً
+    </div>
   {% endfor %}
 </div>
 
+<!-- ===== شريط إعلاني سفلي عائم (الإعلان الثالث إن وجد) ===== -->
+{% if active_ads and active_ads|length > 2 %}
+<div id="floatingAdBar" class="floating-ad-bar">
+  <span class="ad-text">{{ active_ads[2].title }}</span>
+  <a href="{{ active_ads[2].button_link }}" target="_blank" rel="noopener" class="ad-btn">{{ active_ads[2].button_text }}</a>
+  <button class="close-btn" onclick="document.getElementById('floatingAdBar').classList.add('hidden')" aria-label="إغلاق الإعلان">✕</button>
+</div>
+{% endif %}
+
 <!-- ===== شريط التنقل السفلي + زر الأعمدة (منفصل) ===== -->
 <div class="bottom-nav-wrapper">
-  <!-- شريط التنقل الأساسي -->
   <div class="bottom-nav-main">
     <a href="/" class="bn-item active" aria-label="الرئيسية">
       <i class="fas fa-home"></i>
@@ -165,7 +201,6 @@
       <span class="badge" id="searchBadge">0</span>
     </button>
   </div>
-  <!-- زر تغيير الأعمدة (منفصل) -->
   <button class="bn-cols" onclick="openColsModal()" aria-label="تغيير عدد الأعمدة">
     <i class="fas fa-grip-lines"></i>
   </button>
@@ -177,7 +212,7 @@
   <i class="fas fa-chevron-up"></i>
 </button>
 
-<!-- Mandatory Ad Modal -->
+<!-- Mandatory Ad Modal (يظهر عند النسخ) -->
 <div class="mandatory-ad-modal" id="mandatoryAdModal" role="dialog" aria-modal="true">
   <div class="mad-box">
     <div class="mad-timer-bar" id="madTimerBar"></div>
@@ -195,8 +230,8 @@
 </div>
 
 <script>
-// ===== بيانات الإعلان الإجباري =====
-const cachedAd = {{ active_ad|tojson|safe if active_ad else 'null' }};
+// ===== بيانات الإعلانات (قائمة) =====
+const cachedAds = {{ active_ads|tojson|safe if active_ads else '[]' }};
 
 // ===== متغيرات عامة =====
 let currentSearchCategory = 'all';
@@ -271,7 +306,7 @@ searchInput.addEventListener('input', function() {
 });
 
 function filterPrompts() {
-  const cards = document.querySelectorAll('.prompt-card');
+  const cards = document.querySelectorAll('.prompt-card:not(.ad-card)');
   if (!cards.length) return;
   let count = 0;
   cards.forEach(card => {
@@ -302,13 +337,12 @@ function applyCardsPerRow() {
   const u = parseInt(localStorage.getItem('cardsPerRow') || '4', 10);
   const w = window.innerWidth;
   let cols = u;
-  // للهواتف (عرض <= 600px): حد أقصى 2 عمود
   if (w <= 400) {
-    cols = 1; // شاشات صغيرة جداً: عمود واحد
+    cols = 1;
   } else if (w <= 600) {
-    cols = Math.min(u, 2); // هواتف: 2 كحد أقصى
+    cols = Math.min(u, 2);
   } else if (w <= 900) {
-    cols = Math.min(u, 3); // أجهزة لوحية صغيرة: 3 كحد أقصى
+    cols = Math.min(u, 3);
   }
   g.style.columns = cols;
 }
@@ -365,8 +399,8 @@ document.addEventListener('click', function(e) {
     if (prompt) {
       pendingCopyText = prompt;
       pendingCopyBtn = copyBtn;
-      if (cachedAd) {
-        showMandatoryAd(cachedAd);
+      if (cachedAds && cachedAds.length > 0) {
+        showMandatoryAd(cachedAds[0]);
       } else {
         executeCopy();
       }
