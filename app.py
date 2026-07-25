@@ -295,8 +295,39 @@ def index():
 
         categories = get_categories_cached()
         library_items = get_library_items_cached()
-        active_ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
+        
+        # جلب 3 إعلانات نشطة لعرضها في أماكن مختلفة
+        active_ads_query = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).limit(3).all()
+        active_ads = []
+        for ad in active_ads_query:
+            active_ads.append({
+                'id': ad.id,
+                'title': ad.title,
+                'text': ad.text,
+                'image_url': ad.image_url,
+                'button_text': ad.button_text,
+                'button_link': ad.button_link,
+                'duration_seconds': ad.duration_seconds,
+            })
 
+        return render_template('index.html',
+                               categories=categories,
+                               library_items=library_items,
+                               active_ads=active_ads,
+                               site_status='on')
+    except Exception as e:
+        logger.error(f"Index error: {e}\n{traceback.format_exc()}")
+        return render_template('index.html', site_status='on', categories=[], library_items=[], active_ads=[])
+
+@main_bp.route('/about')
+def about_page():
+    try:
+        prompt_count = PromptLibrary.query.count()
+        total_copies = db.session.query(func.sum(PromptLibrary.copy_count)).scalar() or 0
+        total_shares = db.session.query(func.sum(PromptLibrary.share_count)).scalar() or 0
+        
+        # جلب إعلان واحد لعرضه في صفحة حول
+        active_ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
         ad_dict = None
         if active_ad:
             ad_dict = {
@@ -308,29 +339,15 @@ def index():
                 'button_link': active_ad.button_link,
                 'duration_seconds': active_ad.duration_seconds,
             }
-
-        return render_template('index.html',
-                               categories=categories,
-                               library_items=library_items,
-                               active_ad=ad_dict,
-                               site_status='on')
-    except Exception as e:
-        logger.error(f"Index error: {e}\n{traceback.format_exc()}")
-        return render_template('index.html', site_status='on', categories=[], library_items=[], active_ad=None)
-
-@main_bp.route('/about')
-def about_page():
-    try:
-        prompt_count = PromptLibrary.query.count()
-        total_copies = db.session.query(func.sum(PromptLibrary.copy_count)).scalar() or 0
-        total_shares = db.session.query(func.sum(PromptLibrary.share_count)).scalar() or 0
+        
         return render_template('about.html',
                                prompt_count=prompt_count,
                                total_copies=total_copies,
-                               total_shares=total_shares)
+                               total_shares=total_shares,
+                               active_ad=ad_dict)
     except Exception as e:
         logger.error(f"About error: {e}\n{traceback.format_exc()}")
-        return render_template('about.html', prompt_count=0, total_copies=0, total_shares=0)
+        return render_template('about.html', prompt_count=0, total_copies=0, total_shares=0, active_ad=None)
 
 @main_bp.route('/robots.txt')
 def robots_txt():
@@ -820,7 +837,7 @@ def create_app():
         
         if request.path.startswith('/api/'):
             return jsonify({'success': False, 'message': 'الصفحة غير موجودة'}), 404
-        return render_template('index.html', site_status='on', categories=[], library_items=[], active_ad=None), 404
+        return render_template('index.html', site_status='on', categories=[], library_items=[], active_ads=[]), 404
 
     @app.errorhandler(500)
     def internal_error(e):
@@ -828,7 +845,7 @@ def create_app():
         db.session.rollback()
         if request.path.startswith('/api/'):
             return jsonify({'success': False, 'message': 'خطأ داخلي في الخادم'}), 500
-        return render_template('index.html', site_status='on', categories=[], library_items=[], active_ad=None), 500
+        return render_template('index.html', site_status='on', categories=[], library_items=[], active_ads=[]), 500
 
     @app.errorhandler(Exception)
     def handle_exception(e):
@@ -839,7 +856,7 @@ def create_app():
         db.session.rollback()
         if request.path.startswith('/api/'):
             return jsonify({'success': False, 'message': 'حدث خطأ غير متوقع'}), 500
-        return render_template('index.html', site_status='on', categories=[], library_items=[], active_ad=None), 500
+        return render_template('index.html', site_status='on', categories=[], library_items=[], active_ads=[]), 500
 
     @app.before_request
     def ensure_db_initialized():
@@ -862,5 +879,4 @@ def create_app():
     return app
 
 # ==================== Vercel Entry Point ====================
-# هذا السطر ضروري لكي يتعرف Vercel على التطبيق
 app = create_app()
