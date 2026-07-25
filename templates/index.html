@@ -15,15 +15,31 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
 </noscript>
 
-<!-- ===== Vercel Analytics (لجمع بيانات الأداء والزوار) ===== -->
+<!-- ===== Vercel Analytics ===== -->
 <script>
   window.vercelAnalytics = { id: '{{ VERCELL_ANALYTICS_ID or 'YOUR_PROJECT_ID' }}' };
 </script>
 <script src="https://vercel.live/analytics.js" defer></script>
-<!-- ====================================================== -->
 
 </head>
 <body>
+
+<!-- ===== نافذة تحديث الموقع ===== -->
+<div class="update-overlay" id="updateOverlay">
+  <div class="update-box">
+    <span class="icon"><i class="fas fa-sync-alt"></i></span>
+    <h2>🔄 تحديث متاح!</h2>
+    <p>
+      تم نشر تحديث جديد للموقع يشمل:<br>
+      <strong>✨ برومبتات جديدة</strong> • 
+      <strong>📢 إعلانات محدثة</strong> • 
+      <strong>🏷️ تصنيفات محسّنة</strong>
+    </p>
+    <button class="btn-update" onclick="location.reload()">
+      <i class="fas fa-redo"></i> تحديث الآن
+    </button>
+  </div>
+</div>
 
 <!-- ===== الهيدر العائم ===== -->
 <div class="top-float">
@@ -117,7 +133,7 @@
 <div class="masonry-grid" id="masonryGrid">
   {% set ad_index = 0 %}
   {% for item in library_items %}
-    <!-- إدراج بطاقة إعلانية كل 4 بطاقات (إذا توفر إعلان إضافي) -->
+    <!-- إدراج بطاقة إعلانية كل 4 بطاقات -->
     {% if loop.index0 > 0 and loop.index0 % 4 == 0 and active_ads and active_ads|length > 1 and ad_index < active_ads|length - 1 %}
       {% set ad = active_ads[ad_index + 1] %}
       <div class="prompt-card ad-card" data-ad-id="{{ ad.id }}">
@@ -126,11 +142,10 @@
           <img src="{{ ad.image_url }}" alt="{{ ad.title }}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
           <div class="no-image-placeholder" style="display:none;"><i class="fas fa-image"></i></div>
           {% else %}
-          <div class="no-image-placeholder"><i class="fas fa-ad" style="color:var(--primary-500);"></i></div>
+          <div class="no-image-placeholder"><i class="fas fa-image"></i></div>
           {% endif %}
         </div>
         <div class="card-body" style="text-align:center;">
-          <div class="card-cat" style="color:var(--danger);">📢 إعلان</div>
           <div class="card-title" style="font-size:var(--font-size-md);">{{ ad.title }}</div>
           <div class="card-author" style="color:var(--text-secondary);">{{ ad.text }}</div>
           <div class="card-actions" style="justify-content:center;">
@@ -195,7 +210,7 @@
 </div>
 {% endif %}
 
-<!-- ===== شريط التنقل السفلي + زر الأعمدة (منفصل) ===== -->
+<!-- ===== شريط التنقل السفلي + زر الأعمدة ===== -->
 <div class="bottom-nav-wrapper">
   <div class="bottom-nav-main">
     <a href="/" class="bn-item active" aria-label="الرئيسية">
@@ -220,15 +235,11 @@
   <i class="fas fa-chevron-up"></i>
 </button>
 
-<!-- Mandatory Ad Modal (يظهر عند النسخ) -->
+<!-- ===== مودال الإعلان الإجباري (يظهر عند النسخ) ===== -->
 <div class="mandatory-ad-modal" id="mandatoryAdModal" role="dialog" aria-modal="true">
   <div class="mad-box">
     <div class="mad-timer-bar" id="madTimerBar"></div>
-    <div class="mad-header">
-      <span class="mad-title">📢 إعلان مميز</span>
-      <span class="mad-timer"><i class="fas fa-clock"></i> <span id="madTimerText">5</span> ث</span>
-    </div>
-    <img class="mad-image" id="madImage" src="" alt="">
+    <img class="mad-image" id="madImage" src="" alt="" loading="lazy" onerror="this.style.display='none';">
     <div class="mad-body">
       <div class="mad-ad-title" id="madTitle"></div>
       <div class="mad-ad-text" id="madText"></div>
@@ -238,7 +249,7 @@
 </div>
 
 <script>
-// ===== بيانات الإعلانات (قائمة) =====
+// ===== بيانات الإعلانات =====
 const cachedAds = {{ active_ads|tojson|safe if active_ads else '[]' }};
 
 // ===== متغيرات عامة =====
@@ -248,6 +259,8 @@ let searchOpen = false;
 let madInterval = null;
 let pendingCopyText = null;
 let pendingCopyBtn = null;
+let currentVersion = null;
+const UPDATE_INTERVAL = 60000; // 60 ثانية
 
 // ===== البحث والتصفية =====
 const searchToggle = document.getElementById('searchToggle');
@@ -338,7 +351,7 @@ function filterPrompts() {
   }
 }
 
-// ===== عدد الأعمدة (مع دعم التكيف والهواتف) =====
+// ===== عدد الأعمدة =====
 function applyCardsPerRow() {
   const g = document.getElementById('masonryGrid');
   if (!g) return;
@@ -422,9 +435,8 @@ function showMandatoryAd(ad) {
   const m = document.getElementById('mandatoryAdModal');
   const img = document.getElementById('madImage');
   const title = document.getElementById('madTitle');
-  const txt = document.getElementById('madText');
+  const text = document.getElementById('madText');
   const btn = document.getElementById('madBtn');
-  const timer = document.getElementById('madTimerText');
   const bar = document.getElementById('madTimerBar');
 
   if (ad.image_url) {
@@ -434,18 +446,17 @@ function showMandatoryAd(ad) {
     img.style.display = 'none';
   }
   title.textContent = ad.title;
-  txt.textContent = ad.text;
+  text.textContent = ad.text;
   btn.textContent = ad.button_text || 'زيارة';
   btn.href = ad.button_link;
+
   m.classList.add('open');
   document.body.style.overflow = 'hidden';
   let sec = ad.duration_seconds || 5, total = sec;
-  timer.textContent = sec;
   bar.style.width = '100%';
   if (madInterval) clearInterval(madInterval);
   madInterval = setInterval(function() {
     sec--;
-    timer.textContent = sec;
     bar.style.width = ((sec / total) * 100) + '%';
     if (sec <= 0) {
       clearInterval(madInterval);
@@ -567,6 +578,21 @@ function openPromptFromURL() {
   }
 }
 
+// ===== فحص التحديثات =====
+async function checkForUpdate() {
+  try {
+    const res = await fetch('/api/version');
+    const data = await res.json();
+    const newVersion = data.version;
+    if (currentVersion && currentVersion !== newVersion) {
+      document.getElementById('updateOverlay').classList.add('show');
+    }
+    currentVersion = newVersion;
+  } catch (e) {
+    // تجاهل الأخطاء (مثلاً في بيئة التطوير)
+  }
+}
+
 // ===== التهيئة =====
 document.addEventListener('DOMContentLoaded', function() {
   const savedCols = localStorage.getItem('cardsPerRow') || '4';
@@ -575,6 +601,14 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   applyCardsPerRow();
   openPromptFromURL();
+  checkForUpdate();
+  setInterval(checkForUpdate, UPDATE_INTERVAL);
+});
+
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) {
+    checkForUpdate();
+  }
 });
 </script>
 </body>
