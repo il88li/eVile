@@ -444,6 +444,56 @@ def get_mandatory_ad():
         logger.error(f"Mandatory ad error: {e}")
         return jsonify({'success': False}), 500
 
+# ===== [جديد] استقبال البرومبت من البوت =====
+@api_bp.route('/prompt/create', methods=['POST'])
+@limiter.limit("10 per minute")
+def create_prompt_from_bot():
+    """استقبال برومبت مستخرج من بوت تيليجرام وإضافته إلى المكتبة."""
+    # التحقق من مفتاح API
+    api_key = request.headers.get('X-API-Key')
+    expected_key = os.getenv('BOT_API_KEY')
+    if not expected_key:
+        logger.error("BOT_API_KEY not set in environment")
+        return jsonify({'success': False, 'message': 'Server configuration error'}), 500
+    if not api_key or api_key != expected_key:
+        logger.warning(f"Unauthorized attempt to create prompt from bot: {request.remote_addr}")
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    data = request.json
+    if not data:
+        return jsonify({'success': False, 'message': 'No data provided'}), 400
+
+    prompt_text = data.get('prompt_text')
+    if not prompt_text:
+        return jsonify({'success': False, 'message': 'البرومبت مطلوب'}), 400
+
+    title = data.get('title', prompt_text[:100])
+    image_url = data.get('image_url', '')
+    category = data.get('category', 'general')
+    publisher = data.get('publisher', 'UFOQ Bot')
+    publisher_link = data.get('publisher_link', 'https://t.me/UFOQ_BOT')
+    keywords = data.get('keywords', '')
+
+    try:
+        item = PromptLibrary(
+            title=title,
+            category=category,
+            image_url=image_url,
+            prompt_text=prompt_text,
+            publisher=publisher,
+            publisher_link=publisher_link,
+            keywords=keywords
+        )
+        db.session.add(item)
+        db.session.commit()
+        invalidate_library_cache()
+        logger.info(f"تمت إضافة برومبت جديد من البوت، المعرف: {item.id}")
+        return jsonify({'success': True, 'id': item.id, 'message': 'تمت إضافة البرومبت بنجاح'})
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error creating prompt from bot: {e}\n{traceback.format_exc()}")
+        return jsonify({'success': False, 'message': 'خطأ في إضافة البرومبت'}), 500
+
 # ----- Admin Blueprint -----
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
