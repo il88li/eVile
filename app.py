@@ -49,14 +49,15 @@ class Config:
         DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_POOL_SIZE = int(os.getenv('DB_POOL_SIZE', '20'))
-    SQLALCHEMY_MAX_OVERFLOW = int(os.getenv('DB_MAX_OVERFLOW', '40'))
+    SQLALCHEMY_POOL_SIZE = int(os.getenv('DB_POOL_SIZE', '5'))
+    SQLALCHEMY_MAX_OVERFLOW = int(os.getenv('DB_MAX_OVERFLOW', '10'))
     SQLALCHEMY_POOL_PRE_PING = True
-    SQLALCHEMY_POOL_RECYCLE = 3600
+    SQLALCHEMY_POOL_RECYCLE = 300
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_pre_ping': True,
-        'pool_recycle': 3600,
-        'pool_timeout': 30,
+        'pool_recycle': 300,
+        'pool_timeout': 10,
+        'pool_reset_on_return': 'rollback',
     }
 
     SESSION_TYPE = 'sqlalchemy'
@@ -296,7 +297,6 @@ def index():
         categories = get_categories_cached()
         library_items = get_library_items_cached()
         
-        # جلب 3 إعلانات نشطة
         active_ads_query = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).limit(3).all()
         active_ads = []
         for ad in active_ads_query:
@@ -370,7 +370,6 @@ def health_check():
         logger.error(f"Health check failed: {e}")
         return jsonify({'status': 'error', 'db': 'disconnected', 'timestamp': datetime.utcnow().isoformat()}), 503
 
-# ===== نقطة نهاية الإصدار (للتحديثات) =====
 @main_bp.route('/api/version')
 def version():
     try:
@@ -444,12 +443,10 @@ def get_mandatory_ad():
         logger.error(f"Mandatory ad error: {e}")
         return jsonify({'success': False}), 500
 
-# ===== [جديد] استقبال البرومبت من البوت =====
+# ===== نقطة نهاية استقبال البرومبت من البوت =====
 @api_bp.route('/prompt/create', methods=['POST'])
 @limiter.limit("10 per minute")
 def create_prompt_from_bot():
-    """استقبال برومبت مستخرج من بوت تيليجرام وإضافته إلى المكتبة."""
-    # التحقق من مفتاح API
     api_key = request.headers.get('X-API-Key')
     expected_key = os.getenv('BOT_API_KEY')
     if not expected_key:
@@ -852,11 +849,12 @@ def admin_clear_all_errors():
         return jsonify({'success': False, 'message': str(e)}), 500
 
 # ==================== Application Factory ====================
+_db_initialized = False
+
 def create_app():
     app = Flask(__name__, template_folder='templates')
     app.config.from_object(Config)
 
-    # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
     cache.init_app(app)
@@ -873,7 +871,6 @@ def create_app():
     app.config['SESSION_SQLALCHEMY'] = db
     session_ext.init_app(app)
 
-    # Register blueprints
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp)
     app.register_blueprint(admin_bp)
@@ -919,6 +916,9 @@ def create_app():
 
     @app.before_request
     def ensure_db_initialized():
+        global _db_initialized
+        if _db_initialized:
+            return
         try:
             inspector = inspect(db.engine)
             if 'category' not in inspector.get_table_names():
@@ -931,6 +931,7 @@ def create_app():
                 logger.info("Database initialized successfully")
             else:
                 run_light_migrations()
+            _db_initialized = True
         except Exception as e:
             logger.error(f"DB init error: {e}")
             db.session.rollback()
