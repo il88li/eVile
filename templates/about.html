@@ -8,7 +8,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;600;700;900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/light/style.css">
 <link rel="stylesheet" href="/static/style.css">
 
@@ -19,61 +19,47 @@
 </head>
 <body>
 
-<header class="topbar">
-  <div class="topbar-inner">
-    <a class="brand" href="/">UFOQ</a>
-    <div></div>
-    <nav class="topbar-nav" aria-label="روابط">
-      <a href="/">المكتبة</a>
-      <a href="https://t.me/UFOQ_7" target="_blank" rel="noopener">تيليجرام</a>
-    </nav>
+<header class="hdr">
+  <div class="hdr-inner">
+    <a class="logo" href="/">UFOQ</a>
+    <div class="hdr-actions">
+      <a class="icon-btn" href="/" aria-label="المكتبة">
+        <i class="ph-light ph-house"></i>
+      </a>
+      <a class="icon-btn" href="https://t.me/UFOQ_7" target="_blank" rel="noopener" aria-label="تيليجرام">
+        <i class="ph-light ph-telegram-logo"></i>
+      </a>
+    </div>
   </div>
 </header>
 
 <main class="about-wrap">
 
-  <!-- Hero -->
   <div class="about-hero">
-    <span class="eyebrow">حول UFOQ</span>
+    <div class="eyebrow">حول UFOQ</div>
     <h1>برومبتاتٌ <em>بلغةٍ</em><br>تشبهك.</h1>
     <p>
       مكتبة عربية مستقلة، هدفها جمع أفضل النصوص التوجيهية لأدوات الذكاء الاصطناعي
-      وتقديمها في قالبٍ نظيف، سريع، وقابل للاستخدام فوراً.
+      وتقديمها في قالب نظيف، سريع، وقابل للاستخدام فوراً.
     </p>
   </div>
 
-  <!-- Stats -->
-  <div class="stat-grid">
-    <div class="stat-tile">
-      <div class="num">{{ prompt_count }}</div>
-      <div class="lbl">برومبت</div>
-    </div>
-    <div class="stat-tile">
-      <div class="num">{{ total_copies }}</div>
-      <div class="lbl">نسخة</div>
-    </div>
-    <div class="stat-tile">
-      <div class="num">{{ total_shares }}</div>
-      <div class="lbl">مشاركة</div>
-    </div>
-    <div class="stat-tile">
-      <div class="num">{{ user_count or 0 }}</div>
-      <div class="lbl">مستخدم</div>
-    </div>
+  <div class="stat-row">
+    <div class="stat-tile"><div class="num">{{ prompt_count }}</div><div class="lbl">برومبت</div></div>
+    <div class="stat-tile"><div class="num">{{ total_copies }}</div><div class="lbl">نسخة</div></div>
+    <div class="stat-tile"><div class="num">{{ total_shares }}</div><div class="lbl">مشاركة</div></div>
+    <div class="stat-tile"><div class="num">{{ user_count or 0 }}</div><div class="lbl">مستخدم</div></div>
   </div>
 
-  <!-- Featured ad -->
   {% if active_ad %}
-  <section class="featured-ad" style="padding:0;margin:0 0 var(--s-16);">
-    <div class="featured-ad-inner">
-      <div class="featured-ad-content">
+  <section class="featured-ad" style="padding: 0; margin-bottom: 72px;">
+    <div class="featured-inner">
+      <span class="ad-tag">AD</span>
+      <div class="featured-content">
         <div class="title">{{ active_ad.title }}</div>
         <div class="text">{{ active_ad.text }}</div>
       </div>
-      {% if active_ad.image_url %}
-      <img class="featured-ad-img" src="{{ active_ad.image_url }}" alt="{{ active_ad.title }}" loading="lazy">
-      {% endif %}
-      <a href="{{ active_ad.button_link }}" class="featured-ad-btn" target="_blank" rel="noopener noreferrer">
+      <a href="{{ active_ad.button_link }}" class="featured-cta" target="_blank" rel="noopener noreferrer">
         {{ active_ad.button_text or 'زيارة' }}
         <i class="ph-light ph-arrow-up-left"></i>
       </a>
@@ -81,121 +67,104 @@
   </section>
   {% endif %}
 
-  <!-- How-to -->
-  <section class="section">
+  <section class="section-block">
     <div class="section-head">
-      <span class="num">01</span>
+      <span class="n">01</span>
       <h2>كيف تستخدمها</h2>
       <span class="line"></span>
     </div>
-    <div class="steps-grid">
-      <div class="step-card">
-        <div class="step-num">01</div>
+    <div class="steps">
+      <div class="step">
+        <div class="n">01</div>
         <h4>تصفح</h4>
         <p>استخدم شريط التصنيفات أو البحث للعثور على برومبت في المجال الذي تحتاجه.</p>
       </div>
-      <div class="step-card">
-        <div class="step-num">02</div>
+      <div class="step">
+        <div class="n">02</div>
         <h4>اختر</h4>
         <p>مرر بين البطاقات، واقرأ العنوان والناشر قبل أن تقرر.</p>
       </div>
-      <div class="step-card">
-        <div class="step-num">03</div>
+      <div class="step">
+        <div class="n">03</div>
         <h4>انسخ</h4>
         <p>بضغطة واحدة يُنسخ النص إلى حافظتك، جاهزاً للصق في أداتك المفضلة.</p>
       </div>
-      <div class="step-card">
-        <div class="step-num">04</div>
+      <div class="step">
+        <div class="n">04</div>
         <h4>تفاعل</h4>
         <p>أعجب بالبرومبتات المميزة، وشاركها مع من يحتاجها.</p>
       </div>
     </div>
   </section>
 
-  <!-- FAQ -->
-  <section class="section">
+  <section class="section-block">
     <div class="section-head">
-      <span class="num">02</span>
+      <span class="n">02</span>
       <h2>أسئلة شائعة</h2>
       <span class="line"></span>
     </div>
-    <div class="faq">
+    <div class="faq-list">
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
           <h4>ما هو UFOQ؟</h4>
           <i class="ph-light ph-plus"></i>
         </div>
-        <div class="faq-a">
-          <p>مكتبة عربية مفتوحة تجمع البرومبتات — النصوص التوجيهية المستخدمة مع ChatGPT و Midjourney و Claude وغيرها — في مكان واحد.</p>
-        </div>
+        <div class="faq-a"><p>مكتبة عربية مفتوحة تجمع البرومبتات — النصوص التوجيهية المستخدمة مع ChatGPT و Midjourney و Claude وغيرها — في مكان واحد.</p></div>
       </div>
-
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
           <h4>هل الاستخدام مجاني؟</h4>
           <i class="ph-light ph-plus"></i>
         </div>
-        <div class="faq-a">
-          <p>نعم، بالكامل. لا اشتراكات، ولا رسوم خفية. مهمتنا نشر الإبداع للجميع.</p>
-        </div>
+        <div class="faq-a"><p>نعم، بالكامل. لا اشتراكات، ولا رسوم خفية. مهمتنا نشر الإبداع للجميع.</p></div>
       </div>
-
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
           <h4>كيف أساهم؟</h4>
           <i class="ph-light ph-plus"></i>
         </div>
-        <div class="faq-a">
-          <p>تواصل معنا عبر تيليجرام وأرسل برومبتاتك. سنراجعها وننشرها مع الإشارة إليك.</p>
-        </div>
+        <div class="faq-a"><p>تواصل معنا عبر تيليجرام وأرسل برومبتاتك. سنراجعها وننشرها مع الإشارة إليك.</p></div>
       </div>
-
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
           <h4>ما الأدوات المدعومة؟</h4>
           <i class="ph-light ph-plus"></i>
         </div>
-        <div class="faq-a">
-          <p>معظم البرومبتات تعمل مع ChatGPT، Claude، Gemini، Midjourney، DALL·E، Stable Diffusion وغيرها.</p>
-        </div>
+        <div class="faq-a"><p>معظم البرومبتات تعمل مع ChatGPT، Claude، Gemini، Midjourney، DALL·E، Stable Diffusion وغيرها.</p></div>
       </div>
-
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
           <h4>كيف يتم التحقق من الجودة؟</h4>
           <i class="ph-light ph-plus"></i>
         </div>
-        <div class="faq-a">
-          <p>تُراجع كل مشاركة يدوياً قبل النشر — للتأكد من وضوحها، وخلوّها من المحتوى غير المناسب، وقيمتها العملية.</p>
-        </div>
+        <div class="faq-a"><p>تُراجع كل مشاركة يدوياً قبل النشر — للتأكد من وضوحها، وخلوّها من المحتوى غير المناسب، وقيمتها العملية.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- Contact -->
-  <section class="section">
+  <section class="section-block">
     <div class="section-head">
-      <span class="num">03</span>
+      <span class="n">03</span>
       <h2>تواصل</h2>
       <span class="line"></span>
     </div>
     <div class="contact-grid">
       <a href="https://t.me/UFOQ_7" target="_blank" rel="noopener" class="contact-card">
-        <span class="icon"><i class="ph-light ph-telegram-logo"></i></span>
+        <span class="ic"><i class="ph-light ph-telegram-logo"></i></span>
         <div class="info">
           <span class="label">قناة التحديثات</span>
           <span class="desc">@UFOQ_7</span>
         </div>
       </a>
       <a href="https://t.me/glo_u" target="_blank" rel="noopener" class="contact-card">
-        <span class="icon"><i class="ph-light ph-code"></i></span>
+        <span class="ic"><i class="ph-light ph-code"></i></span>
         <div class="info">
           <span class="label">المطوّر</span>
           <span class="desc">@glo_u</span>
         </div>
       </a>
       <a href="https://instagram.com/ufoq7" target="_blank" rel="noopener" class="contact-card">
-        <span class="icon"><i class="ph-light ph-instagram-logo"></i></span>
+        <span class="ic"><i class="ph-light ph-instagram-logo"></i></span>
         <div class="info">
           <span class="label">إنستغرام</span>
           <span class="desc">@ufoq7</span>
@@ -204,21 +173,24 @@
     </div>
   </section>
 
-  <!-- About text -->
-  <section class="section">
+  <section class="section-block">
     <div class="section-head">
-      <span class="num">04</span>
+      <span class="n">04</span>
       <h2>من نحن</h2>
       <span class="line"></span>
     </div>
-    <p style="color:var(--fg-3);font-size:var(--t-lg);line-height:1.85;max-width:66ch;">
+    <p style="color: var(--ink-2); font-size: 17px; line-height: 1.85; max-width: 66ch;">
       UFOQ مشروع عربي مستقل، يؤمن بأن الذكاء الاصطناعي يجب أن يكون في متناول الجميع —
-      وأن البرومبت الجيد هو الفرق بين نتيجة عادية وأخرى استثنائية. نبني مكتبة تعتني بالتفاصيل:
-      من اختيار الخط إلى سهولة النسخ.
+      وأن البرومبت الجيد هو الفرق بين نتيجة عادية وأخرى استثنائية.
     </p>
   </section>
 
 </main>
+
+<!-- Floating search FAB (bottom-right) -->
+<button class="fab-search" onclick="window.location.href='/'">
+  <i class="ph-light ph-magnifying-glass"></i>
+</button>
 
 <!-- Bottom dock -->
 <nav class="dock" aria-label="التنقل">
@@ -228,13 +200,10 @@
   <a href="/about" class="dock-btn active" aria-label="حول">
     <i class="ph-light ph-info"></i>
   </a>
-  <div class="dock-divider" aria-hidden="true"></div>
-  <a href="https://t.me/UFOQ_7" target="_blank" rel="noopener" class="dock-cols" aria-label="تيليجرام">
+  <a href="https://t.me/UFOQ_7" target="_blank" rel="noopener" class="dock-btn" aria-label="تيليجرام">
     <i class="ph-light ph-telegram-logo"></i>
   </a>
 </nav>
-
-<div class="toast" id="toast" role="status"></div>
 
 <script>
 function toggleFaq(el){
@@ -243,23 +212,18 @@ function toggleFaq(el){
   document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
   if (!wasOpen) item.classList.add('open');
 }
-function showToast(msg, isError){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.remove('error');
-  if (isError) t.classList.add('error');
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2400);
-}
 
-// hide dock on scroll down
 let lastScroll = 0;
 window.addEventListener('scroll', () => {
   const y = window.scrollY;
   const dock = document.querySelector('.dock');
-  if (dock){
-    if (y > lastScroll && y > 200) dock.style.transform = 'translateX(-50%) translateY(140%)';
-    else dock.style.transform = 'translateX(-50%) translateY(0)';
+  const fab  = document.querySelector('.fab-search');
+  if (y > lastScroll && y > 240){
+    dock.style.transform = 'translateX(-50%) translateY(160%)';
+    if (fab) fab.style.transform = 'translateY(160%)';
+  } else {
+    dock.style.transform = 'translateX(-50%) translateY(0)';
+    if (fab) fab.style.transform = 'translateY(0)';
   }
   lastScroll = y;
 }, { passive: true });
