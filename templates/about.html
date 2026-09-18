@@ -8,7 +8,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/light/style.css">
 <link rel="stylesheet" href="/static/style.css">
 
@@ -20,17 +20,17 @@
 <body>
 
 <header class="hdr">
-  <div class="hdr-inner">
-    <a class="logo" href="/">UFOQ</a>
-    <div class="hdr-meta">حول · قصتنا</div>
-    <div class="hdr-actions">
-      <a class="icon-btn" href="/" aria-label="المكتبة">
-        <i class="ph-light ph-house"></i>
-      </a>
-      <a class="icon-btn" href="https://t.me/UFOQ_7" target="_blank" rel="noopener" aria-label="تيليجرام">
-        <i class="ph-light ph-telegram-logo"></i>
-      </a>
-    </div>
+  <a class="logo" href="/">
+    <span class="logo-mark"><i class="ph-light ph-aperture"></i></span>
+    <span class="logo-name">UFOQ</span>
+  </a>
+  <div class="hdr-actions">
+    <a class="ic-btn" href="/" aria-label="المكتبة">
+      <i class="ph-light ph-house"></i>
+    </a>
+    <a class="ic-btn" href="https://t.me/UFOQ_7" target="_blank" rel="noopener" aria-label="تيليجرام">
+      <i class="ph-light ph-telegram-logo"></i>
+    </a>
   </div>
 </header>
 
@@ -46,14 +46,14 @@
   </div>
 
   <div class="stat-row">
-    <div class="stat-tile"><div class="num">{{ prompt_count }}</div><div class="lbl">برومبت</div></div>
-    <div class="stat-tile"><div class="num">{{ total_copies }}</div><div class="lbl">نسخة</div></div>
-    <div class="stat-tile"><div class="num">{{ total_shares }}</div><div class="lbl">مشاركة</div></div>
-    <div class="stat-tile"><div class="num">{{ user_count or 0 }}</div><div class="lbl">مستخدم</div></div>
+    <div class="stat-tile-2"><span class="n">{{ prompt_count }}</span><span class="l">برومبت</span></div>
+    <div class="stat-tile-2"><span class="n">{{ total_copies }}</span><span class="l">نسخة</span></div>
+    <div class="stat-tile-2"><span class="n">{{ total_shares }}</span><span class="l">مشاركة</span></div>
+    <div class="stat-tile-2"><span class="n">{{ user_count or 0 }}</span><span class="l">مستخدم</span></div>
   </div>
 
   {% if active_ad %}
-  <section class="featured-ad" style="padding: 0; margin-bottom: 64px;">
+  <section class="featured-ad" style="padding: 0; margin-bottom: 56px;">
     <div class="featured-inner">
       <span class="ad-tag">AD · رعاية</span>
       <div class="featured-content">
@@ -180,7 +180,7 @@
       <h2>من نحن</h2>
       <span class="line"></span>
     </div>
-    <p style="color: var(--ink-2); font-size: 18px; line-height: 1.85; max-width: 66ch; font-weight: 500;">
+    <p style="color: var(--fg-2); font-size: 17px; line-height: 1.85; max-width: 66ch;">
       UFOQ مشروع عربي مستقل، يؤمن بأن الذكاء الاصطناعي يجب أن يكون في متناول الجميع —
       وأن البرومبت الجيد هو الفرق بين نتيجة عادية وأخرى استثنائية.
     </p>
@@ -218,8 +218,8 @@ window.addEventListener('scroll', () => {
   const dock = document.querySelector('.dock');
   const fab  = document.querySelector('.fab-search');
   if (y > lastScroll && y > 240){
-    dock.style.transform = 'translateX(-50%) translateY(160%)';
-    if (fab) fab.style.transform = 'translateY(160%)';
+    dock.style.transform = 'translateX(-50%) translateY(180%)';
+    if (fab) fab.style.transform = 'translateY(180%)';
   } else {
     dock.style.transform = 'translateX(-50%) translateY(0)';
     if (fab) fab.style.transform = 'translateY(0)';
