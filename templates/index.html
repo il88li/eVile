@@ -8,7 +8,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/light/style.css">
 <link rel="stylesheet" href="/static/style.css">
 
@@ -34,30 +34,25 @@
 
 <!-- ===== Header ===== -->
 <header class="hdr">
-  <div class="hdr-inner">
-    <a class="logo" href="/">UFOQ</a>
-    <div class="hdr-meta">مكتبة البرومبتات العربية · الإصدار 2.0</div>
-    <div class="hdr-actions">
-      <button class="icon-btn" id="searchToggle" aria-label="بحث" aria-expanded="false">
-        <i class="ph-light ph-magnifying-glass"></i>
-      </button>
-      <a class="icon-btn" href="https://t.me/UFOQ_7" target="_blank" rel="noopener" aria-label="تيليجرام">
-        <i class="ph-light ph-telegram-logo"></i>
-      </a>
-    </div>
+  <a class="logo" href="/">
+    <span class="logo-mark"><i class="ph-light ph-aperture"></i></span>
+    <span class="logo-name">UFOQ</span>
+  </a>
+
+  <div class="hdr-actions">
+    <button class="ic-btn" id="searchToggle" aria-label="بحث" aria-expanded="false">
+      <i class="ph-light ph-magnifying-glass"></i>
+    </button>
+    <a class="ic-btn" href="https://t.me/UFOQ_7" target="_blank" rel="noopener" aria-label="تيليجرام">
+      <i class="ph-light ph-telegram-logo"></i>
+    </a>
   </div>
 
-  <!-- Expanding search bar -->
+  <!-- Expanding search sheet -->
   <div class="search-wrap" id="searchWrap">
     <div class="search-inner">
       <i class="ph-light ph-magnifying-glass search-icon"></i>
-      <input
-        type="text"
-        id="searchInput"
-        class="search-input"
-        placeholder="ابحث عن برومبت…"
-        autocomplete="off"
-      >
+      <input type="text" id="searchInput" class="search-input" placeholder="ابحث…" autocomplete="off">
       <button class="search-cat-chip" id="searchCatBtn" type="button">
         <span id="searchCatLabel">الكل</span>
         <i class="ph-light ph-caret-down"></i>
@@ -83,51 +78,50 @@
 
 <!-- ===== Hero ===== -->
 <section class="hero">
-  <div class="hero-left">
-    <div class="hero-eyebrow">★ مكتبة البرومبتات العربية</div>
-    <h1 class="hero-title">
-      اكتب. انسخ.<br>
-      <em>ابدأ الإبداع.</em>
-    </h1>
-    <p class="hero-sub">
-      مجموعة منتقاة من البرومبتات الاحترافية لأدوات الذكاء الاصطناعي — جاهزة للاستخدام الفوري، بلا تعقيد.
-    </p>
-  </div>
-  <div class="hero-right">
-    <div class="hero-stats">
-      <div class="hero-stat">
-        <strong>{{ library_items|length }}</strong>
-        <span>برومبت</span>
+  <div class="hero-inner">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-eyebrow">
+          <span class="pulse"></span>
+          مكتبة البرومبتات العربية
+        </div>
+        <h1 class="hero-title">
+          اكتشف، انسخ، <em>ابدأ الإبداع</em>.
+        </h1>
+        <p class="hero-sub">
+          مجموعة منتقاة من البرومبتات الاحترافية لأدوات الذكاء الاصطناعي — جاهزة للاستخدام الفوري، بلا تعقيد.
+        </p>
       </div>
-      <div class="hero-stat">
-        <strong>{{ total_copies if total_copies is defined else 0 }}</strong>
-        <span>نسخة</span>
-      </div>
-      <div class="hero-stat">
-        <strong>{{ categories|length }}</strong>
-        <span>تصنيف</span>
+      <div class="hero-stats">
+        <div class="stat-tile">
+          <span class="n">{{ library_items|length }}</span>
+          <span class="l">برومبت</span>
+        </div>
+        <div class="stat-tile">
+          <span class="n">{{ total_copies if total_copies is defined else 0 }}</span>
+          <span class="l">نسخة</span>
+        </div>
+        <div class="stat-tile">
+          <span class="n">{{ categories|length }}</span>
+          <span class="l">تصنيف</span>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===== Rule: section header ===== -->
-<div class="rule">
-  <span class="num">01</span>
-  <span>تصفح المكتبة</span>
-  <span class="line"></span>
-</div>
-
 <!-- ===== Category pills ===== -->
-<div class="pills" id="categoriesBar">
-  <a href="/?cat=all" data-cat="all" class="pill {% if not current_cat or current_cat == 'all' %}active{% endif %}" onclick="chipSelect(event,'all','الكل')">
-    <span class="dot"></span> الكل
-  </a>
-  {% for cat in categories %}
-  <a href="/?cat={{ cat.name }}" data-cat="{{ cat.name }}" class="pill {% if current_cat == cat.name %}active{% endif %}" onclick="chipSelect(event,'{{ cat.name }}','{{ cat.display_name }}')">
-    <span class="dot"></span> {{ cat.display_name }}
-  </a>
-  {% endfor %}
+<div class="pills-wrap">
+  <div class="pills" id="categoriesBar">
+    <a href="/?cat=all" data-cat="all" class="pill {% if not current_cat or current_cat == 'all' %}active{% endif %}" onclick="chipSelect(event,'all','الكل')">
+      الكل
+    </a>
+    {% for cat in categories %}
+    <a href="/?cat={{ cat.name }}" data-cat="{{ cat.name }}" class="pill {% if current_cat == cat.name %}active{% endif %}" onclick="chipSelect(event,'{{ cat.name }}','{{ cat.display_name }}')">
+      {{ cat.display_name }}
+    </a>
+    {% endfor %}
+  </div>
 </div>
 
 <!-- ===== Featured ad ===== -->
@@ -148,8 +142,9 @@
 </section>
 {% endif %}
 
-<!-- ===== Grid ===== -->
-<div class="grid" id="masonryGrid">
+<!-- ===== Masonry ===== -->
+{% if library_items %}
+<div class="masonry" id="masonryGrid">
   {% set ad_index = 0 %}
   {% for item in library_items %}
 
@@ -187,6 +182,18 @@
         {% else %}
         <div class="no-image-placeholder"><i class="ph-light ph-image"></i></div>
         {% endif %}
+
+        <!-- Pinterest-style quick action -->
+        <button
+          class="card-quick copy-btn"
+          data-prompt="{{ item.prompt_text|replace('"', '&quot;') }}"
+          data-id="{{ item.id }}"
+          aria-label="نسخ سريع"
+          onclick="event.stopPropagation();">
+          <span class="card-quick-btn">
+            <i class="ph-light ph-copy"></i>
+          </span>
+        </button>
       </div>
 
       <div class="card-body">
@@ -214,20 +221,21 @@
         </div>
       </div>
     </article>
-  {% else %}
-    <div class="empty-state">
-      <i class="ph-light ph-tray"></i>
-      <p>لا توجد برومبتات بعد</p>
-    </div>
   {% endfor %}
 </div>
+{% else %}
+<div class="empty-state">
+  <i class="ph-light ph-tray"></i>
+  <p>لا توجد برومبتات بعد</p>
+</div>
+{% endif %}
 
-<!-- ===== Floating search FAB (bottom-right) ===== -->
+<!-- ===== Floating search FAB (bottom-right, standalone) ===== -->
 <button class="fab-search" id="fabSearch" aria-label="بحث">
   <i class="ph-light ph-magnifying-glass"></i>
 </button>
 
-<!-- ===== Bottom dock (bottom-center) ===== -->
+<!-- ===== Bottom dock (bottom-center, standalone) ===== -->
 <nav class="dock" id="bottomDock" aria-label="التنقل السريع">
   <a href="/" class="dock-btn active" aria-label="الرئيسية">
     <i class="ph-light ph-house"></i>
@@ -252,7 +260,7 @@
 {% endif %}
 
 <!-- ===== Toast ===== -->
-<div class="toast" id="toast" role="status">تم!</div>
+<div class="toast" id="toast" role="status"></div>
 
 <!-- ===== Scroll top ===== -->
 <button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="أعلى الصفحة">
@@ -269,7 +277,7 @@
       <div class="placeholder" style="display:none;">✻</div>
     </div>
     <div class="mad-body">
-      <div class="mad-eyebrow">★ من رعاة UFOQ</div>
+      <div class="mad-eyebrow">★ رعاية</div>
       <h3 class="mad-title" id="madTitle"></h3>
       <p class="mad-text" id="madText"></p>
       <a href="#" class="mad-btn" id="madBtn" target="_blank" rel="noopener noreferrer">
@@ -309,7 +317,7 @@ function openSearch(){
   searchToggle.classList.add('active');
   searchToggle.setAttribute('aria-expanded', 'true');
   fabSearch.classList.add('active');
-  setTimeout(() => searchInput.focus(), 320);
+  setTimeout(() => searchInput.focus(), 300);
 }
 function closeSearch(){
   searchOpen = false;
@@ -359,7 +367,7 @@ const searchCatDropdown = document.getElementById('searchCatDropdown');
 function positionDropdown(){
   const r = searchCatBtn.getBoundingClientRect();
   searchCatDropdown.style.top  = (r.bottom + 8) + 'px';
-  searchCatDropdown.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 240)) + 'px';
+  searchCatDropdown.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 220)) + 'px';
 }
 searchCatBtn.addEventListener('click', e => {
   e.stopPropagation();
@@ -414,10 +422,10 @@ document.addEventListener('click', e => {
         if (data.success){
           if (countSpan) countSpan.textContent = data.likes;
           likeBtn.classList.add('liked');
-          showToast('❤️ تم الإعجاب');
+          showToast('❤️ تم الإعجاب', 'success');
         }
       })
-      .catch(() => showToast('حدث خطأ', true));
+      .catch(() => showToast('حدث خطأ', 'error'));
     return;
   }
 
@@ -438,8 +446,8 @@ document.addEventListener('click', e => {
       navigator.share({ title, text: 'برومبت من UFOQ', url }).catch(() => {});
     } else {
       navigator.clipboard.writeText('🔮 ' + title + '\n' + url)
-        .then(() => showToast('تم نسخ الرابط'))
-        .catch(() => showToast('خطأ', true));
+        .then(() => showToast('تم نسخ الرابط', 'success'))
+        .catch(() => showToast('خطأ', 'error'));
     }
     return;
   }
@@ -447,6 +455,7 @@ document.addEventListener('click', e => {
   const copyBtn = e.target.closest('.copy-btn');
   if (copyBtn){
     e.preventDefault();
+    e.stopPropagation();
     const prompt = copyBtn.dataset.prompt;
     if (!prompt) return;
     pendingCopyText = prompt;
@@ -523,7 +532,7 @@ function executeCopy(){
       countSpan.textContent = old + 1;
     }
     btn.classList.add('copied');
-    showToast('✓ تم نسخ البرومبت');
+    showToast('✓ تم نسخ البرومبت', 'success');
     setTimeout(() => btn.classList.remove('copied'), 1500);
   }
   pendingCopyText = null;
@@ -546,11 +555,12 @@ function fallbackCopy(text){
    TOAST
    ============================================================ */
 let toastTimeout;
-function showToast(msg, isError){
+function showToast(msg, type){
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.classList.remove('error');
-  if (isError) t.classList.add('error');
+  t.classList.remove('success', 'error');
+  if (type === 'success') t.classList.add('success');
+  if (type === 'error') t.classList.add('error');
   t.classList.add('show');
   clearTimeout(toastTimeout);
   toastTimeout = setTimeout(() => t.classList.remove('show'), 2400);
@@ -565,8 +575,8 @@ window.addEventListener('scroll', () => {
   const dock = document.getElementById('bottomDock');
   const fab  = document.getElementById('fabSearch');
   if (y > lastScroll && y > 240){
-    dock.style.transform = 'translateX(-50%) translateY(160%)';
-    fab.style.transform  = 'translateY(160%)';
+    dock.style.transform = 'translateX(-50%) translateY(180%)';
+    fab.style.transform  = 'translateY(180%)';
   } else {
     dock.style.transform = 'translateX(-50%) translateY(0)';
     fab.style.transform  = 'translateY(0)';
@@ -600,9 +610,10 @@ function openPromptFromURL(){
   const card = document.querySelector(`.card[data-id="${id}"]`);
   if (!card) return;
   card.scrollIntoView({ behavior:'smooth', block:'center' });
-  card.style.transition = 'box-shadow 400ms ease';
-  card.style.boxShadow  = '10px 10px 0 var(--accent)';
-  setTimeout(() => { card.style.boxShadow = ''; }, 3800);
+  card.style.transition = 'box-shadow 400ms ease, transform 400ms ease';
+  card.style.boxShadow = '0 0 0 2px var(--accent), 0 24px 48px -12px rgba(255,106,44,0.5)';
+  card.style.transform = 'translateY(-4px)';
+  setTimeout(() => { card.style.boxShadow = ''; card.style.transform = ''; }, 3800);
 }
 
 /* ============================================================
