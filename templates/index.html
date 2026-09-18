@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UFOQ — مكتبة البرومبتات العربية</title>
-<meta name="description" content="مجموعة منتقاة من البرومبتات الاحترافية لأدوات الذكاء الاصطناعي. اختر، انسخ، وابدأ الإبداع.">
+<meta name="description" content="مجموعة منتقاة من البرومبتات الاحترافية لأدوات الذكاء الاصطناعي.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;600;700;900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/light/style.css">
 <link rel="stylesheet" href="/static/style.css">
 
@@ -23,88 +23,88 @@
 <div class="update-overlay" id="updateOverlay">
   <div class="update-box">
     <div class="icon"><i class="ph-light ph-arrows-clockwise"></i></div>
-    <h2>تحديثٌ جديد متاح</h2>
-    <p>أضفنا برومبتات جديدة وحسّنّا التصنيفات. حدّث الصفحة للاستفادة.</p>
+    <h2>تحديث جديد متاح</h2>
+    <p>أضفنا برومبتات جديدة وحسّنّا التجربة. حدّث الصفحة للمتابعة.</p>
     <button class="btn-update" onclick="location.reload()">
-      <i class="ph-light ph-16 ph-arrow-clockwise"></i>
+      <i class="ph-light ph-arrow-clockwise"></i>
       تحديث الآن
     </button>
   </div>
 </div>
 
-<!-- ===== Top bar ===== -->
-<header class="topbar">
-  <div class="topbar-inner">
-    <a class="brand" href="/">UFOQ</a>
-
-    <button class="search-trigger" id="searchToggle" type="button">
-      <i class="ph-light ph-18 ph-magnifying-glass"></i>
-      <span>ابحث في المكتبة…</span>
-      <kbd>⌘K</kbd>
-    </button>
-
-    <nav class="topbar-nav" aria-label="روابط">
-      <a href="/about">حول</a>
-      <a href="https://t.me/UFOQ_7" target="_blank" rel="noopener">تيليجرام</a>
-    </nav>
+<!-- ===== Header ===== -->
+<header class="hdr">
+  <div class="hdr-inner">
+    <a class="logo" href="/">UFOQ</a>
+    <div class="hdr-actions">
+      <button class="icon-btn" id="searchToggle" aria-label="بحث" aria-expanded="false">
+        <i class="ph-light ph-magnifying-glass"></i>
+      </button>
+      <a class="icon-btn" href="https://t.me/UFOQ_7" target="_blank" rel="noopener" aria-label="تيليجرام">
+        <i class="ph-light ph-telegram-logo"></i>
+      </a>
+    </div>
   </div>
 
-  <div class="search-panel" id="searchPanel">
+  <!-- Expanding search bar -->
+  <div class="search-wrap" id="searchWrap">
     <div class="search-inner">
-      <i class="ph-light ph-18 search-icon ph-magnifying-glass"></i>
-      <input type="text" id="searchInput" placeholder="اكتب كلمة… مثلاً: تصميم، كتابة، برمجة" autocomplete="off">
+      <i class="ph-light ph-magnifying-glass search-icon"></i>
+      <input
+        type="text"
+        id="searchInput"
+        class="search-input"
+        placeholder="ابحث عن برومبت…"
+        autocomplete="off"
+      >
       <button class="search-cat-chip" id="searchCatBtn" type="button">
         <span id="searchCatLabel">الكل</span>
         <i class="ph-light ph-caret-down"></i>
+      </button>
+      <button class="search-close" id="searchClose" type="button" aria-label="إغلاق">
+        <i class="ph-light ph-x"></i>
       </button>
     </div>
   </div>
 </header>
 
-<!-- Category dropdown -->
+<!-- ===== Category dropdown ===== -->
 <div class="search-cat-dropdown" id="searchCatDropdown" role="menu">
-  <a href="#" class="active" data-cat="all" onclick="selectSearchCategory(event,'all','الكل')" role="menuitem"><span class="dot"></span> الكل</a>
+  <a href="#" class="active" data-cat="all" onclick="selectSearchCategory(event,'all','الكل')" role="menuitem">
+    <span class="dot"></span> الكل
+  </a>
   {% for cat in categories %}
-  <a href="#" data-cat="{{ cat.name }}" onclick="selectSearchCategory(event,'{{ cat.name }}','{{ cat.display_name }}')" role="menuitem"><span class="dot"></span> {{ cat.display_name }}</a>
+  <a href="#" data-cat="{{ cat.name }}" onclick="selectSearchCategory(event,'{{ cat.name }}','{{ cat.display_name }}')" role="menuitem">
+    <span class="dot"></span> {{ cat.display_name }}
+  </a>
   {% endfor %}
 </div>
 
-<!-- ===== Hero Bento ===== -->
+<!-- ===== Hero ===== -->
 <section class="hero">
-  <div class="hero-grid">
-    <div class="hero-main">
-      <div>
-        <span class="eyebrow">مكتبة البرومبتات العربية</span>
-        <h1 class="hero-title">
-          اكتب. <em>انسخ.</em><br>
-          ابدأ الإبداع.
-        </h1>
-        <p class="hero-sub">
-          مجموعة منتقاة من البرومبتات الاحترافية لأدوات الذكاء الاصطناعي — جاهزة للاستخدام، بلا تعقيد.
-        </p>
-      </div>
-    </div>
-
-    <div class="hero-stat">
-      <div class="num">{{ library_items|length }}</div>
-      <div class="lbl"><i class="ph-light ph-16 ph-stack"></i> برومبت</div>
-    </div>
-
-    <div class="hero-stat dark">
-      <div class="num">{{ total_copies if total_copies is defined else 0 }}</div>
-      <div class="lbl"><i class="ph-light ph-16 ph-copy"></i> نسخة</div>
-    </div>
+  <div class="hero-eyebrow">مكتبة البرومبتات العربية</div>
+  <h1 class="hero-title">
+    اكتشف، انسخ،<br>
+    <em>ابدأ الإبداع.</em>
+  </h1>
+  <p class="hero-sub">
+    مجموعة منتقاة من البرومبتات الاحترافية لأدوات الذكاء الاصطناعي — جاهزة للاستخدام الفوري.
+  </p>
+  <div class="hero-stats">
+    <span><strong>{{ library_items|length }}</strong> برومبت</span>
+    <span><strong>{{ total_copies if total_copies is defined else 0 }}</strong> نسخة</span>
+    <span><strong>{{ categories|length }}</strong> تصنيف</span>
   </div>
 </section>
 
-<!-- ===== Category chips ===== -->
-<div class="chip-row-wrap">
-  <div class="chip-row" id="categoriesBar">
-    <a href="/?cat=all" data-cat="all" class="chip {% if not current_cat or current_cat == 'all' %}active{% endif %}" onclick="chipSelect(event,'all','الكل')">
+<!-- ===== Category pills ===== -->
+<div class="pills-wrap">
+  <div class="pills" id="categoriesBar">
+    <a href="/?cat=all" data-cat="all" class="pill {% if not current_cat or current_cat == 'all' %}active{% endif %}" onclick="chipSelect(event,'all','الكل')">
       <span class="dot"></span> الكل
     </a>
     {% for cat in categories %}
-    <a href="/?cat={{ cat.name }}" data-cat="{{ cat.name }}" class="chip {% if current_cat == cat.name %}active{% endif %}" onclick="chipSelect(event,'{{ cat.name }}','{{ cat.display_name }}')">
+    <a href="/?cat={{ cat.name }}" data-cat="{{ cat.name }}" class="pill {% if current_cat == cat.name %}active{% endif %}" onclick="chipSelect(event,'{{ cat.name }}','{{ cat.display_name }}')">
       <span class="dot"></span> {{ cat.display_name }}
     </a>
     {% endfor %}
@@ -115,15 +115,13 @@
 {% if active_ads and active_ads|length > 0 %}
 {% set ad = active_ads[0] %}
 <section class="featured-ad">
-  <div class="featured-ad-inner">
-    <div class="featured-ad-content">
+  <div class="featured-inner">
+    <span class="ad-tag">AD</span>
+    <div class="featured-content">
       <div class="title">{{ ad.title }}</div>
       <div class="text">{{ ad.text }}</div>
     </div>
-    {% if ad.image_url %}
-    <img class="featured-ad-img" src="{{ ad.image_url }}" alt="{{ ad.title }}" loading="lazy">
-    {% endif %}
-    <a href="{{ ad.button_link }}" class="featured-ad-btn" target="_blank" rel="noopener noreferrer">
+    <a href="{{ ad.button_link }}" class="featured-cta" target="_blank" rel="noopener noreferrer">
       {{ ad.button_text or 'زيارة' }}
       <i class="ph-light ph-arrow-up-left"></i>
     </a>
@@ -131,15 +129,15 @@
 </section>
 {% endif %}
 
-<!-- ===== Masonry grid ===== -->
-<div class="masonry" id="masonryGrid">
+<!-- ===== Grid ===== -->
+<div class="grid" id="masonryGrid">
   {% set ad_index = 0 %}
   {% for item in library_items %}
 
-    {% if loop.index0 > 0 and loop.index0 % 5 == 0 and active_ads and active_ads|length > 1 and ad_index < active_ads|length - 1 %}
+    {% if loop.index0 > 0 and loop.index0 % 6 == 0 and active_ads and active_ads|length > 1 and ad_index < active_ads|length - 1 %}
       {% set ad = active_ads[ad_index + 1] %}
-      <div class="prompt-card ad-card" data-ad-id="{{ ad.id }}">
-        <div class="card-image-wrap">
+      <article class="card ad-card" data-ad-id="{{ ad.id }}">
+        <div class="card-media">
           {% if ad.image_url %}
           <img src="{{ ad.image_url }}" alt="{{ ad.title }}" loading="lazy">
           {% else %}
@@ -147,24 +145,25 @@
           {% endif %}
         </div>
         <div class="card-body">
-          <div class="card-title">{{ ad.title }}</div>
+          <div class="card-cat">رعاية</div>
+          <h3 class="card-title">{{ ad.title }}</h3>
           <div class="card-author">{{ ad.text }}</div>
-          <div class="card-actions" style="grid-template-columns:1fr;">
+          <div class="card-actions">
             <a href="{{ ad.button_link }}" target="_blank" rel="noopener noreferrer" class="card-btn">
               {{ ad.button_text or 'زيارة' }}
-              <i class="ph-light ph-16 ph-arrow-up-left"></i>
+              <i class="ph-light ph-arrow-up-left"></i>
             </a>
           </div>
         </div>
-      </div>
+      </article>
       {% set ad_index = ad_index + 1 %}
     {% endif %}
 
-    <article class="prompt-card" data-id="{{ item.id }}" data-keywords="{{ item.keywords or '' }}" data-category="{{ item.category }}">
-      <div class="card-image-wrap">
+    <article class="card" data-id="{{ item.id }}" data-keywords="{{ item.keywords or '' }}" data-category="{{ item.category }}">
+      <div class="card-media">
         {% if item.image_url %}
         <img src="{{ item.image_url }}" alt="{{ item.title }}" loading="lazy"
-             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+             onerror="this.style.display='none';this.nextElementSibling.style.display='grid';">
         <div class="no-image-placeholder" style="display:none;"><i class="ph-light ph-image"></i></div>
         {% else %}
         <div class="no-image-placeholder"><i class="ph-light ph-image"></i></div>
@@ -172,7 +171,7 @@
       </div>
 
       <div class="card-body">
-        <div class="card-eyebrow">{{ item.category }}</div>
+        <div class="card-cat">{{ item.category }}</div>
         <h3 class="card-title">{{ item.title }}</h3>
         {% if item.publisher %}
         <div class="card-author">
@@ -183,7 +182,6 @@
         <div class="card-actions">
           <button class="card-btn copy-btn" data-prompt="{{ item.prompt_text|replace('"', '&quot;') }}" data-id="{{ item.id }}" aria-label="نسخ">
             <i class="ph-light ph-copy"></i>
-            <span>نسخ</span>
             <span class="count">{{ item.copy_count or 0 }}</span>
           </button>
           <button class="card-btn like-btn" data-id="{{ item.id }}" aria-label="إعجاب">
@@ -205,7 +203,12 @@
   {% endfor %}
 </div>
 
-<!-- ===== Floating bottom dock ===== -->
+<!-- ===== Floating search FAB (bottom-right) ===== -->
+<button class="fab-search" id="fabSearch" aria-label="بحث">
+  <i class="ph-light ph-magnifying-glass"></i>
+</button>
+
+<!-- ===== Bottom dock (bottom-center) ===== -->
 <nav class="dock" id="bottomDock" aria-label="التنقل السريع">
   <a href="/" class="dock-btn active" aria-label="الرئيسية">
     <i class="ph-light ph-house"></i>
@@ -213,61 +216,33 @@
   <a href="/about" class="dock-btn" aria-label="حول">
     <i class="ph-light ph-info"></i>
   </a>
-  <button class="dock-btn" id="searchToggleDock" aria-label="بحث">
-    <i class="ph-light ph-magnifying-glass"></i>
-    <span class="badge" id="searchBadge">0</span>
-  </button>
-
-  <div class="dock-divider" aria-hidden="true"></div>
-
-  <button class="dock-cols" onclick="openColsModal()" aria-label="عدد البطاقات في الصف">
-    <i class="ph-light ph-squares-four"></i>
-  </button>
+  <a href="https://t.me/UFOQ_7" target="_blank" rel="noopener" class="dock-btn" aria-label="تيليجرام">
+    <i class="ph-light ph-telegram-logo"></i>
+  </a>
 </nav>
 
-<!-- ===== Cols modal ===== -->
-<div class="modal" id="colsModal" role="dialog" aria-modal="true" aria-labelledby="colsTitle">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeColsModal()" aria-label="إغلاق">
-      <i class="ph-light ph-x"></i>
-    </button>
-    <div class="modal-eyebrow">View</div>
-    <h2 class="modal-title" id="colsTitle">كم بطاقة في الصف؟</h2>
-    <p class="modal-desc">اختر ما يناسب شاشتك. يتكيف التخطيط تلقائياً مع حجم الجهاز.</p>
-
-    <div class="cols-options" id="colsScroll">
-      <div class="cols-option" data-cols="1" onclick="setCols(1)">
-        <div class="bars"><span style="height:60%"></span></div>
-        <div class="num">1</div>
-        <div class="lbl">عمود</div>
-      </div>
-      <div class="cols-option" data-cols="2" onclick="setCols(2)">
-        <div class="bars"><span style="height:60%"></span><span style="height:40%"></span></div>
-        <div class="num">2</div>
-        <div class="lbl">عمودان</div>
-      </div>
-      <div class="cols-option" data-cols="3" onclick="setCols(3)">
-        <div class="bars"><span style="height:60%"></span><span style="height:40%"></span><span style="height:70%"></span></div>
-        <div class="num">3</div>
-        <div class="lbl">3 أعمدة</div>
-      </div>
-      <div class="cols-option active" data-cols="4" onclick="setCols(4)">
-        <div class="bars"><span style="height:60%"></span><span style="height:40%"></span><span style="height:70%"></span><span style="height:50%"></span></div>
-        <div class="num">4</div>
-        <div class="lbl">4 أعمدة</div>
-      </div>
-      <div class="cols-option" data-cols="5" onclick="setCols(5)">
-        <div class="bars"><span style="height:60%"></span><span style="height:40%"></span><span style="height:70%"></span><span style="height:50%"></span><span style="height:65%"></span></div>
-        <div class="num">5</div>
-        <div class="lbl">5 أعمدة</div>
-      </div>
-    </div>
-  </div>
+<!-- ===== Floating ad bar ===== -->
+{% if active_ads and active_ads|length > 2 %}
+<div id="floatingAdBar" class="floating-ad-bar">
+  <span class="ad-text">{{ active_ads[2].title }}</span>
+  <a href="{{ active_ads[2].button_link }}" target="_blank" rel="noopener" class="ad-btn">{{ active_ads[2].button_text }}</a>
+  <button class="close-btn" onclick="document.getElementById('floatingAdBar').classList.add('hidden')" aria-label="إغلاق الإعلان">
+    <i class="ph-light ph-x"></i>
+  </button>
 </div>
+{% endif %}
+
+<!-- ===== Toast ===== -->
+<div class="toast" id="toast" role="status">تم!</div>
+
+<!-- ===== Scroll top ===== -->
+<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="أعلى الصفحة">
+  <i class="ph-light ph-arrow-up"></i>
+</button>
 
 <!-- ===== Mandatory ad modal ===== -->
-<div class="modal" id="mandatoryAdModal" role="dialog" aria-modal="true">
-  <div class="modal-box">
+<div class="mandatory-ad-modal" id="mandatoryAdModal" role="dialog" aria-modal="true">
+  <div class="mad-box">
     <div class="mad-timer"><div class="mad-timer-bar" id="madTimerBar"></div></div>
     <div class="mad-media">
       <img id="madImage" src="" alt="" loading="lazy" style="display:none;"
@@ -286,14 +261,6 @@
   </div>
 </div>
 
-<!-- ===== Toast ===== -->
-<div class="toast" id="toast" role="status">تم النسخ!</div>
-
-<!-- ===== Scroll top ===== -->
-<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="أعلى الصفحة">
-  <i class="ph-light ph-arrow-up"></i>
-</button>
-
 <script>
 /* ============================================================
    STATE
@@ -311,27 +278,43 @@ const UPDATE_INTERVAL = 60000;
 /* ============================================================
    SEARCH
    ============================================================ */
-const searchToggle   = document.getElementById('searchToggle');
-const searchToggleDock = document.getElementById('searchToggleDock');
-const searchPanel    = document.getElementById('searchPanel');
-const searchInput    = document.getElementById('searchInput');
-const searchBadge    = document.getElementById('searchBadge');
+const searchToggle = document.getElementById('searchToggle');
+const searchWrap   = document.getElementById('searchWrap');
+const searchInput  = document.getElementById('searchInput');
+const searchClose  = document.getElementById('searchClose');
+const searchBadge  = document.getElementById('searchBadge'); // may not exist
+const fabSearch    = document.getElementById('fabSearch');
 
-function toggleSearch(){
-  searchOpen = !searchOpen;
-  searchToggle.classList.toggle('active', searchOpen);
-  searchToggleDock.classList.toggle('active', searchOpen);
-  searchPanel.classList.toggle('open', searchOpen);
-  if (searchOpen) setTimeout(() => searchInput.focus(), 250);
-  else { searchInput.value = ''; currentSearchQuery = ''; filterPrompts(); }
+function openSearch(){
+  searchOpen = true;
+  searchWrap.classList.add('open');
+  searchToggle.classList.add('active');
+  searchToggle.setAttribute('aria-expanded', 'true');
+  fabSearch.classList.add('active');
+  setTimeout(() => searchInput.focus(), 300);
 }
-searchToggle.addEventListener('click', toggleSearch);
-searchToggleDock.addEventListener('click', toggleSearch);
+function closeSearch(){
+  searchOpen = false;
+  searchWrap.classList.remove('open');
+  searchToggle.classList.remove('active');
+  searchToggle.setAttribute('aria-expanded', 'false');
+  fabSearch.classList.remove('active');
+  searchInput.value = '';
+  currentSearchQuery = '';
+  filterPrompts();
+}
+function toggleSearch(){
+  if (searchOpen) closeSearch();
+  else openSearch();
+}
 
-// shortcut
+searchToggle.addEventListener('click', toggleSearch);
+fabSearch.addEventListener('click', toggleSearch);
+searchClose.addEventListener('click', closeSearch);
+
 document.addEventListener('keydown', (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === 'k'){ e.preventDefault(); toggleSearch(); }
-  if (e.key === 'Escape' && searchOpen) toggleSearch();
+  if (e.key === 'Escape' && searchOpen) closeSearch();
 });
 
 /* ============================================================
@@ -339,8 +322,10 @@ document.addEventListener('keydown', (e) => {
    ============================================================ */
 function setCategory(cat, label){
   currentSearchCategory = cat;
-  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.cat === cat));
-  document.querySelectorAll('#searchCatDropdown a').forEach(a => a.classList.toggle('active', a.dataset.cat === cat));
+  document.querySelectorAll('.pill').forEach(c =>
+    c.classList.toggle('active', c.dataset.cat === cat));
+  document.querySelectorAll('#searchCatDropdown a').forEach(a =>
+    a.classList.toggle('active', a.dataset.cat === cat));
   document.getElementById('searchCatLabel').textContent = (cat === 'all' ? 'الكل' : label);
   filterPrompts();
 }
@@ -358,8 +343,8 @@ const searchCatDropdown = document.getElementById('searchCatDropdown');
 
 function positionDropdown(){
   const r = searchCatBtn.getBoundingClientRect();
-  searchCatDropdown.style.top = (r.bottom + 8) + 'px';
-  searchCatDropdown.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 200)) + 'px';
+  searchCatDropdown.style.top  = (r.bottom + 8) + 'px';
+  searchCatDropdown.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 220)) + 'px';
 }
 searchCatBtn.addEventListener('click', e => {
   e.stopPropagation();
@@ -387,63 +372,17 @@ searchInput.addEventListener('input', () => {
 });
 
 function filterPrompts(){
-  const cards = document.querySelectorAll('.prompt-card:not(.ad-card)');
+  const cards = document.querySelectorAll('.card:not(.ad-card)');
   if (!cards.length) return;
-  let count = 0;
   cards.forEach(card => {
     const cat = card.dataset.category;
     const title = card.querySelector('.card-title')?.textContent?.toLowerCase() || '';
     const keywords = (card.dataset.keywords || '').toLowerCase();
     const matchCat = currentSearchCategory === 'all' || cat === currentSearchCategory;
     const matchText = !currentSearchQuery || title.includes(currentSearchQuery) || keywords.includes(currentSearchQuery);
-    if (matchCat && matchText){ card.style.display=''; count++; }
-    else card.style.display='none';
-  });
-  if (currentSearchQuery || currentSearchCategory !== 'all'){
-    searchBadge.textContent = count;
-    searchBadge.classList.add('show');
-  } else {
-    searchBadge.classList.remove('show');
-  }
-}
-
-/* ============================================================
-   COLUMNS
-   ============================================================ */
-function applyCardsPerRow(){
-  const g = document.getElementById('masonryGrid');
-  if (!g) return;
-  const u = parseInt(localStorage.getItem('cardsPerRow') || '4', 10);
-  const w = window.innerWidth;
-  let cols = u;
-  if (w <= 400) cols = 1;
-  else if (w <= 760) cols = Math.min(u, 2);
-  else if (w <= 1100) cols = Math.min(u, 3);
-  g.style.columnCount = cols;
-}
-window.addEventListener('resize', applyCardsPerRow);
-
-function openColsModal(){
-  document.getElementById('colsModal').classList.add('open');
-  const sel = parseInt(localStorage.getItem('cardsPerRow') || '4', 10);
-  document.querySelectorAll('#colsScroll .cols-option').forEach(el => {
-    el.classList.toggle('active', parseInt(el.dataset.cols) === sel);
+    card.style.display = (matchCat && matchText) ? '' : 'none';
   });
 }
-function closeColsModal(){
-  document.getElementById('colsModal').classList.remove('open');
-}
-function setCols(n){
-  localStorage.setItem('cardsPerRow', n);
-  document.querySelectorAll('#colsScroll .cols-option').forEach(el => {
-    el.classList.toggle('active', parseInt(el.dataset.cols) === n);
-  });
-  setTimeout(closeColsModal, 260);
-  applyCardsPerRow();
-}
-document.getElementById('colsModal').addEventListener('click', function(e){
-  if (e.target === this) closeColsModal();
-});
 
 /* ============================================================
    COPY / LIKE / SHARE
@@ -477,7 +416,7 @@ document.addEventListener('click', e => {
       countSpan.textContent = old + 1;
     }
     fetch('/api/prompt/' + id + '/share', { method: 'POST' }).catch(() => {});
-    const card = shareBtn.closest('.prompt-card');
+    const card = shareBtn.closest('.card');
     const title = card?.querySelector('.card-title')?.textContent || 'برومبت';
     const url = window.location.origin + window.location.pathname + '?prompt_id=' + id;
     if (navigator.share){
@@ -609,9 +548,13 @@ let lastScroll = 0;
 window.addEventListener('scroll', () => {
   const y = window.scrollY;
   const dock = document.getElementById('bottomDock');
-  if (dock){
-    if (y > lastScroll && y > 200) dock.style.transform = 'translateX(-50%) translateY(140%)';
-    else dock.style.transform = 'translateX(-50%) translateY(0)';
+  const fab  = document.getElementById('fabSearch');
+  if (y > lastScroll && y > 240){
+    dock.style.transform = 'translateX(-50%) translateY(160%)';
+    fab.style.transform  = 'translateY(160%)';
+  } else {
+    dock.style.transform = 'translateX(-50%) translateY(0)';
+    fab.style.transform  = 'translateY(0)';
   }
   lastScroll = y;
   const st = document.getElementById('scrollTopBtn');
@@ -639,11 +582,11 @@ function openPromptFromURL(){
   const params = new URLSearchParams(window.location.search);
   const id = params.get('prompt_id');
   if (!id) return;
-  const card = document.querySelector(`.prompt-card[data-id="${id}"]`);
+  const card = document.querySelector(`.card[data-id="${id}"]`);
   if (!card) return;
   card.scrollIntoView({ behavior:'smooth', block:'center' });
   card.style.transition = 'box-shadow 400ms ease';
-  card.style.boxShadow = '0 0 0 3px var(--accent), 0 20px 40px -12px rgba(232,93,4,0.4)';
+  card.style.boxShadow  = '0 0 0 3px var(--accent), 0 20px 40px -12px rgba(255,77,28,0.4)';
   setTimeout(() => { card.style.boxShadow = ''; }, 3800);
 }
 
@@ -651,11 +594,6 @@ function openPromptFromURL(){
    INIT
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('cardsPerRow') || '4';
-  document.querySelectorAll('#colsScroll .cols-option').forEach(el => {
-    el.classList.toggle('active', parseInt(el.dataset.cols) === parseInt(saved));
-  });
-  applyCardsPerRow();
   openPromptFromURL();
   checkForUpdate();
   setInterval(checkForUpdate, UPDATE_INTERVAL);
