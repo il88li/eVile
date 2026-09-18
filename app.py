@@ -1,22 +1,19 @@
 import os
-import re
 import logging
 import secrets
 import traceback
-from datetime import datetime, timedelta
+from datetime import datetime
 from functools import wraps
 from urllib.parse import urlparse
 
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_caching import Cache
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
-from flask_session import Session
 from sqlalchemy import inspect, text, func
-from sqlalchemy.orm import joinedload
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -44,15 +41,13 @@ class Config:
         SECRET_KEY = os.urandom(32).hex()
 
     ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
+
     DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///ufoq.db')
+    # Vercel Postgres sometimes provides postgres:// (deprecated) instead of postgresql://
     if DATABASE_URL.startswith('postgres://'):
         DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_POOL_SIZE = int(os.getenv('DB_POOL_SIZE', '5'))
-    SQLALCHEMY_MAX_OVERFLOW = int(os.getenv('DB_MAX_OVERFLOW', '10'))
-    SQLALCHEMY_POOL_PRE_PING = True
-    SQLALCHEMY_POOL_RECYCLE = 300
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_pre_ping': True,
         'pool_recycle': 300,
@@ -60,20 +55,20 @@ class Config:
         'pool_reset_on_return': 'rollback',
     }
 
-    SESSION_TYPE = 'sqlalchemy'
-    SESSION_SQLALCHEMY_TABLE = 'flask_sessions'
-    SESSION_PERMANENT = True
-    SESSION_USE_SIGNER = True
-    SESSION_KEY_PREFIX = 'ufoq_session:'
-    PERMANENT_SESSION_LIFETIME = 2592000
+    # ────── Native cookie-based sessions (serverless-safe) ──────
+    # We no longer use flask-session / SQLAlchemy sessions because
+    # they cause FUNCTION_INVOCATION_FAILED on Vercel serverless.
     SESSION_COOKIE_NAME = 'ufoq_session'
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
-    SESSION_COOKIE_SECURE = os.getenv('RENDER') is not None or os.getenv('FORCE_HTTPS') == '1'
+    SESSION_COOKIE_SECURE = bool(os.getenv('RENDER')) or os.getenv('FORCE_HTTPS') == '1'
+    SESSION_PERMANENT = True
+    PERMANENT_SESSION_LIFETIME = 60 * 60 * 24 * 30  # 30 days
     SESSION_REFRESH_EACH_REQUEST = True
 
     CACHE_TYPE = 'SimpleCache'
     CACHE_DEFAULT_TIMEOUT = 300
+
     RATELIMIT_ENABLED = True
     RATELIMIT_STORAGE_URI = os.getenv('REDIS_URL', 'memory://')
     RATELIMIT_STRATEGY = 'fixed-window'
@@ -90,7 +85,6 @@ limiter = Limiter(
     strategy='fixed-window'
 )
 talisman = Talisman()
-session_ext = Session()
 
 # ==================== Models ====================
 class Category(db.Model):
@@ -195,7 +189,7 @@ def log_error(error_type, url, details=None):
             query = query.filter_by(details=details)
         else:
             query = query.filter(ErrorLog.details.is_(None))
-        
+
         existing = query.first()
         if existing:
             existing.count += 1
@@ -217,30 +211,36 @@ def log_error(error_type, url, details=None):
         logger.error(f"Failed to log error to DB: {e}")
 
 def run_light_migrations():
+    """Add missing columns — safe in serverless (idempotent)."""
     try:
         engine = db.engine
         inspector = inspect(engine)
-        if 'error_logs' not in inspector.get_table_names():
+        existing_tables = set(inspector.get_table_names())
+
+        # 1) error_logs table
+        if 'error_logs' not in existing_tables:
             try:
-                engine.execute(text("""
-                    CREATE TABLE IF NOT EXISTS error_logs (
-                        id SERIAL PRIMARY KEY,
-                        error_type VARCHAR(20) DEFAULT '404',
-                        url VARCHAR(500) NOT NULL,
-                        referer VARCHAR(500),
-                        user_agent VARCHAR(300),
-                        ip_address VARCHAR(50),
-                        details TEXT,
-                        count INTEGER DEFAULT 1 NOT NULL,
-                        ignored BOOLEAN DEFAULT FALSE,
-                        last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    )
-                """))
+                with engine.begin() as conn:
+                    conn.execute(text("""
+                        CREATE TABLE IF NOT EXISTS error_logs (
+                            id SERIAL PRIMARY KEY,
+                            error_type VARCHAR(20) DEFAULT '404',
+                            url VARCHAR(500) NOT NULL,
+                            referer VARCHAR(500),
+                            user_agent VARCHAR(300),
+                            ip_address VARCHAR(50),
+                            details TEXT,
+                            count INTEGER DEFAULT 1 NOT NULL,
+                            ignored BOOLEAN DEFAULT FALSE,
+                            last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        )
+                    """))
                 logger.info("Created error_logs table")
             except Exception as e:
                 logger.warning(f"Could not create error_logs: {e}")
-        
+
+        # 2) add missing columns
         required_columns = {
             'prompt_library': {
                 'publisher_link': 'VARCHAR(500)',
@@ -254,12 +254,15 @@ def run_light_migrations():
             },
         }
         for table_name, cols in required_columns.items():
-            if table_name in inspector.get_table_names():
+            if table_name in existing_tables:
                 existing_cols = {col['name'] for col in inspector.get_columns(table_name)}
                 for col_name, col_def in cols.items():
                     if col_name not in existing_cols:
                         try:
-                            engine.execute(text(f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col_def}"))
+                            with engine.begin() as conn:
+                                conn.execute(text(
+                                    f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col_def}"
+                                ))
                             logger.info(f"Added column {table_name}.{col_name}")
                         except Exception as e:
                             logger.warning(f"Could not add {table_name}.{col_name}: {e}")
@@ -292,23 +295,26 @@ def index():
     try:
         site = SiteSetting.query.first()
         if site and site.status == 'off':
-            return render_template('index.html', site_status='off', offline_message=site.offline_message)
+            return render_template('index.html', site_status='off',
+                                   offline_message=site.offline_message,
+                                   categories=[], library_items=[], active_ads=[])
 
         categories = get_categories_cached()
         library_items = get_library_items_cached()
-        
-        active_ads_query = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).limit(3).all()
-        active_ads = []
-        for ad in active_ads_query:
-            active_ads.append({
-                'id': ad.id,
-                'title': ad.title,
-                'text': ad.text,
-                'image_url': ad.image_url,
-                'button_text': ad.button_text,
-                'button_link': ad.button_link,
-                'duration_seconds': ad.duration_seconds,
-            })
+
+        active_ads_query = (LibraryAd.query
+                            .filter_by(is_active=True)
+                            .order_by(LibraryAd.created_at.desc())
+                            .limit(3).all())
+        active_ads = [{
+            'id': ad.id,
+            'title': ad.title,
+            'text': ad.text,
+            'image_url': ad.image_url,
+            'button_text': ad.button_text,
+            'button_link': ad.button_link,
+            'duration_seconds': ad.duration_seconds,
+        } for ad in active_ads_query]
 
         return render_template('index.html',
                                categories=categories,
@@ -317,7 +323,8 @@ def index():
                                site_status='on')
     except Exception as e:
         logger.error(f"Index error: {e}\n{traceback.format_exc()}")
-        return render_template('index.html', site_status='on', categories=[], library_items=[], active_ads=[])
+        return render_template('index.html', site_status='on',
+                               categories=[], library_items=[], active_ads=[])
 
 @main_bp.route('/about')
 def about_page():
@@ -325,8 +332,11 @@ def about_page():
         prompt_count = PromptLibrary.query.count()
         total_copies = db.session.query(func.sum(PromptLibrary.copy_count)).scalar() or 0
         total_shares = db.session.query(func.sum(PromptLibrary.share_count)).scalar() or 0
-        
-        active_ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
+
+        active_ad = (LibraryAd.query
+                     .filter_by(is_active=True)
+                     .order_by(LibraryAd.created_at.desc())
+                     .first())
         ad_dict = None
         if active_ad:
             ad_dict = {
@@ -338,7 +348,7 @@ def about_page():
                 'button_link': active_ad.button_link,
                 'duration_seconds': active_ad.duration_seconds,
             }
-        
+
         return render_template('about.html',
                                prompt_count=prompt_count,
                                total_copies=total_copies,
@@ -346,7 +356,8 @@ def about_page():
                                active_ad=ad_dict)
     except Exception as e:
         logger.error(f"About error: {e}\n{traceback.format_exc()}")
-        return render_template('about.html', prompt_count=0, total_copies=0, total_shares=0, active_ad=None)
+        return render_template('about.html', prompt_count=0,
+                               total_copies=0, total_shares=0, active_ad=None)
 
 @main_bp.route('/robots.txt')
 def robots_txt():
@@ -365,17 +376,19 @@ def favicon():
 def health_check():
     try:
         db.session.execute(text('SELECT 1'))
-        return jsonify({'status': 'ok', 'db': 'connected', 'timestamp': datetime.utcnow().isoformat()})
+        return jsonify({'status': 'ok', 'db': 'connected',
+                        'timestamp': datetime.utcnow().isoformat()})
     except Exception as e:
         logger.error(f"Health check failed: {e}")
-        return jsonify({'status': 'error', 'db': 'disconnected', 'timestamp': datetime.utcnow().isoformat()}), 503
+        return jsonify({'status': 'error', 'db': 'disconnected',
+                        'timestamp': datetime.utcnow().isoformat()}), 503
 
 @main_bp.route('/api/version')
 def version():
     try:
         with open('version.txt', 'r') as f:
             ver = f.read().strip()
-    except:
+    except Exception:
         ver = str(int(datetime.utcnow().timestamp()))
     return jsonify({'version': ver})
 
@@ -424,7 +437,10 @@ def track_share(item_id):
 @api_bp.route('/mandatory-ad')
 def get_mandatory_ad():
     try:
-        ad = LibraryAd.query.filter_by(is_active=True).order_by(LibraryAd.created_at.desc()).first()
+        ad = (LibraryAd.query
+              .filter_by(is_active=True)
+              .order_by(LibraryAd.created_at.desc())
+              .first())
         if not ad:
             return jsonify({'success': False, 'message': 'No active ad'}), 404
         return jsonify({
@@ -453,7 +469,7 @@ def create_prompt_from_bot():
         logger.error("BOT_API_KEY not set in environment")
         return jsonify({'success': False, 'message': 'Server configuration error'}), 500
     if not api_key or api_key != expected_key:
-        logger.warning(f"Unauthorized attempt to create prompt from bot: {request.remote_addr}")
+        logger.warning(f"Unauthorized bot attempt: {request.remote_addr}")
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
 
     data = request.json
@@ -484,8 +500,9 @@ def create_prompt_from_bot():
         db.session.add(item)
         db.session.commit()
         invalidate_library_cache()
-        logger.info(f"تمت إضافة برومبت جديد من البوت، المعرف: {item.id}")
-        return jsonify({'success': True, 'id': item.id, 'message': 'تمت إضافة البرومبت بنجاح'})
+        logger.info(f"Bot added prompt id={item.id}")
+        return jsonify({'success': True, 'id': item.id,
+                        'message': 'تمت إضافة البرومبت بنجاح'})
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error creating prompt from bot: {e}\n{traceback.format_exc()}")
@@ -543,7 +560,8 @@ def add_category():
         if Category.query.filter_by(name=name).first():
             flash('التصنيف موجود مسبقاً', 'error')
             return redirect(url_for('admin.admin_panel'))
-        cat = Category(name=name, display_name=display_name, icon=icon, sort_order=sort_order)
+        cat = Category(name=name, display_name=display_name,
+                       icon=icon, sort_order=sort_order)
         db.session.add(cat)
         db.session.commit()
         invalidate_library_cache()
@@ -585,16 +603,18 @@ def edit_category(category_id):
         display_name = request.form.get('display_name', '').strip()
         icon = request.form.get('icon', 'bi-tag').strip()
         sort_order = int(request.form.get('sort_order', 0))
-        
+
         if not name or not display_name:
             flash('اسم التصنيف واسم العرض مطلوبان', 'error')
             return redirect(url_for('admin.admin_panel'))
-        
-        existing = Category.query.filter(Category.name == name, Category.id != category_id).first()
+
+        existing = Category.query.filter(
+            Category.name == name, Category.id != category_id
+        ).first()
         if existing:
             flash('التصنيف موجود مسبقاً', 'error')
             return redirect(url_for('admin.admin_panel'))
-        
+
         cat.name = name
         cat.display_name = display_name
         cat.icon = icon
@@ -748,7 +768,7 @@ def toggle_library_ad(ad_id):
         flash('خطأ في تغيير حالة الإعلان', 'error')
     return redirect(url_for('admin.admin_panel'))
 
-# ---------- Admin: Site Settings (API) ----------
+# ---------- Admin: Site Settings ----------
 @admin_bp.route('/api/admin/update_site_settings', methods=['POST'])
 @admin_required
 def update_site_settings():
@@ -776,7 +796,8 @@ def get_site_status():
         })
     except Exception as e:
         logger.error(f"Get site status error: {e}")
-        return jsonify({'status': 'on', 'offline_message': 'الموقع تحت الصيانة حالياً.'})
+        return jsonify({'status': 'on',
+                        'offline_message': 'الموقع تحت الصيانة حالياً.'})
 
 # ---------- Admin: Errors ----------
 @admin_bp.route('/errors')
@@ -852,28 +873,84 @@ def admin_clear_all_errors():
 _db_initialized = False
 
 def create_app():
-    app = Flask(__name__, template_folder='templates')
+    global _db_initialized
+
+    app = Flask(__name__, template_folder='templates', static_folder='static')
     app.config.from_object(Config)
 
     db.init_app(app)
     migrate.init_app(app, db)
     cache.init_app(app)
     limiter.init_app(app)
-    talisman.init_app(app, force_https=False, content_security_policy={
-        'default-src': ["'self'"],
-        'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
-        'script-src': ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com", "https://accounts.google.com"],
-        'font-src': ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
-        'img-src': ["'self'", "data:", "https:", "blob:"],
-        'connect-src': ["'self'"],
-        'frame-ancestors': ["'none'"],
-    })
-    app.config['SESSION_SQLALCHEMY'] = db
-    session_ext.init_app(app)
+
+    # ────────── Content Security Policy ──────────
+    # IMPORTANT: must allow all CDNs used by templates.
+    talisman.init_app(
+        app,
+        force_https=False,
+        content_security_policy={
+            'default-src': ["'self'"],
+            'style-src': [
+                "'self'", "'unsafe-inline'",
+                "https://fonts.googleapis.com",
+                "https://cdn.jsdelivr.net",
+                "https://cdnjs.cloudflare.com",
+                "https://unpkg.com",
+            ],
+            'script-src': [
+                "'self'", "'unsafe-inline'",
+                "https://cdn.jsdelivr.net",
+                "https://cdnjs.cloudflare.com",
+                "https://accounts.google.com",
+                "https://vercel.live",
+            ],
+            'font-src': [
+                "'self'",
+                "https://fonts.gstatic.com",
+                "https://cdn.jsdelivr.net",
+                "https://cdnjs.cloudflare.com",
+                "https://unpkg.com",
+            ],
+            'img-src': ["'self'", "data:", "https:", "blob:"],
+            'connect-src': ["'self'", "https://vercel.live"],
+            'frame-ancestors': ["'none'"],
+        }
+    )
 
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp)
     app.register_blueprint(admin_bp)
+
+    # ────────── Database initialization ──────────
+    # Run ONCE at startup, inside app context — NOT in before_request.
+    # In serverless environments, before_request would run per invocation
+    # which causes conflicts and FUNCTION_INVOCATION_FAILED.
+    if not _db_initialized:
+        with app.app_context():
+            try:
+                inspector = inspect(db.engine)
+                tables = set(inspector.get_table_names())
+
+                if 'category' not in tables:
+                    logger.info("Initializing database tables...")
+                    db.create_all()
+                    run_light_migrations()
+                    if not SiteSetting.query.first():
+                        db.session.add(SiteSetting())
+                        db.session.commit()
+                    logger.info("Database initialized successfully.")
+                else:
+                    # Tables already exist — only run light migrations
+                    run_light_migrations()
+
+                _db_initialized = True
+            except Exception as e:
+                logger.error(f"DB init error: {e}\n{traceback.format_exc()}")
+                try:
+                    db.session.rollback()
+                except Exception:
+                    pass
+                # Don't fail the whole app if DB init fails — routes will retry
 
     # ---------- Error Handlers ----------
     @app.errorhandler(404)
@@ -887,21 +964,31 @@ def create_app():
             details = f"Asset missing: {request.path}"
         else:
             details = f"Page not found: {request.path}"
-        
+
         if not request.path.startswith('/admin') and not request.path.startswith('/api'):
-            log_error('404', request.url, details)
-        
+            try:
+                log_error('404', request.url, details)
+            except Exception:
+                pass
+
         if request.path.startswith('/api/'):
             return jsonify({'success': False, 'message': 'الصفحة غير موجودة'}), 404
-        return render_template('index.html', site_status='on', categories=[], library_items=[], active_ads=[]), 404
+        return render_template('index.html', site_status='on',
+                               categories=[], library_items=[],
+                               active_ads=[]), 404
 
     @app.errorhandler(500)
     def internal_error(e):
         logger.error(f"500 ERROR: {str(e)}\n{traceback.format_exc()}")
-        db.session.rollback()
+        try:
+            db.session.rollback()
+        except Exception:
+            pass
         if request.path.startswith('/api/'):
             return jsonify({'success': False, 'message': 'خطأ داخلي في الخادم'}), 500
-        return render_template('index.html', site_status='on', categories=[], library_items=[], active_ads=[]), 500
+        return render_template('index.html', site_status='on',
+                               categories=[], library_items=[],
+                               active_ads=[]), 500
 
     @app.errorhandler(Exception)
     def handle_exception(e):
@@ -909,34 +996,20 @@ def create_app():
         if isinstance(e, HTTPException):
             return e
         logger.error(f"UNHANDLED EXCEPTION: {str(e)}\n{traceback.format_exc()}")
-        db.session.rollback()
+        try:
+            db.session.rollback()
+        except Exception:
+            pass
         if request.path.startswith('/api/'):
             return jsonify({'success': False, 'message': 'حدث خطأ غير متوقع'}), 500
-        return render_template('index.html', site_status='on', categories=[], library_items=[], active_ads=[]), 500
-
-    @app.before_request
-    def ensure_db_initialized():
-        global _db_initialized
-        if _db_initialized:
-            return
-        try:
-            inspector = inspect(db.engine)
-            if 'category' not in inspector.get_table_names():
-                logger.info("Database tables not found, creating...")
-                db.create_all()
-                run_light_migrations()
-                if not SiteSetting.query.first():
-                    db.session.add(SiteSetting())
-                    db.session.commit()
-                logger.info("Database initialized successfully")
-            else:
-                run_light_migrations()
-            _db_initialized = True
-        except Exception as e:
-            logger.error(f"DB init error: {e}")
-            db.session.rollback()
+        return render_template('index.html', site_status='on',
+                               categories=[], library_items=[],
+                               active_ads=[]), 500
 
     return app
 
 # ==================== Vercel Entry Point ====================
 app = create_app()
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=False)
