@@ -33,7 +33,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 # ==================== Config ====================
+def _safe_redis_url() -> str:
+    """
+    Use Redis ONLY if explicitly configured with a valid URL.
+    Otherwise fall back to in-memory storage — the ONLY safe choice
+    for Vercel serverless (which blocks outbound Redis on some tiers).
+    """
+    url = (os.getenv('REDIS_URL') or '').strip()
+    if not url:
+        return 'memory://'
+    # Accept only redis:// or rediss:// (Upstash uses rediss://)
+    if not (url.startswith('redis://') or url.startswith('rediss://')):
+        logger.warning(f"Invalid REDIS_URL scheme, falling back to memory:// — got: {url[:30]}…")
+        return 'memory://'
+    return url
+
+
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY')
     if not SECRET_KEY:
@@ -42,8 +59,8 @@ class Config:
 
     ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
 
+    # ---------- Database ----------
     DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///ufoq.db')
-    # Vercel Postgres sometimes provides postgres:// (deprecated) instead of postgresql://
     if DATABASE_URL.startswith('postgres://'):
         DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
@@ -53,38 +70,69 @@ class Config:
         'pool_recycle': 300,
         'pool_timeout': 10,
         'pool_reset_on_return': 'rollback',
+        'connect_args': {
+            # Critical: fail fast on network issues, don't hang the request
+            'connect_timeout': 5,
+            'options': '-c statement_timeout=8000',
+        } if DATABASE_URL.startswith('postgresql') else {},
     }
 
-    # ────── Native cookie-based sessions (serverless-safe) ──────
-    # We no longer use flask-session / SQLAlchemy sessions because
-    # they cause FUNCTION_INVOCATION_FAILED on Vercel serverless.
+    # ---------- Sessions (cookie-based) ----------
     SESSION_COOKIE_NAME = 'ufoq_session'
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
     SESSION_COOKIE_SECURE = bool(os.getenv('RENDER')) or os.getenv('FORCE_HTTPS') == '1'
     SESSION_PERMANENT = True
-    PERMANENT_SESSION_LIFETIME = 60 * 60 * 24 * 30  # 30 days
+    PERMANENT_SESSION_LIFETIME = 60 * 60 * 24 * 30
     SESSION_REFRESH_EACH_REQUEST = True
 
+    # ---------- Cache ----------
     CACHE_TYPE = 'SimpleCache'
     CACHE_DEFAULT_TIMEOUT = 300
 
+    # ---------- Rate limiter — DEFENSIVE CONFIG ----------
+    # The single most important fix: RATELIMIT_SWALLOW_ERRORS=True makes
+    # the limiter fail-OPEN (never crash the request) if the storage
+    # backend (Redis) is unreachable. Combined with in-memory fallback,
+    # the app stays alive even when Redis is down.
     RATELIMIT_ENABLED = True
-    RATELIMIT_STORAGE_URI = os.getenv('REDIS_URL', 'memory://')
+    RATELIMIT_STORAGE_URI = _safe_redis_url()
+    RATELIMIT_STORAGE_OPTIONS = {
+        'socket_connect_timeout': 2,
+        'socket_timeout': 2,
+        'retry_on_timeout': False,
+    }
     RATELIMIT_STRATEGY = 'fixed-window'
     RATELIMIT_DEFAULT = "200 per minute"
+    RATELIMIT_SWALLOW_ERRORS = True
+    RATELIMIT_IN_MEMORY_FALLBACK_ENABLED = True
+    RATELIMIT_IN_MEMORY_FALLBACK = ["100 per minute"]
+    RATELIMIT_HEADERS_ENABLED = True
+
 
 # ==================== Extensions ====================
 db = SQLAlchemy()
 migrate = Migrate()
 cache = Cache()
+
 limiter = Limiter(
     key_func=get_remote_address,
     default_limits=["200 per minute"],
-    storage_uri=os.getenv('REDIS_URL', 'memory://'),
-    strategy='fixed-window'
+    storage_uri=_safe_redis_url(),
+    storage_options={
+        'socket_connect_timeout': 2,
+        'socket_timeout': 2,
+        'retry_on_timeout': False,
+    },
+    strategy='fixed-window',
+    # Fail-OPEN if Redis is unreachable
+    swallow_errors=True,
+    in_memory_fallback_enabled=True,
+    in_memory_fallback=["100 per minute"],
 )
+
 talisman = Talisman()
+
 
 # ==================== Models ====================
 class Category(db.Model):
@@ -94,6 +142,7 @@ class Category(db.Model):
     icon = db.Column(db.String(50), default='bi-tag')
     sort_order = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 class PromptLibrary(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -109,6 +158,7 @@ class PromptLibrary(db.Model):
     likes = db.Column(db.Integer, default=0, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+
 class LibraryAd(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -121,10 +171,12 @@ class LibraryAd(db.Model):
     is_mandatory = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+
 class SiteSetting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(10), default='on')
     offline_message = db.Column(db.Text, default='الموقع تحت الصيانة حالياً.')
+
 
 class ErrorLog(db.Model):
     __tablename__ = 'error_logs'
@@ -150,17 +202,20 @@ class ErrorLog(db.Model):
             'count': self.count,
             'ignored': self.ignored,
             'last_seen': self.last_seen.isoformat() if self.last_seen else None,
-            'created_at': self.created_at.isoformat() if self.created_at else None
+            'created_at': self.created_at.isoformat() if self.created_at else None,
         }
 
-# ==================== Helper Functions ====================
+
+# ==================== Helpers ====================
 def generate_csrf_token():
     if 'csrf_token' not in session:
         session['csrf_token'] = secrets.token_urlsafe(32)
     return session['csrf_token']
 
+
 def validate_csrf_token(token):
     return token == session.get('csrf_token')
+
 
 def admin_required(f):
     @wraps(f)
@@ -170,6 +225,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated
 
+
 def is_valid_publisher_link(url):
     if not url:
         return True
@@ -178,6 +234,7 @@ def is_valid_publisher_link(url):
         return parsed.scheme in ('http', 'https') and bool(parsed.netloc)
     except Exception:
         return False
+
 
 def log_error(error_type, url, details=None):
     try:
@@ -195,29 +252,29 @@ def log_error(error_type, url, details=None):
             existing.count += 1
             existing.last_seen = datetime.utcnow()
         else:
-            new_log = ErrorLog(
-                error_type=error_type,
-                url=url,
+            db.session.add(ErrorLog(
+                error_type=error_type, url=url,
                 referer=request.referrer,
                 user_agent=request.user_agent.string if request.user_agent else None,
                 ip_address=request.remote_addr,
-                details=details,
-                count=1
-            )
-            db.session.add(new_log)
+                details=details, count=1,
+            ))
         db.session.commit()
     except Exception as e:
-        db.session.rollback()
+        try:
+            db.session.rollback()
+        except Exception:
+            pass
         logger.error(f"Failed to log error to DB: {e}")
 
+
 def run_light_migrations():
-    """Add missing columns — safe in serverless (idempotent)."""
+    """Idempotent — safe to run every cold start."""
     try:
         engine = db.engine
         inspector = inspect(engine)
         existing_tables = set(inspector.get_table_names())
 
-        # 1) error_logs table
         if 'error_logs' not in existing_tables:
             try:
                 with engine.begin() as conn:
@@ -240,7 +297,6 @@ def run_light_migrations():
             except Exception as e:
                 logger.warning(f"Could not create error_logs: {e}")
 
-        # 2) add missing columns
         required_columns = {
             'prompt_library': {
                 'publisher_link': 'VARCHAR(500)',
@@ -255,7 +311,7 @@ def run_light_migrations():
         }
         for table_name, cols in required_columns.items():
             if table_name in existing_tables:
-                existing_cols = {col['name'] for col in inspector.get_columns(table_name)}
+                existing_cols = {c['name'] for c in inspector.get_columns(table_name)}
                 for col_name, col_def in cols.items():
                     if col_name not in existing_cols:
                         try:
@@ -269,26 +325,30 @@ def run_light_migrations():
     except Exception as e:
         logger.error(f"Migration error: {e}")
 
-# ==================== Caching Helpers ====================
+
+# ==================== Cache helpers ====================
 @cache.memoize(timeout=60)
 def get_categories_cached():
     return Category.query.order_by(Category.sort_order).all()
 
+
 @cache.memoize(timeout=30)
 def get_library_items_cached():
-    return (PromptLibrary.query
-            .order_by(PromptLibrary.created_at.desc())
-            .all())
+    return PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
+
 
 def invalidate_library_cache():
     cache.delete_memoized(get_categories_cached)
     cache.delete_memoized(get_library_items_cached)
 
+
 # ==================== Blueprints ====================
 from flask import Blueprint
 
-# ----- Main Blueprint -----
 main_bp = Blueprint('main', __name__)
+api_bp = Blueprint('api', __name__, url_prefix='/api')
+admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
 
 @main_bp.route('/')
 def index():
@@ -301,20 +361,13 @@ def index():
 
         categories = get_categories_cached()
         library_items = get_library_items_cached()
-
-        active_ads_query = (LibraryAd.query
-                            .filter_by(is_active=True)
-                            .order_by(LibraryAd.created_at.desc())
-                            .limit(3).all())
+        ads_query = (LibraryAd.query.filter_by(is_active=True)
+                     .order_by(LibraryAd.created_at.desc()).limit(3).all())
         active_ads = [{
-            'id': ad.id,
-            'title': ad.title,
-            'text': ad.text,
-            'image_url': ad.image_url,
-            'button_text': ad.button_text,
-            'button_link': ad.button_link,
-            'duration_seconds': ad.duration_seconds,
-        } for ad in active_ads_query]
+            'id': a.id, 'title': a.title, 'text': a.text,
+            'image_url': a.image_url, 'button_text': a.button_text,
+            'button_link': a.button_link, 'duration_seconds': a.duration_seconds,
+        } for a in ads_query]
 
         return render_template('index.html',
                                categories=categories,
@@ -326,6 +379,7 @@ def index():
         return render_template('index.html', site_status='on',
                                categories=[], library_items=[], active_ads=[])
 
+
 @main_bp.route('/about')
 def about_page():
     try:
@@ -333,18 +387,13 @@ def about_page():
         total_copies = db.session.query(func.sum(PromptLibrary.copy_count)).scalar() or 0
         total_shares = db.session.query(func.sum(PromptLibrary.share_count)).scalar() or 0
 
-        active_ad = (LibraryAd.query
-                     .filter_by(is_active=True)
-                     .order_by(LibraryAd.created_at.desc())
-                     .first())
+        active_ad = (LibraryAd.query.filter_by(is_active=True)
+                     .order_by(LibraryAd.created_at.desc()).first())
         ad_dict = None
         if active_ad:
             ad_dict = {
-                'id': active_ad.id,
-                'title': active_ad.title,
-                'text': active_ad.text,
-                'image_url': active_ad.image_url,
-                'button_text': active_ad.button_text,
+                'id': active_ad.id, 'title': active_ad.title, 'text': active_ad.text,
+                'image_url': active_ad.image_url, 'button_text': active_ad.button_text,
                 'button_link': active_ad.button_link,
                 'duration_seconds': active_ad.duration_seconds,
             }
@@ -359,6 +408,7 @@ def about_page():
         return render_template('about.html', prompt_count=0,
                                total_copies=0, total_shares=0, active_ad=None)
 
+
 @main_bp.route('/robots.txt')
 def robots_txt():
     return """User-agent: *
@@ -368,9 +418,11 @@ Disallow: /api/admin
 Sitemap: https://ufoq.vercel.app/sitemap.xml
 """, 200, {'Content-Type': 'text/plain'}
 
+
 @main_bp.route('/favicon.ico')
 def favicon():
     return '', 204
+
 
 @main_bp.route('/health')
 def health_check():
@@ -383,6 +435,7 @@ def health_check():
         return jsonify({'status': 'error', 'db': 'disconnected',
                         'timestamp': datetime.utcnow().isoformat()}), 503
 
+
 @main_bp.route('/api/version')
 def version():
     try:
@@ -392,9 +445,8 @@ def version():
         ver = str(int(datetime.utcnow().timestamp()))
     return jsonify({'version': ver})
 
-# ----- API Blueprint -----
-api_bp = Blueprint('api', __name__, url_prefix='/api')
 
+# ===== API =====
 @api_bp.route('/prompt/<int:item_id>/copy', methods=['POST'])
 @limiter.limit("30 per minute")
 def track_copy(item_id):
@@ -407,6 +459,7 @@ def track_copy(item_id):
         db.session.rollback()
         logger.error(f"Error tracking copy: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
+
 
 @api_bp.route('/prompt/<int:item_id>/like', methods=['POST'])
 @limiter.limit("30 per minute")
@@ -421,6 +474,7 @@ def track_like(item_id):
         logger.error(f"Error tracking like: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
+
 @api_bp.route('/prompt/<int:item_id>/share', methods=['POST'])
 @limiter.limit("30 per minute")
 def track_share(item_id):
@@ -434,32 +488,24 @@ def track_share(item_id):
         logger.error(f"Error tracking share: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
 
+
 @api_bp.route('/mandatory-ad')
 def get_mandatory_ad():
     try:
-        ad = (LibraryAd.query
-              .filter_by(is_active=True)
-              .order_by(LibraryAd.created_at.desc())
-              .first())
+        ad = (LibraryAd.query.filter_by(is_active=True)
+              .order_by(LibraryAd.created_at.desc()).first())
         if not ad:
             return jsonify({'success': False, 'message': 'No active ad'}), 404
-        return jsonify({
-            'success': True,
-            'ad': {
-                'id': ad.id,
-                'title': ad.title,
-                'text': ad.text,
-                'image_url': ad.image_url,
-                'button_text': ad.button_text,
-                'button_link': ad.button_link,
-                'duration_seconds': ad.duration_seconds,
-            }
-        })
+        return jsonify({'success': True, 'ad': {
+            'id': ad.id, 'title': ad.title, 'text': ad.text,
+            'image_url': ad.image_url, 'button_text': ad.button_text,
+            'button_link': ad.button_link, 'duration_seconds': ad.duration_seconds,
+        }})
     except Exception as e:
         logger.error(f"Mandatory ad error: {e}")
         return jsonify({'success': False}), 500
 
-# ===== نقطة نهاية استقبال البرومبت من البوت =====
+
 @api_bp.route('/prompt/create', methods=['POST'])
 @limiter.limit("10 per minute")
 def create_prompt_from_bot():
@@ -480,22 +526,15 @@ def create_prompt_from_bot():
     if not prompt_text:
         return jsonify({'success': False, 'message': 'البرومبت مطلوب'}), 400
 
-    title = data.get('title', prompt_text[:100])
-    image_url = data.get('image_url', '')
-    category = data.get('category', 'general')
-    publisher = data.get('publisher', 'UFOQ Bot')
-    publisher_link = data.get('publisher_link', 'https://t.me/UFOQ_BOT')
-    keywords = data.get('keywords', '')
-
     try:
         item = PromptLibrary(
-            title=title,
-            category=category,
-            image_url=image_url,
+            title=data.get('title', prompt_text[:100]),
+            category=data.get('category', 'general'),
+            image_url=data.get('image_url', ''),
             prompt_text=prompt_text,
-            publisher=publisher,
-            publisher_link=publisher_link,
-            keywords=keywords
+            publisher=data.get('publisher', 'UFOQ Bot'),
+            publisher_link=data.get('publisher_link', 'https://t.me/UFOQ_BOT'),
+            keywords=data.get('keywords', ''),
         )
         db.session.add(item)
         db.session.commit()
@@ -508,9 +547,8 @@ def create_prompt_from_bot():
         logger.error(f"Error creating prompt from bot: {e}\n{traceback.format_exc()}")
         return jsonify({'success': False, 'message': 'خطأ في إضافة البرومبت'}), 500
 
-# ----- Admin Blueprint -----
-admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
+# ===== Admin =====
 @admin_bp.route('/', methods=['GET', 'POST'])
 def admin_panel():
     try:
@@ -524,7 +562,6 @@ def admin_panel():
             library_items = PromptLibrary.query.order_by(PromptLibrary.created_at.desc()).all()
             library_ads = LibraryAd.query.order_by(LibraryAd.created_at.desc()).all()
             site_settings = SiteSetting.query.first()
-
             return render_template('admin.html',
                                    categories=categories,
                                    library_items=library_items,
@@ -537,12 +574,13 @@ def admin_panel():
         db.session.rollback()
         return render_template('admin.html'), 500
 
+
 @admin_bp.route('/logout')
 def admin_logout():
     session.pop('logged_in', None)
     return redirect(url_for('admin.admin_panel'))
 
-# ---------- Admin: Categories ----------
+
 @admin_bp.route('/category/add', methods=['POST'])
 @admin_required
 def add_category():
@@ -560,9 +598,8 @@ def add_category():
         if Category.query.filter_by(name=name).first():
             flash('التصنيف موجود مسبقاً', 'error')
             return redirect(url_for('admin.admin_panel'))
-        cat = Category(name=name, display_name=display_name,
-                       icon=icon, sort_order=sort_order)
-        db.session.add(cat)
+        db.session.add(Category(name=name, display_name=display_name,
+                                icon=icon, sort_order=sort_order))
         db.session.commit()
         invalidate_library_cache()
         flash('تمت إضافة التصنيف', 'success')
@@ -571,6 +608,7 @@ def add_category():
         logger.error(f"Error adding category: {e}")
         flash('خطأ في إضافة التصنيف', 'error')
     return redirect(url_for('admin.admin_panel'))
+
 
 @admin_bp.route('/category/<int:category_id>/delete', methods=['POST'])
 @admin_required
@@ -591,6 +629,7 @@ def delete_category(category_id):
         flash('خطأ في حذف التصنيف', 'error')
     return redirect(url_for('admin.admin_panel'))
 
+
 @admin_bp.route('/category/<int:category_id>/edit', methods=['POST'])
 @admin_required
 def edit_category(category_id):
@@ -603,18 +642,14 @@ def edit_category(category_id):
         display_name = request.form.get('display_name', '').strip()
         icon = request.form.get('icon', 'bi-tag').strip()
         sort_order = int(request.form.get('sort_order', 0))
-
         if not name or not display_name:
             flash('اسم التصنيف واسم العرض مطلوبان', 'error')
             return redirect(url_for('admin.admin_panel'))
-
-        existing = Category.query.filter(
-            Category.name == name, Category.id != category_id
-        ).first()
+        existing = Category.query.filter(Category.name == name,
+                                         Category.id != category_id).first()
         if existing:
             flash('التصنيف موجود مسبقاً', 'error')
             return redirect(url_for('admin.admin_panel'))
-
         cat.name = name
         cat.display_name = display_name
         cat.icon = icon
@@ -628,7 +663,7 @@ def edit_category(category_id):
         flash('خطأ في تحديث التصنيف', 'error')
     return redirect(url_for('admin.admin_panel'))
 
-# ---------- Admin: Library ----------
+
 @admin_bp.route('/library/add', methods=['POST'])
 @admin_required
 def add_library_item():
@@ -640,16 +675,15 @@ def add_library_item():
         flash('رابط الناشر غير صالح', 'error')
         return redirect(url_for('admin.admin_panel'))
     try:
-        item = PromptLibrary(
+        db.session.add(PromptLibrary(
             title=request.form.get('title'),
             category=request.form.get('category', 'general'),
             image_url=request.form.get('image_url', ''),
             prompt_text=request.form.get('prompt_text'),
             publisher=request.form.get('publisher', '').strip() or None,
             publisher_link=publisher_link or None,
-            keywords=request.form.get('keywords', '').strip() or None
-        )
-        db.session.add(item)
+            keywords=request.form.get('keywords', '').strip() or None,
+        ))
         db.session.commit()
         invalidate_library_cache()
         flash('تمت إضافة البرومبت', 'success')
@@ -658,6 +692,7 @@ def add_library_item():
         logger.error(f"Error adding library item: {e}")
         flash('خطأ في إضافة البرومبت', 'error')
     return redirect(url_for('admin.admin_panel'))
+
 
 @admin_bp.route('/library/<int:item_id>/delete', methods=['POST'])
 @admin_required
@@ -676,6 +711,7 @@ def delete_library_item(item_id):
         logger.error(f"Error deleting library item: {e}")
         flash('خطأ', 'error')
     return redirect(url_for('admin.admin_panel'))
+
 
 @admin_bp.route('/library/<int:item_id>/update', methods=['POST'])
 @admin_required
@@ -707,7 +743,7 @@ def update_library_item(item_id):
         flash('خطأ', 'error')
     return redirect(url_for('admin.admin_panel'))
 
-# ---------- Admin: Ads ----------
+
 @admin_bp.route('/library_ad/add', methods=['POST'])
 @admin_required
 def add_library_ad():
@@ -715,7 +751,7 @@ def add_library_ad():
         flash('CSRF خطأ', 'error')
         return redirect(url_for('admin.admin_panel'))
     try:
-        ad = LibraryAd(
+        db.session.add(LibraryAd(
             title=request.form.get('title'),
             text=request.form.get('text'),
             image_url=request.form.get('image_url') or None,
@@ -723,9 +759,8 @@ def add_library_ad():
             button_link=request.form.get('button_link'),
             duration_seconds=int(request.form.get('duration_seconds', 5)),
             is_active=request.form.get('is_active') == 'on',
-            is_mandatory=request.form.get('is_mandatory') == 'on'
-        )
-        db.session.add(ad)
+            is_mandatory=request.form.get('is_mandatory') == 'on',
+        ))
         db.session.commit()
         flash('تمت إضافة الإعلان', 'success')
     except Exception as e:
@@ -733,6 +768,7 @@ def add_library_ad():
         logger.error(f"Error adding library ad: {e}")
         flash('خطأ في إضافة الإعلان', 'error')
     return redirect(url_for('admin.admin_panel'))
+
 
 @admin_bp.route('/library_ad/<int:ad_id>/delete', methods=['POST'])
 @admin_required
@@ -751,6 +787,7 @@ def delete_library_ad(ad_id):
         flash('خطأ في حذف الإعلان', 'error')
     return redirect(url_for('admin.admin_panel'))
 
+
 @admin_bp.route('/library_ad/<int:ad_id>/toggle', methods=['POST'])
 @admin_required
 def toggle_library_ad(ad_id):
@@ -768,7 +805,7 @@ def toggle_library_ad(ad_id):
         flash('خطأ في تغيير حالة الإعلان', 'error')
     return redirect(url_for('admin.admin_panel'))
 
-# ---------- Admin: Site Settings ----------
+
 @admin_bp.route('/api/admin/update_site_settings', methods=['POST'])
 @admin_required
 def update_site_settings():
@@ -785,6 +822,7 @@ def update_site_settings():
         logger.error(f"Site settings error: {e}")
         return jsonify({'success': False}), 500
 
+
 @admin_bp.route('/api/admin/get_site_status')
 @admin_required
 def get_site_status():
@@ -792,14 +830,14 @@ def get_site_status():
         s = SiteSetting.query.first()
         return jsonify({
             'status': s.status if s else 'on',
-            'offline_message': s.offline_message if s else 'الموقع تحت الصيانة حالياً.'
+            'offline_message': s.offline_message if s else 'الموقع تحت الصيانة حالياً.',
         })
     except Exception as e:
         logger.error(f"Get site status error: {e}")
         return jsonify({'status': 'on',
                         'offline_message': 'الموقع تحت الصيانة حالياً.'})
 
-# ---------- Admin: Errors ----------
+
 @admin_bp.route('/errors')
 @admin_required
 def admin_get_errors():
@@ -809,6 +847,7 @@ def admin_get_errors():
         query = query.filter_by(ignored=False)
     errors = query.order_by(ErrorLog.last_seen.desc()).all()
     return jsonify([e.to_dict() for e in errors])
+
 
 @admin_bp.route('/error/<int:error_id>/ignore', methods=['POST'])
 @admin_required
@@ -822,8 +861,8 @@ def admin_ignore_error(error_id):
         return jsonify({'success': True, 'message': 'تم تجاهل الخطأ'})
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error ignoring error: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
+
 
 @admin_bp.route('/error/<int:error_id>/unignore', methods=['POST'])
 @admin_required
@@ -837,8 +876,8 @@ def admin_unignore_error(error_id):
         return jsonify({'success': True, 'message': 'تم إلغاء تجاهل الخطأ'})
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error unignoring error: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
+
 
 @admin_bp.route('/error/<int:error_id>/delete', methods=['POST'])
 @admin_required
@@ -852,8 +891,8 @@ def admin_delete_error(error_id):
         return jsonify({'success': True, 'message': 'تم حذف الخطأ'})
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error deleting error: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
+
 
 @admin_bp.route('/errors/clear-all', methods=['POST'])
 @admin_required
@@ -866,11 +905,38 @@ def admin_clear_all_errors():
         return jsonify({'success': True, 'message': 'تم حذف جميع الأخطاء'})
     except Exception as e:
         db.session.rollback()
-        logger.error(f"Error clearing errors: {e}")
         return jsonify({'success': False, 'message': str(e)}), 500
+
 
 # ==================== Application Factory ====================
 _db_initialized = False
+
+
+def _try_db_init(app):
+    """Attempt DB init. Never raises."""
+    with app.app_context():
+        try:
+            inspector = inspect(db.engine)
+            tables = set(inspector.get_table_names())
+            if 'category' not in tables:
+                logger.info("Initializing database tables…")
+                db.create_all()
+                run_light_migrations()
+                if not SiteSetting.query.first():
+                    db.session.add(SiteSetting())
+                    db.session.commit()
+                logger.info("Database initialized successfully.")
+            else:
+                run_light_migrations()
+            return True
+        except Exception as e:
+            logger.error(f"DB init failed (non-fatal): {e}")
+            try:
+                db.session.rollback()
+            except Exception:
+                pass
+            return False
+
 
 def create_app():
     global _db_initialized
@@ -883,99 +949,52 @@ def create_app():
     cache.init_app(app)
     limiter.init_app(app)
 
-    # ────────── Content Security Policy ──────────
-    # IMPORTANT: must allow all CDNs used by templates.
     talisman.init_app(
         app,
         force_https=False,
         content_security_policy={
             'default-src': ["'self'"],
-            'style-src': [
-                "'self'", "'unsafe-inline'",
-                "https://fonts.googleapis.com",
-                "https://cdn.jsdelivr.net",
-                "https://cdnjs.cloudflare.com",
-                "https://unpkg.com",
-            ],
-            'script-src': [
-                "'self'", "'unsafe-inline'",
-                "https://cdn.jsdelivr.net",
-                "https://cdnjs.cloudflare.com",
-                "https://accounts.google.com",
-                "https://vercel.live",
-            ],
-            'font-src': [
-                "'self'",
-                "https://fonts.gstatic.com",
-                "https://cdn.jsdelivr.net",
-                "https://cdnjs.cloudflare.com",
-                "https://unpkg.com",
-            ],
+            'style-src': ["'self'", "'unsafe-inline'",
+                          "https://fonts.googleapis.com",
+                          "https://cdn.jsdelivr.net",
+                          "https://cdnjs.cloudflare.com",
+                          "https://unpkg.com"],
+            'script-src': ["'self'", "'unsafe-inline'",
+                           "https://cdn.jsdelivr.net",
+                           "https://cdnjs.cloudflare.com",
+                           "https://accounts.google.com",
+                           "https://vercel.live"],
+            'font-src': ["'self'",
+                         "https://fonts.gstatic.com",
+                         "https://cdn.jsdelivr.net",
+                         "https://cdnjs.cloudflare.com",
+                         "https://unpkg.com"],
             'img-src': ["'self'", "data:", "https:", "blob:"],
             'connect-src': ["'self'", "https://vercel.live"],
             'frame-ancestors': ["'none'"],
-        }
+        },
     )
 
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp)
     app.register_blueprint(admin_bp)
 
-    # ────────── Database initialization ──────────
-    # Run ONCE at startup, inside app context — NOT in before_request.
-    # In serverless environments, before_request would run per invocation
-    # which causes conflicts and FUNCTION_INVOCATION_FAILED.
+    # Init DB once — never blocks app startup if it fails
     if not _db_initialized:
-        with app.app_context():
-            try:
-                inspector = inspect(db.engine)
-                tables = set(inspector.get_table_names())
+        _db_initialized = _try_db_init(app)
 
-                if 'category' not in tables:
-                    logger.info("Initializing database tables...")
-                    db.create_all()
-                    run_light_migrations()
-                    if not SiteSetting.query.first():
-                        db.session.add(SiteSetting())
-                        db.session.commit()
-                    logger.info("Database initialized successfully.")
-                else:
-                    # Tables already exist — only run light migrations
-                    run_light_migrations()
-
-                _db_initialized = True
-            except Exception as e:
-                logger.error(f"DB init error: {e}\n{traceback.format_exc()}")
-                try:
-                    db.session.rollback()
-                except Exception:
-                    pass
-                # Don't fail the whole app if DB init fails — routes will retry
-
-    # ---------- Error Handlers ----------
     @app.errorhandler(404)
     def not_found(e):
-        logger.warning(f"404 ERROR: {request.url} - {request.remote_addr}")
-        details = None
-        path = request.path.lower()
-        if path.endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.ico')):
-            details = f"Image missing: {request.path}"
-        elif path.endswith(('.css', '.js', '.json')):
-            details = f"Asset missing: {request.path}"
-        else:
+        try:
             details = f"Page not found: {request.path}"
-
-        if not request.path.startswith('/admin') and not request.path.startswith('/api'):
-            try:
+            if not request.path.startswith('/admin') and not request.path.startswith('/api'):
                 log_error('404', request.url, details)
-            except Exception:
-                pass
-
+        except Exception:
+            pass
         if request.path.startswith('/api/'):
             return jsonify({'success': False, 'message': 'الصفحة غير موجودة'}), 404
         return render_template('index.html', site_status='on',
-                               categories=[], library_items=[],
-                               active_ads=[]), 404
+                               categories=[], library_items=[], active_ads=[]), 404
 
     @app.errorhandler(500)
     def internal_error(e):
@@ -987,8 +1006,7 @@ def create_app():
         if request.path.startswith('/api/'):
             return jsonify({'success': False, 'message': 'خطأ داخلي في الخادم'}), 500
         return render_template('index.html', site_status='on',
-                               categories=[], library_items=[],
-                               active_ads=[]), 500
+                               categories=[], library_items=[], active_ads=[]), 500
 
     @app.errorhandler(Exception)
     def handle_exception(e):
@@ -1003,12 +1021,12 @@ def create_app():
         if request.path.startswith('/api/'):
             return jsonify({'success': False, 'message': 'حدث خطأ غير متوقع'}), 500
         return render_template('index.html', site_status='on',
-                               categories=[], library_items=[],
-                               active_ads=[]), 500
+                               categories=[], library_items=[], active_ads=[]), 500
 
     return app
 
-# ==================== Vercel Entry Point ====================
+
+# ==================== Entry Point ====================
 app = create_app()
 
 if __name__ == '__main__':
