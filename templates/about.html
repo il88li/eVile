@@ -8,7 +8,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;600;700;900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/light/style.css">
 <link rel="stylesheet" href="/static/style.css">
 
@@ -22,6 +22,7 @@
 <header class="hdr">
   <div class="hdr-inner">
     <a class="logo" href="/">UFOQ</a>
+    <div class="hdr-meta">حول · قصتنا</div>
     <div class="hdr-actions">
       <a class="icon-btn" href="/" aria-label="المكتبة">
         <i class="ph-light ph-house"></i>
@@ -36,7 +37,7 @@
 <main class="about-wrap">
 
   <div class="about-hero">
-    <div class="eyebrow">حول UFOQ</div>
+    <div class="eyebrow">★ حول UFOQ</div>
     <h1>برومبتاتٌ <em>بلغةٍ</em><br>تشبهك.</h1>
     <p>
       مكتبة عربية مستقلة، هدفها جمع أفضل النصوص التوجيهية لأدوات الذكاء الاصطناعي
@@ -52,9 +53,9 @@
   </div>
 
   {% if active_ad %}
-  <section class="featured-ad" style="padding: 0; margin-bottom: 72px;">
+  <section class="featured-ad" style="padding: 0; margin-bottom: 64px;">
     <div class="featured-inner">
-      <span class="ad-tag">AD</span>
+      <span class="ad-tag">AD · رعاية</span>
       <div class="featured-content">
         <div class="title">{{ active_ad.title }}</div>
         <div class="text">{{ active_ad.text }}</div>
@@ -179,7 +180,7 @@
       <h2>من نحن</h2>
       <span class="line"></span>
     </div>
-    <p style="color: var(--ink-2); font-size: 17px; line-height: 1.85; max-width: 66ch;">
+    <p style="color: var(--ink-2); font-size: 18px; line-height: 1.85; max-width: 66ch; font-weight: 500;">
       UFOQ مشروع عربي مستقل، يؤمن بأن الذكاء الاصطناعي يجب أن يكون في متناول الجميع —
       وأن البرومبت الجيد هو الفرق بين نتيجة عادية وأخرى استثنائية.
     </p>
@@ -187,12 +188,10 @@
 
 </main>
 
-<!-- Floating search FAB (bottom-right) -->
 <button class="fab-search" onclick="window.location.href='/'">
   <i class="ph-light ph-magnifying-glass"></i>
 </button>
 
-<!-- Bottom dock -->
 <nav class="dock" aria-label="التنقل">
   <a href="/" class="dock-btn" aria-label="المكتبة">
     <i class="ph-light ph-house"></i>
