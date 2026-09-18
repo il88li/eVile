@@ -8,7 +8,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@300;400;500;600;700;900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/light/style.css">
 <link rel="stylesheet" href="/static/style.css">
 
@@ -36,6 +36,7 @@
 <header class="hdr">
   <div class="hdr-inner">
     <a class="logo" href="/">UFOQ</a>
+    <div class="hdr-meta">مكتبة البرومبتات العربية · الإصدار 2.0</div>
     <div class="hdr-actions">
       <button class="icon-btn" id="searchToggle" aria-label="بحث" aria-expanded="false">
         <i class="ph-light ph-magnifying-glass"></i>
@@ -82,33 +83,51 @@
 
 <!-- ===== Hero ===== -->
 <section class="hero">
-  <div class="hero-eyebrow">مكتبة البرومبتات العربية</div>
-  <h1 class="hero-title">
-    اكتشف، انسخ،<br>
-    <em>ابدأ الإبداع.</em>
-  </h1>
-  <p class="hero-sub">
-    مجموعة منتقاة من البرومبتات الاحترافية لأدوات الذكاء الاصطناعي — جاهزة للاستخدام الفوري.
-  </p>
-  <div class="hero-stats">
-    <span><strong>{{ library_items|length }}</strong> برومبت</span>
-    <span><strong>{{ total_copies if total_copies is defined else 0 }}</strong> نسخة</span>
-    <span><strong>{{ categories|length }}</strong> تصنيف</span>
+  <div class="hero-left">
+    <div class="hero-eyebrow">★ مكتبة البرومبتات العربية</div>
+    <h1 class="hero-title">
+      اكتب. انسخ.<br>
+      <em>ابدأ الإبداع.</em>
+    </h1>
+    <p class="hero-sub">
+      مجموعة منتقاة من البرومبتات الاحترافية لأدوات الذكاء الاصطناعي — جاهزة للاستخدام الفوري، بلا تعقيد.
+    </p>
+  </div>
+  <div class="hero-right">
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <strong>{{ library_items|length }}</strong>
+        <span>برومبت</span>
+      </div>
+      <div class="hero-stat">
+        <strong>{{ total_copies if total_copies is defined else 0 }}</strong>
+        <span>نسخة</span>
+      </div>
+      <div class="hero-stat">
+        <strong>{{ categories|length }}</strong>
+        <span>تصنيف</span>
+      </div>
+    </div>
   </div>
 </section>
 
+<!-- ===== Rule: section header ===== -->
+<div class="rule">
+  <span class="num">01</span>
+  <span>تصفح المكتبة</span>
+  <span class="line"></span>
+</div>
+
 <!-- ===== Category pills ===== -->
-<div class="pills-wrap">
-  <div class="pills" id="categoriesBar">
-    <a href="/?cat=all" data-cat="all" class="pill {% if not current_cat or current_cat == 'all' %}active{% endif %}" onclick="chipSelect(event,'all','الكل')">
-      <span class="dot"></span> الكل
-    </a>
-    {% for cat in categories %}
-    <a href="/?cat={{ cat.name }}" data-cat="{{ cat.name }}" class="pill {% if current_cat == cat.name %}active{% endif %}" onclick="chipSelect(event,'{{ cat.name }}','{{ cat.display_name }}')">
-      <span class="dot"></span> {{ cat.display_name }}
-    </a>
-    {% endfor %}
-  </div>
+<div class="pills" id="categoriesBar">
+  <a href="/?cat=all" data-cat="all" class="pill {% if not current_cat or current_cat == 'all' %}active{% endif %}" onclick="chipSelect(event,'all','الكل')">
+    <span class="dot"></span> الكل
+  </a>
+  {% for cat in categories %}
+  <a href="/?cat={{ cat.name }}" data-cat="{{ cat.name }}" class="pill {% if current_cat == cat.name %}active{% endif %}" onclick="chipSelect(event,'{{ cat.name }}','{{ cat.display_name }}')">
+    <span class="dot"></span> {{ cat.display_name }}
+  </a>
+  {% endfor %}
 </div>
 
 <!-- ===== Featured ad ===== -->
@@ -116,7 +135,7 @@
 {% set ad = active_ads[0] %}
 <section class="featured-ad">
   <div class="featured-inner">
-    <span class="ad-tag">AD</span>
+    <span class="ad-tag">AD · رعاية</span>
     <div class="featured-content">
       <div class="title">{{ ad.title }}</div>
       <div class="text">{{ ad.text }}</div>
@@ -134,7 +153,7 @@
   {% set ad_index = 0 %}
   {% for item in library_items %}
 
-    {% if loop.index0 > 0 and loop.index0 % 6 == 0 and active_ads and active_ads|length > 1 and ad_index < active_ads|length - 1 %}
+    {% if loop.index0 > 0 and loop.index0 % 7 == 0 and active_ads and active_ads|length > 1 and ad_index < active_ads|length - 1 %}
       {% set ad = active_ads[ad_index + 1] %}
       <article class="card ad-card" data-ad-id="{{ ad.id }}">
         <div class="card-media">
@@ -250,7 +269,7 @@
       <div class="placeholder" style="display:none;">✻</div>
     </div>
     <div class="mad-body">
-      <div class="mad-eyebrow">من رعاة UFOQ</div>
+      <div class="mad-eyebrow">★ من رعاة UFOQ</div>
       <h3 class="mad-title" id="madTitle"></h3>
       <p class="mad-text" id="madText"></p>
       <a href="#" class="mad-btn" id="madBtn" target="_blank" rel="noopener noreferrer">
@@ -282,7 +301,6 @@ const searchToggle = document.getElementById('searchToggle');
 const searchWrap   = document.getElementById('searchWrap');
 const searchInput  = document.getElementById('searchInput');
 const searchClose  = document.getElementById('searchClose');
-const searchBadge  = document.getElementById('searchBadge'); // may not exist
 const fabSearch    = document.getElementById('fabSearch');
 
 function openSearch(){
@@ -291,7 +309,7 @@ function openSearch(){
   searchToggle.classList.add('active');
   searchToggle.setAttribute('aria-expanded', 'true');
   fabSearch.classList.add('active');
-  setTimeout(() => searchInput.focus(), 300);
+  setTimeout(() => searchInput.focus(), 320);
 }
 function closeSearch(){
   searchOpen = false;
@@ -303,10 +321,7 @@ function closeSearch(){
   currentSearchQuery = '';
   filterPrompts();
 }
-function toggleSearch(){
-  if (searchOpen) closeSearch();
-  else openSearch();
-}
+function toggleSearch(){ searchOpen ? closeSearch() : openSearch(); }
 
 searchToggle.addEventListener('click', toggleSearch);
 fabSearch.addEventListener('click', toggleSearch);
@@ -344,7 +359,7 @@ const searchCatDropdown = document.getElementById('searchCatDropdown');
 function positionDropdown(){
   const r = searchCatBtn.getBoundingClientRect();
   searchCatDropdown.style.top  = (r.bottom + 8) + 'px';
-  searchCatDropdown.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 220)) + 'px';
+  searchCatDropdown.style.left = Math.max(8, Math.min(r.left, window.innerWidth - 240)) + 'px';
 }
 searchCatBtn.addEventListener('click', e => {
   e.stopPropagation();
@@ -586,7 +601,7 @@ function openPromptFromURL(){
   if (!card) return;
   card.scrollIntoView({ behavior:'smooth', block:'center' });
   card.style.transition = 'box-shadow 400ms ease';
-  card.style.boxShadow  = '0 0 0 3px var(--accent), 0 20px 40px -12px rgba(255,77,28,0.4)';
+  card.style.boxShadow  = '10px 10px 0 var(--accent)';
   setTimeout(() => { card.style.boxShadow = ''; }, 3800);
 }
 
