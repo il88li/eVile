@@ -34,23 +34,41 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# ==================== Config ====================
-def _safe_redis_url() -> str:
+# ==================== URL Normalizer ====================
+def _normalize_database_url(raw: str) -> str:
     """
-    Use Redis ONLY if explicitly configured with a valid URL.
-    Otherwise fall back to in-memory storage — the ONLY safe choice
-    for Vercel serverless (which blocks outbound Redis on some tiers).
+    Normalize Postgres URLs to a scheme SQLAlchemy 2.0 accepts.
+
+    Handles common typos in environment variables:
+      - postgres://   → postgresql://  (SQLAlchemy 2.x removed the old alias)
+      - postgre://    → postgresql://  (missing final 's')
+      - postgress://  → postgresql://  (extra 's')
+      - Quoted strings, surrounding whitespace
+    Falls back to SQLite if the URL is empty or unrecognizable.
     """
-    url = (os.getenv('REDIS_URL') or '').strip()
-    if not url:
-        return 'memory://'
-    # Accept only redis:// or rediss:// (Upstash uses rediss://)
-    if not (url.startswith('redis://') or url.startswith('rediss://')):
-        logger.warning(f"Invalid REDIS_URL scheme, falling back to memory:// — got: {url[:30]}…")
-        return 'memory://'
+    if not raw:
+        logger.warning("DATABASE_URL is empty — falling back to SQLite")
+        return 'sqlite:///ufoq.db'
+
+    url = raw.strip()
+
+    # Strip surrounding quotes if present
+    if (url.startswith('"') and url.endswith('"')) or \
+       (url.startswith("'") and url.endswith("'")):
+        url = url[1:-1].strip()
+
+    lowered = url.lower()
+    for scheme in ('postgresql://', 'postgres://', 'postgre://', 'postgress://'):
+        if lowered.startswith(scheme):
+            normalized = 'postgresql://' + url[len(scheme):]
+            host_part = url.split('@')[-1].split('/')[0] if '@' in url else '?'
+            logger.info(f"DATABASE_URL normalized: {scheme} → postgresql:// (host={host_part[:40]})")
+            return normalized
+
     return url
 
 
+# ==================== Config ====================
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY')
     if not SECRET_KEY:
@@ -59,10 +77,21 @@ class Config:
 
     ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
 
-    # ---------- Database ----------
-    DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///ufoq.db')
-    if DATABASE_URL.startswith('postgres://'):
-        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+    # ────── Database — with bulletproof URL normalization ──────
+    _RAW_DB_URL = os.getenv('DATABASE_URL', 'sqlite:///ufoq.db')
+    DATABASE_URL = _normalize_database_url(_RAW_DB_URL)
+
+    # Pre-validate: verify SQLAlchemy can parse the URL BEFORE create_engine runs
+    try:
+        from sqlalchemy.engine.url import make_url
+        _parsed = make_url(DATABASE_URL)
+        if _parsed.drivername and not _parsed.drivername.startswith(('postgresql', 'sqlite')):
+            logger.warning(f"Unexpected DB driver '{_parsed.drivername}' — falling back to SQLite")
+            DATABASE_URL = 'sqlite:///ufoq.db'
+    except Exception as e:
+        logger.error(f"DATABASE_URL is unparseable ({e}) — falling back to SQLite")
+        DATABASE_URL = 'sqlite:///ufoq.db'
+
     SQLALCHEMY_DATABASE_URI = DATABASE_URL
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
@@ -70,14 +99,13 @@ class Config:
         'pool_recycle': 300,
         'pool_timeout': 10,
         'pool_reset_on_return': 'rollback',
-        'connect_args': {
-            # Critical: fail fast on network issues, don't hang the request
-            'connect_timeout': 5,
-            'options': '-c statement_timeout=8000',
-        } if DATABASE_URL.startswith('postgresql') else {},
     }
+    if DATABASE_URL.startswith('postgresql'):
+        SQLALCHEMY_ENGINE_OPTIONS['connect_args'] = {
+            'connect_timeout': 5,
+        }
 
-    # ---------- Sessions (cookie-based) ----------
+    # ────── Sessions (cookie-based, serverless-safe) ──────
     SESSION_COOKIE_NAME = 'ufoq_session'
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
@@ -86,22 +114,16 @@ class Config:
     PERMANENT_SESSION_LIFETIME = 60 * 60 * 24 * 30
     SESSION_REFRESH_EACH_REQUEST = True
 
-    # ---------- Cache ----------
+    # ────── Cache ──────
     CACHE_TYPE = 'SimpleCache'
     CACHE_DEFAULT_TIMEOUT = 300
 
-    # ---------- Rate limiter — DEFENSIVE CONFIG ----------
-    # The single most important fix: RATELIMIT_SWALLOW_ERRORS=True makes
-    # the limiter fail-OPEN (never crash the request) if the storage
-    # backend (Redis) is unreachable. Combined with in-memory fallback,
-    # the app stays alive even when Redis is down.
+    # ────── Rate limiter — serverless-safe ──────
+    # Redis is unreliable from Vercel serverless (socket restrictions).
+    # We use in-memory storage with fail-open semantics: if the storage
+    # is unreachable, requests pass through instead of crashing.
     RATELIMIT_ENABLED = True
-    RATELIMIT_STORAGE_URI = _safe_redis_url()
-    RATELIMIT_STORAGE_OPTIONS = {
-        'socket_connect_timeout': 2,
-        'socket_timeout': 2,
-        'retry_on_timeout': False,
-    }
+    RATELIMIT_STORAGE_URI = 'memory://'
     RATELIMIT_STRATEGY = 'fixed-window'
     RATELIMIT_DEFAULT = "200 per minute"
     RATELIMIT_SWALLOW_ERRORS = True
@@ -118,14 +140,8 @@ cache = Cache()
 limiter = Limiter(
     key_func=get_remote_address,
     default_limits=["200 per minute"],
-    storage_uri=_safe_redis_url(),
-    storage_options={
-        'socket_connect_timeout': 2,
-        'socket_timeout': 2,
-        'retry_on_timeout': False,
-    },
+    storage_uri='memory://',
     strategy='fixed-window',
-    # Fail-OPEN if Redis is unreachable
     swallow_errors=True,
     in_memory_fallback_enabled=True,
     in_memory_fallback=["100 per minute"],
@@ -357,7 +373,8 @@ def index():
         if site and site.status == 'off':
             return render_template('index.html', site_status='off',
                                    offline_message=site.offline_message,
-                                   categories=[], library_items=[], active_ads=[])
+                                   categories=[], library_items=[], active_ads=[],
+                                   current_cat='all', total_copies=0)
 
         categories = get_categories_cached()
         library_items = get_library_items_cached()
@@ -369,15 +386,21 @@ def index():
             'button_link': a.button_link, 'duration_seconds': a.duration_seconds,
         } for a in ads_query]
 
+        total_copies = sum((item.copy_count or 0) for item in library_items)
+        current_cat = request.args.get('cat', 'all')
+
         return render_template('index.html',
                                categories=categories,
                                library_items=library_items,
                                active_ads=active_ads,
-                               site_status='on')
+                               site_status='on',
+                               current_cat=current_cat,
+                               total_copies=total_copies)
     except Exception as e:
         logger.error(f"Index error: {e}\n{traceback.format_exc()}")
         return render_template('index.html', site_status='on',
-                               categories=[], library_items=[], active_ads=[])
+                               categories=[], library_items=[], active_ads=[],
+                               current_cat='all', total_copies=0)
 
 
 @main_bp.route('/about')
@@ -402,11 +425,13 @@ def about_page():
                                prompt_count=prompt_count,
                                total_copies=total_copies,
                                total_shares=total_shares,
+                               user_count=0,
                                active_ad=ad_dict)
     except Exception as e:
         logger.error(f"About error: {e}\n{traceback.format_exc()}")
         return render_template('about.html', prompt_count=0,
-                               total_copies=0, total_shares=0, active_ad=None)
+                               total_copies=0, total_shares=0,
+                               user_count=0, active_ad=None)
 
 
 @main_bp.route('/robots.txt')
@@ -428,12 +453,20 @@ def favicon():
 def health_check():
     try:
         db.session.execute(text('SELECT 1'))
-        return jsonify({'status': 'ok', 'db': 'connected',
-                        'timestamp': datetime.utcnow().isoformat()})
+        return jsonify({
+            'status': 'ok',
+            'db': 'connected',
+            'db_scheme': Config.DATABASE_URL.split('://')[0] if '://' in Config.DATABASE_URL else 'unknown',
+            'timestamp': datetime.utcnow().isoformat(),
+        })
     except Exception as e:
         logger.error(f"Health check failed: {e}")
-        return jsonify({'status': 'error', 'db': 'disconnected',
-                        'timestamp': datetime.utcnow().isoformat()}), 503
+        return jsonify({
+            'status': 'degraded',
+            'db': 'disconnected',
+            'error': str(e)[:200],
+            'timestamp': datetime.utcnow().isoformat(),
+        }), 503
 
 
 @main_bp.route('/api/version')
@@ -571,7 +604,10 @@ def admin_panel():
         return render_template('admin.html')
     except Exception as e:
         logger.error(f"Admin panel error: {e}\n{traceback.format_exc()}")
-        db.session.rollback()
+        try:
+            db.session.rollback()
+        except Exception:
+            pass
         return render_template('admin.html'), 500
 
 
@@ -913,7 +949,7 @@ _db_initialized = False
 
 
 def _try_db_init(app):
-    """Attempt DB init. Never raises."""
+    """Attempt DB init. Never raises — logs and continues."""
     with app.app_context():
         try:
             inspector = inspect(db.engine)
@@ -943,6 +979,9 @@ def create_app():
 
     app = Flask(__name__, template_folder='templates', static_folder='static')
     app.config.from_object(Config)
+
+    # Log the resolved DB scheme (no credentials) for post-deploy debugging
+    logger.info(f"Database scheme in use: {Config.DATABASE_URL.split('://')[0]}")
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -994,7 +1033,8 @@ def create_app():
         if request.path.startswith('/api/'):
             return jsonify({'success': False, 'message': 'الصفحة غير موجودة'}), 404
         return render_template('index.html', site_status='on',
-                               categories=[], library_items=[], active_ads=[]), 404
+                               categories=[], library_items=[], active_ads=[],
+                               current_cat='all', total_copies=0), 404
 
     @app.errorhandler(500)
     def internal_error(e):
@@ -1006,7 +1046,8 @@ def create_app():
         if request.path.startswith('/api/'):
             return jsonify({'success': False, 'message': 'خطأ داخلي في الخادم'}), 500
         return render_template('index.html', site_status='on',
-                               categories=[], library_items=[], active_ads=[]), 500
+                               categories=[], library_items=[], active_ads=[],
+                               current_cat='all', total_copies=0), 500
 
     @app.errorhandler(Exception)
     def handle_exception(e):
@@ -1021,7 +1062,8 @@ def create_app():
         if request.path.startswith('/api/'):
             return jsonify({'success': False, 'message': 'حدث خطأ غير متوقع'}), 500
         return render_template('index.html', site_status='on',
-                               categories=[], library_items=[], active_ads=[]), 500
+                               categories=[], library_items=[], active_ads=[],
+                               current_cat='all', total_copies=0), 500
 
     return app
 
